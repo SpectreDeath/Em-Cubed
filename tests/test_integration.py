@@ -5,6 +5,11 @@ from em_cubed.search import search_registry
 from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
 
 
+# Disable whoosh for integration tests to ensure consistent behavior
+def search_registry_test(query, registry_path, max_results=10):
+    return search_registry(query, registry_path, max_results, use_whoosh=False)
+
+
 class TestIntegration:
     """Integration tests for the full Em-Cubed workflow."""
 
@@ -48,7 +53,7 @@ def multiply(x, y):
         reindex(skills_dir, registry_file)
 
         # 3. Search for the skill
-        results = search_registry("calculator", registry_file)
+        results = search_registry_test("calculator", registry_file)
         assert len(results) == 1
         assert results[0]["name"] == "Test Calculator"
 
@@ -163,7 +168,7 @@ def test_function():
 
         # Search for each skill
         for skill_id, name, search_term, surface, code in skills_data:
-            results = search_registry(search_term, registry_file)
+            results = search_registry_test(search_term, registry_file)
             assert len(results) >= 1
 
             # Find our skill in results
@@ -208,7 +213,7 @@ A skill designed to test error scenarios.
         reindex(skills_dir, registry_file)
 
         # 3. Search - should work
-        results = search_registry("error", registry_file)
+        results = search_registry_test("error", registry_file)
         assert len(results) == 1
 
         # 4. Execute with error - should handle gracefully
@@ -249,7 +254,7 @@ Test registry persistence
         assert len(registry1) == 1
 
         # Search works
-        results1 = search_registry("persistent", registry_file)
+        results1 = search_registry_test("persistent", registry_file)
         assert len(results1) == 1
 
         # Add another skill

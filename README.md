@@ -181,7 +181,7 @@ result = await surface.execute("len(data)", {"data": [1, 2, 3, 4]})
 print(result['value'])  # 4
 ```
 
-**Security**: Uses asteval for safe evaluation, no access to dangerous builtins.
+**Security**: Uses asteval for safe evaluation, no access to dangerous builtins. Prolog queries have a 10-second timeout and are limited to 1000 results to prevent resource exhaustion.
 
 ### Prolog Surface
 

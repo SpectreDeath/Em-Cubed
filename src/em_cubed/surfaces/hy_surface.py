@@ -2,6 +2,9 @@
 
 import importlib.util
 from typing import List, Dict, Any, Optional
+import structlog
+
+logger = structlog.get_logger()
 
 
 class HySurface:
@@ -9,6 +12,7 @@ class HySurface:
 
     def __init__(self) -> None:
         self.available = self._check_availability()
+        logger.info("HySurface initialized", available=self.available)
 
     def _check_availability(self) -> bool:
         """Check if Hy is available."""
@@ -25,16 +29,25 @@ class HySurface:
 
     def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Hy code and return results."""
+        logger.info("Executing Hy code", code_length=len(code), has_context=context is not None)
+
         if not self.available:
+            logger.error("Attempted Hy execution but Hy not available")
             return {"status": "error", "message": "Hy not available"}
 
         try:
             import hy
 
-            # Execute code in Hy environment
-            result = hy.eval(hy.read(code))
+            # Read and evaluate all forms in the code
+            forms = hy.read_many(code)
+            result = None
+            for form in forms:
+                result = hy.eval(form)
+
+            logger.info("Hy execution successful")
             return {"status": "ok", "value": result}
         except Exception as e:
+            logger.exception("Hy execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}
 
     def health(self) -> bool:

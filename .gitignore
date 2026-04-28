@@ -63,3 +63,9 @@ htmlcov/
 Thumbs.db
 # Memtext context
 .context/
+
+# Kilo AI assistant files
+.kilo/
+
+# Whoosh search index
+.whoosh_index/

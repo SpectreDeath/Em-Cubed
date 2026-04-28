@@ -15,7 +15,7 @@ logger = structlog.get_logger()
 app = FastAPI(
     title="Em-Cubed API",
     description="Multi-Surface Skill Framework API",
-    version="0.2.0"
+    version="0.3.0"
 )
 
 # Initialize surfaces
@@ -59,6 +59,17 @@ async def search(request: SearchRequest):
         return {"results": results}
     except Exception as e:
         logger.exception("Search failed", error=str(e), query=request.query)
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+
+@app.get("/search")
+async def search_get(q: str, top: int = 10):
+    """Search the skill registry via GET."""
+    try:
+        results = search_registry(q, get_registry_path(), top)
+        return {"results": results}
+    except Exception as e:
+        logger.exception("Search failed", error=str(e), query=q)
         raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
 @app.exception_handler(HTTPException)

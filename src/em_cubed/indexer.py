@@ -92,6 +92,7 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
             heuristic_tags.extend(PythonSurface.extract_tags(python_source))
 
         return {
+            "schema_version": 1,
             "name": fm.get("name", file_path.parent.name),
             "domain": fm.get("Domain", "General"),
             "version": fm.get("Version", "0.1.0"),
