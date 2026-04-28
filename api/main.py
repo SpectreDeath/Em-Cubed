@@ -1,25 +1,124 @@
-from fastapi import FastAPI
-from typing import Dict, Any
+"""FastAPI application for Em-Cubed skill execution and search."""
+import os
+from pathlib import Path
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from typing import Dict, Any, List, Optional
+import structlog
 
-app = FastAPI(title='Em-Cubed API', version='0.1.0')
+from em_cubed.search import search_registry
+from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
 
-@app.get('/health')
+logger = structlog.get_logger()
+
+app = FastAPI(
+    title="Em-Cubed API",
+    description="Multi-Surface Skill Framework API",
+    version="0.1.0"
+)
+
+# Initialize surfaces
+python_surface = PythonSurface()
+prolog_surface = PrologSurface()
+hy_surface = HySurface()
+
+# Get registry path from environment or default
+REGISTRY_PATH = Path(os.getenv("EM_CUBED_REGISTRY", "registry.json"))
+
+# Allow overriding for testing
+def get_registry_path():
+    return REGISTRY_PATH
+
+class SearchRequest(BaseModel):
+    query: str
+    max_results: int = 10
+
+class ExecuteRequest(BaseModel):
+    surface: str
+    code: str
+    context: Optional[Dict[str, Any]] = None
+
+@app.get("/health")
 async def health():
-    return {'status': 'ok'}
+    """Health check endpoint."""
+    return {
+        "status": "ok",
+        "surfaces": {
+            "python": python_surface.available,
+            "prolog": prolog_surface.available,
+            "hy": hy_surface.available,
+        }
+    }
 
-@app.get('/surfaces')
+@app.post("/search")
+async def search(request: SearchRequest):
+    """Search the skill registry."""
+    try:
+        results = search_registry(request.query, get_registry_path(), request.max_results)
+        return {"results": results}
+    except Exception as e:
+        logger.exception("Search failed", error=str(e), query=request.query)
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+@app.post("/execute")
+async def execute_code(request: ExecuteRequest):
+    """Execute code on specified surface."""
+    surface_map = {
+        "python": python_surface,
+        "prolog": prolog_surface,
+        "hy": hy_surface,
+    }
+
+    if request.surface not in surface_map:
+        raise HTTPException(status_code=400, detail=f"Unknown surface: {request.surface}")
+
+    surface = surface_map[request.surface]
+
+    try:
+        if request.surface == "python":
+            result = await surface.execute(request.code, request.context)
+        else:
+            # Prolog and Hy surfaces are synchronous
+            result = surface.execute(request.code, request.context)
+
+        if result["status"] == "error":
+            raise HTTPException(status_code=400, detail=result["message"])
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Execution failed", error=str(e), surface=request.surface, code_length=len(request.code))
+        raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
+
+@app.get("/surfaces")
 async def list_surfaces():
-    # Will be connected to registry
-    return {'surfaces': []}
-
-@app.post('/skills/{name}/run')
-async def run_skill(name: str, context: Dict[str, Any]):
-    return {'result': None}
-
-@app.post('/index')
-async def index_document(doc: Dict[str, Any]):
-    return {'indexed': True}
-
-@app.get('/search')
-async def search(query: str):
-    return {'results': []}
+    """List available surfaces and their status."""
+    return {
+        "surfaces": [
+            {
+                "name": "python",
+                "available": python_surface.available,
+                "description": "Safe Python execution with asteval"
+            },
+            {
+                "name": "prolog",
+                "available": prolog_surface.available,
+                "description": "Prolog execution via PySWIP"
+            },
+            {
+                "name": "hy",
+                "available": hy_surface.available,
+                "description": "Hy Lisp execution"
+            }
+        ]
+    }

@@ -4,22 +4,30 @@ import re
 from pathlib import Path
 import yaml
 from typing import List, Dict, Any, Optional
+import structlog
+
+logger = structlog.get_logger()
+
 
 def extract_fenced_block(content: str, lang: str) -> Optional[str]:
     """Extract first fenced code block of a given language tag."""
-    pattern = rf"```{lang}\s*\n(.*?)```"
+    # Match various fenced code block formats: ```lang, ````lang, etc.
+    # Handle both \n and \r\n line endings
+    pattern = rf"`+{lang}\s*\r?\n(.*?)`+"
     match = re.search(pattern, content, re.DOTALL)
     return match.group(1).strip() if match else None
+
 
 def extract_prolog_tags(prolog_source: Optional[str]) -> List[str]:
     """Extract predicate names from Prolog clause heads as logic_tags."""
     if not prolog_source:
         return []
-    # Match predicate heads: name( or name :- 
-    heads = re.findall(r"^([a-z][a-zA-Z0-9_]*)\s*[:(]", prolog_source, re.MULTILINE)
+    # Match predicate heads: name( or name :-
+    heads = re.findall(r"([a-z][a-zA-Z0-9_]*)\s*\(", prolog_source)
     # Deduplicate, exclude Prolog builtins
     builtins = {"not", "is", "true", "fail", "assert", "retract"}
     return list(dict.fromkeys(h for h in heads if h not in builtins))
+
 
 def extract_hy_tags(hy_source: Optional[str]) -> List[str]:
     """Extract function names from Hy defn forms as heuristic_tags."""
@@ -27,6 +35,7 @@ def extract_hy_tags(hy_source: Optional[str]) -> List[str]:
         return []
     fns = re.findall(r"\(defn\s+([a-zA-Z][a-zA-Z0-9_\-?!]*)", hy_source)
     return list(dict.fromkeys(fns))
+
 
 def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, Any]]:
     """Extract metadata from a SKILL.md file."""
@@ -76,6 +85,11 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         # Extract tags
         logic_tags = extract_prolog_tags(prolog_source)
         heuristic_tags = extract_hy_tags(hy_source)
+        # Also extract Python function names as heuristic tags
+        if python_source:
+            from em_cubed.surfaces.python_surface import PythonSurface
+
+            heuristic_tags.extend(PythonSurface.extract_tags(python_source))
 
         return {
             "name": fm.get("name", file_path.parent.name),
@@ -93,9 +107,11 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         print(f"Error indexing {file_path}: {e}")
         return None
 
+
 def reindex(skills_dir: Path, registry_output: Path) -> None:
     """Reindex all skills in the given directory and write registry."""
-    print(f"Re-indexing skills in {skills_dir}...")
+    logger.info("Starting skill reindex", skills_dir=str(skills_dir), registry_output=str(registry_output))
+
     registry = []
 
     # Look for both SKILL.md and SKILL_*.md files
@@ -112,18 +128,23 @@ def reindex(skills_dir: Path, registry_output: Path) -> None:
     with open(registry_output, "w", encoding="utf-8") as f:
         json.dump(registry, f, indent=2)
 
-    print(f"Successfully indexed {len(registry)} skills to {registry_output}")
-    # Summary breakdown
     multi = [s for s in registry if len(s.get("surfaces", [])) > 1]
-    print(f"  Multi-surface skills: {len(multi)}")
-    print(f"  Single-surface skills: {len(registry) - len(multi)}")
+    logger.info(
+        "Skill reindex completed",
+        total_skills=len(registry),
+        multi_surface=len(multi),
+        single_surface=len(registry) - len(multi),
+        registry_path=str(registry_output),
+    )
+
 
 if __name__ == "__main__":
     import sys
+
     if len(sys.argv) < 3:
         print("Usage: python -m em_cubed.indexer <skills_dir> <registry_output>")
         sys.exit(1)
-    
+
     skills_dir = Path(sys.argv[1])
     registry_output = Path(sys.argv[2])
     reindex(skills_dir, registry_output)

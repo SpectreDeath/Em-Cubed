@@ -1,15 +1,26 @@
 import json
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
+import structlog
+
+logger = structlog.get_logger()
+
 
 def search_registry(query: str, registry_path: Path, max_results: int = 10) -> List[Dict[str, Any]]:
     """Search the skill registry with multi-surface scoring."""
-    query = query.lower()
+    logger.info("Searching registry", query=query, registry_path=str(registry_path), max_results=max_results)
+
+    query = query.strip().lower()
     results = []
 
     if not registry_path.exists():
+        logger.error("Registry file not found", registry_path=str(registry_path))
         return [{"error": "Registry file not found. Run indexer first."}]
+
+    # Return empty results for empty queries
+    if not query:
+        return []
 
     try:
         with open(registry_path, encoding="utf-8") as f:
@@ -60,7 +71,11 @@ def search_registry(query: str, registry_path: Path, max_results: int = 10) -> L
 
     # Sort by score
     results.sort(key=lambda x: x["score"], reverse=True)
-    return results[:max_results]
+    top_results = results[:max_results]
+
+    logger.info("Search completed", total_matches=len(results), returned=len(top_results))
+    return top_results
+
 
 def main():
     if len(sys.argv) < 3:
@@ -71,6 +86,7 @@ def main():
     query = sys.argv[2]
     matches = search_registry(query, registry_path)
     print(json.dumps(matches, indent=2))
+
 
 if __name__ == "__main__":
     main()

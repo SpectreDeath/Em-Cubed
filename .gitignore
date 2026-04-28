@@ -1,10 +1,4 @@
-# Em-Cubed (only ignore specific build artifacts, not source)
-# core/ - needed for source
-# surfaces/ - needed for source
-# api/ - needed for source
-# skills/ - needed for source
-# docs/ - needed for source
-# tests/ - needed for source
+# Em-Cubed build artifacts and temporary files
 
 # Python
 __pycache__/
@@ -67,3 +61,5 @@ htmlcov/
 
 # OS
 Thumbs.db
+# Memtext context
+.context/
