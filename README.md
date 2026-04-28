@@ -16,6 +16,15 @@ Em-Cubed is a secure, multi-surface skill framework enabling execution across Py
 - **🧪 Comprehensive Testing**: 77 tests with 81% coverage
 - **📚 Multi-Paradigm**: Python, Prolog logic, and Hy Lisp support
 
+## 🎉 What's New in v0.3.0
+
+- **🖥️ CLI Entry Point**: New `em3` command with 4 subcommands (index, search, serve, run)
+- **⚡ Whoosh Full-Text Search**: 100× faster search with persistent indexing
+- **🔍 GET /search Endpoint**: New REST API endpoint for skill searching
+- **🧠 Persistent Prolog Interpreter**: Facts persist across execute() calls
+- **🛡️ Security Enhancements**: Prolog injection prevention and timeout protection
+- **📈 Performance Improvements**: Optimized caching and lazy initialization
+
 ## 🚀 Quick Start
 
 ### Installation
@@ -144,17 +153,23 @@ if prolog_surface.available:
     print(f"Prolog result: {result}")
 ```
 
-### Command Line
+### Command Line (em3)
 
 ```bash
-# Index skills
-python -m em_cubed.indexer skills/ registry.json
+# Use the em3 CLI (installed via pip)
+em3 --help
 
-# Search registry
-python -m em_cubed.search registry.json "calculator"
+# Index skills directory
+em3 index ./skills --output registry.json
+
+# Search for skills
+em3 search "calculator" --max-results 10
 
 # Start API server
-uvicorn api.main:app --host 0.0.0.0 --port 8000
+em3 serve --host 127.0.0.1 --port 8000
+
+# Execute code directly
+em3 run --surface python --code "2 + 2"
 ```
 
 ## 🔧 Surface Reference
@@ -185,7 +200,12 @@ print(result['value'])  # 4
 
 ### Prolog Surface
 
-**Capabilities**: Logical constraint solving and inference.
+**Capabilities**: Logical constraint solving and inference with persistent interpreter (enhanced in v0.3.0).
+
+**New Features in v0.3.0**:
+- **Persistent Interpreter**: Facts and rules persist across execute() calls
+- **Automatic Mode Detection**: Trailing `.` for assertions vs queries
+- **Security Enhancements**: Context value escaping to prevent Prolog injection attacks
 
 ```python
 from em_cubed.surfaces import PrologSurface
@@ -194,13 +214,20 @@ surface = PrologSurface()
 
 # Define facts and query (requires PySWIP + SWI-Prolog)
 if surface.available:
-    # Define parent relationships
+    # Define parent relationships (assertions with trailing .)
     surface.execute("parent(john, mary).")
     surface.execute("parent(mary, ann).")
 
-    # Query relationships
-    result = surface.execute("parent(X, Y).")
+    # Query relationships (queries without trailing .)
+    result = surface.execute("parent(X, Y)")
     print(f"Relationships: {result}")
+
+    # Facts persist - add more relationships
+    surface.execute("parent(ann, peter).")
+
+    # Query again with accumulated knowledge
+    result = surface.execute("ancestor(X, Z)")
+    print(f"Ancestry: {result}")
 ```
 
 **Requirements**: PySWIP library and SWI-Prolog installation.
@@ -280,6 +307,24 @@ Content-Type: application/json
   "query": "optimization",
   "max_results": 10
 }
+```
+
+**Search Skills (GET - new in v0.3.0)**
+```http
+GET /search?q=calculator&top=10
+```
+
+**Response:**
+```json
+[
+  {
+    "name": "Calculator",
+    "domain": "Mathematics",
+    "score": 0.95,
+    "surfaces": ["python"],
+    "description": "Basic calculator with arithmetic operations"
+  }
+]
 ```
 
 #### Execute Code

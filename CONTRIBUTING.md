@@ -244,7 +244,7 @@ class TestPythonSurface:
 
 ### Test Coverage
 
-- **Target**: 80%+ coverage for core modules
+- **Target**: 85%+ coverage for core modules
 - **Required**: All new features must include tests
 - **Integration**: End-to-end tests for critical workflows
 
@@ -265,6 +265,21 @@ pytest --lf
 
 # New tests only
 pytest --nf
+```
+
+### CLI Testing
+
+- **Coverage**: Test all `em3` subcommands (index, search, serve, run)
+- **Mocking**: Mock system exits and command-line arguments
+- **Error Handling**: Verify help text and error handling
+- **Integration**: End-to-end CLI workflows
+
+```bash
+# Test CLI commands
+pytest tests/test_cli.py -v
+
+# Test CLI help output
+em3 --help
 ```
 
 ## 📚 Documentation
