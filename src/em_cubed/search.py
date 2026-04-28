@@ -95,7 +95,6 @@ class WhooshSearchIndex:
 
         try:
             from whoosh import qparser, scoring
-            from whoosh.query import FuzzyTerm
 
             # Use BM25 scoring with fuzzy matching
             searcher = self.ix.searcher(weighting=scoring.BM25F())

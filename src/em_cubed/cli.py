@@ -5,6 +5,10 @@ import sys
 from pathlib import Path
 import structlog
 
+from em_cubed.indexer import reindex
+from em_cubed.search import search_registry
+from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
+
 # Configure structlog for CLI
 structlog.configure(
     processors=[
@@ -23,10 +27,6 @@ structlog.configure(
     wrapper_class=structlog.stdlib.BoundLogger,
     cache_logger_on_first_use=True,
 )
-
-from em_cubed.indexer import reindex
-from em_cubed.search import search_registry
-from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
 
 logger = structlog.get_logger()
 

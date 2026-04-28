@@ -1,6 +1,6 @@
 import pytest
 import json
-from pathlib import Path
+
 from unittest.mock import patch
 from em_cubed.cli import main
 
@@ -64,8 +64,11 @@ def test():
         with open(registry_file, "w") as f:
             json.dump(registry_data, f)
 
+        from em_cubed.search import WhooshSearchIndex
         with patch('sys.argv', ['em3', 'search', 'test', '--registry', str(registry_file)]):
-            main()
+            with patch('em_cubed.search.get_search_index', return_value=WhooshSearchIndex(tmp_path / "whoosh_index")):
+                with patch('em_cubed.search._search_index', None):
+                    main()
 
         captured = capsys.readouterr()
         results = json.loads(captured.out.strip())
@@ -101,7 +104,7 @@ def test():
                 main()
 
         captured = capsys.readouterr()
-        assert "Unknown surface" in captured.err
+        assert "invalid choice: 'unknown'" in captured.err
 
     def test_no_command(self, capsys):
         """Test running without command."""
@@ -118,5 +121,4 @@ def test():
                 main()
                 assert False, "Should have exited"
             except SystemExit:
-                pass  # Expected</content>
-<parameter name="filePath">tests/test_cli.py
+                pass  # Expected

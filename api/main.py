@@ -82,7 +82,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 @app.post("/execute")
 async def execute_code(request: ExecuteRequest):
     """Execute code on specified surface."""
-    surface_map = {
+    surface_map: Dict[str, Any] = {
         "python": python_surface,
         "prolog": prolog_surface,
         "hy": hy_surface,

@@ -43,6 +43,12 @@ class TestAPI:
         # Mock the get_registry_path function
         monkeypatch.setattr("api.main.get_registry_path", lambda: registry_file)
 
+        # Mock Whoosh index to use a temporary directory
+        index_dir = tmp_path / "whoosh_index"
+        monkeypatch.setattr("em_cubed.search._search_index", None)
+        from em_cubed.search import WhooshSearchIndex
+        monkeypatch.setattr("em_cubed.search.get_search_index", lambda: WhooshSearchIndex(index_dir))
+
         return registry_file
 
     def test_health_endpoint(self, client):
