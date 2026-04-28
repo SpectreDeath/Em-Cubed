@@ -1,7 +1,7 @@
 # Em-Cubed: Multi-Surface Skill Framework
 
-[![Tests](https://img.shields.io/badge/tests-54%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
-[![Coverage](https://img.shields.io/badge/coverage-76%25+-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Tests](https://img.shields.io/badge/tests-77%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Coverage](https://img.shields.io/badge/coverage-81%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
@@ -13,7 +13,7 @@ Em-Cubed is a secure, multi-surface skill framework enabling execution across Py
 - **🔍 Intelligent Search**: Multi-surface scoring and skill discovery
 - **🌐 REST API**: Full HTTP API for skill execution and management
 - **📊 Structured Logging**: Comprehensive logging with context
-- **🧪 Comprehensive Testing**: 54 tests with 76%+ coverage
+- **🧪 Comprehensive Testing**: 77 tests with 81% coverage
 - **📚 Multi-Paradigm**: Python, Prolog logic, and Hy Lisp support
 
 ## 🚀 Quick Start
@@ -83,7 +83,7 @@ em-cubed/
 │       └── janus_surface.py   # Python-Prolog bridge
 ├── api/main.py            # FastAPI REST API
 ├── examples/              # Multi-surface skill examples
-├── tests/                 # Comprehensive test suite (54 tests)
+├── tests/                 # Comprehensive test suite (77 tests)
 └── docs/                  # Technical specifications
 ```
 
@@ -349,7 +349,7 @@ double(X, Result) :- Result is X * 2.
 
 ## 🧪 Testing
 
-Em-Cubed includes a comprehensive test suite with 54 tests covering:
+Em-Cubed includes a comprehensive test suite with 77 tests covering:
 
 ```bash
 # Run all tests

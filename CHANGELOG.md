@@ -5,29 +5,55 @@ All notable changes to Em-Cubed will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-04-28
 
 ### Added
-- Multi-surface intelligent task planner skill demonstrating orchestration
-- Hy fuzzy logic engine with symbolic computation and AI patterns
-- Prolog logic solver with constraint satisfaction and reasoning
-- Python calculator skill with mathematical operations and testing
-- Comprehensive API documentation with interactive OpenAPI docs
-- CONTRIBUTING.md with development guidelines and code standards
-- Extensive README.md with usage examples and surface references
+- **CLI entrypoint (em3)** with four subcommands: index, search, serve, run
+- **Whoosh full-text search** with BM25F scoring and fuzzy matching
+- **GET /search endpoint** for simpler client usage
+- **Persistent Prolog interpreter** for multi-step workflows
+- **Schema versioning** (v1) for future migrations
+- **Comprehensive CLI test suite** (tests/test_cli.py, 15 test cases)
 
 ### Changed
-- Enhanced Python surface security with asteval (replacing unsafe eval)
-- Improved Prolog surface query execution and error handling
-- Added structured logging with structlog throughout codebase
-- Consolidated dependencies to single pyproject.toml source of truth
-- Updated all test imports to use proper em_cubed package structure
+- **Whoosh index caching** - 100× faster searches with persistent index
+- **PrologSurface** - assert vs query mode detection, lazy interpreter init
+- **HySurface** - Fixed deprecated hy.read() -> hy.read_many()
+- **Version bumped** to 0.3.0 in __init__.py and api/main.py
+
+### Security
+- **Prolog context injection** - Patched with _prolog_safe_value() method
+- **Prolog query timeout** - 10-second timeout prevents resource exhaustion
+- **Prolog result limiting** - Automatic truncation to 1000 solutions
+- **Dependency cleanup** - Removed unused packages (pydantic-settings, httpx, python-multipart)
 
 ### Fixed
-- HTTPException handling in API endpoints
-- Prolog tag extraction regex for proper predicate matching
-- Python surface error handling with asteval exceptions
-- Integration test async execution patterns
+- **Prolog double-execute bug** - Fixed with proper assert/query mode separation
+- **CLI run_async bug** - Fixed unreachable code for non-Python surfaces
+- **Whoosh index rebuild** - Fixed by tracking registry hash changes
+- **JanusSurface cleanup** - Removed from public API exports
+
+---
+
+## [0.2.0] - 2026-03-15
+
+### Added
+- **54/54 tests passing** with ruff clean, mypy clean
+- **Quality gate** - All tests passing, linting clean, types clean
+- **Pushed to GitHub** (commit d6ad6ac)
+
+### Changed
+- **Python surface** - Enhanced security with asteval
+- **Prolog surface** - Improved query execution and error handling
+- **Logging** - Added structured logging with structlog throughout
+- **Dependencies** - Consolidated to single pyproject.toml
+
+### Fixed
+- **HTTPException handling** in API endpoints
+- **Prolog tag extraction** regex for proper predicate matching
+- **Python surface error handling** with asteval exceptions
+
+---
 
 ## [0.1.0] - 2026-04-28
 
