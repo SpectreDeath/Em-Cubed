@@ -214,8 +214,9 @@ A skill designed to test error scenarios.
         # 4. Execute with error - should handle gracefully
         surface = PythonSurface()
         result = await surface.execute("1 / 0")  # Division by zero
-        assert result["status"] in {"ok", "error"}  # asteval may handle differently
-        assert "division by zero" in result["message"]
+        # asteval returns {"status": "error", "message": "..."} for ZeroDivisionError
+        assert result["status"] == "error"
+        assert "division by zero" in result["message"].lower()
 
     @pytest.mark.asyncio
     async def test_registry_persistence_integration(self, tmp_path):

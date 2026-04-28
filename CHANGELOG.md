@@ -107,5 +107,4 @@ Em-Cubed follows [Semantic Versioning](https://semver.org/):
 - **SpectreDeath**: Project creator and maintainer
 - **Community**: Bug reports, feature requests, and contributions welcome!
 
-For more information about contributing, see [CONTRIBUTING.md](CONTRIBUTING.md).</content>
-<parameter name="filePath">D:\GitHub\projects\em-cubed\CHANGELOG.md
+For more information about contributing, see [CONTRIBUTING.md](CONTRIBUTING.md).

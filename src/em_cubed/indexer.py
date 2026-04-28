@@ -104,7 +104,7 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
             "heuristic_tags": heuristic_tags,
         }
     except Exception as e:
-        print(f"Error indexing {file_path}: {e}")
+        logger.warning("Error indexing skill file", path=str(file_path), error=str(e))
         return None
 
 

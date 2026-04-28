@@ -72,4 +72,4 @@ class PythonSurface:
 
     async def health(self) -> bool:
         """Check if the surface is available."""
-        return self.available
+        return bool(self.available)

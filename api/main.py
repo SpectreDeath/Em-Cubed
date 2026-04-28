@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 import structlog
 
 from em_cubed.search import search_registry
@@ -15,7 +15,7 @@ logger = structlog.get_logger()
 app = FastAPI(
     title="Em-Cubed API",
     description="Multi-Surface Skill Framework API",
-    version="0.1.0"
+    version="0.2.0"
 )
 
 # Initialize surfaces

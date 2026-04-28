@@ -536,5 +536,4 @@ Prolog execution requires careful consideration:
 | Python | General computing | - | Complex logic patterns |
 | Prolog | Logic/Constraints | Declarative, backtracking | Numeric computation |
 | Hy | Lisp programming | - | Logic constraints |
-| Multi-surface | Complex problems | Combines all approaches | Coordination overhead |</content>
-<parameter name="filePath">D:\GitHub\projects\em-cubed\skills\prolog_logic_solver\SKILL.md
+| Multi-surface | Complex problems | Combines all approaches | Coordination overhead |
