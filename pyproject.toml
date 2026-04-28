@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "em-cubed"
-version = "0.1.0"
+version = "0.2.0"
 description = "Multi-Surface Skill Framework for Python, Prolog, and Hy execution surfaces"
 authors = [
     {name = "SpectreDeath", email = "spectre@example.com"},

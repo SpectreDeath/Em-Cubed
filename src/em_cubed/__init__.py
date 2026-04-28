@@ -28,7 +28,7 @@ from .indexer import reindex, get_skill_metadata
 from .search import search_registry
 from .surfaces import PrologSurface, HySurface, JanusSurface, PythonSurface
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = [
     "reindex",
     "get_skill_metadata",
