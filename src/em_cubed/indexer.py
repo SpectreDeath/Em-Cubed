@@ -109,19 +109,82 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         return None
 
 
+def reindex_incremental(skills_dir: Path, registry_output: Path) -> None:
+    """Update only changed skills in the registry."""
+    logger.info("Starting incremental skill reindex", skills_dir=str(skills_dir), registry_output=str(registry_output))
+
+    # Load existing registry
+    existing_registry = []
+    if registry_output.exists():
+        try:
+            with open(registry_output, encoding="utf-8") as f:
+                existing_registry = json.load(f)
+        except Exception as e:
+            logger.warning("Could not load existing registry, starting fresh", error=str(e))
+            existing_registry = []
+
+    # Build lookup by path for existing skills
+    existing_by_path = {skill["path"]: skill for skill in existing_registry}
+
+    updated_registry = []
+    processed_paths = set()
+
+    # Check all skill files
+    for skill_file in _discover_skill_files(skills_dir):
+        rel_path = str(skill_file.relative_to(skills_dir.parent))
+        processed_paths.add(rel_path)
+
+        # Check if file has changed
+        current_mtime = os.path.getmtime(skill_file)
+        existing_skill = existing_by_path.get(rel_path)
+
+        if existing_skill and existing_skill.get("last_modified") == current_mtime:
+            # File unchanged, keep existing metadata
+            updated_registry.append(existing_skill)
+            logger.debug("Skill unchanged, keeping cached metadata", path=rel_path)
+        else:
+            # File changed or new, re-index
+            metadata = get_skill_metadata(skill_file, skills_dir)
+            if metadata:
+                updated_registry.append(metadata)
+                if existing_skill:
+                    logger.debug("Skill updated", path=rel_path)
+                else:
+                    logger.debug("New skill added", path=rel_path)
+
+    # Remove skills for deleted files
+    removed_count = 0
+    for existing_path in existing_by_path:
+        if existing_path not in processed_paths:
+            logger.debug("Skill removed (file deleted)", path=existing_path)
+            removed_count += 1
+
+    # Sort registry for consistent output
+    updated_registry.sort(key=lambda x: x["path"])
+
+    with open(registry_output, "w", encoding="utf-8") as f:
+        json.dump(updated_registry, f, indent=2)
+
+    multi = [s for s in updated_registry if len(s.get("surfaces", [])) > 1]
+    logger.info(
+        "Incremental reindex completed",
+        total_skills=len(updated_registry),
+        multi_surface=len(multi),
+        single_surface=len(updated_registry) - len(multi),
+        updated=len(updated_registry) - len(existing_registry) + removed_count,
+        removed=removed_count,
+        registry_path=str(registry_output),
+    )
+
+
 def reindex(skills_dir: Path, registry_output: Path) -> None:
     """Reindex all skills in the given directory and write registry."""
-    logger.info("Starting skill reindex", skills_dir=str(skills_dir), registry_output=str(registry_output))
+    logger.info("Starting full skill reindex", skills_dir=str(skills_dir), registry_output=str(registry_output))
 
     registry = []
 
     # Look for both SKILL.md and SKILL_*.md files
-    for skill_file in skills_dir.glob("**/SKILL.md"):
-        metadata = get_skill_metadata(skill_file, skills_dir)
-        if metadata:
-            registry.append(metadata)
-
-    for skill_file in skills_dir.glob("**/SKILL_*.md"):
+    for skill_file in _discover_skill_files(skills_dir):
         metadata = get_skill_metadata(skill_file, skills_dir)
         if metadata:
             registry.append(metadata)
@@ -131,12 +194,26 @@ def reindex(skills_dir: Path, registry_output: Path) -> None:
 
     multi = [s for s in registry if len(s.get("surfaces", [])) > 1]
     logger.info(
-        "Skill reindex completed",
+        "Full skill reindex completed",
         total_skills=len(registry),
         multi_surface=len(multi),
         single_surface=len(registry) - len(multi),
         registry_path=str(registry_output),
     )
+
+
+def _discover_skill_files(skills_dir: Path) -> List[Path]:
+    """Discover all skill files in the directory."""
+    skill_files = []
+
+    # Look for both SKILL.md and SKILL_*.md files
+    for skill_file in skills_dir.glob("**/SKILL.md"):
+        skill_files.append(skill_file)
+
+    for skill_file in skills_dir.glob("**/SKILL_*.md"):
+        skill_files.append(skill_file)
+
+    return skill_files
 
 
 if __name__ == "__main__":

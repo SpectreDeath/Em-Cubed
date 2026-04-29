@@ -121,7 +121,7 @@ double(X, Result) :- Result is X * 2.
 
         # 4. Test Prolog surface (if available)
         prolog_surface = PrologSurface()
-        result = prolog_surface.execute("double(4, Result).")
+        result = await prolog_surface.execute("double(4, Result).")
         # Prolog may or may not be available depending on system
         # Just verify result has status field
         assert "status" in result
@@ -297,5 +297,5 @@ Second test skill
         # Prolog/Hy availability depends on system
         # Just test that the health methods work
         assert isinstance(await python_surface.health(), bool)
-        assert isinstance(prolog_surface.health(), bool)
-        assert isinstance(hy_surface.health(), bool)
+        assert isinstance(await prolog_surface.health(), bool)
+        assert isinstance(await hy_surface.health(), bool)

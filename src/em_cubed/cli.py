@@ -7,7 +7,7 @@ import structlog
 
 from em_cubed.indexer import reindex
 from em_cubed.search import search_registry
-from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
+from em_cubed.plugin_manager import PluginManager
 
 # Configure structlog for CLI
 structlog.configure(
@@ -48,6 +48,12 @@ def main():
         default="registry.json",
         help="Output registry file (default: registry.json)"
     )
+    index_parser.add_argument(
+        "--incremental",
+        "-i",
+        action="store_true",
+        help="Only re-index changed files (faster for large collections)"
+    )
 
     # Search command
     search_parser = subparsers.add_parser("search", help="Search skill registry")
@@ -87,7 +93,6 @@ def main():
         "--surface",
         "-s",
         required=True,
-        choices=["python", "prolog", "hy"],
         help="Surface to execute code on"
     )
     run_parser.add_argument(
@@ -95,6 +100,12 @@ def main():
         "-c",
         required=True,
         help="Code to execute"
+    )
+    run_parser.add_argument(
+        "--timeout",
+        "-t",
+        type=float,
+        help="Maximum execution time in seconds (default: 30)"
     )
 
     args = parser.parse_args()
@@ -122,13 +133,20 @@ def _handle_index(args):
     """Handle index command."""
     skills_dir = Path(args.skills_dir)
     registry_output = Path(args.output)
+    incremental = args.incremental
 
     if not skills_dir.exists():
         raise ValueError(f"Skills directory does not exist: {skills_dir}")
 
-    logger.info("Indexing skills", skills_dir=str(skills_dir), output=str(registry_output))
-    reindex(skills_dir, registry_output)
-    print(f"Registry created at {registry_output}")
+    if incremental:
+        logger.info("Incremental indexing skills", skills_dir=str(skills_dir), output=str(registry_output))
+        from em_cubed.indexer import reindex_incremental
+        reindex_incremental(skills_dir, registry_output)
+        print(f"Registry incrementally updated at {registry_output}")
+    else:
+        logger.info("Full indexing skills", skills_dir=str(skills_dir), output=str(registry_output))
+        reindex(skills_dir, registry_output)
+        print(f"Registry created at {registry_output}")
 
 
 def _handle_search(args):
@@ -171,31 +189,28 @@ def _handle_run(args):
     """Handle run command."""
     surface_name = args.surface
     code = args.code
+    timeout = args.timeout
 
-    surface_map = {
-        "python": PythonSurface(),
-        "prolog": PrologSurface(),
-        "hy": HySurface(),
-    }
+    plugin_manager = PluginManager()
+    surface = plugin_manager.get(surface_name)
 
-    surface = surface_map[surface_name]
+    if not surface:
+        available_surfaces = plugin_manager.get_available_surfaces()
+        raise ValueError(f"Surface '{surface_name}' not found. Available: {', '.join(available_surfaces)}")
 
     if not surface.available:
         raise ValueError(f"Surface '{surface_name}' is not available")
 
-    logger.info("Executing code", surface=surface_name, code_length=len(code))
+    logger.info("Executing code", surface=surface_name, code_length=len(code), timeout=timeout)
 
     import asyncio
     import json
 
-    if surface_name == "python":
-        async def run_async():
-            result = await surface.execute(code)
-            print(json.dumps(result, indent=2))
-        asyncio.run(run_async())
-    else:
-        result = surface.execute(code)
+    async def run_async():
+        result = await surface.execute(code)
         print(json.dumps(result, indent=2))
+
+    asyncio.run(run_async())
 
 
 if __name__ == "__main__":

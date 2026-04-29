@@ -4,15 +4,30 @@ import importlib.util
 from typing import List, Dict, Any, Optional
 import structlog
 
+from .base import SurfaceBase
+from ..plugin import SurfacePlugin
+
 logger = structlog.get_logger()
 
 
-class HySurface:
+class HySurface(SurfaceBase, SurfacePlugin):
     """Handle Hy code execution and function extraction."""
 
-    def __init__(self) -> None:
-        self.available = self._check_availability()
-        logger.info("HySurface initialized", available=self.available)
+    @property
+    def name(self) -> str:
+        return "hy"
+
+    @property
+    def description(self) -> str:
+        return "Hy Lisp execution"
+
+    @property
+    def available(self) -> bool:
+        return self._check_availability()
+
+    def __init__(self, timeout: Optional[float] = None) -> None:
+        super().__init__(timeout)
+        logger.info("HySurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
         """Check if Hy is available."""
@@ -27,8 +42,12 @@ class HySurface:
         fns = re.findall(r"\(defn\s+([a-zA-Z][a-zA-Z0-9_\-?!]*)", hy_source)
         return list(dict.fromkeys(fns))
 
-    def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Hy code and return results."""
+        return await self.execute_with_timeout(code, context)
+
+    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute Hy code - implementation with timeout protection."""
         logger.info("Executing Hy code", code_length=len(code), has_context=context is not None)
 
         if not self.available:
@@ -50,6 +69,6 @@ class HySurface:
             logger.exception("Hy execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}
 
-    def health(self) -> bool:
+    async def health(self) -> bool:
         """Check if the surface is available."""
         return self.available

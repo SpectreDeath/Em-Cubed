@@ -46,10 +46,10 @@ def world():
     async def test_execute_unavailable(self):
         surface = PythonSurface()
         # Mock availability to False
-        surface.available = False
-        result = await surface.execute("1 + 1", {})
-        assert result["status"] == "error"
-        assert "asteval not available" in result["message"]
+        with patch.object(surface, '_check_availability', return_value=False):
+            result = await surface.execute("1 + 1", {})
+            assert result["status"] == "error"
+            assert "asteval not available" in result["message"]
 
     @pytest.mark.asyncio
     async def test_execute_long_error(self):
@@ -73,39 +73,43 @@ def world():
             surface = PythonSurface()
             assert surface.available is False
 
-
 class TestHySurface:
-    def test_execute_simple(self):
+
+    @pytest.mark.asyncio
+    async def test_execute_simple(self):
         surface = HySurface()
         if not surface.available:
             pytest.skip("Hy not available")
-        result = surface.execute("(+ 1 2)")
+        result = await surface.execute("(+ 1 2)")
         assert result["status"] == "ok"
         assert result["value"] == 3
 
-    def test_execute_multiple_forms(self):
+    @pytest.mark.asyncio
+    async def test_execute_multiple_forms(self):
         surface = HySurface()
         if not surface.available:
             pytest.skip("Hy not available")
-        result = surface.execute("(setv x 10)\n(* x 2)")
+        result = await surface.execute("(setv x 10)\n(* x 2)")
         assert result["status"] == "ok"
         assert result["value"] == 20
 
-    def test_execute_with_error(self):
+    @pytest.mark.asyncio
+    async def test_execute_with_error(self):
         surface = HySurface()
         if not surface.available:
             pytest.skip("Hy not available")
-        result = surface.execute("(invalid-function)")
+        result = await surface.execute("(invalid-function)")
         assert result["status"] == "error"
         assert "message" in result
 
-    def test_execute_unavailable(self):
+    @pytest.mark.asyncio
+    async def test_execute_unavailable(self):
         surface = HySurface()
         # Mock availability to False
-        surface.available = False
-        result = surface.execute("(+ 1 2)")
-        assert result["status"] == "error"
-        assert "Hy not available" in result["message"]
+        with patch.object(surface, '_check_availability', return_value=False):
+            result = await surface.execute("(+ 1 2)")
+            assert result["status"] == "error"
+            assert "Hy not available" in result["message"]
 
     def test_extract_tags(self):
         surface = HySurface()
@@ -120,38 +124,42 @@ class TestHySurface:
         assert "add" in tags
         assert "multiply" in tags
 
-    def test_health(self):
+    @pytest.mark.asyncio
+    async def test_health(self):
         surface = HySurface()
-        assert isinstance(surface.health(), bool)
-
+        assert isinstance(await surface.health(), bool)
 
 class TestPrologSurface:
-    def test_execute_assert(self):
+
+    @pytest.mark.asyncio
+    async def test_execute_assert(self):
         surface = PrologSurface()
         if not surface.available:
             pytest.skip("PySWIP not available")
-        result = surface.execute("parent(john, mary).")
+        result = await surface.execute("parent(john, mary).")
         assert result["status"] == "ok"
         assert "asserted successfully" in result["message"]
 
-    def test_execute_query(self):
+    @pytest.mark.asyncio
+    async def test_execute_query(self):
         surface = PrologSurface()
         if not surface.available:
             pytest.skip("PySWIP not available")
         # First assert some facts
-        surface.execute("parent(john, mary).")
-        surface.execute("parent(mary, alice).")
+        await surface.execute("parent(john, mary).")
+        await surface.execute("parent(mary, alice).")
         # Then query (without trailing . for query mode)
-        result = surface.execute("parent(john, X)")
+        result = await surface.execute("parent(john, X)")
         assert result["status"] == "ok"
         assert "result" in result
 
-    def test_execute_unavailable(self):
+    @pytest.mark.asyncio
+    async def test_execute_unavailable(self):
         surface = PrologSurface()
-        surface.available = False
-        result = surface.execute("test.")
-        assert result["status"] == "error"
-        assert "PySWIP not available" in result["message"]
+        with patch.object(surface, '_check_availability', return_value=False):
+            result = await surface.execute("test.")
+            assert result["status"] == "error"
+            assert "PySWIP not available" in result["message"]
 
     def test_check_availability(self):
         surface = PrologSurface()
@@ -169,6 +177,7 @@ father(john, mary).
         assert "parent" in tags
         assert "father" in tags
 
-    def test_health(self):
+    @pytest.mark.asyncio
+    async def test_health(self):
         surface = PrologSurface()
-        assert isinstance(surface.health(), bool)
+        assert isinstance(await surface.health(), bool)

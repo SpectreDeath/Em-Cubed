@@ -104,7 +104,7 @@ def test():
                 main()
 
         captured = capsys.readouterr()
-        assert "invalid choice: 'unknown'" in captured.err
+        assert "Surface 'unknown' not found" in captured.err
 
     def test_no_command(self, capsys):
         """Test running without command."""

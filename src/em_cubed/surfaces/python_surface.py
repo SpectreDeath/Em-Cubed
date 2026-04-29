@@ -4,15 +4,30 @@ import importlib.util
 from typing import Dict, Any, Optional
 import structlog
 
+from .base import SurfaceBase
+from ..plugin import SurfacePlugin
+
 logger = structlog.get_logger()
 
 
-class PythonSurface:
+class PythonSurface(SurfaceBase, SurfacePlugin):
     """Handle Python code execution and metadata extraction."""
 
-    def __init__(self):
-        self.available = self._check_availability()
-        logger.info("PythonSurface initialized", available=self.available)
+    @property
+    def name(self) -> str:
+        return "python"
+
+    @property
+    def description(self) -> str:
+        return "Safe Python execution with asteval"
+
+    @property
+    def available(self) -> bool:
+        return self._check_availability()
+
+    def __init__(self, timeout: Optional[float] = None):
+        super().__init__(timeout)
+        logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
         """Check if asteval is available."""
@@ -33,6 +48,10 @@ class PythonSurface:
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Python code and return results using asteval for safety."""
+        return await self.execute_with_timeout(code, context)
+
+    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute Python code - implementation with timeout protection."""
         logger.info("Executing Python code", code_length=len(code), has_context=context is not None)
 
         if not self.available:

@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 import structlog
 
 from em_cubed.search import search_registry
-from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
+from em_cubed.plugin_manager import PluginManager
 
 logger = structlog.get_logger()
 
@@ -18,10 +18,8 @@ app = FastAPI(
     version="0.3.0"
 )
 
-# Initialize surfaces
-python_surface = PythonSurface()
-prolog_surface = PrologSurface()
-hy_surface = HySurface()
+# Initialize plugin manager
+plugin_manager = PluginManager()
 
 # Get registry path from environment or default
 REGISTRY_PATH = Path(os.getenv("EM_CUBED_REGISTRY", "registry.json"))
@@ -38,17 +36,14 @@ class ExecuteRequest(BaseModel):
     surface: str
     code: str
     context: Optional[Dict[str, Any]] = None
+    timeout: Optional[float] = None
 
 @app.get("/health")
 async def health():
     """Health check endpoint."""
     return {
         "status": "ok",
-        "surfaces": {
-            "python": python_surface.available,
-            "prolog": prolog_surface.available,
-            "hy": hy_surface.available,
-        }
+        "surfaces": plugin_manager.list_plugins(),
     }
 
 @app.post("/search")
@@ -82,23 +77,17 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 @app.post("/execute")
 async def execute_code(request: ExecuteRequest):
     """Execute code on specified surface."""
-    surface_map: Dict[str, Any] = {
-        "python": python_surface,
-        "prolog": prolog_surface,
-        "hy": hy_surface,
-    }
+    surface = plugin_manager.get(request.surface)
 
-    if request.surface not in surface_map:
-        raise HTTPException(status_code=400, detail=f"Unknown surface: {request.surface}")
+    if not surface:
+        available_surfaces = plugin_manager.get_available_surfaces()
+        raise HTTPException(status_code=400, detail=f"Unknown surface: {request.surface}. Available: {', '.join(available_surfaces)}")
 
-    surface = surface_map[request.surface]
+    if not surface.available:
+        raise HTTPException(status_code=503, detail=f"Surface '{request.surface}' is not available")
 
     try:
-        if request.surface == "python":
-            result = await surface.execute(request.code, request.context)
-        else:
-            # Prolog and Hy surfaces are synchronous
-            result = surface.execute(request.code, request.context)
+        result = await surface.execute(request.code, request.context)
 
         if result["status"] == "error":
             raise HTTPException(status_code=400, detail=result["message"])
@@ -115,21 +104,5 @@ async def execute_code(request: ExecuteRequest):
 async def list_surfaces():
     """List available surfaces and their status."""
     return {
-        "surfaces": [
-            {
-                "name": "python",
-                "available": python_surface.available,
-                "description": "Safe Python execution with asteval"
-            },
-            {
-                "name": "prolog",
-                "available": prolog_surface.available,
-                "description": "Prolog execution via PySWIP"
-            },
-            {
-                "name": "hy",
-                "available": hy_surface.available,
-                "description": "Hy Lisp execution"
-            }
-        ]
+        "surfaces": plugin_manager.get_surface_info()
     }

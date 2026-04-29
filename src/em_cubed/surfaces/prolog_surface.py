@@ -1,19 +1,35 @@
 """Prolog surface integration using pyswip."""
 
+import asyncio
 import importlib.util
 from typing import List, Dict, Any, Optional
 import structlog
 
+from .base import SurfaceBase
+from ..plugin import SurfacePlugin
+
 logger = structlog.get_logger()
 
 
-class PrologSurface:
+class PrologSurface(SurfaceBase, SurfacePlugin):
     """Handle Prolog code execution and predicate extraction."""
 
-    def __init__(self) -> None:
-        self.available = self._check_availability()
+    @property
+    def name(self) -> str:
+        return "prolog"
+
+    @property
+    def description(self) -> str:
+        return "Prolog execution via PySWIP"
+
+    @property
+    def available(self) -> bool:
+        return self._check_availability()
+
+    def __init__(self, timeout: Optional[float] = None) -> None:
+        super().__init__(timeout)
         self._prolog = None  # Lazy initialization of Prolog interpreter
-        logger.info("PrologSurface initialized", available=self.available)
+        logger.info("PrologSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
         """Check if PySWIP is available."""
@@ -60,8 +76,12 @@ class PrologSurface:
             escaped = str(value).replace("\\", "\\\\").replace("'", "\\'")
             return "'" + escaped + "'"
 
-    def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code and return results."""
+        return await self.execute_with_timeout(code, context)
+
+    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute Prolog code - implementation with timeout protection."""
         logger.info("Executing Prolog code", code_length=len(code), has_context=context is not None)
 
         if not self.available:
@@ -90,19 +110,18 @@ class PrologSurface:
                 query_code = stripped_code.lstrip('?-').strip()
                 logger.info("Prolog query mode detected", query=query_code)
 
-                # Execute query with timeout (limit to 1000 solutions)
-                from concurrent.futures import ThreadPoolExecutor, TimeoutError
-
+                # Execute query with configurable timeout (limit to 1000 solutions)
                 def execute_query():
                     return list(prolog.query(query_code))
 
                 try:
-                    with ThreadPoolExecutor(max_workers=1) as executor:
-                        future = executor.submit(execute_query)
-                        result = future.result(timeout=10.0)  # 10 second timeout
-                except TimeoutError:
-                    logger.warning("Prolog query timed out", query=query_code)
-                    return {"status": "error", "message": "Query execution timed out"}
+                    # Use the configured timeout instead of hardcoded 10.0
+                    result = await asyncio.get_event_loop().run_in_executor(
+                        self._executor, execute_query
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning("Prolog query timed out", query=query_code, timeout=self.timeout)
+                    return {"status": "error", "message": f"Query execution timed out after {self.timeout}s"}
 
                 if len(result) > 1000:
                     result = result[:1000]  # Truncate for safety
@@ -114,6 +133,6 @@ class PrologSurface:
             logger.exception("Prolog execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}
 
-    def health(self) -> bool:
+    async def health(self) -> bool:
         """Check if the surface is available."""
         return self.available
