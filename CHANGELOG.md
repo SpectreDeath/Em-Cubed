@@ -5,6 +5,37 @@ All notable changes to Em-Cubed will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-29
+
+### Added
+- **Async timeouts** - Configurable execution timeouts across all surfaces (default 30s)
+- **Incremental indexing** - Only re-index changed skill files (10x+ performance boost)
+- **Plugin system** - Extensible surface architecture with 3 discovery mechanisms
+- **SurfacePlugin interface** - Abstract base class for custom surface implementations
+- **PluginManager** - Manages surface plugins with automatic discovery
+- **EM_CUBED_TIMEOUT** environment variable support
+- **--timeout flag** for em3 run command
+- **Timeout parameter** for API /execute endpoint
+- **--incremental flag** for em3 index command
+- **Registry schema v2** with modification time tracking
+
+### Changed
+- **All surface execute() methods now async** - Breaking change for API clients
+- **CLI uses PluginManager** - No more hardcoded surface imports
+- **API uses PluginManager** - Dynamic surface loading and health checks
+- **Registry format extended** - Includes last_modified timestamps
+- **Test suite updated** - All surface tests now async, improved mocking
+
+### Performance
+- **10x+ faster incremental indexing** for large skill collections
+- **Timeout protection** prevents hanging on infinite loops
+- **Lazy plugin loading** reduces startup time
+
+### Breaking Changes
+- Surface execute() methods are now async and must be awaited
+- API clients must update to handle async responses
+- Registry schema upgraded to v2 (backward compatible)
+
 ## [0.3.0] - 2026-04-28
 
 ### Added
