@@ -74,11 +74,13 @@ class PluginManager:
     def _discover_builtin(self):
         """Register built-in surfaces."""
         try:
-            from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
+            from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface, Z3Surface, DatalogSurface
             self.register("python", PythonSurface())
             self.register("prolog", PrologSurface())
             self.register("hy", HySurface())
-            logger.info("Built-in plugins registered", count=3)
+            self.register("z3", Z3Surface())
+            self.register("datalog", DatalogSurface())
+            logger.info("Built-in plugins registered", count=5)
         except Exception as e:
             logger.error("Failed to register built-in plugins", error=str(e))
 

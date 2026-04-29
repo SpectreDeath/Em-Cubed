@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from em_cubed.surfaces import PythonSurface, HySurface, PrologSurface
+from em_cubed.surfaces import PythonSurface, HySurface, PrologSurface, Z3Surface, DatalogSurface
 
 
 class TestPythonSurface:
@@ -73,6 +73,7 @@ def world():
             surface = PythonSurface()
             assert surface.available is False
 
+
 class TestHySurface:
 
     @pytest.mark.asyncio
@@ -115,10 +116,10 @@ class TestHySurface:
         surface = HySurface()
         hy_source = """
 (defn add [x y]
-  (+ x y))
+   (+ x y))
 
 (defn multiply [a b]
-  (* a b))
+   (* a b))
 """
         tags = surface.extract_tags(hy_source)
         assert "add" in tags
@@ -127,6 +128,204 @@ class TestHySurface:
     @pytest.mark.asyncio
     async def test_health(self):
         surface = HySurface()
+        assert isinstance(await surface.health(), bool)
+
+
+class TestPrologSurface:
+
+    @pytest.mark.asyncio
+    async def test_execute_assert(self):
+        surface = PrologSurface()
+        if not surface.available:
+            pytest.skip("PySWIP not available")
+        result = await surface.execute("parent(john, mary).")
+        assert result["status"] == "ok"
+        assert "asserted successfully" in result["message"]
+
+    @pytest.mark.asyncio
+    async def test_execute_query(self):
+        surface = PrologSurface()
+        if not surface.available:
+            pytest.skip("PySWIP not available")
+        # First assert some facts
+        await surface.execute("parent(john, mary).")
+        await surface.execute("parent(mary, alice).")
+        # Then query (without trailing . for query mode)
+        result = await surface.execute("parent(john, X)")
+        assert result["status"] == "ok"
+        assert "result" in result
+
+    @pytest.mark.asyncio
+    async def test_execute_unavailable(self):
+        surface = PrologSurface()
+        with patch.object(surface, '_check_availability', return_value=False):
+            result = await surface.execute("test.")
+            assert result["status"] == "error"
+            assert "PySWIP not available" in result["message"]
+
+    def test_check_availability(self):
+        surface = PrologSurface()
+        # This will test the _check_availability method
+        available = surface.available
+        assert isinstance(available, bool)
+
+    def test_extract_tags(self):
+        surface = PrologSurface()
+        prolog_source = """
+parent(X, Y) :- father(X, Y).
+father(john, mary).
+"""
+        tags = surface.extract_tags(prolog_source)
+        assert "parent" in tags
+        assert "father" in tags
+
+    @pytest.mark.asyncio
+    async def test_health(self):
+        surface = PrologSurface()
+        assert isinstance(await surface.health(), bool)
+
+
+class TestZ3Surface:
+
+    @pytest.mark.asyncio
+    async def test_execute_simple_sat(self):
+        surface = Z3Surface()
+        if not surface.available:
+            pytest.skip("Z3 not available")
+        # Simple satisfiability problem: x > 5
+        code = """
+solver = Solver()
+x = Int('x')
+solver.add(x > 5)
+result = solver.check()
+"""
+        result = await surface.execute(code, {})
+        assert result["status"] == "ok"
+        # Should be satisfiable
+        assert result["value"]["status"] == "sat"
+
+    @pytest.mark.asyncio
+    async def test_execute_simple_unsat(self):
+        surface = Z3Surface()
+        if not surface.available:
+            pytest.skip("Z3 not available")
+        # Unsatisfiable problem: x > 5 and x < 3
+        code = """
+solver = Solver()
+x = Int('x')
+solver.add(x > 5)
+solver.add(x < 3)
+result = solver.check()
+"""
+        result = await surface.execute(code, {})
+        assert result["status"] == "ok"
+        # Should be unsatisfiable
+        assert result["value"]["status"] == "unsat"
+
+    @pytest.mark.asyncio
+    async def test_execute_optimization(self):
+        surface = Z3Surface()
+        if not surface.available:
+            pytest.skip("Z3 not available")
+        # Simple optimization: maximize x where x < 10
+        code = """
+solver = Optimize()
+x = Int('x')
+solver.add(x < 10)
+solver.maximize(x)
+result = solver.check()
+"""
+        result = await surface.execute(code, {})
+        assert result["status"] == "ok"
+        # Should be satisfiable
+        assert result["value"]["status"] == "sat"
+
+    def test_extract_tags(self):
+        surface = Z3Surface()
+        z3_source = """
+solver = Solver()
+x = Int('x')
+y = Real('y')
+solver.add(x > 0)
+solver.add(y < 10.0)
+"""
+        tags = surface.extract_tags(z3_source)
+        # Should extract variable types and assertion indicators
+        assert "Int" in tags or "Real" in tags
+        assert "assertion" in tags
+
+    @pytest.mark.asyncio
+    async def test_execute_unavailable(self):
+        surface = Z3Surface()
+        # Mock availability to False
+        with patch.object(surface, '_check_availability', return_value=False):
+            result = await surface.execute("solver = Solver()", {})
+            assert result["status"] == "error"
+            assert "z3 not available" in result["message"]
+
+    @pytest.mark.asyncio
+    async def test_health(self):
+        surface = Z3Surface()
+        assert isinstance(await surface.health(), bool)
+
+
+class TestDatalogSurface:
+
+    @pytest.mark.asyncio
+    async def test_execute_simple_fact(self):
+        surface = DatalogSurface()
+        if not surface.available:
+            pytest.skip("pyDatalog not available")
+        # Simple fact assertion
+        code = """
+from pyDatalog import pyDatalog
+pyDatalog.create_atoms('likes')
++ (likes['john', 'pizza'])
+"""
+        result = await surface.execute(code)
+        assert result["status"] == "ok"
+
+    @pytest.mark.asyncio
+    async def test_execute_simple_rule(self):
+        surface = DatalogSurface()
+        if not surface.available:
+            pytest.skip("pyDatalog not available")
+        # Simple rule definition
+        code = """
+from pyDatalog import pyDatalog
+pyDatalog.create_atoms('parent', 'ancestor')
+ancestor[X, Y] = parent[X, Y]
+ancestor[X, Y] = parent[X, Z] & ancestor[Z, Y]
+"""
+        result = await surface.execute(code)
+        assert result["status"] == "ok"
+
+    def test_extract_tags(self):
+        surface = DatalogSurface()
+        datalog_source = """
+parent(X, Y) :- mother(X, Y).
+parent(X, Y) :- father(X, Y).
+mother('mary', 'john').
+?- parent(X, Y).
+"""
+        tags = surface.extract_tags(datalog_source)
+        # Should extract predicate names
+        assert "parent" in tags
+        assert "mother" in tags
+        assert "father" in tags
+
+    @pytest.mark.asyncio
+    async def test_execute_unavailable(self):
+        surface = DatalogSurface()
+        # Mock availability to False
+        with patch.object(surface, '_check_availability', return_value=False):
+            result = await surface.execute("parent('john', 'mary')")
+            assert result["status"] == "error"
+            assert "pyDatalog not available" in result["message"]
+
+    @pytest.mark.asyncio
+    async def test_health(self):
+        surface = DatalogSurface()
         assert isinstance(await surface.health(), bool)
 
 class TestPrologSurface:

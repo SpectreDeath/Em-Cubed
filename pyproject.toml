@@ -17,6 +17,8 @@ dependencies = [
     "hy>=0.28.0",       # Hy Lisp integration
     "asteval>=0.9.0",   # Safe Python evaluation
     "whoosh>=2.7.4,<3.0.0",  # Full-text search
+    "z3-solver>=4.12.2.0",  # Z3 SMT solver
+    "pyDatalog>=0.18.0",    # Datalog for relational queries
 
     "fastapi>=0.104.0,<1.0.0",  # API serving
     "uvicorn[standard]>=0.24.0,<0.30.0",

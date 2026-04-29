@@ -33,7 +33,7 @@ class HySurface(SurfaceBase, SurfacePlugin):
         """Check if Hy is available."""
         return importlib.util.find_spec("hy") is not None
 
-    def extract_tags(self, hy_source: str) -> List[str]:
+    def extract_tags(self, hy_source: Optional[str]) -> List[str]:
         """Extract function names from Hy defn forms as heuristic_tags."""
         if not hy_source:
             return []

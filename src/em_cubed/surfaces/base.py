@@ -2,7 +2,7 @@
 import asyncio
 import os
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Optional
 import structlog
 
