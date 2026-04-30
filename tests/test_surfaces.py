@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from em_cubed.surfaces import PythonSurface, HySurface, PrologSurface, Z3Surface, DatalogSurface
+from em_cubed.surfaces import PythonSurface, HySurface, Z3Surface, DatalogSurface
 
 
 class TestPythonSurface:
