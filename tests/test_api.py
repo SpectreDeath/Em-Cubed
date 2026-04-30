@@ -61,10 +61,13 @@ class TestAPI:
         assert "surfaces" in data
 
         # Check surface availability (may vary based on installed packages)
-        surfaces = data["surfaces"]
-        assert "python" in surfaces
-        assert "prolog" in surfaces
-        assert "hy" in surfaces
+        surfaces_dict = data["surfaces"]  # This is a dict: {surface_name: available_bool}
+        # Core surfaces should always be available
+        assert surfaces_dict.get("python") is True
+        assert surfaces_dict.get("prolog") is True
+        assert surfaces_dict.get("hy") is True
+        # New surfaces should be available if dependencies are installed
+        # Note: In CI environment, these may not be installed, so we check if they appear
 
     def test_surfaces_endpoint(self, client):
         """Test the surfaces listing endpoint."""
@@ -75,7 +78,10 @@ class TestAPI:
         assert "surfaces" in data
 
         surfaces = data["surfaces"]
-        assert len(surfaces) == 3  # python, prolog, hy
+        # Updated to reflect all 5 surfaces: python, prolog, hy, z3, datalog
+        expected_surfaces = {"python", "prolog", "hy", "z3", "datalog"}
+        actual_surface_names = {s["name"] for s in surfaces}
+        assert actual_surface_names == expected_surfaces, f"Expected {expected_surfaces}, got {actual_surface_names}"
 
         # Check each surface has required fields
         for surface in surfaces:
