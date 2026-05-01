@@ -214,8 +214,8 @@ class TestAPI:
             data = response.json()
             assert data["status"] == "ok"
         else:
-            # If PySWIP fails, gets 400 or 500
-            assert response.status_code in {400, 500}
+            # If PySWIP is unavailable, gets 503. If execution fails, 400 or 500.
+            assert response.status_code in {400, 500, 503}
 
     def test_execute_endpoint_hy(self, client):
         """Test executing Hy code (if available)."""
@@ -229,7 +229,7 @@ class TestAPI:
             assert data["status"] == "ok"
             assert data["value"] == 3
         else:
-            # If Hy not available, should get error
-            assert response.status_code == 400
+            # If Hy not available, should get 503 error
+            assert response.status_code == 503
             data = response.json()
-            assert "Hy not available" in data["detail"]
+            assert "is not available" in data["detail"]
