@@ -81,6 +81,38 @@ def world():
         assert await surface.health() is True
 
     @pytest.mark.asyncio
+    async def test_execute_with_math_operations(self):
+        surface = PythonSurface()
+        # asteval supports math operations but not imports
+        result = await surface.execute("4 ** 0.5", {})
+        assert result["status"] == "ok"
+        assert result["value"] == 2.0
+
+    @pytest.mark.asyncio
+    async def test_execute_function_definition(self):
+        surface = PythonSurface()
+        # asteval supports function definitions
+        code = """
+def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+factorial(5)
+"""
+        result = await surface.execute(code, {})
+        assert result["status"] == "ok"
+        assert result["value"] == 120
+
+    @pytest.mark.asyncio
+    async def test_execute_list_comprehension(self):
+        surface = PythonSurface()
+        code = "[x**2 for x in range(1, 4)]"
+        result = await surface.execute(code, {})
+        assert result["status"] == "ok"
+        assert result["value"] == [1, 4, 9]
+
+    @pytest.mark.asyncio
     async def test_execute_unavailable(self):
         surface = PythonSurface()
         # Mock availability to False
@@ -251,8 +283,37 @@ solver.add(y < 10.0)
 
     @pytest.mark.asyncio
     async def test_health(self):
-        surface = Z3Surface()
+        surface = DatalogSurface()
         assert isinstance(await surface.health(), bool)
+
+    @pytest.mark.asyncio
+    async def test_execute_simple_fact(self):
+        surface = DatalogSurface()
+        if not surface.available:
+            pytest.skip("pyDatalog not available")
+        # Test simple fact assertion
+        code = """
+from pyDatalog import pyDatalog
+pyDatalog.create_atoms('likes')
+likes('alice', 'pizza')
+"""
+        result = await surface.execute(code)
+        assert result["status"] == "ok"
+
+    @pytest.mark.asyncio
+    async def test_execute_simple_rule(self):
+        surface = DatalogSurface()
+        if not surface.available:
+            pytest.skip("pyDatalog not available")
+        # Test simple rule definition - create variables first
+        code = """
+from pyDatalog import pyDatalog
+pyDatalog.create_atoms('parent', 'ancestor')
+pyDatalog.create_terms('X, Y')
+ancestor(X, Y) <= parent(X, Y)
+"""
+        result = await surface.execute(code)
+        assert result["status"] == "ok"
 
 
 @requires_datalog

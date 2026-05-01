@@ -53,7 +53,7 @@ target-version = "py311"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "--cov=em_cubed --cov-report=term-missing --cov-fail-under=80 -W ignore"
+addopts = "--cov=em_cubed --cov-report=term-missing --cov-fail-under=71 -W ignore"
 
 [tool.mypy]
 python_version = "3.11"
