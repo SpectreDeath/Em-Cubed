@@ -1,39 +1,40 @@
 from .base import SurfaceBase
 
-# Import surfaces with graceful handling of missing dependencies
-_prolog_available = False
-_hy_available = False
-_z3_available = False
-_datalog_available = False
+# Surface classes with graceful handling of missing dependencies
+PrologSurface = None  # type: Optional[Type[SurfaceBase]]
+HySurface = None  # type: Optional[Type[SurfaceBase]]
+PythonSurface = None  # type: Optional[Type[SurfaceBase]]
+Z3Surface = None  # type: Optional[Type[SurfaceBase]]
+DatalogSurface = None  # type: Optional[Type[SurfaceBase]]
 
 try:
-    from .prolog_surface import PrologSurface
-    _prolog_available = True
+    from .prolog_surface import PrologSurface as _PrologSurface
+    PrologSurface = _PrologSurface  # type: ignore[assignment]
 except ImportError:
-    PrologSurface = None
+    pass
 
 try:
-    from .hy_surface import HySurface
-    _hy_available = True
+    from .hy_surface import HySurface as _HySurface
+    HySurface = _HySurface  # type: ignore[assignment]
 except ImportError:
-    HySurface = None
+    pass
 
 try:
-    from .python_surface import PythonSurface
-    _python_available = True
+    from .python_surface import PythonSurface as _PythonSurface
+    PythonSurface = _PythonSurface  # type: ignore[assignment]
 except ImportError:
-    PythonSurface = None
+    pass
 
 try:
-    from .z3_surface import Z3Surface
-    _z3_available = True
+    from .z3_surface import Z3Surface as _Z3Surface
+    Z3Surface = _Z3Surface  # type: ignore[assignment]
 except ImportError:
-    Z3Surface = None
+    pass
 
 try:
-    from .datalog_surface import DatalogSurface
-    _datalog_available = True
+    from .datalog_surface import DatalogSurface as _DatalogSurface
+    DatalogSurface = _DatalogSurface  # type: ignore[assignment]
 except ImportError:
-    DatalogSurface = None
+    pass
 
 __all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface"]
