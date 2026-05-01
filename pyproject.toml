@@ -54,7 +54,6 @@ target-version = "py311"
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "--cov=em_cubed --cov-report=term-missing -W ignore"
-asyncio_mode = "auto"
 
 [tool.mypy]
 python_version = "3.11"
