@@ -1,7 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
 from pathlib import Path
-import tempfile
 from em_cubed.plugin_manager import PluginManager, SurfacePlugin
 from typing import Dict, Any, Optional
 
