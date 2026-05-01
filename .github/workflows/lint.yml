@@ -21,10 +21,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install ruff mypy types-PyYAML
+        pip install -e .[dev,surfaces]
     
     - name: Lint with ruff
       run: ruff check src/ tests/
     
     - name: Type check with mypy
-      run: mypy src/em_cubed/ --ignore-missing-imports
+      run: mypy src/em_cubed/
