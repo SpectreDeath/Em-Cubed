@@ -73,16 +73,30 @@ class PluginManager:
 
     def _discover_builtin(self):
         """Register built-in surfaces."""
-        try:
-            from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface, Z3Surface, DatalogSurface
-            self.register("python", PythonSurface())
-            self.register("prolog", PrologSurface())
-            self.register("hy", HySurface())
-            self.register("z3", Z3Surface())
-            self.register("datalog", DatalogSurface())
-            logger.info("Built-in plugins registered", count=5)
-        except Exception as e:
-            logger.error("Failed to register built-in plugins", error=str(e))
+        # Import surfaces module which handles missing dependencies gracefully
+        from em_cubed import surfaces
+        
+        surfaces_to_register = [
+            ("python", surfaces.PythonSurface),
+            ("prolog", surfaces.PrologSurface),
+            ("hy", surfaces.HySurface),
+            ("z3", surfaces.Z3Surface),
+            ("datalog", surfaces.DatalogSurface),
+        ]
+        
+        registered = 0
+        for name, surface_class in surfaces_to_register:
+            if surface_class is not None:
+                try:
+                    self.register(name, surface_class())
+                    registered += 1
+                except Exception as e:
+                    logger.warning("Failed to instantiate surface", surface=name, error=str(e))
+            else:
+                logger.debug("Surface not available", surface=name)
+        
+        if registered > 0:
+            logger.info("Built-in plugins registered", count=registered)
 
     def _discover_entry_points(self):
         """Discover plugins via setuptools entry points."""

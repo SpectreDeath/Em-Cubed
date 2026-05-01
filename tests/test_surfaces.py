@@ -1,6 +1,44 @@
 import pytest
 from unittest.mock import patch
-from em_cubed.surfaces import PythonSurface, HySurface, Z3Surface, DatalogSurface
+
+# Try to import surfaces, skip tests if dependencies are missing
+try:
+    from em_cubed.surfaces import PythonSurface, HySurface, Z3Surface, DatalogSurface
+    _core_surfaces_available = True
+except ImportError:
+    PythonSurface = HySurface = Z3Surface = DatalogSurface = None
+    _core_surfaces_available = False
+
+try:
+    from em_cubed.surfaces import PrologSurface
+    _prolog_available = True
+except ImportError:
+    PrologSurface = None
+    _prolog_available = False
+
+# Check other surfaces
+try:
+    from em_cubed.surfaces import HySurface
+    _hy_available = True
+except ImportError:
+    _hy_available = False
+
+try:
+    from em_cubed.surfaces import Z3Surface
+    _z3_available = True
+except ImportError:
+    _z3_available = False
+
+try:
+    from em_cubed.surfaces import DatalogSurface
+    _datalog_available = True
+except ImportError:
+    _datalog_available = False
+
+# Skip decorators
+requires_hy = pytest.mark.skipif(not _hy_available, reason="HySurface not available")
+requires_z3 = pytest.mark.skipif(not _z3_available, reason="Z3Surface not available")
+requires_datalog = pytest.mark.skipif(not _datalog_available, reason="DatalogSurface not available")
 
 
 class TestPythonSurface:
@@ -74,6 +112,7 @@ def world():
             assert surface.available is False
 
 
+@requires_hy
 class TestHySurface:
 
     @pytest.mark.asyncio
@@ -131,6 +170,7 @@ class TestHySurface:
         assert isinstance(await surface.health(), bool)
 
 
+@requires_z3
 class TestZ3Surface:
 
     @pytest.mark.asyncio
@@ -215,6 +255,7 @@ solver.add(y < 10.0)
         assert isinstance(await surface.health(), bool)
 
 
+@requires_datalog
 class TestDatalogSurface:
 
     @pytest.mark.asyncio
