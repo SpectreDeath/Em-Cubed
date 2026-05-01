@@ -130,7 +130,6 @@ class Z3Surface(SurfaceBase, SurfacePlugin):
                 'Bool': __import__('z3').z3.Bool,
                 'BitVec': __import__('z3').z3.BitVec,
                 'Function': __import__('z3').z3.Function,
-                'DeclareFun': __import__('z3').z3.DeclareFun,
                 'Const': __import__('z3').z3.Const,
                 'And': __import__('z3').z3.And,
                 'Or': __import__('z3').z3.Or,
@@ -138,10 +137,9 @@ class Z3Surface(SurfaceBase, SurfacePlugin):
                 'Xor': __import__('z3').z3.Xor,
                 'Implies': __import__('z3').z3.Implies,
                 'If': __import__('z3').z3.If,
-                'Equals': __import__('z3').z3.Equals,
                 'Distinct': __import__('z3').z3.Distinct,
                 'Sum': __import__('z3').z3.Sum,
-                'Prod': __import__('z3').z3.Prod,
+                'Product': __import__('z3').z3.Product,
             }
             
             # Add context to globals if provided
