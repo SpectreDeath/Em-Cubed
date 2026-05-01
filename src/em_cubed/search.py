@@ -5,6 +5,8 @@ import structlog
 
 logger = structlog.get_logger()
 
+__all__ = ["search_registry", "get_search_index", "WhooshSearchIndex"]
+
 
 class WhooshSearchIndex:
     """Whoosh-based full-text search index for skills."""
@@ -144,17 +146,9 @@ class WhooshSearchIndex:
             return []
 
 
-# Global search index instance
-_search_index: Optional[WhooshSearchIndex] = None
-_indexed_registry_hash: Optional[str] = None
-
-
-def get_search_index() -> WhooshSearchIndex:
-    """Get or create the global search index."""
-    global _search_index
-    if _search_index is None:
-        _search_index = WhooshSearchIndex()
-    return _search_index
+def get_search_index(index_dir: Optional[Path] = None) -> WhooshSearchIndex:
+    """Get or create a search index instance."""
+    return WhooshSearchIndex(index_dir)
 
 
 def _get_registry_hash(registry: List[Dict[str, Any]]) -> str:
@@ -167,7 +161,7 @@ def _get_registry_hash(registry: List[Dict[str, Any]]) -> str:
     return hashlib.sha256(stable_json.encode()).hexdigest()
 
 
-def search_registry(query: str, registry_path: Path, max_results: int = 10, use_whoosh: bool = True) -> List[Dict[str, Any]]:
+def search_registry(query: str, registry_path: Path, max_results: int = 10, use_whoosh: bool = True, index_dir: Optional[Path] = None) -> List[Dict[str, Any]]:
     """Search the skill registry with whoosh or fallback to naive search."""
     logger.info("Searching registry", query=query, registry_path=str(registry_path), max_results=max_results, use_whoosh=use_whoosh)
 
@@ -189,15 +183,26 @@ def search_registry(query: str, registry_path: Path, max_results: int = 10, use_
     # Try whoosh search first if enabled
     if use_whoosh:
         try:
-            search_index = get_search_index()
-            global _indexed_registry_hash
+            search_index = get_search_index(index_dir)
 
             # Check if we need to update the index
             current_hash = _get_registry_hash(registry)
-            if _indexed_registry_hash != current_hash:
+            index_hash_file = index_dir / ".registry_hash" if index_dir else Path(".whoosh_index/.registry_hash")
+
+            # Read existing hash
+            existing_hash = None
+            if index_hash_file.exists():
+                try:
+                    existing_hash = index_hash_file.read_text().strip()
+                except Exception:
+                    existing_hash = None
+
+            if existing_hash != current_hash:
                 logger.info("Updating Whoosh index", registry_skills=len(registry))
                 search_index.index_skills(registry)
-                _indexed_registry_hash = current_hash
+                # Write new hash
+                index_hash_file.parent.mkdir(exist_ok=True)
+                index_hash_file.write_text(current_hash)
             else:
                 logger.debug("Whoosh index is up to date")
 

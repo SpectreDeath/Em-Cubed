@@ -9,6 +9,8 @@ from em_cubed.indexer import reindex
 from em_cubed.search import search_registry
 from em_cubed.plugin_manager import PluginManager
 
+__all__ = ["main"]
+
 # Configure structlog for CLI
 structlog.configure(
     processors=[

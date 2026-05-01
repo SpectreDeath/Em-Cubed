@@ -36,7 +36,10 @@ jobs:
     
     - name: Type check with mypy
       run: mypy src/em_cubed/
-    
+
+    - name: Security scan with bandit
+      run: pip install bandit && bandit -r src/ -c pyproject.toml
+
     - name: Run tests
       run: pytest --cov=em_cubed --cov-report=term-missing
     

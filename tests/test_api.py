@@ -45,9 +45,8 @@ class TestAPI:
 
         # Mock Whoosh index to use a temporary directory
         index_dir = tmp_path / "whoosh_index"
-        monkeypatch.setattr("em_cubed.search._search_index", None)
         from em_cubed.search import WhooshSearchIndex
-        monkeypatch.setattr("em_cubed.search.get_search_index", lambda: WhooshSearchIndex(index_dir))
+        monkeypatch.setattr("em_cubed.search.get_search_index", lambda index_dir=None: WhooshSearchIndex(index_dir or Path(".whoosh_index")))
 
         return registry_file
 

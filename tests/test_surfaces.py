@@ -5,9 +5,15 @@ from unittest.mock import patch
 try:
     from em_cubed.surfaces import PythonSurface, HySurface, Z3Surface, DatalogSurface
     _core_surfaces_available = True
+    _hy_available = HySurface is not None
+    _z3_available = Z3Surface is not None
+    _datalog_available = DatalogSurface is not None
 except ImportError:
     PythonSurface = HySurface = Z3Surface = DatalogSurface = None
     _core_surfaces_available = False
+    _hy_available = False
+    _z3_available = False
+    _datalog_available = False
 
 try:
     from em_cubed.surfaces import PrologSurface
@@ -15,25 +21,6 @@ try:
 except ImportError:
     PrologSurface = None
     _prolog_available = False
-
-# Check other surfaces
-try:
-    from em_cubed.surfaces import HySurface
-    _hy_available = True
-except ImportError:
-    _hy_available = False
-
-try:
-    from em_cubed.surfaces import Z3Surface
-    _z3_available = True
-except ImportError:
-    _z3_available = False
-
-try:
-    from em_cubed.surfaces import DatalogSurface
-    _datalog_available = True
-except ImportError:
-    _datalog_available = False
 
 # Skip decorators
 requires_hy = pytest.mark.skipif(not _hy_available, reason="HySurface not available")
@@ -198,7 +185,7 @@ class TestHySurface:
 
     @pytest.mark.asyncio
     async def test_health(self):
-        surface = DatalogSurface()
+        surface = HySurface()
         assert isinstance(await surface.health(), bool)
 
 

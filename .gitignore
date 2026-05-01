@@ -69,3 +69,6 @@ Thumbs.db
 
 # Whoosh search index
 .whoosh_index/
+
+# Extracted logs
+logs_extracted/

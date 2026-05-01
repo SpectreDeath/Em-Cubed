@@ -8,6 +8,8 @@ import structlog
 
 logger = structlog.get_logger()
 
+__all__ = ["reindex", "get_skill_metadata"]
+
 
 def extract_fenced_block(content: str, lang: str) -> Optional[str]:
     """Extract first fenced code block of a given language tag."""

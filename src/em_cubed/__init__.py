@@ -13,7 +13,7 @@ class JanusSurface:
     def __init__(self):
         raise NotImplementedError("JanusSurface is not implemented. Requires janus-swi package and SWI-Prolog system installation.")
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __all__ = [
     "reindex",
     "get_skill_metadata",

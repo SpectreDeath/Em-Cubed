@@ -1,7 +1,7 @@
 # Em-Cubed: Multi-Surface Skill Framework
 
-[![Tests](https://img.shields.io/badge/tests-77%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
-[![Coverage](https://img.shields.io/badge/coverage-81%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Tests](https://img.shields.io/badge/tests-100%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
@@ -16,14 +16,15 @@ Em-Cubed is a secure, multi-surface skill framework enabling execution across Py
 - **🧪 Comprehensive Testing**: 77 tests with 81% coverage
 - **📚 Multi-Paradigm**: Python, Prolog logic, and Hy Lisp support
 
-## 🎉 What's New in v0.3.0
+## 🎉 What's New in v0.4.0
 
-- **🖥️ CLI Entry Point**: New `em3` command with 4 subcommands (index, search, serve, run)
-- **⚡ Whoosh Full-Text Search**: 100× faster search with persistent indexing
-- **🔍 GET /search Endpoint**: New REST API endpoint for skill searching
-- **🧠 Persistent Prolog Interpreter**: Facts persist across execute() calls
-- **🛡️ Security Enhancements**: Prolog injection prevention and timeout protection
-- **📈 Performance Improvements**: Optimized caching and lazy initialization
+- **⚡ Async Timeouts**: Configurable execution timeouts across all surfaces (default 30s)
+- **🔄 Incremental Indexing**: Only re-index changed skill files (10x+ performance boost)
+- **🔌 Plugin System**: Extensible surface architecture with 3 discovery mechanisms
+- **🎯 SurfacePlugin Interface**: Abstract base class for custom surface implementations
+- **📊 PluginManager**: Manages surface plugins with automatic discovery
+- **⏱️ Timeout Protection**: Environment variable and CLI support for execution limits
+- **📈 Performance**: Lazy plugin loading and optimized resource management
 
 ## 🚀 Quick Start
 

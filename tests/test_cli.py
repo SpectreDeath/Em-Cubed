@@ -67,8 +67,7 @@ def test():
         from em_cubed.search import WhooshSearchIndex
         with patch('sys.argv', ['em3', 'search', 'test', '--registry', str(registry_file)]):
             with patch('em_cubed.search.get_search_index', return_value=WhooshSearchIndex(tmp_path / "whoosh_index")):
-                with patch('em_cubed.search._search_index', None):
-                    main()
+                main()
 
         captured = capsys.readouterr()
         results = json.loads(captured.out.strip())
