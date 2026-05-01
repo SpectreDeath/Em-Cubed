@@ -1,11 +1,12 @@
 from .base import SurfaceBase
+from typing import Optional
 
 # Surface classes with graceful handling of missing dependencies
-PrologSurface = None  # type: Optional[Type[SurfaceBase]]
-HySurface = None  # type: Optional[Type[SurfaceBase]]
-PythonSurface = None  # type: Optional[Type[SurfaceBase]]
-Z3Surface = None  # type: Optional[Type[SurfaceBase]]
-DatalogSurface = None  # type: Optional[Type[SurfaceBase]]
+PrologSurface = None  # type: Optional[type]
+HySurface = None  # type: Optional[type]
+PythonSurface = None  # type: Optional[type]
+Z3Surface = None  # type: Optional[type]
+DatalogSurface = None  # type: Optional[type]
 
 try:
     from .prolog_surface import PrologSurface as _PrologSurface
