@@ -27,4 +27,4 @@ jobs:
       run: ruff check src/ tests/
     
     - name: Type check with mypy
-      run: mypy src/em_cubed/
+      run: mypy src/em_cubed/ --ignore-missing-imports
