@@ -8,13 +8,11 @@ import structlog
 
 logger = structlog.get_logger()
 
-__all__ = ["reindex", "get_skill_metadata"]
+__all__ = ["reindex", "get_skill_metadata", "reindex_incremental"]
 
 
 def extract_fenced_block(content: str, lang: str) -> Optional[str]:
     """Extract first fenced code block of a given language tag."""
-    # Match various fenced code block formats: ```lang, ````lang, etc.
-    # Handle both \n and \r\n line endings
     pattern = rf"`+{lang}\s*\r?\n(.*?)`+"
     match = re.search(pattern, content, re.DOTALL)
     return match.group(1).strip() if match else None
@@ -24,8 +22,10 @@ def extract_prolog_tags(prolog_source: Optional[str]) -> List[str]:
     """Extract predicate names from Prolog clause heads as logic_tags."""
     if not prolog_source:
         return []
+    import re
     # Match predicate heads: name( or name :-
-    heads = re.findall(r"([a-z][a-zA-Z0-9_]*)\s*\(", prolog_source)
+    # Don't anchor to line start - allows finding predicates with indentation
+    heads = re.findall(r"([a-z][a-zA-Z0-9_]*)\s*[:(]", prolog_source)
     # Deduplicate, exclude Prolog builtins
     builtins = {"not", "is", "true", "fail", "assert", "retract"}
     return list(dict.fromkeys(h for h in heads if h not in builtins))
@@ -40,7 +40,7 @@ def extract_hy_tags(hy_source: Optional[str]) -> List[str]:
 
 
 def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, Any]]:
-    """Extract metadata from a SKILL.md file."""
+    """Extract extended metadata from a SKILL.md file."""
     try:
         with open(file_path, encoding="utf-8") as f:
             content = f.read()
@@ -55,44 +55,58 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         fm = yaml.safe_load(parts[1]) or {}
         body = parts[2]
 
-        # Extract purpose
+        # Use new SkillMetadata class for full extraction
+        from em_cubed.skills.metadata import SkillMetadata
+        metadata = SkillMetadata.from_frontmatter(fm, body, file_path)
+
+        # Return extended dictionary representation
+        return metadata.to_registry_dict()
+
+    except Exception as e:
+        logger.warning("Error indexing skill file", path=str(file_path), error=str(e))
+        return None
+
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return None
+
+        fm = yaml.safe_load(parts[1]) or {}
+        body = parts[2]
+
+        # Extract purpose and description using original regex logic
         purpose = ""
         purpose_match = re.search(r"## Purpose\s*\n\s*(.+)", body)
         if purpose_match:
             purpose = purpose_match.group(1).strip()
 
-        # Extract description
         description = ""
         desc_match = re.search(r"## Description\s*\n\s*(.+)", body)
         if desc_match:
             description = desc_match.group(1).strip()
 
-        # Extract fenced code blocks for surface detection
+        # Extract surfaces from fenced code blocks
+        surfaces = []
+        for lang in ["python", "prolog", "hy"]:
+            if extract_fenced_block(body, lang):
+                surfaces.append(lang)
+        if not surfaces:
+            surfaces = fm.get("surfaces", ["python"])
+
+        # Extract tags using original separate logic
         prolog_source = extract_fenced_block(body, "prolog")
         hy_source = extract_fenced_block(body, "hy")
         python_source = extract_fenced_block(body, "python")
 
-        # Build surfaces list from detected blocks
-        surfaces = []
-        if python_source:
-            surfaces.append("python")
-        if prolog_source:
-            surfaces.append("prolog")
-        if hy_source:
-            surfaces.append("hy")
-        # Fall back to frontmatter if no blocks found
-        if not surfaces:
-            surfaces = fm.get("surfaces", ["python"])
-
-        # Extract tags
         logic_tags = extract_prolog_tags(prolog_source)
         heuristic_tags = extract_hy_tags(hy_source)
-        # Also extract Python function names as heuristic tags
         if python_source:
-            from em_cubed.surfaces.python_surface import PythonSurface
+            try:
+                from em_cubed.surfaces.python_surface import PythonSurface
+                heuristic_tags.extend(PythonSurface.extract_tags(python_source))
+            except ImportError:
+                pass
 
-            heuristic_tags.extend(PythonSurface.extract_tags(python_source))
-
+        # Return dictionary in original format for backward compatibility
         return {
             "schema_version": 1,
             "name": fm.get("name", file_path.parent.name),
@@ -106,6 +120,68 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
             "logic_tags": logic_tags,
             "heuristic_tags": heuristic_tags,
         }
+    except Exception as e:
+        logger.warning("Error indexing skill file", path=str(file_path), error=str(e))
+        return None
+
+        parts = content.split("---", 2)
+        if len(parts) < 3:
+            return None
+
+        fm = yaml.safe_load(parts[1]) or {}
+        body = parts[2]
+
+        # Extract purpose and description
+        purpose = ""
+        purpose_match = re.search(r"## Purpose\s*\n\s*(.+)", body)
+        if purpose_match:
+            purpose = purpose_match.group(1).strip()
+
+        description = ""
+        desc_match = re.search(r"## Description\s*\n\s*(.+)", body)
+        if desc_match:
+            description = desc_match.group(1).strip()
+
+        # Extract code blocks for surface detection and tag extraction
+        prolog_source = extract_fenced_block(body, "prolog")
+        hy_source = extract_fenced_block(body, "hy")
+        python_source = extract_fenced_block(body, "python")
+
+        # Build surfaces list
+        surfaces = []
+        if python_source:
+            surfaces.append("python")
+        if prolog_source:
+            surfaces.append("prolog")
+        if hy_source:
+            surfaces.append("hy")
+        if not surfaces:
+            surfaces = fm.get("surfaces", ["python"])
+
+        # Extract tags
+        logic_tags = extract_prolog_tags(prolog_source)
+        heuristic_tags = extract_hy_tags(hy_source)
+        if python_source:
+            try:
+                from em_cubed.surfaces.python_surface import PythonSurface
+                heuristic_tags.extend(PythonSurface.extract_tags(python_source))
+            except ImportError:
+                pass
+
+        # Build extended metadata using SkillMetadata class
+        from em_cubed.skills.metadata import SkillMetadata
+
+        metadata = SkillMetadata.from_frontmatter(fm, body, file_path)
+
+        # Merge tags from code analysis (these override/append frontmatter)
+        metadata.tags = list(set(logic_tags + heuristic_tags + (fm.get("tags", []) or [])))
+        # Ensure surfaces come from actual code blocks
+        if surfaces:
+            metadata.surfaces = surfaces
+
+        # Return as dictionary for registry compatibility
+        return metadata.to_registry_dict()
+
     except Exception as e:
         logger.warning("Error indexing skill file", path=str(file_path), error=str(e))
         return None
