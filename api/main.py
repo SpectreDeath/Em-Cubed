@@ -21,12 +21,9 @@ app = FastAPI(
 # Initialize plugin manager
 plugin_manager = PluginManager()
 
-# Get registry path from environment or default
-REGISTRY_PATH = Path(os.getenv("EM_CUBED_REGISTRY", "registry.json"))
-
 # Allow overriding for testing
 def get_registry_path():
-    return REGISTRY_PATH
+    return Path(os.getenv("EM_CUBED_REGISTRY", "registry.json"))
 
 class SearchRequest(BaseModel):
     query: str

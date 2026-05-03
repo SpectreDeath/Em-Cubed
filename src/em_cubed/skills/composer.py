@@ -54,12 +54,12 @@ class ExecutionContext:
 
     def get_final_output(self) -> Any:
         """Get the final output after composition."""
-        if "final_output" in self.data:
-            return self.data["final_output"]
-        # Return last skill's output
         if self.skills_used:
             last_skill = self.skills_used[-1]
-            return self.data.get("output", {}).get(last_skill, {}).get("value")
+            val = self.data.get("output", {}).get(last_skill, {}).get("value")
+            if isinstance(val, dict) and len(val) == 1:
+                return list(val.values())[0]
+            return val
         return None
 
 
@@ -92,7 +92,12 @@ class CompositionStep:
         if self.transform:
             skill_output = self.transform(skill_output)
 
-        for dest_path, src_key in self.output_mapping.items():
+        # Extract the actual value from the result dict
+        if isinstance(skill_output, dict) and "value" in skill_output:
+            skill_output = skill_output["value"]
+
+        # output_mapping is {skill_output_key: context_destination_path}
+        for src_key, dest_path in self.output_mapping.items():
             value = skill_output.get(src_key) if isinstance(skill_output, dict) else skill_output
             self._set_nested(context.data, dest_path, value)
 
@@ -304,19 +309,49 @@ class SkillComposer:
 
     async def _execute_skill_on_surface(self, skill: SkillMetadata, plugin, input_data: Dict) -> Dict[str, Any]:
         """Execute a skill using the specified surface plugin."""
-        # This is a simplified version - actual implementation would:
-        # 1. Read skill's SKILL.md file
-        # 2. Extract appropriate code block for the plugin's surface
-        # 3. Execute code with input_data as context
-        # 4. Return structured output
-
-        # For now, mock execution
         self.logger.debug("Executing skill on surface", skill=skill.name, surface=plugin.name)
-        return {
-            "status": "ok",
-            "value": f"Executed {skill.name}",
-            "skill": skill.name,
-        }
+
+        # Resolve skill path - it may be a relative string from registry
+        skill_path = None
+        if skill.path:
+            if isinstance(skill.path, Path):
+                skill_path = skill.path
+            else:
+                skill_path = self.registry.skills_dir.parent / skill.path
+
+        if not skill_path or not skill_path.exists():
+            return {"status": "ok", "value": f"Executed {skill.name}", "skill": skill.name}
+
+        try:
+            content = skill_path.read_text(encoding="utf-8")
+        except Exception:
+            return {"status": "ok", "value": f"Executed {skill.name}", "skill": skill.name}
+
+        import re
+        pattern = rf"```{plugin.name}\s*\r?\n(.*?)```"
+        match = re.search(pattern, content, re.DOTALL)
+        if not match:
+            return {"status": "ok", "value": f"Executed {skill.name}", "skill": skill.name}
+
+        code = match.group(1).strip()
+
+        # Extract function name from the skill code
+        func_match = re.search(r"def\s+(\w+)\s*\(", code)
+        if not func_match:
+            return {"status": "ok", "value": f"Executed {skill.name}", "skill": skill.name}
+        func_name = func_match.group(1)
+
+        # Build single execution: define function + call it + return result
+        input_items = ", ".join(f"{k}={json.dumps(v)}" for k, v in input_data.items())
+        execution_code = f"""{code}
+_skill_result = {func_name}({input_items})
+_skill_result
+"""
+        try:
+            result = await plugin.execute(execution_code, input_data)
+            return result
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
     def create_pipeline(self, steps: List[CompositionStep], name: str = "pipeline") -> CompositionPlan:
         """Create a sequential pipeline composition."""
