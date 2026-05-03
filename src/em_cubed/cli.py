@@ -228,7 +228,7 @@ def main():
             asyncio.run(_handle_compose(args))
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
-        print(f"Error: {e}", file=sys.stderr())
+        print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 

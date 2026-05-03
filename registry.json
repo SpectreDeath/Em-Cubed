@@ -2435,5 +2435,119 @@
     },
     "validation_score": 1.0,
     "test_coverage": 0.0
+  },
+  {
+    "skill_id": "AUTOMATION/github-pr-manager",
+    "name": "github-pr-manager",
+    "domain": "AUTOMATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Automated GitHub Pull Request management using Python for API interaction, Prolog for branch validation, and Hy for intelligent PR description synthesis.",
+    "description": "This skill automates the creation and management of GitHub Pull Requests by: Python for robust interaction with the GitHub REST API (v3), Prolog for validating branch relationships, and Hy for adaptive synthesis of PR titles and bodies.",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "repo_full_name": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "head": {
+          "type": "string"
+        },
+        "base": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token",
+        "repo_full_name",
+        "head",
+        "base"
+      ],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "html_url": {
+          "type": "string"
+        },
+        "number": {
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [
+        "python",
+        "prolog",
+        "hy"
+      ],
+      "permissions": [
+        "network",
+        "filesystem"
+      ],
+      "resources": {},
+      "external_services": [
+        "github.com"
+      ]
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 60.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "pull_request",
+      "github",
+      "automation",
+      "git_ops",
+      "api",
+      "create_pr",
+      "validate_branch"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\AUTOMATION\\github-pr-manager\\SKILL.md",
+    "schema_version": 1,
+    "created_at": "2026-05-03T15:38:03.322965+00:00",
+    "updated_at": "2026-05-03T15:38:03.323004+00:00",
+    "metrics": {
+      "applied_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "completion_rate": 1.0,
+      "total_execution_time": 2.5,
+      "avg_execution_time": 2.5,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": "2026-05-03T15:38:03.323020+00:00",
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
   }
 ]

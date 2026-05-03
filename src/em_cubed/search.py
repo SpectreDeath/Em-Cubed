@@ -5,7 +5,16 @@ import structlog
 
 logger = structlog.get_logger()
 
-__all__ = ["search_registry", "get_search_index", "WhooshSearchIndex"]
+__all__ = ["search_registry", "get_search_index", "WhooshSearchIndex", "SearchIndexManager"]
+
+
+class SearchIndexManager:
+    """Manages Whoosh search index with proper state isolation."""
+
+    def __init__(self, index_dir: Optional[Path] = None):
+        self.index_dir = index_dir or Path(".whoosh_index")
+        self._index_hash: Optional[str] = None
+        self._whoosh_index: Optional[WhooshSearchIndex] = None
 
 
 class WhooshSearchIndex:
