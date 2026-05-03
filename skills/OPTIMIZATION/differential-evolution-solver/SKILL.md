@@ -7,6 +7,8 @@ Category: Evolutionary Skills
 Estimated Execution Time: 10-30 minutes
 name: differential-evolution-solver
 Source: community
+surfaces:
+  - python
 ---
 origin: manual
 triggers:

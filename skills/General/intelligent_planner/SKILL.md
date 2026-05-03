@@ -6,6 +6,13 @@ surfaces:
   - python
   - prolog
   - hy
+triggers:
+  - planning
+  - task
+  - orchestration
+  - scheduling
+  - multi_surface
+  - coordination
 ---
 
 ## Purpose

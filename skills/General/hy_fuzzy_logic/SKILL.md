@@ -1,8 +1,16 @@
 ---
+name: Hy Fuzzy Logic
 Domain: General
 Version: 1.0.0
 surfaces:
   - hy
+triggers:
+  - fuzzy
+  - logic
+  - hy
+  - lisp
+  - heuristic
+  - reasoning
 ---
 
 ## Purpose

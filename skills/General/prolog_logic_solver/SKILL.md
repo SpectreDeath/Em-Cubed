@@ -4,6 +4,13 @@ Domain: General
 Version: 1.0.0
 surfaces:
   - prolog
+triggers:
+  - logic
+  - prolog
+  - reasoning
+  - constraints
+  - puzzle
+  - inference
 ---
 
 ## Purpose

@@ -4,6 +4,12 @@ Domain: General
 Version: 1.0.0
 surfaces:
   - python
+triggers:
+  - calculator
+  - math
+  - arithmetic
+  - computation
+  - calculate
 ---
 
 ## Purpose
