@@ -1,2 +1,32 @@
-name: example_skills
-version: 0.1.0
+name: em_cubed_skills
+version: 1.0.0
+description: Multi-surface skill framework for Em-Cubed
+schema_version: 1
+
+quality_thresholds:
+  min_test_coverage: 0.8
+  min_success_rate: 0.7
+  max_execution_time: 30.0
+  required_surfaces: 1
+
+default_dependencies: []
+skill_categories:
+  - AUTOMATION
+  - DATA_PROCESSING
+  - DECISION_MAKING
+  - DISTRIBUTED_SYSTEMS
+  - ENSEMBLE
+  - FEATURE_ENGINEERING
+  - General
+  - GRAPH_ML
+  - KNOWLEDGE_GRAPH
+  - MACHINE_LEARNING
+  - ML_OPERATIONS
+  - MODEL_VALIDATION
+  - NLP
+  - OPTIMIZATION
+  - RECOMMENDER_SYSTEMS
+  - RESOURCE_MANAGEMENT
+  - SIMULATION
+  - STATISTICS
+  - TIME_SERIES

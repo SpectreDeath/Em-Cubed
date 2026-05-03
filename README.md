@@ -140,6 +140,54 @@ reindex("skills/", "registry.json")
 # Search for skills
 results = search_registry("optimization", "registry.json")
 for skill in results:
+    print(f"{skill['name']} ({skill['domain']})")
+    print(f"  Surfaces: {', '.join(skill['surfaces'])}")
+
+# Execute code on surfaces
+python_surface = PythonSurface()
+result = await python_surface.execute("2 + 2")
+print(f"Result: {result['value']}")  # 4
+
+# Prolog logical reasoning
+prolog = PrologSurface()
+if prolog.available:
+    await prolog.execute("parent(john, mary).")
+    result = await prolog.execute("parent(X, Y)")
+    print(f"Parents: {result['result']}")
+```
+
+### Command Line Interface
+
+Em-Cubed provides a full-featured CLI for skill management:
+
+```bash
+# Index/reindex skills
+em3 index skills/ -o registry.json
+em3 index skills/ --incremental  # Faster, only changed files
+
+# Search for skills
+em3 search "machine learning"
+em3 search "optimization" --max-results 5
+
+# Execute code on a surface
+em3 run --surface python --code "2 + 2"
+em3 run --surface prolog --code "parent(X, Y)"
+
+# Validate skills (structure, quality)
+em3 validate --skills-dir skills/ --json-output
+
+# Run quality pipeline (validation + tests + benchmarks)
+em3 quality --benchmark
+
+# Run tests for specific skill
+em3 test NLP/natural-language-generator --generate
+
+# Get skill recommendations
+em3 recommend "need to optimize a function"
+
+# Search for skills
+results = search_registry("optimization", "registry.json")
+for skill in results:
     print(f"{skill['name']}: {skill['purpose']}")
 
 # Execute code on different surfaces
@@ -254,11 +302,77 @@ if surface.available:
 
 **Requirements**: Hy library installation.
 
-### Janus Surface (Future)
+## 🎯 Skills Quality Framework
 
-**Capabilities**: Seamless Python-Prolog interoperation.
+Em-Cubed includes a comprehensive quality assurance system for skills:
 
-*Currently a placeholder for future Python-Prolog bridge implementation.*
+### Features
+
+- **🔍 Automated Validation**: Every skill is validated for structure, code quality, and completeness
+- **📊 Quality Metrics**: Track execution success rates, performance, and usage patterns
+- **🧪 Test Generation**: Automatic test file generation for all skills
+- **🔗 Skill Composition**: Compose multiple skills together in pipelines
+- **📈 Benchmarking**: Performance benchmarking across surfaces
+- **💡 Recommendations**: Intelligent skill recommendation based on task requirements
+
+### CLI Commands
+
+```bash
+# Index skills
+em3 index skills/ -o registry.json
+
+# Validate all skills
+em3 validate --skills-dir skills/
+
+# Run full quality pipeline
+em3 quality --benchmark
+
+# Run tests for a skill
+em3 test NLP/natural-language-generator
+
+# Get skill recommendations
+em3 recommend "generate text from prompt"
+
+# Compose skills
+em3 compose --source NLP/text-preprocessor --target NLP/sentiment-analyzer
+```
+
+### Quality Standards
+
+Skills must meet minimum thresholds:
+- At least 1 surface implementation (Python/Prolog/Hy)
+- Purpose ≥10 characters, Description ≥20 characters
+- Valid code blocks for each declared surface
+- Test coverage ≥80%
+- Success rate ≥70%
+
+### Programmatic Usage
+
+```python
+from em_cubed.skills import (
+    SkillRegistry,
+    SkillValidator,
+    SkillComposer,
+    SkillRecommender,
+    SkillBenchmark,
+)
+
+# Load registry
+registry = SkillRegistry(Path("skills"), Path("registry.json"))
+
+# Validate a skill
+validator = SkillValidator()
+result = validator.validate_skill_file(skill_path, metadata)
+
+# Compose skills
+composer = SkillComposer(plugin_manager, registry)
+plan = composer.create_pipeline([...])
+result = await composer.compose(plan, input_data)
+
+# Get recommendations
+recommender = SkillRecommender(registry)
+suggestions = recommender.recommend_for_task("optimize this function")
+```
 
 ## 🌐 API Documentation
 

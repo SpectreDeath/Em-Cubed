@@ -1,0 +1,2553 @@
+[
+  {
+    "skill_id": "TIME_SERIES/time-series-forecaster",
+    "name": "time-series-forecaster",
+    "domain": "TIME_SERIES",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface time series forecaster with Python for statistical forecasting, Prolog for temporal logic, and Hy for fuzzy temporal patterns.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "fit",
+      "forecast",
+      "cross_validate",
+      "exponential_smoothing",
+      "seasonal_decompose",
+      "holds_at",
+      "valid_forecast",
+      "seasonal_pattern",
+      "forecast_anomaly",
+      "fuzzy-seasonality",
+      "uncertainty-bands"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\TIME_SERIES\\time-series-forecaster\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "STATISTICS/uncertainty-quantifier",
+    "name": "uncertainty-quantifier",
+    "domain": "STATISTICS",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface uncertainty quantifier that uses Python for probabilistic sampling, Prolog for logical uncertainty propagation, and Hy for fuzzy uncertainty modeling and sensitivity analysis.",
+    "description": "This skill quantifies uncertainty by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "sample",
+      "__init__",
+      "add_variable",
+      "add_correlation",
+      "monte_carlo_analysis",
+      "sensitivity_analysis",
+      "bayesian_inference",
+      "uncertainty_propagation",
+      "confidence_belt",
+      "test_normal_distribution_sampling",
+      "sample_normal",
+      "test_uniform_distribution_sampling",
+      "test_monte_carlo_mean_estimation",
+      "monte_carlo_mean",
+      "test_percentile_calculation",
+      "test_sensitivity_analysis",
+      "model",
+      "test_confidence_interval_overlap",
+      "confidence_overlap",
+      "test_risk_level_calculation",
+      "risk_level",
+      "risk_category",
+      "test_evidence_combination",
+      "complementary_confidence",
+      "test_beta_distribution_for_probabilities",
+      "sample_beta",
+      "test_correlation_application",
+      "apply_correlation",
+      "estimate_uncertainty",
+      "uncertain",
+      "uncertain_result",
+      "combined_confidence",
+      "worst_case",
+      "within_bounds",
+      "high_risk",
+      "medium_risk",
+      "low_risk",
+      "combined_evidence",
+      "print",
+      "np",
+      "uq",
+      "fuzzy-probability",
+      "uncertainty-aggregation",
+      "sensitivity-measure",
+      "confidence-growth",
+      "decision-under-uncertainty",
+      "uncertainty-visualization"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\uncertainty-quantifier\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "SIMULATION/system-dynamics-modeler",
+    "name": "system-dynamics-modeler",
+    "domain": "SIMULATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "datalog"
+    ],
+    "purpose": "Multi-surface system dynamics modeler that combines Python for numerical simulation, Prolog for causal relationship logic, and Datalog for recursive feedback loop analysis.",
+    "description": "This skill builds and simulates system dynamics models by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "add_stock",
+      "add_flow",
+      "set_variable",
+      "_derivatives",
+      "simulate",
+      "find_equilibrium",
+      "equilibrium_equations",
+      "lotka_volterra_prey",
+      "lotka_volterra_predator",
+      "add_link",
+      "find_feedback_loops",
+      "loop_polarity",
+      "causal_link",
+      "feedback_loop",
+      "equilibrium_reached",
+      "stable_system",
+      "unstable_system",
+      "influences",
+      "valid_stock_flow",
+      "delayed_effect",
+      "causes",
+      "influences_directly",
+      "strongly_connected",
+      "attractor_state",
+      "policy_impact",
+      "scenario_outcome",
+      "negative_feedback",
+      "positive_feedback",
+      "model"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\SIMULATION\\system-dynamics-modeler\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "RESOURCE_MANAGEMENT/resource-allocation-planner",
+    "name": "resource-allocation-planner",
+    "domain": "RESOURCE_MANAGEMENT",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface resource allocation planner that combines Python for optimization algorithms, Prolog for constraint validation, and Hy for flexible priority scoring with multi-objective optimization.",
+    "description": "This skill handles resource allocation problems by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "allocate_by_priority",
+      "genetic_algorithm",
+      "fitness",
+      "create_random_individual",
+      "crossover",
+      "mutate",
+      "calculate_fair_share",
+      "valid_allocation",
+      "valid_resource_type",
+      "min_priority",
+      "max_priority",
+      "allocation_satisfies_demand",
+      "allocation_conflict",
+      "exponential-weighting",
+      "penalty-score",
+      "efficiency-score",
+      "fairness-index",
+      "adaptive-rebalance"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\RESOURCE_MANAGEMENT\\resource-allocation-planner\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "RECOMMENDER_SYSTEMS/recommendation-engine",
+    "name": "recommendation-engine",
+    "domain": "RECOMMENDER_SYSTEMS",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface recommendation engine combining Python for collaborative/content filtering, Prolog for logical consistency rules, and Hy for fuzzy preference aggregation.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "fit",
+      "recommend",
+      "content_based_similarity",
+      "hybrid_scoring",
+      "test_collaborative_filter_fit",
+      "test_collaborative_filter_recommend",
+      "test_content_based_similarity",
+      "test_hybrid_scoring",
+      "test_recommendation_diversity",
+      "get_diverse_recommendations",
+      "recommend_popular",
+      "consistent_preferences",
+      "contradictory_preferences",
+      "valid_recommendation",
+      "recommendations_diverse",
+      "cf",
+      "print",
+      "preference-weighting",
+      "novelty-score",
+      "serendipity-measure"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\RECOMMENDER_SYSTEMS\\recommendation-engine\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "OPTIMIZATION/constraint-satisfaction-solver",
+    "name": "constraint-satisfaction-solver",
+    "domain": "OPTIMIZATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface constraint satisfaction solver that uses Python for search algorithms, Prolog for logical constraint definition, and Z3 (when available) for mathematical constraint solving.",
+    "description": "This skill solves constraint satisfaction problems by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "is_consistent",
+      "backtrack_search",
+      "forward_check",
+      "solve_sudoku",
+      "all_different",
+      "sum_constraint",
+      "diff_constraint",
+      "sudoku",
+      "blocks",
+      "all_distinct",
+      "nqueens",
+      "map_color",
+      "coloring_constraint",
+      "adjacent",
+      "most-constrained-variable",
+      "least-constraining-value",
+      "count-constraints",
+      "ac-3-enforce"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\constraint-satisfaction-solver\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "OPTIMIZATION/differential-evolution-solver",
+    "name": "differential-evolution-solver",
+    "domain": "OPTIMIZATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface differential evolution solver with Python for optimization, Prolog for constraint logic, and Hy for adaptive DE parameters.",
+    "description": "DE solver for continuous optimization",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "_init_population",
+      "optimize",
+      "de_adaptive",
+      "sphere_function",
+      "rastrigin_function",
+      "sphere",
+      "rosenbrock",
+      "test_func",
+      "objective",
+      "valid_parameters",
+      "converged_best",
+      "valid_mutation",
+      "print",
+      "adaptive-f",
+      "jade-strategy"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\differential-evolution-solver\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "OPTIMIZATION/optimization-landscape-analyzer",
+    "name": "optimization-landscape-analyzer",
+    "domain": "OPTIMIZATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog"
+    ],
+    "purpose": "Multi-surface optimization landscape analyzer that combines Python for numerical optimization, Prolog for constraint analysis, and Z3 for SMT-based optimization verification.",
+    "description": "This skill analyzes optimization landscapes by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "sample_landscape",
+      "find_local_optima",
+      "compute_modality",
+      "compute_ruggedness",
+      "compute_neutrality",
+      "build_surrogate",
+      "feature_importance",
+      "multi_objective_landscape",
+      "verify_global_optimum",
+      "sphere",
+      "constraint_boundary",
+      "local_optimum",
+      "critical_region",
+      "multimodal_landscape",
+      "constraint_interaction",
+      "optimality_certified"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\optimization-landscape-analyzer\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "OPTIMIZATION/pathfinding-with-constraints",
+    "name": "pathfinding-with-constraints",
+    "domain": "OPTIMIZATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface pathfinding solver that combines Python for graph algorithms, Prolog for logical constraint satisfaction, and Hy for heuristic path evaluation with multiple objectives.",
+    "description": "This skill solves complex pathfinding problems by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "_build_adjacency",
+      "dijkstra",
+      "astar",
+      "_euclidean_distance",
+      "multi_objective_search",
+      "detect_negative_cycles",
+      "valid_path",
+      "valid_edge",
+      "satisfies_constraints",
+      "time_allowed",
+      "avoid_tolls",
+      "avoid_highways",
+      "vehicle_compatible",
+      "traffic_rule_violation",
+      "path-score",
+      "pareto-front",
+      "dominates",
+      "fuzzy-time-estimate",
+      "multi-objective-normalize",
+      "dynamic-weight-adjustment"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\pathfinding-with-constraints\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "NLP/natural-language-generator",
+    "name": "natural-language-generator",
+    "domain": "NLP",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface natural language generator using Python for neural text generation, Prolog for grammatical constraints, and Hy for style transfer and coherence optimization.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "generate",
+      "constrained_generate",
+      "template_fill",
+      "conditional_generation",
+      "test_template_fill",
+      "test_conditional_generation_logic",
+      "test_simple_text_generation_mock",
+      "generate_next_word",
+      "check_constraints",
+      "generate_greeting",
+      "valid_sentence",
+      "matches_style",
+      "coherent_text",
+      "valid_transformation",
+      "print",
+      "style-features",
+      "rewrite-coherence",
+      "tone-adjustment"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\NLP\\natural-language-generator\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "NLP/sentiment-intelligence-engine",
+    "name": "sentiment-intelligence-engine",
+    "domain": "NLP",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface sentiment intelligence engine that uses Python for text processing and embeddings, Prolog for logical sentiment rules, and Hy for fuzzy sentiment aggregation and trend detection.",
+    "description": "This skill provides advanced sentiment analysis by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "analyze",
+      "_extract_entities",
+      "batch_analyze",
+      "get_embeddings",
+      "lexicon_score",
+      "preprocess_text",
+      "temporal_aggregation",
+      "test_text_preprocessing",
+      "test_lexicon_sentiment_scoring",
+      "test_temporal_aggregation",
+      "test_sentiment_classification_logic",
+      "classify_sentiment",
+      "test_confidence_interval",
+      "confidence_interval",
+      "test_sentiment_fusion",
+      "aspect_fusion",
+      "test_negation_handling",
+      "apply_negation",
+      "test_batch_analysis_structure",
+      "test_emotional_variance",
+      "emotional_variance",
+      "simple_sentiment",
+      "analyze_sentiment",
+      "sentiment_in_context",
+      "negated_sentiment",
+      "domain_sentiment_adjusted",
+      "aspect_sentiment",
+      "sentiment_intensity",
+      "comparative_sentiment",
+      "contradictory_sentiments",
+      "print",
+      "fuzzy-sentiment-composition",
+      "sentiment-trend",
+      "confidence-interval",
+      "emotional-variance",
+      "sentiment-forecast",
+      "aspect-sentiment-fusion"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\NLP\\sentiment-intelligence-engine\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "MODEL_VALIDATION/model-validation-suite",
+    "name": "model-validation-suite",
+    "domain": "MODEL_VALIDATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface model validation suite with Python for statistical tests, Prolog for logical validation rules, and Hy for fuzzy validation confidence.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "cross_validate",
+      "statistical_test",
+      "overfitting_check",
+      "bias_variance_decomposition",
+      "permutation_test",
+      "statistical_significance",
+      "test_cross_validate_calculation",
+      "test_mse_rmse_mae_calculation",
+      "regression_metrics",
+      "test_overfitting_detection",
+      "test_bias_variance_decomposition",
+      "bias_variance_decomp",
+      "test_permutation_test",
+      "test_statistical_significance",
+      "paired_ttest",
+      "test_cv_consistency_check",
+      "cv_consistent",
+      "validate",
+      "valid_model",
+      "statistically_significant",
+      "consistent_cv_scores",
+      "no_data_leakage",
+      "print",
+      "validation-confidence",
+      "drift-detection",
+      "model-stability"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MODEL_VALIDATION\\model-validation-suite\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "ML_OPERATIONS/anomaly-detection-system",
+    "name": "anomaly-detection-system",
+    "domain": "ML_OPERATIONS",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface anomaly detection system that uses Python for statistical methods and ML, Prolog for logical anomaly rules, and Hy for fuzzy anomaly scoring and temporal pattern detection.",
+    "description": "This skill detects anomalies by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "fit",
+      "detect",
+      "statistical_zscore",
+      "statistical_iqr",
+      "reconstruction_error_anomaly",
+      "temporal_anomaly_detection",
+      "anomaly",
+      "outside_normal_range",
+      "pattern_anomaly",
+      "business_anomaly",
+      "contextual_anomaly",
+      "correlated_anomalies",
+      "aggregation_anomaly",
+      "detector",
+      "fuzzy-anomaly-score",
+      "temporal-anomaly-confidence",
+      "adaptive-threshold",
+      "anomaly-clustering",
+      "severity-composition"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ML_OPERATIONS\\anomaly-detection-system\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "MACHINE_LEARNING/reinforcement-learning-agent",
+    "name": "reinforcement-learning-agent",
+    "domain": "MACHINE_LEARNING",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface reinforcement learning agent that uses Python for Q-learning and policy gradients, Prolog for logical policy constraints, and Hy for exploration strategy optimization.",
+    "description": "This skill implements RL agents by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "act",
+      "learn",
+      "policy",
+      "multi_agent_rl",
+      "experience_replay",
+      "valid_action",
+      "safe_action",
+      "coordinated_actions",
+      "exploration_allowed",
+      "shaped_reward",
+      "converged",
+      "agent",
+      "adaptive-exploration",
+      "learning-rate-schedule",
+      "multi-armed-bandit",
+      "policy-entropy",
+      "curiosity-driven-action"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MACHINE_LEARNING\\reinforcement-learning-agent\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "KNOWLEDGE_GRAPH/knowledge-graph-builder",
+    "name": "knowledge-graph-builder",
+    "domain": "KNOWLEDGE_GRAPH",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "datalog"
+    ],
+    "purpose": "Multi-surface knowledge graph builder that uses Python for entity extraction and graph algorithms, Prolog for logical relationship inference, and Datalog for recursive knowledge discovery.",
+    "description": "This skill constructs knowledge graphs by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "extract_entities",
+      "extract_relationships",
+      "compute_embeddings",
+      "cluster_entities",
+      "graph_metrics",
+      "related",
+      "transitive_relationship",
+      "subtype",
+      "valid_entity",
+      "contradiction_exists",
+      "common_neighbors",
+      "inferred_triple",
+      "ancestor",
+      "entity_type",
+      "frequently_cooccur",
+      "likely_relationship",
+      "same_community"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\KNOWLEDGE_GRAPH\\knowledge-graph-builder\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "GRAPH_ML/graph-neural-network",
+    "name": "graph-neural-network",
+    "domain": "GRAPH_ML",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog"
+    ],
+    "purpose": "Multi-surface graph neural network using Python for message passing, Prolog for graph logic rules, and Z3 for constraint-based GNN verification.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "reset_parameters",
+      "forward",
+      "message_passing",
+      "graph_attention",
+      "verify_gnn_properties",
+      "test_graph_adjacency_construction",
+      "test_message_passing_simple",
+      "test_graph_attention_weights",
+      "test_gnn_property_verification",
+      "verify_feature_bounds",
+      "test_node_degree_calculation",
+      "test_feature_aggregation",
+      "aggregate_neighbors",
+      "simple_gcn_step",
+      "connected",
+      "path",
+      "homogeneous_neighborhood",
+      "valid_graph",
+      "subgraph_isomorphic",
+      "message_consistent",
+      "print"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\GRAPH_ML\\graph-neural-network\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "General/hy_fuzzy_logic",
+    "name": "hy_fuzzy_logic",
+    "domain": "General",
+    "version": "1.0.0",
+    "surfaces": [
+      "hy",
+      "python"
+    ],
+    "purpose": "Implement fuzzy logic systems, heuristic algorithms, and approximate reasoning using Hy Lisp's functional programming capabilities.",
+    "description": "A comprehensive fuzzy logic engine that demonstrates Hy's strengths in symbolic computation, functional programming, and AI applications. This skill showcases how Lisp-style programming excels at implementing complex reasoning systems, pattern matching, and heuristic search algorithms.",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "hy_surface",
+      "test_fuzzy_membership",
+      "test_fuzzy_operations",
+      "test_list_comprehensions",
+      "test_function_definitions",
+      "test_error_handling",
+      "test_symbolic_computation",
+      "cold-membership",
+      "warm-membership",
+      "hot-membership",
+      "fuzzy-and",
+      "fuzzy-or",
+      "fuzzy-not",
+      "classify-temperature",
+      "manhattan-distance",
+      "astar-search",
+      "grid-neighbors",
+      "fuzzy-membership",
+      "fuzzy-union",
+      "fuzzy-intersection",
+      "fuzzy-complement",
+      "alpha-cut",
+      "cold-temp",
+      "comfortable-temp",
+      "hot-temp",
+      "temperature-controller",
+      "match-pattern",
+      "unify",
+      "hill-climbing",
+      "genetic-algorithm",
+      "sentiment-analysis",
+      "text-similarity",
+      "square",
+      "add",
+      "fuzzy-temperature-controller",
+      "manhattan-heuristic",
+      "solve-8-puzzle",
+      "classify-sentiment"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\hy_fuzzy_logic\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "General/Intelligent Task Planner",
+    "name": "Intelligent Task Planner",
+    "domain": "General",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Demonstrate intelligent task planning and execution using multi-surface orchestration across Python, Prolog, and Hy Lisp.",
+    "description": "A comprehensive AI planning system that leverages the strengths of each execution surface:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__post_init__",
+      "__init__",
+      "test_prolog_constraints",
+      "test_hy_optimization",
+      "developer",
+      "project",
+      "has_skill",
+      "meets_requirements",
+      "developer_capacity",
+      "project_priority",
+      "valid_assignment",
+      "optimal_allocation",
+      "member",
+      "forall",
+      "select_optimal",
+      "print",
+      "workload-balance",
+      "fuzzy-membership",
+      "skill-match-score",
+      "workload-balance-score",
+      "priority-satisfaction",
+      "composite-fitness",
+      "optimize-assignment"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\intelligent_planner\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "General/Prolog Logic Solver",
+    "name": "Prolog Logic Solver",
+    "domain": "General",
+    "version": "1.0.0",
+    "surfaces": [
+      "prolog",
+      "python"
+    ],
+    "purpose": "Solve logical puzzles, constraints, and reasoning problems using Prolog's declarative programming paradigm.",
+    "description": "A comprehensive logic solver that demonstrates Prolog's capabilities for constraint solving, puzzle resolution, and logical inference. This skill showcases how Prolog excels at problems involving rules, relationships, and logical constraints.",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "prolog_surface",
+      "test_family_relationships",
+      "test_constraint_solving",
+      "test_list_operations",
+      "test_mathematical_functions",
+      "test_error_handling",
+      "test_prolog_skill_integration",
+      "parent",
+      "male",
+      "female",
+      "father",
+      "mother",
+      "grandparent",
+      "grandfather",
+      "grandmother",
+      "sibling",
+      "brother",
+      "sister",
+      "ancestor",
+      "color",
+      "nationality",
+      "house",
+      "solve_houses",
+      "queens",
+      "safe_queens",
+      "no_attack",
+      "solve_8_queens",
+      "pet",
+      "drink",
+      "cigarette",
+      "right_of",
+      "next_to",
+      "first",
+      "einstein_puzzle",
+      "bst_insert",
+      "bst_search",
+      "dfs",
+      "neighbor",
+      "member",
+      "length",
+      "append",
+      "reverse",
+      "factorial",
+      "fibonacci",
+      "union",
+      "intersection",
+      "likes",
+      "friends",
+      "solve_puzzle",
+      "bird",
+      "can_fly",
+      "penguin"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\prolog_logic_solver\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "General/Python Calculator",
+    "name": "Python Calculator",
+    "domain": "General",
+    "version": "1.0.0",
+    "surfaces": [
+      "python"
+    ],
+    "purpose": "Perform basic and advanced mathematical calculations using Python's built-in capabilities.",
+    "description": "A comprehensive calculator skill that demonstrates safe Python code execution in Em-Cubed. Supports basic arithmetic, mathematical functions, and complex expressions with proper error handling.",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "power",
+      "square_root",
+      "factorial",
+      "trigonometric_functions",
+      "calculate_circle_area",
+      "calculate_statistics",
+      "print"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\python_calculator\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "FEATURE_ENGINEERING/feature-engineering-pipeline",
+    "name": "feature-engineering-pipeline",
+    "domain": "FEATURE_ENGINEERING",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface feature engineering pipeline with Python for transformations, Prolog for logical feature rules, and Hy for feature importance scoring.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "add_transformer",
+      "fit_transform",
+      "encode_categorical",
+      "polynomial_features",
+      "interaction_features",
+      "datetime_features",
+      "test_categorical_encoding",
+      "test_standard_scaling",
+      "test_polynomial_features",
+      "test_interaction_features",
+      "create_interactions",
+      "test_datetime_feature_extraction",
+      "test_feature_selection_threshold",
+      "test_pca_dimensionality_reduction",
+      "test_pipeline_chaining",
+      "test_prolog_feature_rule",
+      "encode",
+      "valid_feature",
+      "feature_interaction",
+      "informative_feature",
+      "data_quality",
+      "print",
+      "np",
+      "prolog",
+      "feature-complexity",
+      "normalization-method",
+      "feature-pipeline-optimization"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\FEATURE_ENGINEERING\\feature-engineering-pipeline\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "ENSEMBLE/ensemble-method-manager",
+    "name": "ensemble-method-manager",
+    "domain": "ENSEMBLE",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface ensemble manager with Python for model ensembling, Prolog for logical model compatibility, and Hy for fuzzy model weighting.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "add_model",
+      "fit",
+      "predict",
+      "stacking_predict",
+      "optimize_weights",
+      "loss",
+      "test_ensemble_manager_initialization",
+      "predict_proba",
+      "test_soft_voting_prediction",
+      "test_hard_voting_prediction",
+      "test_stacking_meta_prediction",
+      "test_weight_optimization",
+      "test_model_diversity",
+      "diversity_score",
+      "ensemble_predict",
+      "compatible_models",
+      "valid_ensemble",
+      "voting_strategy",
+      "manager",
+      "print",
+      "diversity-score",
+      "fuzzy-weight"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ENSEMBLE\\ensemble-method-manager\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "DISTRIBUTED_SYSTEMS/multi-agent-coordinator",
+    "name": "multi-agent-coordinator",
+    "domain": "DISTRIBUTED_SYSTEMS",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface multi-agent coordinator with Python for agent management, Prolog for coordination protocols, and Hy for emergent behavior analysis.",
+    "description": "",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "register_agent",
+      "task_allocation",
+      "flocking_behavior",
+      "coordinate_agents",
+      "message_exchange",
+      "consensus_reached",
+      "potential_deadlock",
+      "emergence-metric",
+      "coordination-efficiency",
+      "adaptive-coordination"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\multi-agent-coordinator\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 0.9,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "DECISION_MAKING/multi-criteria-weight-calculator",
+    "name": "multi-criteria-weight-calculator",
+    "domain": "DECISION_MAKING",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface multi-criteria decision analysis (MCDA) tool that uses Python for weight calculation algorithms, Prolog for consistency checking in pairwise comparisons, and Hy for fuzzy AHP and dynamic weight adjustment.",
+    "description": "This skill provides comprehensive MCDA capabilities:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "set_comparison",
+      "calculate_weights",
+      "calculate_consistency_ratio",
+      "rank_alternatives",
+      "calculate",
+      "entropy_weights",
+      "hybrid_weighting",
+      "consistent_comparison",
+      "reciprocal",
+      "matrix_consistent",
+      "consistency_ratio",
+      "random_index",
+      "transitive_preference",
+      "dominates",
+      "pareto_optimal",
+      "ahp",
+      "fuzzy-pairwise",
+      "defuzzify",
+      "fuzzy-geometric-mean",
+      "fuzzy-consistency",
+      "dynamic-weight-update",
+      "sensitivity-analysis"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\multi-criteria-weight-calculator\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "DECISION_MAKING/multi-surface-decision-tree",
+    "name": "multi-surface-decision-tree",
+    "domain": "DECISION_MAKING",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface decision tree analyzer that combines Python for data processing, Prolog for logical inference, and Hy for fuzzy decision scoring across complex criteria.",
+    "description": "This skill provides a comprehensive decision-making framework:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "build_decision_tree",
+      "calculate_weighted_score",
+      "normalize_value",
+      "traverse",
+      "normalize_criteria",
+      "valid_decision",
+      "constraint_violation",
+      "meets_all_criteria",
+      "dominated_by",
+      "pareto_optimal",
+      "prolog",
+      "hy",
+      "fuzzy-and",
+      "fuzzy-or",
+      "fuzzy-not",
+      "triangular-membership",
+      "score-with-uncertainty",
+      "multi-criteria-aggregation",
+      "confidence-interval",
+      "test-fn"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\multi-surface-decision-tree\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "DATA_PROCESSING/data-pipeline-orchestrator",
+    "name": "data-pipeline-orchestrator",
+    "domain": "DATA_PROCESSING",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "datalog"
+    ],
+    "purpose": "Multi-surface data pipeline orchestrator that combines Python for data transformation, Prolog for data lineage and constraint validation, and Datalog for recursive data flow rules.",
+    "description": "This skill provides comprehensive data pipeline orchestration:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "__init__",
+      "add_stage",
+      "_topological_sort",
+      "visit",
+      "validate_schema",
+      "ancestor_data",
+      "valid_schema",
+      "pipeline_consistent",
+      "quality_check_passed",
+      "stage_ready",
+      "failure_propagates",
+      "stage_depends_on",
+      "depends_on",
+      "needs_recomputation",
+      "can_run_in_parallel",
+      "pipeline"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DATA_PROCESSING\\data-pipeline-orchestrator\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "AUTOMATION/workflow-synthesiser",
+    "name": "workflow-synthesiser",
+    "domain": "AUTOMATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Multi-surface workflow synthesizer that uses Python for process optimization, Prolog for logical workflow validation, and Hy for adaptive workflow adaptation and execution planning.",
+    "description": "This skill synthesizes workflows by:",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [],
+      "permissions": [],
+      "resources": {},
+      "external_services": []
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 30.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "add_task",
+      "__init__",
+      "create_workflow",
+      "optimize_order",
+      "critical_path",
+      "parallel_execution_plan",
+      "workflow_similarity",
+      "generate_conditional_tasks",
+      "valid_workflow",
+      "acyclic",
+      "topological_sort",
+      "no_unresolved_dependencies",
+      "requires_completion",
+      "consistent_workflow",
+      "task_can_retry",
+      "failure_propagation",
+      "sufficient_resources",
+      "potential_deadlock",
+      "wf",
+      "workflow-score",
+      "adapt-workflow",
+      "execution-risk",
+      "dynamic-prioritization",
+      "workflow-optimization",
+      "execution-monitoring"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\AUTOMATION\\workflow-synthesiser\\SKILL.md",
+    "schema_version": 1,
+    "created_at": null,
+    "updated_at": null,
+    "metrics": {
+      "applied_count": 0,
+      "success_count": 0,
+      "failure_count": 0,
+      "completion_rate": 0.0,
+      "total_execution_time": 0.0,
+      "avg_execution_time": 0.0,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": null,
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  },
+  {
+    "skill_id": "AUTOMATION/github-pr-manager",
+    "name": "github-pr-manager",
+    "domain": "AUTOMATION",
+    "version": "1.0.0",
+    "surfaces": [
+      "python",
+      "prolog",
+      "hy"
+    ],
+    "purpose": "Automated GitHub Pull Request management using Python for API interaction, Prolog for branch validation, and Hy for intelligent PR description synthesis.",
+    "description": "This skill automates the creation and management of GitHub Pull Requests by: Python for robust interaction with the GitHub REST API (v3), Prolog for validating branch relationships, and Hy for adaptive synthesis of PR titles and bodies.",
+    "dependencies": [],
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "repo_full_name": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "head": {
+          "type": "string"
+        },
+        "base": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token",
+        "repo_full_name",
+        "head",
+        "base"
+      ],
+      "additionalProperties": true,
+      "description": null
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "html_url": {
+          "type": "string"
+        },
+        "number": {
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "additionalProperties": true,
+      "description": null
+    },
+    "capabilities": {
+      "surfaces": [
+        "python",
+        "prolog",
+        "hy"
+      ],
+      "permissions": [
+        "network",
+        "filesystem"
+      ],
+      "resources": {},
+      "external_services": [
+        "github.com"
+      ]
+    },
+    "compatibility": {
+      "min_version": "0.1.0",
+      "max_version": null,
+      "breaking_changes": []
+    },
+    "quality_thresholds": {
+      "min_test_coverage": 0.8,
+      "min_success_rate": 0.7,
+      "max_execution_time": 60.0,
+      "max_memory_usage": 536870912,
+      "required_surfaces": 1,
+      "min_documentation_ratio": 0.3
+    },
+    "tags": [
+      "pull_request",
+      "github",
+      "automation",
+      "git_ops",
+      "api",
+      "create_pr",
+      "validate_branch"
+    ],
+    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\AUTOMATION\\github-pr-manager\\SKILL.md",
+    "schema_version": 1,
+    "created_at": "2026-05-03T15:38:03.322965+00:00",
+    "updated_at": "2026-05-03T15:38:03.323004+00:00",
+    "metrics": {
+      "applied_count": 1,
+      "success_count": 1,
+      "failure_count": 0,
+      "completion_rate": 1.0,
+      "total_execution_time": 2.5,
+      "avg_execution_time": 2.5,
+      "total_token_usage": 0,
+      "avg_token_savings": 0.0,
+      "last_executed": "2026-05-03T15:38:03.323020+00:00",
+      "recent_performance": []
+    },
+    "validation_score": 1.0,
+    "test_coverage": 0.0
+  }
+]

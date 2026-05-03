@@ -328,45 +328,204 @@ When adding new features:
    mypy src/
    ```
 
-2. **Update documentation** if needed
+2. **Validate skill quality** (for skill contributions):
+   ```bash
+   em3 quality --skills-dir skills/
+   ```
 
-3. **Write clear commit messages**:
+3. **Update documentation** if needed
+
+4. **Write clear commit messages**:
    ```
    feat: add new surface capability
    fix: resolve memory leak in search engine
    docs: update API documentation
    test: add integration tests for skill execution
    refactor: simplify indexer logic
+   skills: enhance skill quality framework
    ```
 
-4. **Create Pull Request**:
+5. **Create Pull Request**:
    - Use descriptive title
    - Reference related issues
    - Provide context and testing instructions
    - Request review from maintainers
 
-5. **Address review feedback** and iterate
+6. **Address review feedback** and iterate
 
-### Commit Message Format
+## 🧠 Skill Development Guide
 
-We follow [Conventional Commits](https://conventionalcommits.org/):
+### Creating a New Skill
 
+Skills in Em-Cubed are defined in `skills/<DOMAIN>/<skill-name>/SKILL.md` files following a multi-surface paradigm.
+
+#### Skill Structure
+
+```markdown
+---
+name: My Skill
+Domain: MACHINE_LEARNING  # Must be from allowed domains list
+Version: 1.0.0
+surfaces:
+  - python  # At least 1 required, can include prolog, hy, z3, datatalog
+dependencies:  # Optional dependencies on other skills
+  - skill_id: "NLP/text-preprocessor"
+    version_range: ">=1.0.0"
+input_schema:  # JSON Schema for skill inputs
+  type: object
+  properties:
+    data:
+      type: array
+  required: ["data"]
+output_schema:  # JSON Schema for skill outputs
+  type: object
+  properties:
+    result:
+      type: number
+capabilities:  # Required capabilities
+  surfaces: ["python", "numpy"]
+  permissions: ["file_read"]
+  resources:
+    memory_mb: 256
+    cpu_cores: 1
+compatibility:
+  min_version: "0.4.0"
+quality_thresholds:
+  min_test_coverage: 0.8
+  min_success_rate: 0.7
+---
+
+## Purpose
+Brief description of what the skill does (min 10 chars).
+
+## Description
+Detailed explanation of the skill's functionality, use cases, and multi-surface approach.
+
+## Implementation
+
+### Python Core
+
+```python
+# Core algorithm implementation
+def execute(data):
+    # Your code here
+    return {"result": processed_data}
 ```
-type(scope): description
 
-[optional body]
+### Prolog Logic (if applicable)
 
-[optional footer]
+```prolog
+% Logical constraints and validation rules
+valid_input(Data) :-
+    length(Data, Len),
+    Len > 0.
 ```
 
-Types:
-- `feat`: New features
-- `fix`: Bug fixes
-- `docs`: Documentation changes
-- `style`: Code style changes
-- `refactor`: Code refactoring
-- `test`: Test additions/changes
-- `chore`: Maintenance tasks
+### Hy Adaptive Logic (if applicable)
+
+```hy
+(defn adapt-parameters [context]
+  "Adapt execution based on context"
+  (let [params (get context "parameters")]
+    (adjust-for-conditions params)))
+```
+
+## Testing
+
+```python
+# Unit tests for your skill
+def test_my_skill():
+    result = execute({"test": "data"})
+    assert result["status"] == "ok"
+```
+
+## Usage
+
+```python
+from em_cubed import search_registry
+
+# Find and use the skill
+results = search_registry("my skill", "registry.json")
+```
+```
+
+#### Skill Quality Standards
+
+All skills MUST meet minimum quality thresholds before being accepted:
+
+- **Structure Validation**:
+  - Required fields present (name, Domain, surfaces)
+  - Purpose ≥10 chars, Description ≥20 chars
+  - At least 1 surface implementation with code
+  - Valid YAML frontmatter
+
+- **Code Quality**:
+  - Python code must be syntactically valid
+  - Prolog rules must be well-formed
+  - Hy code (if present) must compile
+  - All surfaces must have executable code blocks
+
+- **Testing**:
+  - Include at least 1 test case in Testing section
+  - Tests should cover primary functionality
+  - Aim for 80%+ test coverage
+
+- **Documentation**:
+  - Clear purpose and description
+  - Surface implementations explained
+  - Usage examples provided
+
+#### Skill Review Process
+
+1. **Automated Validation**: CI runs `em3 quality` to check skill quality
+2. **Manual Review**: Maintainer reviews code quality, security, and design
+3. **Integration Testing**: Verify skill composes well with others
+4. **Performance Check**: Ensure skill meets timing/resource requirements
+5. **Final Approval**: Merge after addressing all feedback
+
+#### Quality Gates
+
+- **Gate 1 (Pre-commit)**: Ruff linting, mypy type checking, basic syntax
+- **Gate 2 (CI Validation)**: `em3 validate` ensures all skills pass structure checks
+- **Gate 3 (Quality Pipeline)**: `em3 quality` runs full validation, testing, and benchmarking
+- **Gate 4 (Integration)**: Verify skill works in compositions and with API
+
+### Skill Composition
+
+Skills can be composed together using the composer framework:
+
+```python
+from em_cubed.skills import SkillComposer, CompositionStep
+
+composer = SkillComposer(plugin_manager, registry)
+
+# Sequential pipeline
+plan = composer.create_pipeline([
+    CompositionStep(
+        skill_id="NLP/text-preprocessor",
+        input_mapping={"text": "input.text"},
+        output_mapping={"tokens": "data.tokens"}
+    ),
+    CompositionStep(
+        skill_id="NLP/sentiment-analyzer",
+        input_mapping={"tokens": "data.tokens"},
+        output_mapping={"sentiment": "output.score"}
+    ),
+])
+
+result = await composer.compose(plan, {"input": {"text": "Hello world"}})
+```
+
+### Telemetry and Metrics
+
+Em-Cubed automatically tracks skill usage and performance:
+
+- Execution counts (success/failure)
+- Execution time statistics
+- Token usage estimation
+- Error tracking and classification
+
+This data feeds into quality scores and recommendations.
 
 ## 🌍 Community
 
