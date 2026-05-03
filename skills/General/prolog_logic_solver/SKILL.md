@@ -1,6 +1,6 @@
 ---
 name: Prolog Logic Solver
-Domain: Logic
+Domain: General
 Version: 1.0.0
 surfaces:
   - prolog

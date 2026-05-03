@@ -1,6 +1,6 @@
 ---
 name: Python Calculator
-Domain: Mathematics
+Domain: General
 Version: 1.0.0
 surfaces:
   - python

@@ -1,6 +1,6 @@
 ---
 name: Intelligent Task Planner
-Domain: Artificial Intelligence
+Domain: General
 Version: 1.0.0
 surfaces:
   - python

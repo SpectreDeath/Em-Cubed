@@ -1,6 +1,5 @@
 ---
-name: Hy Fuzzy Logic Engine
-Domain: Artificial Intelligence
+Domain: General
 Version: 1.0.0
 surfaces:
   - hy
