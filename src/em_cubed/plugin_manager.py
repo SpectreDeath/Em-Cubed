@@ -8,8 +8,22 @@ import structlog
 logger = structlog.get_logger()
 
 
+class SurfaceTimeoutError(Exception):
+    """Raised when a surface operation times out."""
+    pass
+
+
 class SurfacePlugin(ABC):
     """Base class for surface plugins."""
+
+    def __init__(self, timeout: Optional[float] = None) -> None:
+        """Initialize surface plugin with optional timeout.
+
+        Args:
+            timeout: Optional timeout in seconds for surface operations
+        """
+        self.timeout = timeout
+        self._executor = None  # Thread pool executor for async execution
 
     @property
     @abstractmethod
@@ -34,7 +48,7 @@ class SurfacePlugin(ABC):
         pass
 
     @abstractmethod
-    def extract_tags(self, source: Optional[str]) -> list:
+    def extract_tags(self, source: Optional[str]) -> List[str]:
         """Extract relevant tags from source code."""
         pass
 
@@ -74,7 +88,7 @@ class PluginManager:
     def _discover_builtin(self):
         """Register built-in surfaces."""
         # Import surfaces module which handles missing dependencies gracefully
-        from em_cubed import surfaces
+        from . import surfaces
         
         surfaces_to_register = [
             ("python", surfaces.PythonSurface),

@@ -158,7 +158,7 @@ class SkillExecutor:
             error_msg = str(e)
 
         # Record telemetry
-        from em_cubed.skills.telemetry import record_skill_execution
+        from .telemetry import record_skill_execution
         record_skill_execution(
             skill_id=skill_id,
             success=success,

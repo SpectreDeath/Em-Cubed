@@ -1,3 +1,9 @@
+"""Skill indexing and reindexing utilities.
+
+Provides functions to scan skill directories, extract metadata from SKILL.md files,
+and build/incrementally update the skill registry JSON.
+"""
+
 import json
 import os
 import re
@@ -42,7 +48,7 @@ def extract_hy_tags(hy_source: Optional[str]) -> List[str]:
 def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, Any]]:
     """Extract extended metadata from a SKILL.md file."""
     try:
-        with open(file_path, encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8-sig") as f:
             content = f.read()
 
         if not content.startswith("---"):
@@ -56,7 +62,7 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         body = parts[2]
 
         # Use new SkillMetadata class for full extraction
-        from em_cubed.skills.metadata import SkillMetadata
+        from .skills.metadata import SkillMetadata
         metadata = SkillMetadata.from_frontmatter(fm, body, file_path)
         result = metadata.to_registry_dict()
 
@@ -69,7 +75,7 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         heuristic_tags = extract_hy_tags(hy_source)
         if python_source:
             try:
-                from em_cubed.surfaces.python_surface import PythonSurface
+                from .surfaces.python_surface import PythonSurface
                 heuristic_tags.extend(PythonSurface.extract_tags(python_source))
             except ImportError:
                 pass
@@ -102,7 +108,7 @@ def reindex_incremental(skills_dir: Path, registry_output: Path) -> None:
     existing_registry = []
     if registry_output.exists():
         try:
-            with open(registry_output, encoding="utf-8") as f:
+            with open(registry_output, encoding="utf-8-sig") as f:
                 existing_registry = json.load(f)
         except Exception as e:
             logger.warning("Could not load existing registry, starting fresh", error=str(e))

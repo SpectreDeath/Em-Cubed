@@ -74,11 +74,11 @@ class SkillTestGenerator:
         """Generate test cases from a SKILL.md file."""
         # Reconstruct a fully-validated SkillMetadata from the file to ensure
         # nested dataclass objects are properly typed (not raw dicts).
-        from em_cubed.skills.metadata import SkillMetadata
+        from .metadata import SkillMetadata
         import yaml
 
         try:
-            content = skill_path.read_text(encoding="utf-8")
+            content = skill_path.read_text(encoding="utf-8-sig")
             if content.startswith("---"):
                 parts = content.split("---", 2)
                 frontmatter = yaml.safe_load(parts[1]) if len(parts) >= 3 else {}
@@ -87,7 +87,7 @@ class SkillTestGenerator:
         except Exception as e:
             self.logger.warning("Failed to re-parse skill metadata, using provided", error=str(e))
             # Fallback: convert any dict attributes to proper dataclass instances
-            from em_cubed.skills.metadata import InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds, RuntimeMetrics
+            from .metadata import InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds, RuntimeMetrics
             if hasattr(skill_metadata, 'input_schema') and isinstance(skill_metadata.input_schema, dict):
                 skill_metadata.input_schema = InputOutputSchema.from_dict(skill_metadata.input_schema)
             if hasattr(skill_metadata, 'output_schema') and isinstance(skill_metadata.output_schema, dict):
@@ -101,7 +101,7 @@ class SkillTestGenerator:
             # metrics can remain dict/RuntimeMetrics - not used in schema generation
 
         tests = []
-        content = skill_path.read_text(encoding="utf-8")
+        content = skill_path.read_text(encoding="utf-8-sig")
 
         # Extract test sections from markdown
         # Look for ```python test blocks, explicit test sections, or infer from examples

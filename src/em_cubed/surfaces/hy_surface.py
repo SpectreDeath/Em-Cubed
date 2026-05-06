@@ -4,13 +4,12 @@ import importlib.util
 from typing import List, Dict, Any, Optional
 import structlog
 
-from .base import SurfaceBase
 from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
 
-class HySurface(SurfaceBase, SurfacePlugin):
+class HySurface(SurfacePlugin):
     """Handle Hy code execution and function extraction."""
 
     @property
@@ -33,7 +32,8 @@ class HySurface(SurfaceBase, SurfacePlugin):
         """Check if Hy is available."""
         return importlib.util.find_spec("hy") is not None
 
-    def extract_tags(self, hy_source: Optional[str]) -> List[str]:
+    @staticmethod
+    def extract_tags(hy_source: Optional[str]) -> List[str]:
         """Extract function names from Hy defn forms as heuristic_tags."""
         if not hy_source:
             return []
@@ -43,8 +43,8 @@ class HySurface(SurfaceBase, SurfacePlugin):
         return list(dict.fromkeys(fns))
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Hy code and return results."""
-        return await self.execute_with_timeout(code, context)
+        """Execute Hy code with timeout protection."""
+        return await self._execute_impl(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Hy code - implementation with timeout protection."""

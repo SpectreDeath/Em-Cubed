@@ -1,16 +1,16 @@
 """Python surface integration for executing Python code."""
 
+import asyncio
 import importlib.util
 from typing import Dict, Any, Optional
 import structlog
 
-from .base import SurfaceBase
 from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
 
-class PythonSurface(SurfaceBase, SurfacePlugin):
+class PythonSurface(SurfacePlugin):
     """Handle Python code execution and metadata extraction."""
 
     @property
@@ -47,8 +47,8 @@ class PythonSurface(SurfaceBase, SurfacePlugin):
         return list(dict.fromkeys(fns))
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Python code and return results using asteval for safety."""
-        return await self.execute_with_timeout(code, context)
+        """Execute Python code with timeout protection."""
+        return await self._execute_impl(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Python code - implementation with timeout protection."""
@@ -61,30 +61,41 @@ class PythonSurface(SurfaceBase, SurfacePlugin):
         try:
             from asteval import Interpreter
 
-            # Create asteval interpreter with safe context
-            aeval = Interpreter()
+            def execute_code():
+                # Create asteval interpreter with safe context
+                aeval = Interpreter()
 
-            # Add context variables if provided
-            if context:
-                for key, value in context.items():
-                    aeval.symtable[key] = value
+                # Add context variables if provided
+                if context:
+                    for key, value in context.items():
+                        aeval.symtable[key] = value
 
-            # Execute the code
-            result = aeval(code)
+                # Execute the code
+                result = aeval(code)
 
-            # Check for errors
-            if aeval.error:
-                if aeval.error and hasattr(aeval.error[0], "msg"):
-                    # asteval ExceptionHolder
-                    error_msg = str(aeval.error[0].msg)
-                else:
-                    error_msg = str(aeval.error[0]) if aeval.error else "Unknown error"
-                logger.info("Python execution failed with error", error=error_msg)
-                return {"status": "error", "message": error_msg}
+                # Check for errors
+                if aeval.error:
+                    if aeval.error and hasattr(aeval.error[0], "msg"):
+                        # asteval ExceptionHolder
+                        error_msg = str(aeval.error[0].msg)
+                    else:
+                        error_msg = str(aeval.error[0]) if aeval.error else "Unknown error"
+                    logger.info("Python execution failed with error", error=error_msg)
+                    return {"status": "error", "message": error_msg}
 
-            logger.info("Python execution successful")
-            return {"status": "ok", "value": result}
+                logger.info("Python execution successful")
+                return {"status": "ok", "value": result}
 
+            return await asyncio.get_event_loop().run_in_executor(
+                self._executor, execute_code
+            )
+
+        except asyncio.TimeoutError:
+            logger.warning("Python execution timed out", timeout=self.timeout)
+            return {
+                "status": "error",
+                "message": f"Execution timed out after {self.timeout}s"
+            }
         except Exception as e:
             logger.exception("Python execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}

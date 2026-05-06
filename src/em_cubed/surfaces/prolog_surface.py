@@ -6,12 +6,11 @@ from typing import List, Dict, Any, Optional
 import structlog
 
 from .base import SurfaceBase
-from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
 
-class PrologSurface(SurfaceBase, SurfacePlugin):
+class PrologSurface(SurfaceBase):
     """Handle Prolog code execution and predicate extraction."""
 
     @property
@@ -78,7 +77,7 @@ class PrologSurface(SurfaceBase, SurfacePlugin):
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code and return results."""
-        return await self.execute_with_timeout(code, context)
+        return await self._execute_impl(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code - implementation with timeout protection."""
@@ -120,8 +119,8 @@ class PrologSurface(SurfaceBase, SurfacePlugin):
                         self._executor, execute_query
                     )
                 except asyncio.TimeoutError:
-                    logger.warning("Prolog query timed out", query=query_code, timeout=self.timeout)
-                    return {"status": "error", "message": f"Query execution timed out after {self.timeout}s"}
+                    logger.warning("Prolog execution timed out", timeout=self.timeout)
+                    return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
 
                 if len(result) > 1000:
                     result = result[:1000]  # Truncate for safety

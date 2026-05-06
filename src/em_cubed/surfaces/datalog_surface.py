@@ -1,16 +1,16 @@
 """Datalog surface integration for fact-heavy relational queries."""
 
+import asyncio
 import importlib.util
 from typing import Dict, Any, Optional, List
 import structlog
 
-from .base import SurfaceBase
 from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
 
-class DatalogSurface(SurfaceBase, SurfacePlugin):
+class DatalogSurface(SurfacePlugin):
     """Handle Datalog code execution and predicate extraction."""
 
     @property
@@ -27,7 +27,6 @@ class DatalogSurface(SurfaceBase, SurfacePlugin):
 
     def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout)
-        self._globals = {'__builtins__': __builtins__}
         logger.info("DatalogSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
@@ -78,10 +77,6 @@ class DatalogSurface(SurfaceBase, SurfacePlugin):
         
         return list(predicates)
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Datalog code and return results."""
-        return await self.execute_with_timeout(code, context)
-
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Datalog code - implementation with timeout protection."""
         logger.info("Executing Datalog code", code_length=len(code), has_context=context is not None)
@@ -91,33 +86,43 @@ class DatalogSurface(SurfaceBase, SurfacePlugin):
             return {"status": "error", "message": "pyDatalog not available"}
 
         try:
-            from pyDatalog import pyDatalog
+            from asteval import Interpreter
+            import pyDatalog
 
-            # Import pyDatalog into our persistent globals
-            if 'pyDatalog' not in self._globals:
-                self._globals['pyDatalog'] = pyDatalog
+            def execute_code():
+                # Create asteval interpreter
+                aeval = Interpreter()
 
-            # Add context as facts if provided
-            if context:
-                for key, value in context.items():
-                    # Create atoms for context predicates
-                    pyDatalog.create_atoms(key)
-                    # Add fact
-                    exec(f"+ ({key}[{repr(key)}] == {repr(value)})", self._globals)
+                # Inject pyDatalog module into interpreter's namespace
+                aeval.symtable['pyDatalog'] = pyDatalog
 
-            # Execute the code using pyDatalog's syntax
-            stripped_code = code.strip()
+                # Add context variables if provided
+                if context:
+                    for key, value in context.items():
+                        aeval.symtable[key] = value
 
-            # Check if it looks like a query (contains == pattern or starts with query-like syntax)
-            if '==' in stripped_code or stripped_code.endswith('?'):
-                # It's a query - evaluate it and return the result
-                result = eval(stripped_code.rstrip('?'), self._globals)
-                return {"status": "ok", "message": "Query executed successfully", "result": str(result)}
-            else:
-                # Treat as assertion (fact or rule) - just execute it
-                exec(stripped_code, self._globals)
-                return {"status": "ok", "message": "Code executed successfully"}
+                # Execute the code using asteval
+                result = aeval(code)
 
+                # Check for errors from asteval
+                if aeval.error:
+                    error_msg = str(aeval.error[0])
+                    logger.info("Datalog execution failed with error", error=error_msg)
+                    return {"status": "error", "message": error_msg}
+
+                logger.info("Datalog execution successful")
+                return {"status": "ok", "value": result, "message": "Execution completed"}
+
+            return await asyncio.get_event_loop().run_in_executor(
+                self._executor, execute_code
+            )
+
+        except asyncio.TimeoutError:
+            logger.warning("Datalog execution timed out", timeout=self.timeout)
+            return {
+                "status": "error",
+                "message": f"Execution timed out after {self.timeout}s"
+            }
         except Exception as e:
             logger.exception("Datalog execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}
