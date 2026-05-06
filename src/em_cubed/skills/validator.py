@@ -88,17 +88,66 @@ class SkillValidator:
     # Required frontmatter fields for a minimal valid skill
     REQUIRED_FIELDS = {"name", "Domain"}
 
-    # Minimum content requirements
-    MIN_PURPOSE_LENGTH = 10
-    MIN_DESCRIPTION_LENGTH = 20
-    MIN_CODE_LINES = 5
-
-    # Quality thresholds
-    IDEAL_SURFACE_COUNT = 3  # python, prolog, hy
-    MIN_SURFACE_COUNT = 1
+    # Default fallback values (will be overridden by manifest)
+    DEFAULT_MIN_PURPOSE_LENGTH = 10
+    DEFAULT_MIN_DESCRIPTION_LENGTH = 20
+    DEFAULT_MIN_CODE_LINES = 5
+    DEFAULT_IDEAL_SURFACE_COUNT = 3  # python, prolog, hy
+    DEFAULT_MIN_SURFACE_COUNT = 1
 
     def __init__(self):
         self.logger = logger.bind(component="skill_validator")
+        # Initialize with defaults
+        self.min_purpose_length = self.DEFAULT_MIN_PURPOSE_LENGTH
+        self.min_description_length = self.DEFAULT_MIN_DESCRIPTION_LENGTH
+        self.min_code_lines = self.DEFAULT_MIN_CODE_LINES
+        self.ideal_surface_count = self.DEFAULT_IDEAL_SURFACE_COUNT
+        self.min_surface_count = self.DEFAULT_MIN_SURFACE_COUNT
+        self._load_manifest()
+
+    def _load_manifest(self):
+        """Load manifest.yaml to get valid domains and quality thresholds."""
+        from pathlib import Path
+        try:
+            import yaml
+        except ImportError:
+            yaml = None
+
+        manifest_path = Path("skills") / "manifest.yaml"
+        # Default fallback domains (hardcoded)
+        self.valid_domains = {
+            "AUTOMATION", "DATA_PROCESSING", "DECISION_MAKING", "DISTRIBUTED_SYSTEMS",
+            "ENSEMBLE", "FEATURE_ENGINEERING", "General", "GRAPH_ML", "KNOWLEDGE_GRAPH",
+            "MACHINE_LEARNING", "ML_OPERATIONS", "MODEL_VALIDATION", "NLP",
+            "OPTIMIZATION", "RECOMMENDER_SYSTEMS", "RESOURCE_MANAGEMENT",
+            "SIMULATION", "STATISTICS", "TIME_SERIES"
+        }
+        self.default_required_surfaces = 1
+
+        if not manifest_path.exists():
+            self.logger.debug("manifest.yaml not found, using defaults", path=str(manifest_path))
+            return
+
+        try:
+            with open(manifest_path) as f:
+                manifest = yaml.safe_load(f) if yaml else {}
+            # skill_categories -> valid domains
+            categories = manifest.get("skill_categories", [])
+            if categories:
+                self.valid_domains = set(categories)
+            # quality_thresholds -> may override defaults
+            qt = manifest.get("quality_thresholds", {})
+            if "required_surfaces" in qt:
+                self.default_required_surfaces = qt["required_surfaces"]
+            if "min_purpose_length" in qt:
+                self.min_purpose_length = qt["min_purpose_length"]
+            if "min_description_length" in qt:
+                self.min_description_length = qt["min_description_length"]
+            if "min_code_lines" in qt:
+                self.min_code_lines = qt["min_code_lines"]
+            self.logger.info("Loaded manifest", domains_count=len(self.valid_domains), required_surfaces=self.default_required_surfaces)
+        except Exception as e:
+            self.logger.warning("Failed to parse manifest, using defaults", error=str(e))
 
     def validate_skill_file(self, file_path, skill_metadata) -> ValidationResult:
         """Perform comprehensive validation on a skill file."""
@@ -139,21 +188,21 @@ class SkillValidator:
                 )
 
         # Check Purpose section
-        if not skill_metadata.purpose or len(skill_metadata.purpose) < self.MIN_PURPOSE_LENGTH:
+        if not skill_metadata.purpose or len(skill_metadata.purpose) < self.min_purpose_length:
             result.add_issue(
                 severity=ValidationSeverity.WARNING,
                 code="SHORT_PURPOSE",
-                message=f"Purpose should be at least {self.MIN_PURPOSE_LENGTH} characters",
+                message=f"Purpose should be at least {self.min_purpose_length} characters",
                 component="content",
                 suggestion="Expand the skill's Purpose section with more detail"
             )
 
         # Check Description section
-        if not skill_metadata.description or len(skill_metadata.description) < self.MIN_DESCRIPTION_LENGTH:
+        if not skill_metadata.description or len(skill_metadata.description) < self.min_description_length:
             result.add_issue(
                 severity=ValidationSeverity.WARNING,
                 code="SHORT_DESCRIPTION",
-                message=f"Description should be at least {self.MIN_DESCRIPTION_LENGTH} characters",
+                message=f"Description should be at least {self.min_description_length} characters",
                 component="content",
                 suggestion="Provide a more comprehensive description"
             )
@@ -172,21 +221,14 @@ class SkillValidator:
                 suggestion="Update version to follow semver (e.g., 1.0.0)"
             )
 
-        # Validate domain
-        valid_domains = {
-            "AUTOMATION", "DATA_PROCESSING", "DECISION_MAKING", "DISTRIBUTED_SYSTEMS",
-            "ENSEMBLE", "FEATURE_ENGINEERING", "General", "GRAPH_ML", "KNOWLEDGE_GRAPH",
-            "MACHINE_LEARNING", "ML_OPERATIONS", "MODEL_VALIDATION", "NLP",
-            "OPTIMIZATION", "RECOMMENDER_SYSTEMS", "RESOURCE_MANAGEMENT",
-            "SIMULATION", "STATISTICS", "TIME_SERIES"
-        }
-        if skill_metadata.domain not in valid_domains:
+        # Validate domain against manifest categories
+        if skill_metadata.domain not in self.valid_domains:
             result.add_issue(
                 severity=ValidationSeverity.WARNING,
                 code="UNKNOWN_DOMAIN",
                 message=f"Domain '{skill_metadata.domain}' is not in the recognized domains list",
                 component="metadata",
-                suggestion=f"Use one of: {', '.join(sorted(valid_domains))}"
+                suggestion=f"Use one of: {', '.join(sorted(self.valid_domains))}"
             )
 
         # Validate surfaces
@@ -202,11 +244,11 @@ class SkillValidator:
                 )
 
         # Check minimum surface count
-        if len(skill_metadata.surfaces) < skill_metadata.quality_thresholds.required_surfaces:
+        if len(skill_metadata.surfaces) < self.default_required_surfaces:
             result.add_issue(
                 severity=ValidationSeverity.ERROR,
                 code="INSUFFICIENT_SURFACES",
-                message=f"Skill must implement at least {skill_metadata.quality_thresholds.required_surfaces} surface(s), has {len(skill_metadata.surfaces)}",
+                message=f"Skill must implement at least {self.default_required_surfaces} surface(s), has {len(skill_metadata.surfaces)}",
                 component="metadata",
                 suggestion="Add implementations for missing surfaces (python, prolog, hy)"
             )

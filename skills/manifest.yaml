@@ -8,6 +8,9 @@ quality_thresholds:
   min_success_rate: 0.7
   max_execution_time: 30.0
   required_surfaces: 1
+  min_purpose_length: 10
+  min_description_length: 20
+  min_code_lines: 5
 
 default_dependencies: []
 skill_categories:

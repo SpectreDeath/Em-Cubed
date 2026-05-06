@@ -48,56 +48,72 @@ Output: Optimal allocation satisfying all constraints
 ### Python Entry Point
 
 ```python
-from pyswip import Prolog
-import hy
-
 def solve_allocation_problem(total_units=100, projects=3):
     """Solve resource allocation using multi-surface approach"""
-    
-    # Initialize Prolog for constraints
-    prolog = Prolog()
-    prolog.assertz("max_allocation(30)")  # No project gets more than 30
-    prolog.assertz("min_allocation(10)")  # Every project gets at least 10
-    
-    # Use Hy for heuristic scoring
+
+    # Access injected surface plugins
+    prolog_surface = context["surfaces"]["prolog"]
+    hy_surface = context["surfaces"]["hy"]
+
+    # Initialize Prolog constraints using injected surface
+    prolog_result = prolog_surface.execute("""
+max_allocation(30).
+min_allocation(10).
+""")
+    if prolog_result["status"] != "ok":
+        return {"error": "Failed to initialize Prolog constraints"}
+
+    # Use Hy for heuristic scoring via injected surface
     hy_code = """
-    (defn score-allocation [alloc]
-      "Score allocation based on balance heuristic"
-      (let [avg (/ (sum alloc) (len alloc))
-            variance (sum (list (pow (- x avg) 2) (for [x alloc)))]
-        (/ 1 (+ 1 variance))))  ; Lower variance = higher score
-    """
-    
-    # Execute Hy heuristic
-    hy.read_str(hy_code)
-    score_fn = hy.eval(hy.read_str('score-allocation'))
-    
+(defn score-allocation [alloc]
+  "Score allocation based on balance heuristic"
+  (let [avg (/ (sum alloc) (len alloc))
+        variance (sum (list (** (- x avg) 2) (for [x alloc])))]
+    (/ 1 (+ 1 variance))))  ; Lower variance = higher score
+"""
+
+    # Execute Hy code to define the function
+    hy_result = hy_surface.execute(hy_code)
+    if hy_result["status"] != "ok":
+        return {"error": "Failed to initialize Hy heuristic"}
+
     # Generate and evaluate allocations
     best_allocation = None
     best_score = 0
-    
+
     # Try different allocations (simplified brute force)
     for a in range(10, 31):
         for b in range(10, min(31, 101-a)):
             c = 100 - a - b
             if 10 <= c <= 30:
                 allocation = [a, b, c]
-                
-                # Check Prolog constraints
+
+                # Check Prolog constraints using injected surface
                 constraint_ok = True
-                for i, units in enumerate(allocation):
-                    result = list(prolog.query(f"max_allocation(M), {units} =< M"))
-                    if not result:
+                for units in allocation:
+                    query_result = prolog_surface.execute(f"max_allocation(M), min_allocation(N), {units} =< M, {units} >= N")
+                    if query_result["status"] != "ok" or not query_result.get("result", []):
                         constraint_ok = False
                         break
-                
+
                 if constraint_ok:
-                    # Score with Hy heuristic
-                    score = score_fn(allocation)
-                    if score > best_score:
-                        best_score = score
-                        best_allocation = allocation
-    
+                    # Score with Hy heuristic using injected surface
+                    score_code = f"""
+(defn score-allocation [alloc]
+  "Score allocation based on balance heuristic"
+  (let [avg (/ (sum alloc) (len alloc))
+        variance (sum (list (** (- x avg) 2) (for [x alloc])))]
+    (/ 1 (+ 1 variance))))
+
+(score-allocation {[a, b, c]})
+"""
+                    score_result = hy_surface.execute(score_code)
+                    if score_result["status"] == "ok":
+                        score = score_result["value"]
+                        if score > best_score:
+                            best_score = score
+                            best_allocation = allocation
+
     return {
         "allocation": best_allocation,
         "score": best_score,
@@ -158,14 +174,13 @@ assert result["constraints_satisfied"] == True
 assert len(result["allocation"]) == 3
 assert sum(result["allocation"]) == 100
 
-# Verify Prolog constraints
-from pyswip import Prolog
-prolog = Prolog()
-prolog.assertz("max_allocation(30)")
-assert list(prolog.query("max_allocation(30)"))
+# Verify Prolog constraints work through injected surface
+prolog_result = context["surfaces"]["prolog"].execute("max_allocation(30)")
+assert prolog_result["status"] == "ok"
 
-# Verify Hy functions work
-import hy
-hy.read_str("(defn test-fn [] 42)")
-assert hy.eval(hy.read_str("(test-fn)")) == 42
+# Verify Hy functions work through injected surface
+hy_result = context["surfaces"]["hy"].execute("(defn test-fn [] 42)")
+assert hy_result["status"] == "ok"
+hy_result2 = context["surfaces"]["hy"].execute("(test-fn)")
+assert hy_result2["value"] == 42
 ```

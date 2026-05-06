@@ -12,6 +12,7 @@ import asyncio
 import structlog
 
 from .telemetry import SkillTelemetry, get_telemetry_collector
+from .registry import SkillRegistry
 
 logger = structlog.get_logger()
 
@@ -131,6 +132,13 @@ class SkillExecutor:
                 "skill_metadata": skill.to_registry_dict(),
                 **(request.context or {}),
             }
+
+            # Inject surface plugins for cross-surface interaction
+            context["surfaces"] = {}
+            for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+                surf_plugin = self.plugin_manager.get(surface_name)
+                if surf_plugin and surf_plugin.available:
+                    context["surfaces"][surface_name] = surf_plugin
 
             # Execute on surface
             result = await plugin.execute(surface_code, context)

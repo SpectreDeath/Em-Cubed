@@ -348,7 +348,17 @@ _skill_result = {func_name}({input_items})
 _skill_result
 """
         try:
-            result = await plugin.execute(execution_code, input_data)
+            # Prepare execution context with input and surface plugins
+            context = dict(input_data)  # Copy input data
+
+            # Inject surface plugins for cross-surface interaction
+            context["surfaces"] = {}
+            for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+                surf_plugin = self.plugin_manager.get(surface_name)
+                if surf_plugin and surf_plugin.available:
+                    context["surfaces"][surface_name] = surf_plugin
+
+            result = await plugin.execute(execution_code, context)
             return result
         except Exception as e:
             return {"status": "error", "message": str(e)}
