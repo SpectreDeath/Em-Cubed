@@ -1,4 +1,4 @@
----
+﻿---
 name: Python Calculator
 Domain: General
 Version: 1.0.0
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     print("\nTrigonometric functions (45°):")
     trig = trigonometric_functions(45)
     for func, value in trig.items():
-        print(".3f")
+        print(f"{func}: {value:.3f}")
 
     print(f"\nCircle area (r=5): {calculate_circle_area(5):.2f}")
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     stats = calculate_statistics([1, 2, 3, 4, 5])
     for key, value in stats.items():
         if isinstance(value, float):
-            print(".2f")
+            print(f"{key}: {value:.2f}")
         else:
             print(f"{key}: {value}")
 ```

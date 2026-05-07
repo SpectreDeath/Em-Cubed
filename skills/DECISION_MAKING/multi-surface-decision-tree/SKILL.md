@@ -198,8 +198,12 @@ pareto_optimal(Option) :-
 
 ## Testing
 
+> **Note:** These tests use direct imports for standalone illustration. In production, use the `SkillExecutor` which injects surface plugins via `context["surfaces"]`. See [Multi-Surface Guide](../../docs/MULTI_SURFACE_GUIDE.md) for the recommended pattern.
+
+### Python Tree Test
+
 ```python
-# Test Python tree operations
+# Test Python tree operations (standalone)
 from skills.multi_surface_decision_tree import build_decision_tree, normalize_criteria
 
 options = [
@@ -209,17 +213,26 @@ options = [
 
 normalized = normalize_criteria(options)
 assert len(normalized) == 2
+```
 
-# Test Prolog constraints
-from pyswip import Prolog
-prolog = Prolog()
-prolog.assertz("option_risk(a, 5)")
-prolog.assertz("option_return(a, 10)")
-prolog.assertz("option_liquidity(a, 50)")
-assert list(prolog.query("valid_decision(a)"))
+### Multi-Surface Integration Test (Recommended Pattern)
 
-# Test Hy fuzzy operations
-import hy
-hy.read_str("(defn test-fn [] 42)")
-assert hy.eval(hy.read_str("(test-fn)")) == 42
+```python
+# Production pattern: use SkillExecutor with context injection
+from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
+
+executor = SkillExecutor(plugin_manager, registry, skills_dir)
+request = SkillExecutionRequest(
+    skill_id="DECISION_MAKING/multi-surface-decision-tree",
+    input_data={
+        "options": [
+            {"risk": 5, "return": 10, "liquidity": 50},
+            {"risk": 3, "return": 8, "liquidity": 80}
+        ],
+        "criteria": ["risk", "return", "liquidity"],
+        "weights": {"risk": 0.4, "return": 0.4, "liquidity": 0.2}
+    }
+)
+result = await executor.execute(request)
+assert result.success
 ```

@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from em_cubed.plugin_manager import PluginManager, SurfacePlugin
 from typing import Dict, Any, Optional
 
@@ -8,6 +7,7 @@ class MockSurface(SurfacePlugin):
     """Mock surface for testing."""
 
     def __init__(self, name: str = "mock", available: bool = True):
+        super().__init__(timeout=None)  # Initialize parent with no timeout
         self._name = name
         self._available = available
 
@@ -19,8 +19,13 @@ class MockSurface(SurfacePlugin):
     def available(self) -> bool:
         return self._available
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Implementation of execute for mock surface."""
         return {"status": "ok", "value": f"executed: {code}"}
+
+    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Override execute to provide mock behavior."""
+        return await self._execute_impl(code, context)
 
     async def health(self) -> bool:
         return self._available
@@ -142,11 +147,12 @@ class TestPluginManager:
 
     def test_discover_directory_nonexistent_dir(self):
         """Test directory discovery with nonexistent directory."""
+        from pathlib import Path
         manager = PluginManager()
-
+        
         # Should not raise exception
         manager._discover_directory(Path("/nonexistent"))
-
+        
         # Plugins should remain unchanged
         initial_count = len(manager._plugins)
         assert len(manager._plugins) == initial_count

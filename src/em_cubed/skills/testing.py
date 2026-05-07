@@ -5,12 +5,9 @@ and integration testing for skill composition.
 """
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
-import tempfile
-import subprocess
-import sys
 
 import structlog
 
@@ -87,7 +84,7 @@ class SkillTestGenerator:
         except Exception as e:
             self.logger.warning("Failed to re-parse skill metadata, using provided", error=str(e))
             # Fallback: convert any dict attributes to proper dataclass instances
-            from .metadata import InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds, RuntimeMetrics
+            from .metadata import InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds
             if hasattr(skill_metadata, 'input_schema') and isinstance(skill_metadata.input_schema, dict):
                 skill_metadata.input_schema = InputOutputSchema.from_dict(skill_metadata.input_schema)
             if hasattr(skill_metadata, 'output_schema') and isinstance(skill_metadata.output_schema, dict):
@@ -171,12 +168,13 @@ class SkillTestGenerator:
             has_imports = "import " in python_code or "from " in python_code
             if not has_imports and len(python_code.strip()) > 0:
                 # Use compile() which is a builtin - no import needed
+                # Escape single quotes for safe embedding in triple-quoted string
+                escaped_code = python_code.replace("'", "\\'")
                 test = TestCase(
                     name=f"test_{skill_metadata.name.lower().replace(' ', '_')}_python_syntax",
                     surface="python",
-                    code=f"""
-try:
-    compile('''{python_code.replace("'", "\\\\'")}''', '<string>', 'exec')
+                    code=f"""try:
+    compile('''{escaped_code}''', '<string>', 'exec')
     print("SYNTAX_OK")
 except SyntaxError as e:
     print(f"SYNTAX_ERROR: {{e}}")
@@ -235,7 +233,7 @@ assert len(metadata['surfaces']) >= 1
 
     def _generate_sample_from_schema(self, schema) -> Dict[str, Any]:
         """Generate a sample instance from a JSON schema."""
-        sample = {}
+        sample: Dict[str, Any] = {}
         for prop_name, prop_def in schema.properties.items():
             prop_type = prop_def.get("type", "string")
             if prop_type == "string":

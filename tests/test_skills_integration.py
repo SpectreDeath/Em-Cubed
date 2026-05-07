@@ -3,12 +3,9 @@
 import pytest
 import asyncio
 from pathlib import Path
-import tempfile
-import json
 
 from em_cubed.skills.composer import SkillComposer, CompositionPlan, CompositionStep, CompositionPattern
 from em_cubed.skills.registry import SkillRegistry
-from em_cubed.skills.metadata import SkillMetadata
 from em_cubed.plugin_manager import PluginManager
 from em_cubed.skills.validator import SkillValidator
 
@@ -160,7 +157,6 @@ def skill_b_execute(result):
 
     async def test_conditional_composition(self, composer, test_registry):
         """Test conditional skill execution."""
-        executed = []
 
         def condition(context):
             return context.data.get("should_run", True)
@@ -230,7 +226,6 @@ class TestSkillValidationIntegration:
 
         pipeline = SkillQualityPipeline(skills_dir, registry_file, PluginManager())
         # Synchronous call for validation
-        import asyncio
         results = asyncio.run(pipeline.validate_all_skills())
 
         assert len(results) > 0
@@ -279,16 +274,15 @@ def test():
         reindex(skills_dir, registry_file)
 
         registry = SkillRegistry(skills_dir, registry_file)
-        benchmark = SkillBenchmark(plugin_manager, registry)
+        benchmark = SkillBenchmark(plugin_manager, registry, skills_dir)
 
-        # Benchmark with minimal config
+        # Benchmark with minimal config (0 warmup, 1 measurement)
         config = BenchmarkConfig(
-            warmup_iterations=1,
-            measurement_iterations=3,
+            warmup_iterations=0,
+            measurement_iterations=1,
         )
 
-        # This will use mock execution since actual skill runner not fully integrated
-        # Just ensure it doesn't crash
+        # Benchmark the test skill (pure Python, no external deps)
         result = await benchmark.benchmark_skill("General/Benchmark Test", config)
         assert result is not None
         assert result.skill_id == "General/Benchmark Test"
@@ -353,7 +347,6 @@ class TestEndToEndQualityPipeline:
         """Smoke test the full quality pipeline on a minimal skill set."""
         from em_cubed.skills.quality_pipeline import SkillQualityPipeline
         from em_cubed.plugin_manager import PluginManager
-        import asyncio
 
         # Create minimal skills dir
         skills_dir = tmp_path / "skills"

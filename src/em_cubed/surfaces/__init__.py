@@ -1,3 +1,9 @@
+"""Surface plugin implementations.
+
+This package contains the various execution surfaces (Python, Prolog, Hy, Z3, Datalog, Janus)
+with graceful handling of missing optional dependencies.
+"""
+
 from .base import SurfaceBase
 from typing import Optional as _Optional  # noqa: F401
 
@@ -7,6 +13,7 @@ HySurface = None  # type: _Optional[type]
 PythonSurface = None  # type: _Optional[type]
 Z3Surface = None  # type: _Optional[type]
 DatalogSurface = None  # type: _Optional[type]
+JanusSurface = None  # type: _Optional[type]
 
 try:
     from .prolog_surface import PrologSurface as _PrologSurface
@@ -38,4 +45,10 @@ try:
 except ImportError:
     pass
 
-__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface"]
+try:
+    from .janus_surface import JanusSurface as _JanusSurface
+    JanusSurface = _JanusSurface  # type: ignore[assignment]
+except ImportError:
+    pass
+
+__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface"]

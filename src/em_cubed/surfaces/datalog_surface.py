@@ -77,6 +77,10 @@ class DatalogSurface(SurfacePlugin):
         
         return list(predicates)
 
+    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute Datalog code with timeout protection."""
+        return await self._execute_impl(code, context)
+
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Datalog code - implementation with timeout protection."""
         logger.info("Executing Datalog code", code_length=len(code), has_context=context is not None)
@@ -87,14 +91,14 @@ class DatalogSurface(SurfacePlugin):
 
         try:
             from asteval import Interpreter
-            import pyDatalog
+            from pyDatalog import pyDatalog as pd
 
             def execute_code():
                 # Create asteval interpreter
                 aeval = Interpreter()
 
                 # Inject pyDatalog module into interpreter's namespace
-                aeval.symtable['pyDatalog'] = pyDatalog
+                aeval.symtable['pyDatalog'] = pd
 
                 # Add context variables if provided
                 if context:

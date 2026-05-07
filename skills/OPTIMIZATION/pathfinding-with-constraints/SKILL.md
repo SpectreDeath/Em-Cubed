@@ -305,8 +305,12 @@ traffic_rule_violation(Path, Violation) :-
 
 ## Testing
 
+> **Note:** These tests use direct imports for standalone illustration. In production, use the `SkillExecutor` which injects surface plugins via `context["surfaces"]`. See [Multi-Surface Guide](../../docs/MULTI_SURFACE_GUIDE.md) for the recommended pattern.
+
+### Python Surface Test
+
 ```python
-# Test pathfinder
+# Test pathfinder (standalone - uses direct imports)
 from skills.pathfinding_with_constraints import ConstraintAwarePathfinder, Node, Edge, EdgeType
 
 nodes = {
@@ -332,4 +336,25 @@ assert path[-1] == "C"
 # Test with constraints
 path_no_tolls = pf.dijkstra("A", "C", {"avoid_tolls"})
 assert path_no_tolls == ["A", "D", "C"]
+```
+
+### Multi-Surface Integration Test (Recommended Pattern)
+
+```python
+# Production pattern: use SkillExecutor with context injection
+from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
+
+executor = SkillExecutor(plugin_manager, registry, skills_dir)
+request = SkillExecutionRequest(
+    skill_id="OPTIMIZATION/pathfinding-with-constraints",
+    input_data={
+        "nodes": {"A": {"x": 0, "y": 0}, "B": {"x": 1, "y": 1}},
+        "edges": [{"source": "A", "target": "B", "weight": 1.5}],
+        "start": "A",
+        "goal": "B",
+        "constraints": []
+    }
+)
+result = await executor.execute(request)
+assert result.success
 ```

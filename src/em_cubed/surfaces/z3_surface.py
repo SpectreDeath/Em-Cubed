@@ -144,7 +144,7 @@ class Z3Surface(SurfacePlugin):
                     aeval.symtable.update(context)
 
                 # Execute the code
-                result = aeval(code)
+                aeval(code)
 
                 # Check for errors
                 if aeval.error:

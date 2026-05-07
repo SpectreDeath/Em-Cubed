@@ -2,7 +2,7 @@
 import importlib.util
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, cast
 import structlog
 
 logger = structlog.get_logger()
@@ -62,20 +62,24 @@ class SurfacePlugin(ABC):
 
 
 class PluginManager:
-    """Manage surface plugins with multiple discovery mechanisms."""
+    """Manage surface plugins with multiple discovery mechanisms.
+
+    Core surfaces (python, prolog, hy) are loaded eagerly at startup.
+    Heavy surfaces (z3, datalog) are loaded on first use to avoid
+    expensive imports when dependencies may not be installed.
+    """
+
+    _LAZY_SURFACES = frozenset({"z3", "datalog"})
 
     def __init__(self):
         self._plugins: Dict[str, SurfacePlugin] = {}
+        self._lazy_classes: Dict[str, type] = {}
+
         self._discover_builtin()
         self._discover_entry_points()
         self._discover_directory()
 
-        # Initialize all plugins
-        for plugin in self._plugins.values():
-            try:
-                plugin.initialize()
-            except Exception as e:
-                logger.warning("Failed to initialize plugin", plugin=plugin.name, error=str(e))
+        logger.info("PluginManager initialized", loaded=list(self._plugins.keys()), lazy=list(self._lazy_classes.keys()))
 
     def __del__(self):
         """Clean up plugins on deletion."""
@@ -86,31 +90,37 @@ class PluginManager:
                 logger.warning("Failed to shutdown plugin", plugin=plugin.name, error=str(e))
 
     def _discover_builtin(self):
-        """Register built-in surfaces."""
-        # Import surfaces module which handles missing dependencies gracefully
+        """Register built-in surfaces.
+
+        Core surfaces (python, prolog, hy) are instantiated immediately.
+        Heavy surfaces (z3, datalog) are stored as classes for lazy loading.
+        """
         from . import surfaces
-        
-        surfaces_to_register = [
+
+        core_surfaces = [
             ("python", surfaces.PythonSurface),
             ("prolog", surfaces.PrologSurface),
             ("hy", surfaces.HySurface),
+        ]
+
+        # Register core surfaces eagerly
+        for name, surface_class in core_surfaces:
+            if surface_class is not None:
+                try:
+                    instance = surface_class()
+                    instance.initialize()
+                    self.register(name, instance)
+                except Exception as e:
+                    logger.warning("Failed to instantiate surface", surface=name, error=str(e))
+
+        # Store heavy surfaces for lazy loading
+        heavy_surfaces = [
             ("z3", surfaces.Z3Surface),
             ("datalog", surfaces.DatalogSurface),
         ]
-        
-        registered = 0
-        for name, surface_class in surfaces_to_register:
+        for name, surface_class in heavy_surfaces:
             if surface_class is not None:
-                try:
-                    self.register(name, surface_class())
-                    registered += 1
-                except Exception as e:
-                    logger.warning("Failed to instantiate surface", surface=name, error=str(e))
-            else:
-                logger.debug("Surface not available", surface=name)
-        
-        if registered > 0:
-            logger.info("Built-in plugins registered", count=registered)
+                self._lazy_classes[name] = surface_class
 
     def _discover_entry_points(self):
         """Discover plugins via setuptools entry points."""
@@ -181,8 +191,23 @@ class PluginManager:
         logger.debug("Plugin registered", plugin=name)
 
     def get(self, name: str) -> Optional[SurfacePlugin]:
-        """Get plugin by name."""
-        return self._plugins.get(name)
+        """Get plugin by name, lazily loading heavy surfaces on first use."""
+        if name in self._plugins:
+            return self._plugins[name]
+
+        if name in self._lazy_classes:
+            try:
+                surface_class = self._lazy_classes.pop(name)
+                instance = surface_class()
+                instance.initialize()
+                self.register(name, instance)
+                logger.info("Lazily loaded surface", surface=name)
+                return cast(SurfacePlugin, instance)
+            except Exception as e:
+                logger.warning("Failed to lazily load surface", surface=name, error=str(e))
+                return None
+
+        return None
 
     def list_plugins(self) -> Dict[str, bool]:
         """List all plugins and their availability."""

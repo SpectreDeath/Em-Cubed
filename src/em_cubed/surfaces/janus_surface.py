@@ -57,6 +57,10 @@ class JanusSurface(SurfacePlugin):
         builtins = {"not", "is", "true", "fail", "assert", "retract"}
         return list(dict.fromkeys(h for h in heads if h not in builtins))
 
+    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute Prolog code via Janus with timeout protection."""
+        return await self._execute_impl(code, context)
+
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code via Janus - implementation with timeout protection."""
         logger.info("Executing Prolog code via Janus", code_length=len(code), has_context=context is not None)

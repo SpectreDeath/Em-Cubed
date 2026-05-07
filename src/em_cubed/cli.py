@@ -7,7 +7,7 @@ import structlog
 import asyncio
 import json
 
-from em_cubed.indexer import reindex, reindex_incremental, get_skill_metadata
+from em_cubed.indexer import reindex, get_skill_metadata
 from em_cubed.search import search_registry
 from em_cubed.plugin_manager import PluginManager
 
@@ -318,7 +318,6 @@ def _handle_run(args):
 async def _handle_validate(args):
     """Handle validate command."""
     from em_cubed.skills.quality_pipeline import SkillQualityPipeline
-    from em_cubed.skills.validator import SkillValidator
 
     skills_dir = Path(args.skills_dir)
     registry_file = Path(args.registry)
@@ -374,7 +373,7 @@ async def _handle_quality(args):
 
     # Report
     report = pipeline.get_quality_report()
-    print(f"\nQuality Report:")
+    print("\nQuality Report:")
     print(f"  Total skills: {report['total_skills']}")
     print(f"  Passing quality: {report['passing_quality']}")
     print(f"  Pass rate: {report['pass_rate']:.1%}")
@@ -384,7 +383,6 @@ async def _handle_quality(args):
 async def _handle_test(args):
     """Handle test command."""
     from em_cubed.skills.testing import SkillTestRunner
-    from em_cubed.indexer import get_skill_metadata, reindex
     from em_cubed.plugin_manager import PluginManager
     from em_cubed.skills.quality_pipeline import generate_all_skill_tests
 

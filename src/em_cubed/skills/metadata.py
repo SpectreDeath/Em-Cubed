@@ -9,7 +9,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from pathlib import Path
-import json
 
 
 @dataclass
@@ -117,7 +116,7 @@ class QualityThresholds:
 class SkillDependency:
     """Dependency on another skill."""
     skill_id: str  # Unique skill identifier (domain/skill-name)
-    version_range: str  # Semver range: ">=1.0.0,<2.0.0"
+    version_range: str = ">=0.1.0"  # Semver range: defaults to any >=0.1.0
     optional: bool = False
     description: Optional[str] = None
 
@@ -296,7 +295,6 @@ class SkillMetadata:
     def check_compatibility(self, other_version: str) -> bool:
         """Check if another skill version is compatible with this one."""
         from packaging import version
-        v_self = version.parse(self.version)
         v_other = version.parse(other_version)
         min_v = version.parse(self.compatibility.min_version)
         max_v = version.parse(self.compatibility.max_version) if self.compatibility.max_version else None
@@ -334,7 +332,6 @@ class SkillMetadata:
     @classmethod
     def from_frontmatter(cls, frontmatter: Dict[str, Any], body: str = "", file_path: Optional[Path] = None) -> "SkillMetadata":
         """Construct SkillMetadata from SKILL.md frontmatter."""
-        import os
         import re
 
         # Extract surfaces from code blocks in body (preferred) or frontmatter
@@ -359,13 +356,16 @@ class SkillMetadata:
             desc_match = re.search(r"## Description\s*\n\s*(.+)", body)
             if desc_match:
                 description = desc_match.group(1).strip()
+        # If description is still empty, fall back to purpose
+        if not description and purpose:
+            description = purpose
 
         # Parse extended fields...
         # [rest unchanged]
         deps = []
         for dep_data in frontmatter.get("dependencies", []):
             if isinstance(dep_data, str):
-                deps.append(SkillDependency(skill_id=dep_data))
+                deps.append(SkillDependency(skill_id=dep_data, version_range=">=0.1.0"))
             elif isinstance(dep_data, dict):
                 deps.append(SkillDependency.from_dict(dep_data))
 
@@ -396,7 +396,8 @@ class SkillMetadata:
         if quality_data:
             metrics.applied_count = quality_data.get("applied_count", 0)
             metrics.success_count = quality_data.get("success_count", 0)
-            metrics.completion_rate = quality_data.get("completion_rate", 0.0)
+            # completion_rate is computed property, not stored directly
+            # Set token usage: token_savings_avg * applied_count
             metrics.total_token_usage = quality_data.get("token_savings_avg", 0.0) * metrics.applied_count if metrics.applied_count > 0 else 0
 
         # Build metadata
@@ -408,7 +409,6 @@ class SkillMetadata:
                 file_path_str = str(file_path.resolve())
         else:
             file_path_str = None
-        mtime = os.path.getmtime(file_path) if file_path else None
 
         return cls(
             name=frontmatter.get("name", file_path.parent.name if file_path else "Unknown"),

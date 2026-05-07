@@ -571,5 +571,35 @@ Contributors are recognized in:
 
 ---
 
-Thank you for contributing to Em-Cubed! Your efforts help make multi-surface programming more accessible and powerful. 🚀</content>
+Thank you for contributing to Em-Cubed! Your efforts help make multi-surface programming more accessible and powerful. 🚀
+
+## 📦 Surface Integration Guidelines
+
+When developing skills, **always** use the Em-Cubed surface abstractions (`em_cubed.surfaces`) instead of direct library imports. This ensures consistency, security, and portability across environments.
+
+### ❌ Don't
+
+```python
+# Direct library access - not portable
+from pyswip import Prolog
+prolog = Prolog()
+```
+
+### ✅ Do
+
+```python
+# Use framework-provided surface
+from em_cubed.surfaces import PrologSurface
+# Or better: obtain via PluginManager
+result = await plugin_manager.get("prolog").execute("...", context)
+```
+
+### Migration Checklist
+
+- [ ] Replace direct imports of `pyswip`, `hy`, `z3`, `pyDatalog` with corresponding `em_cubed.surfaces.*Surface` usage.
+- [ ] Update skill code to execute via `surface.execute(code, context)`.
+- [ ] Remove initialization of external libraries inside skill code.
+- [ ] Test skill with the updated surface abstraction.
+
+Skills that continue to use direct imports will be deprecated in a future release. See the full migration guide in `docs/SURFACE_MIGRATION.md` for detailed patterns and examples.</content>
 <parameter name="filePath">D:\GitHub\projects\em-cubed\CONTRIBUTING.md

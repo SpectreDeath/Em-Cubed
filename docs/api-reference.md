@@ -39,16 +39,26 @@ Search the skill registry for relevant skills.
 {
   "results": [
     {
-      "id": "skill_id",
       "name": "Skill Name",
-      "description": "Skill description",
-      "score": 0.95,
-      "tags": ["tag1", "tag2"],
-      "surfaces": ["python"],
-      "metadata": {...}
+      "domain": "Domain",
+      "purpose": "Brief purpose statement",
+      "description": "Full skill description",
+      "path": "skills/domain/skill-name/SKILL.md",
+      "surfaces": ["python", "prolog"],
+      "logic_tags": ["constraint", "optimization"],
+      "heuristic_tags": ["graph", "search"],
+      "tags": ["constraint", "optimization", "graph", "search"],
+      "score": 0.95
     }
   ]
 }
+```
+
+**Error Response:**
+```json
+[{
+  "error": "Registry file not found. Run indexer first."
+}]
 ```
 
 ### GET /search
@@ -83,11 +93,24 @@ Execute code on a specified surface.
 }
 ```
 
-**Response (Error):**
+**Response (Execution Error):**
+```json
+{
+  "status": "error",
+  "message": "Error details from surface"
+}
+```
+
+**HTTP Error Responses:**
 ```json
 {
   "detail": "Error message"
 }
+```
+- `400`: Invalid surface, malformed code
+- `401`: Invalid or missing API key
+- `500`: Internal server error
+- `503`: Surface not available
 ```
 
 ### GET /surfaces

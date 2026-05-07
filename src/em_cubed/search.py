@@ -35,7 +35,11 @@ class WhooshSearchIndex:
             schema = Schema(
                 name=TEXT(stored=True, field_boost=2.0),
                 description=TEXT(stored=True),
+                domain=TEXT(stored=True),
+                purpose=TEXT(stored=True),
                 tags=KEYWORD(stored=True, commas=True),
+                logic_tags=KEYWORD(stored=True, commas=True),
+                heuristic_tags=KEYWORD(stored=True, commas=True),
                 surface=KEYWORD(stored=True),
                 content=TEXT(stored=True),
                 path=ID(stored=True, unique=True),
@@ -82,11 +86,17 @@ class WhooshSearchIndex:
                 content = " ".join(content_parts)
                 tags = ",".join(all_tags)
                 surface = ",".join(surfaces)
+                logic_tags_str = ",".join(logic_tags)
+                heuristic_tags_str = ",".join(heuristic_tags)
 
                 writer.update_document(
                     name=skill.get("name", ""),
                     description=skill.get("description", ""),
+                    domain=skill.get("domain", ""),
+                    purpose=skill.get("purpose", ""),
                     tags=tags,
+                    logic_tags=logic_tags_str,
+                    heuristic_tags=heuristic_tags_str,
                     surface=surface,
                     content=content,
                     path=skill.get("path", ""),
@@ -129,21 +139,41 @@ class WhooshSearchIndex:
 
                 # Boost for exact tag matches
                 query_lower = query.lower()
-                tags = hit.get("tags", "").split(",")
-                if any(query_lower in tag.lower() for tag in tags):
+                tags = hit.get("tags", "")
+                if isinstance(tags, list):
+                    tags_list = tags
+                else:
+                    tags_list = tags.split(",") if tags else []
+                if any(query_lower in tag.lower() for tag in tags_list):
                     score *= 1.5
 
                 # Boost for surface matches
-                surfaces = hit.get("surface", "").split(",")
-                if any(query_lower in surf.lower() for surf in surfaces):
+                surfaces = hit.get("surface", "")
+                if isinstance(surfaces, list):
+                    surfaces_list = surfaces
+                else:
+                    surfaces_list = surfaces.split(",") if surfaces else []
+                if any(query_lower in surf.lower() for surf in surfaces_list):
                     score *= 1.2
+
+                # Get additional metadata
+                domain = hit.get("domain", "")
+                purpose = hit.get("purpose", "")
+                logic_tags_raw = hit.get("logic_tags", "")
+                heuristic_tags_raw = hit.get("heuristic_tags", "")
+                logic_tags_list = logic_tags_raw.split(",") if isinstance(logic_tags_raw, str) and logic_tags_raw else []
+                heuristic_tags_list = heuristic_tags_raw.split(",") if isinstance(heuristic_tags_raw, str) and heuristic_tags_raw else []
 
                 search_results.append({
                     "name": hit.get("name"),
+                    "domain": domain,
+                    "purpose": purpose,
                     "description": hit.get("description"),
                     "path": hit.get("path"),
-                    "tags": tags,
-                    "surfaces": surfaces,
+                    "surfaces": surfaces_list,
+                    "logic_tags": logic_tags_list,
+                    "heuristic_tags": heuristic_tags_list,
+                    "tags": tags_list,
                     "score": score,
                 })
 
@@ -261,15 +291,19 @@ def _naive_search_registry(query: str, registry: List[Dict[str, Any]], max_resul
                 score += 8
 
         if score > 0:
+            # Combine tags for compatibility
+            combined_tags = logic_tags + heuristic_tags
             results.append(
                 {
                     "name": skill.get("name"),
                     "domain": skill.get("domain"),
                     "purpose": (purpose[:100] + "...") if purpose else "",
+                    "description": skill.get("description", ""),
                     "path": skill.get("path"),
                     "surfaces": skill.get("surfaces", []),
                     "logic_tags": skill.get("logic_tags", []),
                     "heuristic_tags": skill.get("heuristic_tags", []),
+                    "tags": combined_tags,
                     "score": score,
                 }
             )

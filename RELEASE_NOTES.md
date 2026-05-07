@@ -1,3 +1,34 @@
+# Em-Cubed v0.5.0 Release Notes
+
+## 🎉 What's New in v0.5.0
+
+Em-Cubed v0.5.0 brings significant security hardening, architectural consolidation, and improved developer ergonomics.
+
+### 🔧 Security & Stability
+
+- **Removed unsafe exec/eval** from DatalogSurface and Z3Surface. Both now use asteval (`Interpreter`) for safe code execution, eliminating arbitrary Python execution risks.
+- **Optional API authentication**: Secure endpoints with `X-API-Key` header via `EM_CUBED_API_KEY` environment variable. Backward compatible when no key is set.
+- **Dependency hygiene**: `psutil` import now guarded with fallback, allowing benchmarks to run without psutil installed.
+
+### 🏗️ Architecture Improvements
+
+- **Merged SurfaceBase into SurfacePlugin**: The diamond inheritance pattern is simplified. `SurfaceBase` is now a deprecated alias for `SurfacePlugin`. All surfaces now inherit solely from `SurfacePlugin`, reducing complexity.
+- **JanusSurface production-ready**: Fully implements `SurfacePlugin` interface with Prolog-compatible execute, tags, and health. Registered in plugin discovery.
+- **Version consistency**: All components now report `0.5.0` (pyproject.toml, package `__init__`, API).
+- **Entry points fixed**: Corrected `importlib.metadata.entry_points` usage for Python 3.11+ compatibility.
+
+### 📋 Validation & Quality
+
+- **Manifest-driven validation**: `SkillValidator` now reads `skills/manifest.yaml` for authoritative domain list and quality thresholds, ensuring a single source of truth.
+- **Async test mode**: pytest configuration now sets `asyncio_mode = "auto"` for seamless async test execution.
+
+### 🛠️ Developer Experience
+
+- **Migration guide** (`docs/SURFACE_MIGRATION.md`) for skill authors to adopt surface abstractions and avoid direct library imports.
+- **Surface integration policy** documented in `CONTRIBUTING.md`.
+
+---
+
 # Em-Cubed v0.2.0 Release Notes
 
 ## 🎉 What's New in v0.2.0

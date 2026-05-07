@@ -1,6 +1,6 @@
 import pytest
 import json
-from em_cubed.indexer import reindex, get_skill_metadata, extract_fenced_block, extract_prolog_tags, extract_hy_tags
+from em_cubed.indexer import reindex, reindex_incremental, get_skill_metadata, extract_fenced_block, extract_prolog_tags, extract_hy_tags
 
 
 class TestIndexerFunctions:
@@ -300,3 +300,162 @@ Addition operations
         names = {skill["name"] for skill in registry}
         assert "Main Calculator" in names
         assert "Addition Module" in names
+
+
+class TestIncrementalIndexing:
+    """Tests for incremental reindexing functionality."""
+
+    def setup_method(self):
+        """Ensure clean environment before each test."""
+        # This test class methods will use a fresh temporary directory per test
+        pass
+
+    def test_incremental_add_skill(self, tmp_path):
+        """Test that adding a new skill file updates the registry incrementally."""
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        registry_file = tmp_path / "registry.json"
+
+        # Create initial skill
+        skill_dir = skills_dir / "math" / "adder"
+        skill_dir.mkdir(parents=True)
+        (skill_dir / "SKILL.md").write_text("""---
+name: Adder
+Domain: Mathematics
+Version: 1.0.0
+surfaces: [python]
+---
+## Purpose
+Adds two numbers.
+""")
+
+        # Initial full reindex
+        from em_cubed.indexer import reindex
+        reindex(skills_dir, registry_file)
+
+        with open(registry_file) as f:
+            registry = json.load(f)
+        assert len(registry) == 1
+        assert registry[0]["name"] == "Adder"
+
+        # Add a new skill file
+        new_dir = skills_dir / "logic" / "solver"
+        new_dir.mkdir(parents=True)
+        (new_dir / "SKILL.md").write_text("""---
+name: Solver
+Domain: General
+Version: 1.0.0
+surfaces: [prolog]
+---
+## Purpose
+Solves logic puzzles.
+""")
+
+        # Run incremental reindex
+        reindex_incremental(skills_dir, registry_file)
+
+        with open(registry_file) as f:
+            registry2 = json.load(f)
+        assert len(registry2) == 2
+        names = {s["name"] for s in registry2}
+        assert "Adder" in names
+        assert "Solver" in names
+
+    def test_incremental_modify_skill(self, tmp_path):
+        """Test that modifying a skill file updates its entry in the registry."""
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        registry_file = tmp_path / "registry.json"
+
+        # Create skill
+        skill_dir = skills_dir / "test" / "skill"
+        skill_dir.mkdir(parents=True)
+        skill_file = skill_dir / "SKILL.md"
+        skill_file.write_text("""---
+name: Original Name
+Domain: General
+Version: 1.0.0
+surfaces: [python]
+---
+## Purpose
+Original purpose.
+""")
+
+        # Initial full reindex
+        from em_cubed.indexer import reindex
+        reindex(skills_dir, registry_file)
+
+        with open(registry_file) as f:
+            registry = json.load(f)
+        assert len(registry) == 1
+        assert registry[0]["name"] == "Original Name"
+
+        # Modify the skill file
+        skill_file.write_text("""---
+name: Updated Name
+Domain: General
+Version: 1.0.0
+surfaces: [python]
+---
+## Purpose
+Updated purpose.
+""")
+
+        # Incremental reindex
+        reindex_incremental(skills_dir, registry_file)
+
+        with open(registry_file) as f:
+            registry2 = json.load(f)
+        assert len(registry2) == 1
+        assert registry2[0]["name"] == "Updated Name"
+        assert "Updated purpose" in registry2[0]["description"]
+
+    def test_incremental_remove_skill(self, tmp_path):
+        """Test that removing a skill file removes it from the registry."""
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        registry_file = tmp_path / "registry.json"
+
+        # Create two skills
+        dir1 = skills_dir / "a" / "skill1"
+        dir1.mkdir(parents=True)
+        (dir1 / "SKILL.md").write_text("""---
+name: Skill One
+Domain: General
+Version: 1.0.0
+surfaces: [python]
+---
+## Purpose
+First skill
+""")
+        dir2 = skills_dir / "b" / "skill2"
+        dir2.mkdir(parents=True)
+        (dir2 / "SKILL.md").write_text("""---
+name: Skill Two
+Domain: General
+Version: 1.0.0
+surfaces: [python]
+---
+## Purpose
+Second skill
+""")
+
+        from em_cubed.indexer import reindex
+        reindex(skills_dir, registry_file)
+
+        with open(registry_file) as f:
+            registry = json.load(f)
+        assert len(registry) == 2
+        names = {s["name"] for s in registry}
+        assert names == {"Skill One", "Skill Two"}
+
+        # Remove skill1 directory
+        import shutil
+        shutil.rmtree(dir1)
+
+        reindex_incremental(skills_dir, registry_file)
+
+        with open(registry_file) as f:
+            registry2 = json.load(f)
+        assert len(registry2) == 1
+        assert registry2[0]["name"] == "Skill Two"

@@ -121,3 +121,97 @@ def test():
                 assert False, "Should have exited"
             except SystemExit:
                 pass  # Expected
+
+    @patch('em_cubed.cli._handle_validate')
+    def test_validate_command(self, mock_handler, tmp_path, capsys):
+        """Test the validate command."""
+        mock_handler.return_value = None
+        
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        registry_file = tmp_path / "registry.json"
+        
+        with patch('sys.argv', ['em3', 'validate', '--skills-dir', str(skills_dir), '--registry', str(registry_file)]):
+            main()
+        
+        mock_handler.assert_called_once()
+
+    @patch('em_cubed.cli._handle_quality')
+    def test_quality_command(self, mock_handler, tmp_path, capsys):
+        """Test the quality command."""
+        mock_handler.return_value = None
+        
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        registry_file = tmp_path / "registry.json"
+        
+        with patch('sys.argv', ['em3', 'quality', '--skills-dir', str(skills_dir), '--registry', str(registry_file)]):
+            main()
+
+        # Handler is mocked, so no output - just verify it was called
+        mock_handler.assert_called_once()
+
+    @patch('em_cubed.cli._handle_test')
+    def test_test_command_all(self, mock_handler, tmp_path, capsys):
+        """Test the test command (all skills)."""
+        mock_handler.return_value = None
+        
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        
+        with patch('sys.argv', ['em3', 'test', '--skills-dir', str(skills_dir)]):
+            main()
+        
+        mock_handler.assert_called_once()
+
+    @patch('em_cubed.cli._handle_test')
+    def test_test_command_specific(self, mock_handler, tmp_path, capsys):
+        """Test the test command (specific skill)."""
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        skill_dir = skills_dir / "test_skill"
+        skill_dir.mkdir()
+        skill_md = skill_dir / "SKILL.md"
+        skill_md.write_text("""---
+name: Test Skill
+Domain: Test
+---
+## Purpose\nTest\n```python\ndef test():\n    return 1\n```""")
+        
+        mock_handler.return_value = None
+        
+        with patch('sys.argv', ['em3', 'test', str(skill_dir)]):
+            main()
+        
+        mock_handler.assert_called_once()
+
+    @patch('em_cubed.cli._handle_recommend')
+    def test_recommend_command(self, mock_handler, tmp_path, capsys):
+        """Test the recommend command."""
+        mock_handler.return_value = None
+        
+        with patch('sys.argv', ['em3', 'recommend', 'test query', '--limit', '3']):
+            main()
+        
+        mock_handler.assert_called_once()
+
+    @patch('em_cubed.cli._handle_compose')
+    def test_compose_command_simple(self, mock_handler, tmp_path, capsys):
+        """Test the compose command (simple)."""
+        mock_handler.return_value = None
+        
+        with patch('sys.argv', ['em3', 'compose', '--source', 'skill1', '--target', 'skill2']):
+            main()
+        
+        mock_handler.assert_called_once()
+
+    @patch('em_cubed.cli._handle_compose')
+    def test_compose_command_goal(self, mock_handler, tmp_path, capsys):
+        """Test the compose command (goal-based)."""
+        mock_handler.return_value = None
+        
+        with patch('sys.argv', ['em3', 'compose', '--source', 'skill1', '--goal', 'test goal']):
+            main()
+        
+        mock_handler.assert_called_once()
+        patch.stopall()
