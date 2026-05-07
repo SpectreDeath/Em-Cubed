@@ -5,6 +5,42 @@ All notable changes to Em-Cubed will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - Unreleased
+
+### Added
+- Optional API key authentication (`X-API-Key` header) via `EM_CUBED_API_KEY`
+- JanusSurface fully integrated and registered in PluginManager
+- `asyncio_mode = "auto"` in pytest configuration for seamless async tests
+- Surface migration guide (`docs/SURFACE_MIGRATION.md`)
+- Explicit surface usage policy in `CONTRIBUTING.md`
+
+### Changed
+- **Architecture**: Merged `SurfaceBase` into `SurfacePlugin`; `SurfaceBase` now a deprecated alias for backward compatibility
+- **Validation**: `SkillValidator` now reads `skills/manifest.yaml` for authoritative domain list and quality thresholds
+- **Inheritance**: All surfaces now inherit exclusively from `SurfacePlugin` (single inheritance)
+- **Version**: Unified version numbers to `0.5.0` across `__init__.py`, `api/main.py`, and `pyproject.toml`
+- **Dependency**: `asteval` used for Z3 and Datalog execution, replacing unsafe `exec`/`eval`
+
+### Fixed
+- **entry_points import**: corrected to `from importlib.metadata import entry_points` with function call syntax for Python 3.11+
+- **Z3Surface test_health bug**: fixed accidental use of `DatalogSurface` in test (line 273)
+- **DatalogSurface security**: removed `exec`/`eval`; now uses asteval.Interpreter with pyDatalog module injection
+- **Z3Surface security**: removed `exec`; now uses asteval.Interpreter with Z3 symbols pre-injected
+- **Benchmark psutil**: wrapped import with try/except and graceful degradation when psutil unavailable
+- **Plugin discovery**: JanusSurface now properly included in `_discover_builtin()` registrations
+- **API documentation**: Fixed search response format to include domain, purpose, logic_tags, heuristic_tags, and tags
+- **Documentation**: Updated README test count (77→219) and coverage (81%→~26%)
+- **Documentation**: Added Z3, Datalog, Janus surfaces to README reference
+- **Prolog**: Fixed assertion bug in test_concurrent_mixed_surfaces (removed trailing period)
+- **Types**: Added missing imports in benchmark.py, composer.py, quality_pipeline.py, recommender.py
+- **Ruff**: Fixed 70 lint warnings (42 auto, 28 manual)
+- **Testing**: Fixed invalid f-string escape sequence in testing.py:179
+
+### Security
+- Eliminated all direct `exec`/`eval` calls in surface implementations
+- API optional authentication prevents unauthorized access when configured
+- Surface executions remain sandboxed via asteval (Python, Z3, Datalog)
+
 ## [0.4.0] - 2026-04-29
 
 ### Added

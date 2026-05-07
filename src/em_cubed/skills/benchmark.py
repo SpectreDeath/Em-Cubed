@@ -5,10 +5,14 @@ resource usage, and quality metrics across different surfaces.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, cast
 import time
-import psutil
-import asyncio
+try:
+    import psutil
+    _psutil_available = True
+except ImportError:
+    psutil = None
+    _psutil_available = False
 from pathlib import Path
 import json
 import statistics
@@ -16,6 +20,9 @@ from datetime import datetime
 from collections import defaultdict
 
 import structlog
+
+from .registry import SkillRegistry
+from .metadata import SkillMetadata
 
 logger = structlog.get_logger()
 
@@ -140,9 +147,10 @@ class BenchmarkResult:
 class SkillBenchmark:
     """Run and record performance benchmarks for skills."""
 
-    def __init__(self, plugin_manager, skill_registry: SkillRegistry):
+    def __init__(self, plugin_manager, skill_registry: SkillRegistry, skills_dir: Optional[Path] = None):
         self.plugin_manager = plugin_manager
         self.registry = skill_registry
+        self.skills_dir = skills_dir
         self.logger = logger.bind(component="skill_benchmark")
         self._benchmark_data: Dict[str, List[BenchmarkResult]] = defaultdict(list)
 
@@ -192,6 +200,7 @@ class SkillBenchmark:
     async def _benchmark_surface(self, skill: SkillMetadata, plugin, config: BenchmarkConfig,
                                  test_input: Optional[Dict[str, Any]]) -> BenchmarkResult:
         """Benchmark a skill on a specific surface."""
+        assert skill.skill_id is not None, "Skill must have a valid ID"
         # Prepare test input
         if test_input is None:
             test_input = self._generate_test_input(skill)
@@ -205,29 +214,37 @@ class SkillBenchmark:
 
         # Measurement phase
         times = []
-        memory_samples = []
+        memory_samples: List[float] = [] if _psutil_available else []
         errors = []
 
-        process = psutil.Process()
+        process = psutil.Process() if _psutil_available else None
+        # Ensure process is not None when psutil is available
+        if _psutil_available:
+            assert process is not None, "psutil.Process() should not be None"
         for i in range(config.measurement_iterations):
-            mem_before = process.memory_info().rss / 1024 / 1024  # MB
+            mem_before = None
+            if _psutil_available:
+                assert process is not None, "Process should be available when psutil is available"
+                mem_before = process.memory_info().rss / 1024 / 1024  # MB
             start = time.perf_counter()
             try:
                 result = await self._execute_skill_once(skill, plugin, test_input)
                 elapsed = time.perf_counter() - start
-                mem_after = process.memory_info().rss / 1024 / 1024
-
+                if _psutil_available and mem_before is not None:
+                    assert process is not None, "Process should be available"
+                    mem_after = process.memory_info().rss / 1024 / 1024
+                    memory_samples.append(mem_after - mem_before)
                 times.append(elapsed)
-                memory_samples.append(mem_after - mem_before)
-
                 if result.get("status") != "ok":
                     errors.append(result.get("message", "Unknown error"))
             except Exception as e:
                 elapsed = time.perf_counter() - start
                 times.append(elapsed)
                 errors.append(str(e))
-                mem_after = process.memory_info().rss / 1024 / 1024
-                memory_samples.append(mem_after - mem_before)
+                if _psutil_available and mem_before is not None:
+                    assert process is not None, "Process should be available"
+                    mem_after = process.memory_info().rss / 1024 / 1024
+                    memory_samples.append(mem_after - mem_before)
 
         return BenchmarkResult.from_timing_data(
             skill_id=skill.skill_id,
@@ -239,20 +256,42 @@ class SkillBenchmark:
         )
 
     async def _execute_skill_once(self, skill: SkillMetadata, plugin, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a skill once (mock - would integrate with actual skill runner)."""
-        # In a real implementation, this would:
-        # 1. Load skill's SKILL.md
-        # 2. Extract code for the specified surface
-        # 3. Execute via plugin with timeout
-        # For now, simulate execution
-        await asyncio.sleep(0.001)  # Simulate minimal work
-        return {"status": "ok", "value": "mock result"}
+        """Execute a skill once using the actual surface plugin."""
+        import re
+
+        skill_path = None
+        if skill.path:
+            skill_path = Path(skill.path)
+        elif self.skills_dir:
+            skill_path = self.skills_dir / skill.domain / skill.name / "SKILL.md"
+
+        if not skill_path or not skill_path.exists():
+            return {"status": "error", "message": f"Skill file not found for {skill.skill_id}"}
+
+        content = skill_path.read_text(encoding="utf-8")
+
+        code_blocks: Dict[str, str] = {}
+        for match in re.finditer(r"```(\w+)\s*\r?\n(.*?)```", content, re.DOTALL):
+            lang = match.group(1).lower()
+            code = match.group(2).strip()
+            code_blocks[lang] = code
+
+        code = code_blocks.get(plugin.name, "")
+        if not code:
+            return {"status": "error", "message": f"No {plugin.name} code block found in {skill.skill_id}"}
+
+        context = {"input": input_data}
+        try:
+            result = await plugin.execute(code, context)
+            return cast(Dict[str, Any], result)
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
     def _generate_test_input(self, skill: SkillMetadata) -> Dict[str, Any]:
         """Generate a valid test input based on skill's input schema."""
         if skill.input_schema.properties:
             # Generate from schema properties
-            input_data = {}
+            input_data: Dict[str, Any] = {}
             for prop_name, prop_def in skill.input_schema.properties.items():
                 if prop_def.get("type") == "string":
                     input_data[prop_name] = "test_value"
@@ -271,7 +310,6 @@ class SkillBenchmark:
 
     def get_benchmark_history(self, skill_id: str, surface: Optional[str] = None) -> List[BenchmarkResult]:
         """Get historical benchmark results."""
-        key = f"{skill_id}/{surface}" if surface else skill_id
         if surface:
             return self._benchmark_data.get(f"{skill_id}/{surface}", [])
         # Aggregate across surfaces
@@ -285,7 +323,7 @@ class SkillBenchmark:
         """Generate a performance comparison report."""
         skills_to_report = skill_ids or list(self._skills.keys()) if hasattr(self, '_skills') else []
 
-        report = {
+        report: Dict[str, Any] = {
             "timestamp": datetime.utcnow().isoformat(),
             "skills": {},
         }

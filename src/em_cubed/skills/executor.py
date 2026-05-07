@@ -6,9 +6,8 @@ and running it on appropriate surfaces with full telemetry.
 
 import time
 from dataclasses import dataclass
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, cast
 from pathlib import Path
-import asyncio
 import structlog
 
 from .telemetry import SkillTelemetry, get_telemetry_collector
@@ -142,7 +141,7 @@ class SkillExecutor:
 
             # Execute on surface
             result = await plugin.execute(surface_code, context)
-            return result
+            return cast(Dict[str, Any], result)
 
         # Execute with telemetry
         start = time.perf_counter()

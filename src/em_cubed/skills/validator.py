@@ -173,18 +173,19 @@ class SkillValidator:
 
     def _validate_structure(self, result: ValidationResult, file_path, skill_metadata) -> None:
         """Validate basic file structure and presence of required sections."""
-        content = file_path.read_text(encoding="utf-8")
+        # Read content for any needed checks (currently just structure validation via metadata)
+        _ = file_path.read_text(encoding="utf-8")
 
         # Check frontmatter completeness
-        for field in self.REQUIRED_FIELDS:
-            value = getattr(skill_metadata, field.lower(), None)
+        for required_field in self.REQUIRED_FIELDS:
+            value = getattr(skill_metadata, required_field.lower(), None)
             if not value:
                 result.add_issue(
                     severity=ValidationSeverity.ERROR,
                     code="MISSING_REQUIRED_FIELD",
-                    message=f"Required field '{field}' is missing",
+                    message=f"Required field '{required_field}' is missing",
                     component="metadata",
-                    suggestion=f"Add '{field}: value' to the YAML frontmatter"
+                    suggestion=f"Add '{required_field}: value' to the YAML frontmatter"
                 )
 
         # Check Purpose section
@@ -276,7 +277,6 @@ class SkillValidator:
 
     def _validate_dependencies(self, result: ValidationResult, skill_metadata) -> None:
         """Validate skill dependencies."""
-        from packaging import version
 
         for dep in skill_metadata.dependencies:
             # Check dependency skill_id format (domain/name)

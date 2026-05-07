@@ -16,6 +16,9 @@ from .metadata import SkillMetadata, RuntimeMetrics
 
 logger = structlog.get_logger()
 
+# Current schema version for registry entries
+CURRENT_SCHEMA_VERSION = 1
+
 
 @dataclass
 class QualityMetrics:
@@ -102,8 +105,11 @@ class SkillRegistry:
                 registry_data = json.load(f)
 
             for skill_data in registry_data:
+                # Migrate older schema versions to current
+                skill_data = self._migrate_skill_entry(skill_data)
                 # Reconstruct SkillMetadata
                 metadata = self._deserialize_metadata(skill_data)
+                assert metadata.skill_id is not None, "Skill ID must be set after deserialization"
                 self._skills[metadata.skill_id] = metadata
                 # Always initialize quality metrics; populate from data if available
                 metrics_data = skill_data.get("metrics", {})
@@ -123,11 +129,23 @@ class SkillRegistry:
         except Exception as e:
             self.logger.error("Failed to load registry", error=str(e))
 
+    def _migrate_skill_entry(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Migrate a registry entry to the current schema version."""
+        version = data.get("schema_version", 0)
+        if version < CURRENT_SCHEMA_VERSION:
+            # Ensure new fields required in current version have defaults
+            data.setdefault("capabilities", {})
+            data.setdefault("compatibility", {})
+            data.setdefault("metrics", {})
+            # Increment schema version
+            data["schema_version"] = CURRENT_SCHEMA_VERSION
+        return data
+
     def _deserialize_metadata(self, data: Dict[str, Any]) -> SkillMetadata:
         """Deserialize dictionary into SkillMetadata object."""
         from .metadata import (
             SkillDependency, InputOutputSchema, SkillCapability,
-            CompatibilityRange, QualityThresholds, RuntimeMetrics
+            CompatibilityRange, QualityThresholds
         )
 
         # Parse dependencies
@@ -205,7 +223,7 @@ class SkillRegistry:
         if surface:
             skills = [s for s in skills if surface in s.surfaces]
         if min_quality is not None:
-            skills = [s for s in skills if self.get_quality(s.skill_id).validation_score >= min_quality]
+            skills = [s for s in skills if s.skill_id is not None and (qm := self.get_quality(s.skill_id)) is not None and qm.validation_score >= min_quality]
 
         return skills
 
@@ -245,13 +263,16 @@ class SkillRegistry:
 
     def find_compatible_skills(self, skill_id: str, min_score: float = 0.5) -> List[str]:
         """Find skills that can be composed with the given skill."""
-        compatible = []
+        compatible: List[str] = []
         target_skill = self.get_skill(skill_id)
         if not target_skill:
             return compatible
 
         for candidate in self._skills.values():
             if candidate.skill_id == skill_id:
+                continue
+            # Ensure skill_id is not None (should always be set)
+            if candidate.skill_id is None:
                 continue
             # Check input/output compatibility
             compatibility = self._check_compatibility(target_skill.output_schema, candidate.input_schema)
@@ -278,6 +299,7 @@ class SkillRegistry:
         try:
             registry_data = []
             for skill in self._skills.values():
+                assert skill.skill_id is not None, "Skill ID must be set"
                 data = skill.to_registry_dict()
                 # Include quality metrics
                 qm = self._quality_metrics.get(skill.skill_id)
@@ -295,6 +317,7 @@ class SkillRegistry:
 
     def add_skill(self, metadata: SkillMetadata) -> None:
         """Add a new skill to the registry."""
+        assert metadata.skill_id is not None, "Skill ID must be set before adding to registry"
         self._skills[metadata.skill_id] = metadata
         self._quality_metrics[metadata.skill_id] = QualityMetrics(skill_id=metadata.skill_id)
         self._save_registry()
@@ -312,11 +335,12 @@ class SkillRegistry:
     def get_statistics(self) -> Dict[str, Any]:
         """Get registry statistics."""
         total = len(self._skills)
-        domains = defaultdict(int)
-        surfaces = defaultdict(int)
+        domains: Dict[str, int] = defaultdict(int)
+        surfaces: Dict[str, int] = defaultdict(int)
         avg_quality = 0.0
 
         for skill in self._skills.values():
+            assert skill.skill_id is not None, "Skill ID must be set"
             domains[skill.domain] += 1
             for surface in skill.surfaces:
                 surfaces[surface] += 1

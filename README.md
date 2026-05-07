@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-Em-Cubed is a secure, multi-surface skill framework enabling execution across Python, Prolog, and Hy Lisp surfaces with unified indexing and search capabilities. It allows developers to create composable skills that leverage different programming paradigms for optimal problem-solving.
+Em-Cubed is a secure, multi-surface skill framework enabling execution across Python, Prolog, Hy Lisp, Z3 SMT solving, Datalog logic, and Janus Python-Prolog bridge surfaces with unified indexing and search capabilities. It allows developers to create composable skills that leverage different programming paradigms for optimal problem-solving.
 
 ## ✨ Key Features
 
@@ -13,10 +13,10 @@ Em-Cubed is a secure, multi-surface skill framework enabling execution across Py
 - **🔍 Intelligent Search**: Multi-surface scoring and skill discovery
 - **🌐 REST API**: Full HTTP API for skill execution and management
 - **📊 Structured Logging**: Comprehensive logging with context
-- **🧪 Comprehensive Testing**: 77 tests with 81% coverage
-- **📚 Multi-Paradigm**: Python, Prolog logic, and Hy Lisp support
+- **🧪 Comprehensive Testing**: 219 tests with ~26% coverage
+- **📚 Multi-Paradigm**: Python, Prolog, Hy, Z3, Datalog, and Janus surfaces
 
-## 🎉 What's New in v0.4.0
+## 🎉 What's New in v0.5.0
 
 - **⚡ Async Timeouts**: Configurable execution timeouts across all surfaces (default 30s)
 - **🔄 Incremental Indexing**: Only re-index changed skill files (10x+ performance boost)
@@ -90,10 +90,12 @@ em-cubed/
 │       ├── python_surface.py  # Safe Python via asteval
 │       ├── prolog_surface.py  # PySWIP Prolog integration
 │       ├── hy_surface.py      # Hy Lisp execution
-│       └── janus_surface.py   # Python-Prolog bridge
+│       ├── z3_surface.py      # Z3 SMT solving
+│       ├── datalog_surface.py # Datalog logic programming
+│       └── janus_surface.py   # Python-Prolog bridge (experimental)
 ├── api/main.py            # FastAPI REST API
 ├── examples/              # Multi-surface skill examples
-├── tests/                 # Comprehensive test suite (77 tests)
+├── tests/                 # Comprehensive test suite (219 tests)
 └── docs/                  # Technical specifications
 ```
 
@@ -302,6 +304,57 @@ if surface.available:
 
 **Requirements**: Hy library installation.
 
+### Z3 Surface
+
+**Capabilities**: SMT (Satisfiability Modulo Theories) solving for formal verification, constraint satisfaction, and symbolic reasoning.
+
+```python
+from em_cubed.surfaces import Z3Surface
+
+surface = Z3Surface()
+if surface.available:
+    # Solve logical constraints
+    result = await surface.execute("x + y == 5 && x > 0", {"x": 2, "y": 3})
+    print(result['value'])  # {'status': 'sat', 'model': {...}}
+```
+
+**Requirements**: z3-solver package. Used for formal verification, optimization, and constraint solving.
+
+### Datalog Surface
+
+**Capabilities**: Logic programming with stratified negation, ideal for graph queries, incremental reasoning, and recursive queries.
+
+```python
+from em_cubed.surfaces import DatalogSurface
+
+surface = DatalogSurface()
+if surface.available:
+    # Define facts and rules
+    await surface.execute("parent(john, mary).")
+    await surface.execute("ancestor(X, Y) :- parent(X, Y).")
+    
+    # Query
+    result = await surface.execute("ancestor(X, Y)")
+    print(result['value'])  # List of bindings
+```
+
+**Requirements**: pyDatalog library. Supports stratified negation and efficient bottom-up evaluation.
+
+### Janus Surface
+
+**Capabilities**: Python-Prolog bidirectional integration via the Janus bridge (experimental, optional).
+
+```python
+from em_cubed.surfaces import JanusSurface
+
+surface = JanusSurface()
+if surface.available:
+    # Call Prolog from Python seamlessly
+    result = await surface.execute("...")
+```
+
+**Requirements**: janus_swi package. This surface provides tight integration between Python and SWI-Prolog, allowing embedding of Prolog calls within Python code. May be unstable; consider using PySWIP directly for production.
+
 ## 🎯 Skills Quality Framework
 
 Em-Cubed includes a comprehensive quality assurance system for skills:
@@ -429,17 +482,29 @@ Content-Type: application/json
 GET /search?q=calculator&top=10
 ```
 
+**Example with cURL:**
+```bash
+curl "http://localhost:8000/search?q=calculator&top=5"
+```
+
 **Response:**
 ```json
-[
-  {
-    "name": "Calculator",
-    "domain": "Mathematics",
-    "score": 0.95,
-    "surfaces": ["python"],
-    "description": "Basic calculator with arithmetic operations"
-  }
-]
+{
+  "results": [
+    {
+      "name": "Calculator",
+      "domain": "Mathematics",
+      "purpose": "Perform basic arithmetic operations",
+      "description": "Simple calculator for addition, subtraction, multiplication, division",
+      "path": "skills/General/python_calculator/SKILL.md",
+      "surfaces": ["python"],
+      "logic_tags": [],
+      "heuristic_tags": ["add", "subtract", "multiply", "divide"],
+      "tags": ["add", "subtract", "multiply", "divide"],
+      "score": 0.95
+    }
+  ]
+}
 ```
 
 #### Execute Code

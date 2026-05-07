@@ -6,7 +6,7 @@ Enhanced with quality assurance, validation, and composition capabilities.
 
 from .indexer import reindex, get_skill_metadata  # noqa: E402
 from .search import search_registry  # noqa: E402
-from .surfaces import PrologSurface, HySurface, PythonSurface  # noqa: E402
+from .surfaces import PrologSurface, HySurface, PythonSurface, Z3Surface, DatalogSurface, JanusSurface  # noqa: E402
 from .skills import (
     SkillMetadata,
     SkillValidator,
@@ -28,21 +28,17 @@ from .skills import (
     initialize_executor,
 )
 
-# JanusSurface is not implemented
-class JanusSurface:
-    """Janus surface is not implemented."""
-    def __init__(self):
-        raise NotImplementedError("JanusSurface is not implemented. Requires janus-swi package and SWI-Prolog system installation.")
-
 __version__ = "0.5.0"  # Bumped: Added skill quality framework, validation, composition, telemetry
 __all__ = [
     "reindex",
     "get_skill_metadata",
     "search_registry",
+    "PythonSurface",
     "PrologSurface",
     "HySurface",
+    "Z3Surface",
+    "DatalogSurface",
     "JanusSurface",
-    "PythonSurface",
     # Skills quality framework
     "SkillMetadata",
     "SkillValidator",

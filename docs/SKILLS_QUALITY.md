@@ -133,7 +133,145 @@ quality_thresholds:
 ---
 ```
 
-## Quality Standards
+## SKILL.md Frontmatter Reference
+
+### Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Skill name (lowercase, hyphens for spaces) |
+| `Domain` | string | Category from manifest.yaml `skill_categories` |
+
+### Optional Standard Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `Version` | string | `0.1.0` | Semantic version (X.Y.Z) |
+| `surfaces` | list[str] | `[]` | Surfaces with code blocks: `python`, `prolog`, `hy`, `z3`, `datalog`, `janus` |
+| `Complexity` | string | undefined | `Low`, `Medium`, or `High` |
+| `Type` | string | undefined | `Process`, `Function`, `Cognitive`, etc. |
+| `Category` | string | undefined | Free-text category |
+| `Estimated Execution Time` | string | undefined | Human-readable estimate |
+| `Source` | string | undefined | `community`, `manual`, `auto` |
+| `origin` | string | `manual` | Origin tracking |
+| `surfaces` | list[str] | `[]` | Surfaces with code blocks |
+
+### Quality Tracking Fields
+
+```yaml
+quality:
+  applied_count: 0          # Total execution attempts
+  success_count: 0          # Successful executions
+  completion_rate: 0.0      # success_count / applied_count
+  token_savings_avg: 0.0    # Average token savings
+created_at: "2026-01-01T00:00:00Z"
+updated_at: "2026-01-01T00:00Z"
+```
+
+### Dependency Declaration
+
+```yaml
+dependencies:               # Other skills this skill depends on
+  - skill_id: "NLP/tokenizer"
+    version_range: ">=1.0.0"
+    optional: false
+```
+
+### Input/Output Schema
+
+```yaml
+input_schema:
+  type: object
+  properties:
+    text:
+      type: string
+  required: ["text"]
+output_schema:
+  type: object
+  properties:
+    result:
+      type: number
+```
+
+### Capabilities & Thresholds
+
+```yaml
+capabilities:
+  surfaces: ["python", "prolog"]
+  permissions: ["filesystem"]
+  resources:
+    memory_mb: 256
+    cpu_cores: 1
+compatibility:
+  min_version: "0.5.0"
+quality_thresholds:
+  min_test_coverage: 0.8
+  min_success_rate: 0.7
+  max_execution_time: 30.0
+  required_surfaces: 2
+```
+
+### Trigger Keywords
+
+```yaml
+triggers:
+  - keyword1
+  - keyword2
+```
+
+### Multi-Surface Note
+
+If a skill implements multiple surfaces, each surface code block should stay independent. Use the [context injection pattern](MULTI_SURFACE_GUIDE.md) for cross-surface interaction:
+
+```markdown
+```python
+# Access other surfaces via context
+prolog = contexts["surfaces"].get("prolog")
+if prolog:
+    result = await prolog.execute("query(X)", {})
+```
+
+```prolog
+% Prolog code runs independently
+query(X) :- fact(X).
+```
+
+## Manifest Configuration
+
+The `skills/manifest.yaml` file is the authoritative source for skill categories and quality thresholds. The `SkillValidator` loads these values at initialization.
+
+### Manifest Structure
+
+```yaml
+name: em_cubed_skills
+version: 1.0.0
+schema_version: 1
+
+quality_thresholds:
+  min_test_coverage: 0.8       # Minimum test coverage ratio
+  min_success_rate: 0.7        # Minimum runtime success rate
+  max_execution_time: 30.0     # Maximum execution time (seconds)
+  required_surfaces: 1         # Minimum surfaces per skill
+  min_purpose_length: 10       # Minimum purpose field length
+  min_description_length: 20   # Minimum description field length
+  min_code_lines: 5            # Minimum code lines per surface
+
+skill_categories:              # Valid Domain values
+  - AUTOMATION
+  - DATA_PROCESSING
+  - DECISION_MAKING
+  # ... (18 total)
+```
+
+### Adding a New Domain
+
+1. Add the domain to `skill_categories` in `skills/manifest.yaml`
+2. Create a subdirectory under `skills/` with the domain name
+3. Run `em3 index skills/ -o registry.json` to re-index
+
+### Adjusting Quality Thresholds
+
+Edit `quality_thresholds` in `skills/manifest.yaml`. Changes take effect on next validation run.
 
 Skills must meet minimum quality thresholds:
 
@@ -254,7 +392,7 @@ print(f"Success rate: {metrics['success_rate']:.1%}")
 ```python
 from em_cubed.skills import SkillBenchmark, BenchmarkConfig
 
-benchmark = SkillBenchmark(plugin_manager, registry)
+benchmark = SkillBenchmark(plugin_manager, registry, skills_dir)
 
 # Run benchmarks
 config = BenchmarkConfig(

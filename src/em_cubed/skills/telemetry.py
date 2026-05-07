@@ -5,7 +5,7 @@ and quality. Integrates with the SkillRegistry for persistent storage.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, cast
 from datetime import datetime
 import time
 import statistics
@@ -170,8 +170,11 @@ class TelemetryCollector:
     def _persist(self) -> None:
         """Write telemetry data to disk."""
         try:
-            self.config.persist_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(self.config.persist_path, "a") as f:
+            path = self.config.persist_path
+            if path is None:
+                return  # Telemetry persistence disabled
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with open(path, "a") as f:
                 for record in self._records[-100:]:  # Last 100 records
                     f.write(json.dumps(record.to_dict()) + "\n")
         except Exception as e:
@@ -185,7 +188,6 @@ class TelemetryCollector:
 
         for skill_id, records in by_skill.items():
             if skill_id in registry._skills:
-                total = len(records)
                 successes = sum(1 for r in records if r.success)
                 times = [r.execution_time_ms for r in records if r.success]
 
@@ -244,7 +246,7 @@ class SkillTelemetry:
 
         self.collector.record_execution(record)
 
-        return result
+        return cast(Dict[str, Any], result)
 
     def _estimate_tokens(self, input_data: Any, result: Dict[str, Any]) -> int:
         """Roughly estimate token usage from input/output size."""
@@ -274,7 +276,7 @@ def initialize_telemetry(config: Optional[TelemetryConfig] = None) -> TelemetryC
     """Initialize global telemetry with optional config."""
     global _global_collector
     _global_collector = TelemetryCollector(config)
-    logger.info("Telemetry initialized", config=config.to_dict() if config else "default")
+    logger.info("Telemetry initialized", config=config.__dict__ if config else "default")
     return _global_collector
 
 

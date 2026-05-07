@@ -4,13 +4,14 @@ Analyzes task requirements, skill capabilities, and usage patterns
 to recommend appropriate skills for a given problem.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
-from datetime import datetime
-from pathlib import Path
-import json
 
 import structlog
+
+from .registry import SkillRegistry
 
 logger = structlog.get_logger()
 
@@ -76,6 +77,8 @@ class SkillRecommender:
         scored = []
 
         for skill in candidates:
+            if skill.skill_id is None:
+                continue  # Skip skills without valid ID
             score, criteria = self._score_skill(skill, requirement)
             if score > 0:
                 scored.append((score, skill, criteria))
@@ -85,6 +88,8 @@ class SkillRecommender:
 
         results = []
         for score, skill, criteria in scored[:limit]:
+            # Ensure skill has a valid ID (filtered earlier, but enforce for type checker)
+            assert skill.skill_id is not None, "Skill ID should not be None at this point"
             # Find composition opportunities
             comp_opps = self.registry.find_compatible_skills(skill.skill_id)
             qm = self.registry.get_quality(skill.skill_id)
@@ -102,7 +107,7 @@ class SkillRecommender:
 
         return results
 
-    def _score_skill(self, skill, requirement: TaskRequirement) -> (float, List[str]):
+    def _score_skill(self, skill, requirement: TaskRequirement) -> tuple[float, List[str]]:
         """Score a skill against requirements."""
         score = 0.0
         criteria = []
@@ -173,7 +178,7 @@ class SkillRecommender:
         # BFS to find shortest paths
         queue = deque([(start_skill_id, [start_skill_id])])
         visited = {start_skill_id}
-        paths = []
+        paths: List[List[str]] = []
 
         while queue and len(paths) < 5:  # Find up to 5 paths
             current, path = queue.popleft()
@@ -201,7 +206,7 @@ class SkillRecommender:
         scored = []
 
         for candidate in candidates:
-            if candidate.skill_id == skill_id:
+            if candidate.skill_id is None or candidate.skill_id == skill_id:
                 continue
             similarity = self._calculate_similarity(skill, candidate)
             if similarity > 0.2:
@@ -211,6 +216,7 @@ class SkillRecommender:
 
         results = []
         for score, candidate in scored[:limit]:
+            assert candidate.skill_id is not None, "Candidate skill ID should not be None"
             qm = self.registry.get_quality(candidate.skill_id)
             results.append(RecommendationResult(
                 skill_id=candidate.skill_id,
@@ -255,8 +261,12 @@ class SkillRecommender:
         keywords = self._extract_keywords(task_description)
         complexity = self._detect_complexity(task_description)
 
+        # Determine category from domains list (first match)
+        domain_list = keywords.get("domains", [])
+        category = domain_list[0] if domain_list else "General"
+
         requirement = TaskRequirement(
-            category=keywords.get("domain", "General"),
+            category=category,
             surfaces=keywords.get("surfaces", []),
             capabilities=keywords.get("capabilities", []),
             complexity=complexity,
@@ -267,7 +277,7 @@ class SkillRecommender:
     def _extract_keywords(self, text: str) -> Dict[str, List[str]]:
         """Extract task keywords from natural language description."""
         text_lower = text.lower()
-        keywords = {"domains": [], "surfaces": [], "capabilities": []}
+        keywords: Dict[str, List[str]] = {"domains": [], "surfaces": [], "capabilities": []}
 
         # Domain keywords
         domain_keywords = {

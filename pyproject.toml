@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "em-cubed"
-version = "0.4.0"
+version = "0.5.0"
 description = "Multi-Surface Skill Framework for Python, Prolog, Hy, Z3, and Datalog execution surfaces"
 authors = [
     {name = "SpectreDeath", email = "spectre@example.com"},
@@ -53,6 +53,7 @@ target-version = "py311"
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "--cov=em_cubed --cov-report=term-missing -W ignore"
+asyncio_mode = "auto"
 
 [tool.mypy]
 python_version = "3.11"

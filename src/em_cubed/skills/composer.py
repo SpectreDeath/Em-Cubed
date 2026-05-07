@@ -4,8 +4,10 @@ Enables chaining skills together, managing data flow between surfaces,
 and coordinating multi-skill execution patterns.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, cast
 from enum import Enum
 import asyncio
 import structlog
@@ -148,7 +150,6 @@ class SkillComposer:
 
     async def compose(self, plan: CompositionPlan, initial_data: Dict[str, Any]) -> CompositionResult:
         """Execute a skill composition plan."""
-        import time
         from datetime import datetime
 
         context = ExecutionContext(data=initial_data.copy())
@@ -359,7 +360,7 @@ _skill_result
                     context["surfaces"][surface_name] = surf_plugin
 
             result = await plugin.execute(execution_code, context)
-            return result
+            return cast(Dict[str, Any], result)
         except Exception as e:
             return {"status": "error", "message": str(e)}
 

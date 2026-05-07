@@ -3,7 +3,6 @@
 This module provides end-to-end quality assurance for skills.
 """
 
-import asyncio
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime
@@ -11,9 +10,9 @@ import structlog
 
 from .metadata import SkillMetadata
 from .validator import SkillValidator, ValidationResult
-from .registry import SkillRegistry, QualityMetrics
-from .testing import SkillTestGenerator, SkillTestRunner, TestCase, TestResult
-from .benchmark import SkillBenchmark, BenchmarkConfig
+from .registry import SkillRegistry
+from .testing import SkillTestGenerator, SkillTestRunner, TestCase
+from .benchmark import SkillBenchmark, BenchmarkConfig, BenchmarkResult
 
 logger = structlog.get_logger()
 
@@ -29,7 +28,7 @@ class SkillQualityPipeline:
         self.registry = SkillRegistry(skills_dir, registry_file)
         self.test_generator = SkillTestGenerator(plugin_manager)
         self.test_runner = SkillTestRunner(plugin_manager, self.registry)
-        self.benchmark = SkillBenchmark(plugin_manager, self.registry)
+        self.benchmark = SkillBenchmark(plugin_manager, self.registry, skills_dir)
         self.logger = logger.bind(component="quality_pipeline")
 
     async def validate_all_skills(self) -> Dict[str, ValidationResult]:
@@ -123,6 +122,8 @@ class SkillQualityPipeline:
         quality_distribution = {"high": 0, "medium": 0, "low": 0}
 
         for skill in skills:
+            if skill.skill_id is None:
+                continue
             qm = self.registry.get_quality(skill.skill_id)
             if qm and qm.validation_score >= 0.7:
                 passing += 1
@@ -175,7 +176,7 @@ class SkillQualityPipeline:
 
     def _load_existing_tests(self, skill_id: str) -> List[TestCase]:
         """Load existing tests from test directory."""
-        tests = []
+        tests: List[TestCase] = []
         test_dir = Path("tests") / "skills" / skill_id.replace("/", "_")
         if test_dir.exists():
             for test_file in test_dir.glob("test_*.py"):
@@ -200,7 +201,7 @@ async def run_quality_pipeline(skills_dir: Path, registry_file: Path,
     test_results = await pipeline.test_all_skills()
 
     # Phase 3: Benchmarking
-    benchmark_results = await pipeline.benchmark_all_skills()
+    _benchmark_results = await pipeline.benchmark_all_skills()
 
     # Generate report
     report = pipeline.get_quality_report()
@@ -230,6 +231,8 @@ def generate_all_skill_tests(skills_dir: Path, output_dir: Path = Path("tests/sk
                 continue
             fm = yaml.safe_load(parts[1]) or {}
             metadata = SkillMetadata.from_frontmatter(fm, parts[2], skill_file)
+            if metadata.skill_id is None:
+                continue  # Skip skills without valid ID
 
             # Generate test file
             skill_id = metadata.skill_id.replace("/", "_")
@@ -245,7 +248,6 @@ def generate_all_skill_tests(skills_dir: Path, output_dir: Path = Path("tests/sk
 
 def generate_test_code(metadata: SkillMetadata, skill_file: Path) -> str:
     """Generate pytest test code for a skill."""
-    import re  # Import for safe_name sanitization
 
     skill_id = metadata.skill_id
     # Sanitize name for use in Python identifiers (class names)
