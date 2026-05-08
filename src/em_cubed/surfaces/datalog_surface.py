@@ -5,12 +5,12 @@ import importlib.util
 from typing import Dict, Any, Optional, List
 import structlog
 
-from ..plugin import SurfacePlugin
+from .base import SurfaceBase
 
 logger = structlog.get_logger()
 
 
-class DatalogSurface(SurfacePlugin):
+class DatalogSurface(SurfaceBase):
     """Handle Datalog code execution and predicate extraction."""
 
     @property

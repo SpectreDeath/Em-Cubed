@@ -1,7 +1,7 @@
 # Em-Cubed: Multi-Surface Skill Framework
 
 [![Tests](https://img.shields.io/badge/tests-100%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
-[![Coverage](https://img.shields.io/badge/coverage-74%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Coverage](https://img.shields.io/badge/coverage-26%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 

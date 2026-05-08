@@ -4,12 +4,12 @@ import importlib.util
 from typing import List, Dict, Any, Optional
 import structlog
 
-from ..plugin import SurfacePlugin
+from .base import SurfaceBase
 
 logger = structlog.get_logger()
 
 
-class HySurface(SurfacePlugin):
+class HySurface(SurfaceBase):
     """Handle Hy code execution and function extraction."""
 
     @property

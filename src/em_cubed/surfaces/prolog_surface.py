@@ -6,6 +6,7 @@ from typing import List, Dict, Any, Optional
 import structlog
 
 from .base import SurfaceBase
+from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
@@ -77,7 +78,7 @@ class PrologSurface(SurfaceBase):
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code and return results."""
-        return await self._execute_impl(code, context)
+        return await self.execute_with_timeout(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code - implementation with timeout protection."""
@@ -97,36 +98,69 @@ class PrologSurface(SurfaceBase):
 
             stripped_code = code.strip()
 
-            # Detect mode: assert (ends with .) vs query (starts with ?- or no .)
-            if stripped_code.endswith('.'):
-                # Assert mode: fact or rule
-                logger.info("Prolog assert mode detected")
-                prolog.assertz(stripped_code.rstrip('.'))
-                logger.info("Prolog assertion successful")
-                return {"status": "ok", "message": "Code asserted successfully"}
+            # Improved mode detection: 
+            # - Explicit queries start with ?-
+            # - Arithmetic/evaluation expressions (even with trailing .) are queries
+            # - Otherwise, trailing . indicates assertion (fact/rule)
+            is_query = False
+            processed_code = stripped_code
+
+            if stripped_code.startswith('?-'):
+                # Explicit query mode
+                is_query = True
+                processed_code = stripped_code[2:].strip()
+            elif stripped_code.endswith('.'):
+                # Might be assertion or query - check if it looks like an arithmetic/evaluation query
+                # Remove the trailing period for analysis
+                code_without_period = stripped_code[:-1].strip()
+                
+                # Check for arithmetic/evaluation patterns: contains "is" with arithmetic symbols
+                # This handles cases like "X is 1+1." which should be queries, not assertions
+                if ' is ' in code_without_period:
+                    # Look for arithmetic symbols around the "is"
+                    import re
+                    # Pattern: something is something_with_numbers_or_symbols
+                    if re.search(r'\d|\+|\-|\*|\/|//', code_without_period):
+                        is_query = True
+                        processed_code = code_without_period
+                    else:
+                        # Doesn't look like arithmetic, treat as assertion
+                        processed_code = code_without_period
+                else:
+                    # Doesn't look like arithmetic/evaluation, treat as assertion (fact/rule)
+                    processed_code = code_without_period
             else:
-                # Query mode: starts with ?- or no trailing .
-                query_code = stripped_code.lstrip('?-').strip()
-                logger.info("Prolog query mode detected", query=query_code)
+                # No trailing period, treat as query
+                is_query = True
+                processed_code = stripped_code
+
+            if is_query:
+                # Query mode: starts with ?- or determined to be query
+                logger.info("Prolog query mode detected", query=processed_code)
 
                 # Execute query with configurable timeout (limit to 1000 solutions)
                 def execute_query():
-                    return list(prolog.query(query_code))
+                    return list(prolog.query(processed_code))
 
                 try:
-                    # Use the configured timeout instead of hardcoded 10.0
                     result = await asyncio.get_event_loop().run_in_executor(
                         self._executor, execute_query
                     )
                 except asyncio.TimeoutError:
-                    logger.warning("Prolog execution timed out", timeout=self.timeout)
-                    return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
+                    logger.warning("Prolog query timed out", query=processed_code, timeout=self.timeout)
+                    return {"status": "error", "message": f"Query execution timed out after {self.timeout}s"}
 
                 if len(result) > 1000:
                     result = result[:1000]  # Truncate for safety
 
                 logger.info("Prolog query successful", result_count=len(result))
                 return {"status": "ok", "message": "Query executed successfully", "result": result}
+            else:
+                # Assertion mode: fact or rule
+                logger.info("Prolog assert mode detected")
+                prolog.assertz(processed_code)
+                logger.info("Prolog assertion successful")
+                return {"status": "ok", "message": "Code asserted successfully"}
 
         except Exception as e:
             logger.exception("Prolog execution failed", error=str(e), code=code)

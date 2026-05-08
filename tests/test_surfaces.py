@@ -217,6 +217,35 @@ class TestPrologSurface:
         assert result["status"] == "ok"
         assert result["result"][0]["X"] == "mary"
 
+    @pytest.mark.asyncio
+    async def test_execute_arithmetic_query(self):
+        """Test that arithmetic expressions like 'X is 1+1' are treated as queries, not assertions."""
+        surface = PrologSurface()
+        # This should be treated as a query, not an assertion
+        result = await surface.execute("X is 1+1")
+        assert result["status"] == "ok"
+        assert result["result"][0]["X"] == 2.0
+
+    @pytest.mark.asyncio
+    async def test_execute_arithmetic_query_with_period(self):
+        """Test that arithmetic expressions with trailing period are still treated as queries."""
+        surface = PrologSurface()
+        # This should be treated as a query, not an assertion, even with trailing period
+        result = await surface.execute("X is 1+1.")
+        assert result["status"] == "ok"
+        assert result["result"][0]["X"] == 2.0
+
+    @pytest.mark.asyncio
+    async def test_execute_assertion_with_period(self):
+        """Test that regular assertions with trailing period are still treated as assertions."""
+        surface = PrologSurface()
+        # First assert a fact
+        await surface.execute("parent(john, mary).")
+        # Then query it
+        result = await surface.execute("parent(john, X)")
+        assert result["status"] == "ok"
+        assert result["result"][0]["X"] == "mary"
+
     def test_extract_tags(self):
         surface = PrologSurface()
         prolog_source = """

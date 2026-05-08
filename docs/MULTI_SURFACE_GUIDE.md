@@ -1,132 +1,133 @@
-# Multi-Surface Integration Guide
+# Multi-Surface Orchestration Guide
 
-## Overview
+This document explains how to create skills that truly leverage the Em-Cubed framework's multilogic architecture by orchestrating execution across multiple surfaces.
 
-Em-Cubed enables skills to leverage multiple execution surfaces (Python, Prolog, Hy, Z3, Datalog, Janus) through a unified context injection mechanism. This guide explains the intended pattern for cross-surface interaction.
+## Understanding Multi-Surface Orchestration
 
-## Context Injection
+True multi-surface orchestration goes beyond simply having multiple implementations of the same logic in different languages. Instead, it involves:
 
-When a skill is executed via `SkillExecutor`, the framework automatically populates the execution context with a `surfaces` dictionary containing all available surface plugins:
+1. **Dynamic Cross-Surface Communication**: One surface generating code or data for another surface to execute
+2. **Leveraging Paradigm Strengths**: Using each surface for what it does best (e.g., Prolog for logical inference, Python for data processing)
+3. **Context Sharing**: Passing data between surfaces through the shared execution context
+4. **Workflow Orchestration**: Controlling the flow of execution across surfaces
 
-```python
-context = {
-    "skill_input": {...},       # Input data for the skill
-    "skill_metadata": {...},    # Skill frontmatter + metadata
-    "surfaces": {               # Available surface plugins
-        "python": <PythonSurface>,
-        "prolog": <PrologSurface>,
-        "hy": <HySurface>,
-        "z3": <Z3Surface>,
-        "datalog": <DatalogSurface>,
-        "janus": <JanusSurface>,
-    },
-    ...  # Additional user-provided context
-}
-```
+## The Context["surfaces"] Injection Pattern
 
-## Pattern: Python Preprocessing → Prolog Validation → Hy Scoring
+The key to multi-surface orchestration is the automatic injection of available surface plugins into the skill execution context:
 
 ```python
-# Python skill code (executed on Python surface)
-def process(data):
-    # Access injected surfaces via context
-    prolog = context["surfaces"]["prolog"]
-    hy = context["surfaces"]["hy"]
-
-    # Step 1: Python preprocessing
-    cleaned = preprocess(data)
-
-    # Step 2: Prolog constraint validation
-    validation = await prolog.execute(
-        f"valid({cleaned})", {}
-    )
-
-    # Step 3: Hy fuzzy scoring
-    score = await hy.execute(
-        f"(score {cleaned} {weights})", {}
-    )
-
-    return {
-        "cleaned": cleaned,
-        "valid": validation["value"],
-        "score": score["value"]
-    }
+# In skill_executor.py, lines 135-140:
+# Inject surface plugins for cross-surface interaction
+context["surfaces"] = {}
+for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+    surf_plugin = self.plugin_manager.get(surface_name)
+    if surf_plugin and surf_plugin.available:
+        context["surfaces"][surface_name] = surf_plugin
 ```
 
-## Important Limitations
+This makes all available surfaces accessible within skills via `context["surfaces"]["surface_name"]`.
 
-1. **Surface isolation**: Each surface has its own interpreter/memory. Shared state must pass through the context dict.
-2. **Not true multi-surface skills**: Existing skills with code blocks in multiple surfaces run independently—one surface per execution. The `surfaces` dict enables calling other surfaces from within a surface.
-3. **Available surfaces**: If a surface's dependencies are not installed, it won't appear in `context["surfaces"]`. Always check:
-   ```python
-   if "prolog" in context.get("surfaces", {}):
-       prolog = context["surfaces"]["prolog"]
-   ```
+## Orchestration Patterns
 
-## Example: True Multi-Surface Skill
+### Pattern 1: Python-as-Orchestrator, Prolog-as-Reasoner
 
-```markdown
----
-Domain: EXAMPLE
-name: python-prolog-pipeline
-Version: 1.0.0
-surfaces: [python, prolog]
----
-
-## Python Code
+Have Python handle data processing, control flow, and orchestration while delegating logical inference to Prolog:
 
 ```python
-# Access the Prolog surface injected via context
-prolog_surface = surfaces["prolog"]
-
-# Define facts for Prolog
-facts = "edge(a, b). edge(b, c). edge(c, d)."
-await prolog_surface.execute(facts, {})
-
-# Query Prolog
-result = await prolog_surface.execute("path(a, d, Path)", {})
-paths = result["value"]
-
-# Post-process in Python in the same execution
-sorted_paths = sorted(paths, key=len)
-return {"shortest": sorted_paths[0] if sorted_paths else None}
+def solve_logical_problem(facts, rules, queries):
+    # Process and validate input data in Python
+    processed_facts = validate_and_format_facts(facts)
+    
+    # Generate Prolog code
+    prolog_code = generate_prolog_code(processed_facts, rules)
+    
+    # Execute Prolog reasoning
+    prolog_result = context["surfaces"]["prolog"].execute(prolog_code, {})
+    
+    if prolog_result["status"] != "ok":
+        return handle_error(prolog_result)
+    
+    # Process results further in Python
+    final_results = process_prolog_output(prolog_result["result"], queries)
+    
+    return final_results
 ```
 
-## Prolog Code
+### Pattern 2: Prolog-as-Fact-Base, Python-as-Processor
 
-```prolog
-% Rules can be loaded by the Python code above
-path(Start, End, [Start|Rest]) :-
-    edge(Start, Next),
-    path(Next, End, Rest).
-path(End, End, [End]).
-```
-```
-
-## Testing Multi-Surface Skills
-
-Use `SkillExecutor` for integration tests. Do not import surface classes directly in test files:
+Use Prolog to maintain a knowledge base and Python for complex computations:
 
 ```python
-from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
-
-executor = SkillExecutor(plugin_manager, registry, skills_dir)
-request = SkillExecutionRequest(
-    skill_id="EXAMPLE/python-prolog-pipeline",
-    input_data={"graph": {"edges": [["a","b"],["b","c"]]}, "start": "a", "end": "c"}
-)
-result = await executor.execute(request)
-assert result.success
-assert result.output["shortest"] == ["a", "b", "c"]
+def hybrid_approach(initial_data):
+    # Load initial facts into Prolog
+    prolog_facts = generate_initial_facts(initial_data)
+    context["surfaces"]["prolog"].execute(prolog_facts, {})
+    
+    # Perform complex calculations in Python that would be difficult in Prolog
+    python_results = perform_complex_calculations(initial_data)
+    
+    # Feed Python results back to Prolog as new facts
+    new_facts = generate_facts_from_python_results(python_results)
+    context["surfaces"]["prolog"].execute(new_facts, {})
+    
+    # Query the combined knowledge base
+    query_result = context["surfaces"]["prolog"].execute(final_query, {})
+    
+    return process_results(query_result)
 ```
 
-## Surface Reference
+### Pattern 3: Pipeline Processing
 
-| Surface | Use Case | Key Methods |
-|---------|----------|-------------|
-| Python | General computation, orchestration | `surfaces["python"].execute(code, context)` |
-| Prolog | Logic rules, constraint solving | `surfaces["prolog"].execute(query, context)` |
-| Hy | Lisp-style processing, fuzzy logic | `surfaces["hy"].execute(code, context)` |
-| Z3 | SMT solving, formal verification | `surfaces["z3"].execute(constraints, context)` |
-| Datalog | Graph queries, recursive rules | `surfaces["datalog"].execute(query, context)` |
-| Janus | Python-Prolog bridge (experimental) | `surfaces["janus"].execute(code, context)` |
+Create execution pipelines where data flows through multiple surfaces:
+
+```python
+def pipeline_processing(input_data):
+    # Stage 1: Initial processing in Python
+    stage1_result = context["surfaces"]["python"].execute(stage1_code, {"input": input_data})
+    
+    # Stage 2: Logical inference in Prolog
+    stage2_code = generate_prolog_from_python_output(stage1_result["value"])
+    stage2_result = context["surfaces"]["prolog"].execute(stage2_code, {})
+    
+    # Stage 3: Final validation in Python
+    stage3_code = generate_validation_code(stage2_result)
+    stage3_result = context["surfaces"]["python"].execute(stage3_code, {})
+    
+    return stage3_result["value"]
+```
+
+## Best Practices for Multi-Surface Skills
+
+1. **Clear Separation of Concerns**: Assign specific responsibilities to each surface based on its strengths
+2. **Minimal Data Transfer**: Only pass essential data between surfaces to reduce overhead
+3. **Error Handling**: Implement robust error handling for each surface interaction
+4. **Timeout Awareness**: Remember that each surface call respects its own timeout settings
+5. **Context Management**: Be mindful of what data is stored in the context between executions
+6. **Surface Availability**: Always check if required surfaces are available before attempting to use them
+
+## Example: Integrated Logic Solver
+
+See `skills/General/integrated-logic-solver/SKILL.md` for a complete example that:
+- Uses Python to process family relationship data
+- Dynamically generates Prolog facts and rules
+- Queries the Prolog surface for complex relationship inference
+- Processes and formats the results in Python
+
+## Debugging Multi-Surface Skills
+
+When debugging orchestrated skills:
+1. Test each surface interaction independently
+2. Log the code/data being passed between surfaces
+3. Check surface availability before execution
+4. Verify the format of data being exchanged
+5. Monitor execution times for each surface interaction
+
+## Performance Considerations
+
+While multi-surface orchestration provides powerful capabilities, consider:
+- The overhead of context switching between surfaces
+- Data serialization costs when passing complex objects
+- Potential bottlenecks if one surface becomes the limiting factor
+- Opportunities for caching or batching operations
+
+By following these patterns and best practices, you can create skills that truly harness the power of Em-Cubed's multilogic architecture, solving problems that would be difficult or impossible with a single programming paradigm.

@@ -1,16 +1,16 @@
 """Python surface integration for executing Python code."""
 
-import asyncio
 import importlib.util
 from typing import Dict, Any, Optional
 import structlog
 
+from .base import SurfaceBase
 from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
 
-class PythonSurface(SurfacePlugin):
+class PythonSurface(SurfaceBase):
     """Handle Python code execution and metadata extraction."""
 
     @property
@@ -47,8 +47,8 @@ class PythonSurface(SurfacePlugin):
         return list(dict.fromkeys(fns))
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Python code with timeout protection."""
-        return await self._execute_impl(code, context)
+        """Execute Python code and return results using asteval for safety."""
+        return await self.execute_with_timeout(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Python code - implementation with timeout protection."""
@@ -90,12 +90,6 @@ class PythonSurface(SurfacePlugin):
                 self._executor, execute_code
             )
 
-        except asyncio.TimeoutError:
-            logger.warning("Python execution timed out", timeout=self.timeout)
-            return {
-                "status": "error",
-                "message": f"Execution timed out after {self.timeout}s"
-            }
         except Exception as e:
             logger.exception("Python execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}

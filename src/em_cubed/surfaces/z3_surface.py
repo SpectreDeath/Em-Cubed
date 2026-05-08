@@ -5,12 +5,12 @@ import importlib.util
 from typing import Dict, Any, Optional
 import structlog
 
-from ..plugin import SurfacePlugin
+from .base import SurfaceBase
 
 logger = structlog.get_logger()
 
 
-class Z3Surface(SurfacePlugin):
+class Z3Surface(SurfaceBase):
     """Handle Z3 SMT solver execution and metadata extraction."""
 
     @property
