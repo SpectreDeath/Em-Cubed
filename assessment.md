@@ -270,22 +270,22 @@ No existing skill uses `context["surfaces"]` for actual cross-surface calls. The
 
 ### Phase 1: Emergency Stabilization
 ```
-[x] Fix 1: Add `import asyncio` to python_surface.py
-[x] Fix 2: Add initialize()/shutdown() stubs to SurfaceBase
-[x] Fix 3: Change HySurface.execute() to call execute_with_timeout()
-[x] Verify: Run pytest tests/ --no-cov → 219/219 passing
-[x] Fix 4: Update README line 577 "77 tests" → "219 tests"
-[x] Fix 5: Add missing `await` in README Prolog example
+~~[x] Fix 1: Add `import asyncio` to python_surface.py~~
+~~[x] Fix 2: Add initialize()/shutdown() stubs to SurfaceBase~~
+~~[x] Fix 3: Change HySurface.execute() to call execute_with_timeout()~~
+~~[x] Verify: Run pytest tests/ --no-cov → 219/219 passing~~
+~~[x] Fix 4: Update README line 577 "77 tests" → "219 tests"~~
+~~[x] Fix 5: Add missing `await` in README Prolog example~~
 ```
 
 ### Phase 2: Architectural Cleanup
 ```
-[x] Unify SurfacePlugin + SurfaceBase into single hierarchy
-[x] Remove or implement skill-use-folder stub (Deleted)
-[x] Fix prompt-quality-evaluator: pass text to Hy scope; implement Prolog gap queries
-[x] Fix MULTI_SURFACE_GUIDE.md broken example reference
-[x] Remove stale debug/artifact files from project root and tests/
-[x] Fix get_performance_report dead code (self._skills doesn't exist)
+~~[x] Unify SurfacePlugin + SurfaceBase into single hierarchy~~
+~~[x] Remove or implement skill-use-folder stub (Deleted)~~
+~~[x] Fix prompt-quality-evaluator: pass text to Hy scope; implement Prolog gap queries~~
+~~[x] Fix MULTI_SURFACE_GUIDE.md broken example reference~~
+~~[x] Remove stale debug/artifact files from project root and tests/~~
+~~[x] Fix get_performance_report dead code (self._skills doesn't exist)~~
 ```
 
 ### Phase 3: Real Multi-Surface Demonstration (1 week)

@@ -129,15 +129,15 @@ def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
     # Execute Hy code for ambiguity detection
     hy_code = f"""
 (defn detect-quantifier-ambiguity [text]
-  "Detect vague quantity terms."
-  (setv vague-terms ["a few" "several" "some" "many" "often" "rarely" "frequently" "highly" "very"])
-  (list (filter (fn [term] (not (= -1 (.find text term)))) vague-terms)))
+   "Detect vague quantity terms."
+   (setv vague-terms ["a few" "several" "some" "many" "often" "rarely" "frequently" "highly" "very"])
+   (list (filter (fn [term] (not (= -1 (.find text term)))) vague-terms)))
 
 (defn calculate-ambiguity-score [text]
-  "Calculate ambiguity severity based on term count and positions."
-  (setv ambiguous (detect-quantifier-ambiguity text))
-  (setv score (- 1.0 (* (len ambiguous) 0.15)))
-  (max 0.0 score))
+   "Calculate ambiguity severity based on term count and positions."
+   (setv ambiguous (detect-quantifier-ambiguity text))
+   (setv score (- 1.0 (* (len ambiguous) 0.15)))
+   (max 0.0 score))
 
 ;; Call the function
 (calculate-ambiguity-score {repr(text)})
@@ -147,9 +147,23 @@ def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
     except Exception as e:
         score = 0.5
     
+    # Extract ambiguous terms for reporting
+    ambiguous_terms_code = f"""
+(defn detect-quantifier-ambiguity [text]
+   "Detect vague quantity terms."
+   (setv vague-terms ["a few" "several" "some" "many" "often" "rarely" "frequently" "highly" "very"])
+   (list (filter (fn [term] (not (= -1 (.find text term)))) vague-terms)))
+(detect-quantifier-ambiguity {repr(text)})
+"""
+    try:
+        ambiguous_terms = hy.eval(hy.read_str(ambiguous_terms_code))
+        issues = [{"text": term, "type": "quantifier", "severity": "info"} for term in ambiguous_terms]
+    except Exception:
+        issues = []
+    
     return {
         "score": score,
-        "issues": [],  # Would be populated from Hy detection
+        "issues": issues,
         "surface": "hy"
     }
 
@@ -167,24 +181,33 @@ def evaluate_coverage_prolog(text: str) -> Dict[str, Any]:
     
     # Analyze text for coverage indicators
     text_lower = text.lower()
-    coverage_found = []
     
-    for requirement in ["user", "input", "task", "error", "case", "scenario"]:
-        if requirement in text_lower:
-            coverage_found.append(requirement)
-            prolog.assertz(f"mentions_category({requirement})")
+    # Assert what we found in the text
+    if "user" in text_lower:
+        prolog.assertz("mentions_category(user)")
+    if "input" in text_lower or "format" in text_lower:
+        prolog.assertz("mentions_category(input)")
+    if "task" in text_lower:
+        prolog.assertz("mentions_category(task)")
+    if "error" in text_lower:
+        prolog.assertz("mentions_category(error)")
     
-    # Query Prolog to identify gaps
+    # Query Prolog to identify gaps using the defined rules
     gaps = []
     for req in ["user_types", "input_formats", "task_variations", "error_handling"]:
-        found = False
-        for aspect in coverage_found:
-            if aspect in req:
-                found = True
-        if not found:
+        # Query if this requirement is NOT met
+        query_result = list(prolog.query(f"coverage_gap({req})"))
+        if query_result:  # If we got results, it's a gap
             gaps.append(req)
     
-    coverage_score = len(coverage_found) / 4.0  # 4 requirement categories
+    # Count how many requirements we actually have
+    found_count = 0
+    for req in ["user_types", "input_formats", "task_variations", "error_handling"]:
+        query_result = list(prolog.query(f"mandatory_coverage_category({req}), mentions_category(_)."))
+        if query_result:
+            found_count += 1
+    
+    coverage_score = found_count / 4.0  # 4 requirement categories
     
     return {
         "score": min(1.0, coverage_score),
