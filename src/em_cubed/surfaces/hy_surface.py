@@ -44,7 +44,7 @@ class HySurface(SurfaceBase):
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Hy code with timeout protection."""
-        return await self._execute_impl(code, context)
+        return await self.execute_with_timeout(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Hy code - implementation with timeout protection."""

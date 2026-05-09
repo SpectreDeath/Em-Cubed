@@ -14,7 +14,9 @@ class SurfaceTimeoutError(Exception):
     pass
 
 
-class SurfaceBase(ABC):
+from ..plugin import SurfacePlugin
+
+class SurfaceBase(SurfacePlugin, ABC):
     """Base class for all execution surfaces with timeout support."""
 
     def __init__(self, timeout: Optional[float] = None):
@@ -26,6 +28,14 @@ class SurfaceBase(ABC):
         """
         self.timeout = timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
         self._executor = ThreadPoolExecutor(max_workers=1)
+
+    def initialize(self) -> None:
+        """Initialize the surface. Subclasses can override this."""
+        pass
+
+    def shutdown(self) -> None:
+        """Shutdown the surface. Subclasses can override this."""
+        pass
 
     def __del__(self):
         """Clean up executor on deletion."""

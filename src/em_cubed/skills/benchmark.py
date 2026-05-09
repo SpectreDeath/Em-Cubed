@@ -321,7 +321,7 @@ class SkillBenchmark:
 
     def get_performance_report(self, skill_ids: Optional[List[str]] = None) -> Dict[str, Any]:
         """Generate a performance comparison report."""
-        skills_to_report = skill_ids or list(self._skills.keys()) if hasattr(self, '_skills') else []
+        skills_to_report = skill_ids or list(self.registry._skills.keys())
 
         report: Dict[str, Any] = {
             "timestamp": datetime.utcnow().isoformat(),

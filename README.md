@@ -200,7 +200,7 @@ print(f"Python result: {result['value']}")
 # Prolog execution (requires PySWIP)
 prolog_surface = PrologSurface()
 if prolog_surface.available:
-    result = prolog_surface.execute("X is 2 + 3.")
+    result = await prolog_surface.execute("X is 2 + 3.")
     print(f"Prolog result: {result}")
 ```
 
@@ -573,8 +573,7 @@ double(X, Result) :- Result is X * 2.
 - Document any external dependencies
 
 ## 🧪 Testing
-
-Em-Cubed includes a comprehensive test suite with 77 tests covering:
+Em-Cubed includes a comprehensive test suite with 219 tests covering:
 
 ```bash
 # Run all tests

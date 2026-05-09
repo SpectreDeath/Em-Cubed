@@ -105,12 +105,12 @@ def pipeline_processing(input_data):
 5. **Context Management**: Be mindful of what data is stored in the context between executions
 6. **Surface Availability**: Always check if required surfaces are available before attempting to use them
 
-## Example: Integrated Logic Solver
+## Example: Python-Prolog Pipeline
 
-See `skills/General/integrated-logic-solver/SKILL.md` for a complete example that:
-- Uses Python to process family relationship data
+See `skills/EXAMPLES/python-prolog-pipeline/SKILL.md` for a complete example that:
+- Uses Python to process and prepare data
 - Dynamically generates Prolog facts and rules
-- Queries the Prolog surface for complex relationship inference
+- Queries the Prolog surface for complex inference
 - Processes and formats the results in Python
 
 ## Debugging Multi-Surface Skills

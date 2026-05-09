@@ -127,11 +127,11 @@ def evaluate_persona_python(text: str) -> Dict[str, Any]:
 def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
     """Hy-based heuristic ambiguity detection using fuzzy matching."""
     # Execute Hy code for ambiguity detection
-    hy_code = """
+    hy_code = f"""
 (defn detect-quantifier-ambiguity [text]
   "Detect vague quantity terms."
   (setv vague-terms ["a few" "several" "some" "many" "often" "rarely" "frequently" "highly" "very"])
-  (list (filter (fn [term] (.find text term)) vague-terms)))
+  (list (filter (fn [term] (not (= -1 (.find text term)))) vague-terms)))
 
 (defn calculate-ambiguity-score [text]
   "Calculate ambiguity severity based on term count and positions."
@@ -140,13 +140,10 @@ def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
   (max 0.0 score))
 
 ;; Call the function
-(calculate-ambiguity-score text)
+(calculate-ambiguity-score {repr(text)})
 """
     try:
-        hy.eval(hy.read_str(hy_code))
-        # Note: In actual implementation, would pass text and get score
-        # For demo, returning placeholder
-        score = 0.8  # Would be computed by Hy code
+        score = float(hy.eval(hy.read_str(hy_code)))
     except Exception as e:
         score = 0.5
     
@@ -175,12 +172,17 @@ def evaluate_coverage_prolog(text: str) -> Dict[str, Any]:
     for requirement in ["user", "input", "task", "error", "case", "scenario"]:
         if requirement in text_lower:
             coverage_found.append(requirement)
+            prolog.assertz(f"mentions_category({requirement})")
     
     # Query Prolog to identify gaps
     gaps = []
     for req in ["user_types", "input_formats", "task_variations", "error_handling"]:
-        # In full impl: use Prolog to reason about gaps
-        pass
+        found = False
+        for aspect in coverage_found:
+            if aspect in req:
+                found = True
+        if not found:
+            gaps.append(req)
     
     coverage_score = len(coverage_found) / 4.0  # 4 requirement categories
     

@@ -1,5 +1,6 @@
 """Python surface integration for executing Python code."""
 
+import asyncio
 import importlib.util
 from typing import Dict, Any, Optional
 import structlog
