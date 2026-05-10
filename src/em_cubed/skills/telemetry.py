@@ -13,8 +13,31 @@ from pathlib import Path
 import json
 
 import structlog
+import uuid
 
 logger = structlog.get_logger()
+
+
+@dataclass
+class TraceSpan:
+    """A single span within an execution trace."""
+    span_id: str
+    surface: str
+    start_time: float
+    end_time: Optional[float] = None
+    input_data: Any = None
+    output_data: Any = None
+    success: bool = True
+    error: Optional[str] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "span_id": self.span_id,
+            "surface": self.surface,
+            "duration_ms": (self.end_time - self.start_time) * 1000 if self.end_time else 0,
+            "success": self.success,
+            "error": self.error,
+        }
 
 
 @dataclass
@@ -31,6 +54,11 @@ class ExecutionRecord:
     error_type: Optional[str] = None
     error_message: Optional[str] = None
     context: Dict[str, Any] = field(default_factory=dict)
+    trace_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    spans: List[TraceSpan] = field(default_factory=list)
+
+    def record_span(self, span: TraceSpan) -> None:
+        self.spans.append(span)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -44,6 +72,8 @@ class ExecutionRecord:
             "surface": self.surface,
             "error_type": self.error_type,
             "error_message": self.error_message,
+            "trace_id": self.trace_id,
+            "spans": [s.to_dict() for s in self.spans],
         }
 
 
@@ -95,6 +125,10 @@ class TelemetryCollector:
         # Periodically aggregate
         if time.time() - self._last_aggregate > self.config.aggregate_interval_seconds:
             self._aggregate_and_persist()
+
+    def flush(self) -> None:
+        """Force immediate aggregation and persistence."""
+        self._aggregate_and_persist()
 
     def get_skill_metrics(self, skill_id: str, window_seconds: int = 3600) -> Dict[str, Any]:
         """Get metrics for a specific skill over a time window."""
@@ -199,6 +233,28 @@ class TelemetryCollector:
                 )
 
 
+class TraceContext:
+    """Helper to manage hierarchical spans during execution."""
+    def __init__(self, record: ExecutionRecord):
+        self.record = record
+    
+    def start_span(self, surface: str, input_data: Any = None) -> TraceSpan:
+        span = TraceSpan(
+            span_id=str(uuid.uuid4()),
+            surface=surface,
+            start_time=time.perf_counter(),
+            input_data=input_data
+        )
+        self.record.record_span(span)
+        return span
+    
+    def end_span(self, span: TraceSpan, output_data: Any = None, success: bool = True, error: str = None):
+        span.end_time = time.perf_counter()
+        span.output_data = output_data
+        span.success = success
+        span.error = error
+
+
 class SkillTelemetry:
     """Wrapper for skill execution that records telemetry."""
 
@@ -216,36 +272,36 @@ class SkillTelemetry:
         success = False
         error_type = None
         error_message = None
+        
+        record = ExecutionRecord(
+            skill_id=skill_id,
+            timestamp=datetime.utcnow(),
+            success=False,
+            execution_time_ms=0,
+            surface=surface,
+        )
+        trace_ctx = TraceContext(record)
 
         try:
-            result = await skill_executor(input_data)
+            result = await skill_executor(input_data, trace_ctx)
             success = result.get("status") == "ok"
             if not success:
                 error_type = "execution_error"
                 error_message = result.get("message", "Unknown error")
-            # Estimate token usage from input/output size
             token_usage = self._estimate_tokens(input_data, result)
         except Exception as e:
             error_type = type(e).__name__
             error_message = str(e)
             result = {"status": "error", "message": error_message}
 
-        elapsed = (time.perf_counter() - start) * 1000  # ms
-
-        record = ExecutionRecord(
-            skill_id=skill_id,
-            timestamp=datetime.utcnow(),
-            success=success,
-            execution_time_ms=elapsed,
-            token_usage=token_usage,
-            surface=surface,
-            error_type=error_type,
-            error_message=error_message,
-            context={"input": str(input_data)[:200]},
-        )
+        record.execution_time_ms = (time.perf_counter() - start) * 1000
+        record.success = success
+        record.token_usage = token_usage
+        record.error_type = error_type
+        record.error_message = error_message
+        record.context = {"input": str(input_data)[:200]}
 
         self.collector.record_execution(record)
-
         return cast(Dict[str, Any], result)
 
     def _estimate_tokens(self, input_data: Any, result: Dict[str, Any]) -> int:

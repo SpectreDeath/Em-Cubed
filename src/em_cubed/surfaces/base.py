@@ -65,6 +65,29 @@ class SurfaceBase(SurfacePlugin, ABC):
                 "message": f"Execution timed out after {self.timeout}s"
             }
 
+    def execute_sync(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Synchronous version of execute for use in non-async contexts.
+        
+        This is primarily used for cross-surface orchestration where a skill
+        running in one surface (e.g. Python/asteval) needs to call another surface.
+        """
+        try:
+            # Try to use current loop if possible, otherwise use asyncio.run
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # We are in a thread where a loop is already running
+                # Create a new loop for this synchronous call
+                new_loop = asyncio.new_event_loop()
+                try:
+                    return new_loop.run_until_complete(self.execute(code, context))
+                finally:
+                    new_loop.close()
+            else:
+                return loop.run_until_complete(self.execute(code, context))
+        except RuntimeError:
+            # No event loop in this thread, use asyncio.run
+            return asyncio.run(self.execute(code, context))
+
     @abstractmethod
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute code - implemented by subclasses.

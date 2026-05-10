@@ -57,6 +57,12 @@ class PrologSurface(SurfaceBase):
             self._prolog = Prolog()
         return self._prolog
 
+    def shutdown(self) -> None:
+        """Shutdown Prolog engine."""
+        if self._prolog is not None:
+            logger.info("Shutting down Prolog surface")
+            self._prolog = None
+
     def _prolog_safe_value(self, value: Any) -> str:
         """Convert a value to a safe Prolog representation."""
         if isinstance(value, (int, float)):

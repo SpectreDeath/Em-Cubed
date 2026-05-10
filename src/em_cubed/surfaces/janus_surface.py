@@ -44,6 +44,14 @@ class JanusSurface(SurfaceBase):
             self._janus = janus_swi
         return self._janus
 
+    def shutdown(self) -> None:
+        """Shutdown Janus/Prolog engine."""
+        if self._janus is not None:
+            logger.info("Shutting down Janus surface")
+            # janus_swi doesn't have an explicit 'stop', but we can clear references
+            self._janus = None
+            # If we were using janus_swi.heartbeat or similar, we'd stop it here
+
     @staticmethod
     def extract_tags(source: Optional[str]) -> List[str]:
         """Extract predicate names from Prolog source as logic_tags."""

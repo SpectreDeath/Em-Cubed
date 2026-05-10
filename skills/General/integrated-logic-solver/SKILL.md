@@ -54,8 +54,8 @@ def process_family_data(family_members):
     # Combine facts and rules
     prolog_code = "\n".join(facts + rules)
     
-    # Execute Prolog reasoning
-    prolog_result = context["surfaces"]["prolog"].execute(prolog_code, {})
+    # Execute Prolog reasoning - use execute_sync for orchestration from Python
+    prolog_result = context["surfaces"]["prolog"].execute_sync(prolog_code, {})
     
     if prolog_result["status"] != "ok":
         return {"error": f"Prolog execution failed: {prolog_result.get('message', 'Unknown error')}"}
@@ -69,7 +69,8 @@ def process_family_data(family_members):
     
     results = {}
     for query in queries:
-        query_result = context["surfaces"]["prolog"].execute(query, {})
+        # Use execute_sync for synchronous query result
+        query_result = context["surfaces"]["prolog"].execute_sync(query, {})
         if query_result["status"] == "ok":
             # Extract results from Prolog output
             results[query] = query_result.get("result", [])

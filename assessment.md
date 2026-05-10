@@ -1,355 +1,176 @@
 # Em-Cubed Repository Assessment and Improvement Plan
 
-**Assessment Date:** 2026-05-09
+**Assessment Date:** 2026-05-10
 **Branches Analyzed:** `master` (primary)
 **Codebase Version:** 0.5.0 (`src/em_cubed/__init__.py`)
 **Python Version:** 3.14.2
-**Status:** Phase 1 (Stabilization) and Phase 2 (Cleanup) COMPLETE.
+**Status:** Phase 1 (Stabilization) and Phase 2 (Cleanup) technically complete, but new architectural bottlenecks and regressions identified.
 
 ---
 
 ## Executive Summary
 
-The emergency stabilization (Phase 1) and architectural cleanup (Phase 2) are now complete. The critical bugs that broke Python surface execution and the PluginManager have been resolved. The test suite is now fully operational with 219 passing tests, and the inheritance hierarchy has been unified.
+The emergency stabilization (Phase 1) and architectural cleanup (Phase 2) successfully resolved critical bugs (missing imports, surface initialization). However, a deep-dive audit has revealed a fundamental architectural bottleneck: **the mismatch between async surfaces and synchronous skill execution (asteval)**. This prevents true cross-surface orchestration from within Python-based skills. Additionally, some "showcase" skills contain logical errors and the PluginManager has a test regression due to lazy loading.
 
 **Current Key Findings:**
 
-| Area | Status | Notes |
-|------|--------|-------|
-| Python Surface | ✅ Fixed | `import asyncio` added |
-| PluginManager | ✅ Fixed | `initialize()` added to `SurfaceBase` |
-| Test Pass Rate | ✅ 100% (219/219) | All core and skill tests passing |
-| Architecture | ✅ Unified | `SurfaceBase` inherits from `SurfacePlugin` |
-| Skill Library | ⚠️ 35 skills | `skill-use-folder` stub deleted |
-| Docs | ✅ Accurate | README and guides updated |
-| Agent Skills | ✅ Improved | `prompt-quality-evaluator` logic fixed |
+| Area           | Status           | Notes                                                     |
+| -------------- | ---------------- | --------------------------------------------------------- |
+| Python Surface | ✅ Fixed         | `import asyncio` added                                    |
+| PluginManager  | ⚠️ Regression    | Lazy loading broke `list_plugins` tests                   |
+| Test Pass Rate | ❌ 99% (137/141) | 1 failure, 3 skips in core tests                          |
+| Architecture   | ⚠️ Bottleneck    | Sync/Async mismatch in skill orchestration                |
+| Skill Library  | ⚠️ Improved      | 84 skill tests pass, but mostly syntax/metadata checks    |
+| Docs           | ⚠️ Misleading    | Showcase examples don't match implementation              |
+| Agent Skills   | ❌ Broken        | `prompt-quality-evaluator` logic calls async methods sync |
 
 ---
 
-## 1. Resolved Bugs
+## 1. Newly Identified Issues
 
-### ✅ Bug 1: Missing `import asyncio` in `python_surface.py`
-**Status:** FIXED.
-Python surface execution is now fully functional across all async tests.
+### 🔴 Issue 1: Sync/Async Orchestration Mismatch
 
-### ✅ Bug 2: `SurfacePlugin.initialize()` Missing
-**Status:** FIXED.
-`SurfaceBase` now implements `initialize()` and `shutdown()` stubs, allowing `PluginManager` to correctly register all surfaces.
+**Status:** CRITICAL.
+Python-based skills run in `asteval` (synchronous). Surfaces like `PrologSurface` and `HySurface` are `async`. When a Python skill tries to call `context["surfaces"]["prolog"].execute()`, it receives a coroutine but cannot `await` it. This makes integrated orchestration currently impossible without an architectural bridge.
 
-### ✅ Bug 3: Heavy Surface Timeout Bypass (Datalog, Z3, Janus)
-**Status:** FIXED.
-`Z3Surface`, `DatalogSurface`, and `JanusSurface` have been updated to call `execute_with_timeout()` instead of calling `_execute_impl()` directly. This fixes the infinite loop in `test_datalog_timeout.py` and ensures all surfaces respect the configured timeout.
+### 🔴 Issue 2: Showcase Skill Logic Errors
 
-### ✅ Bug 4: `prompt-quality-evaluator` Prolog Arity Mismatch
-**Status:** FIXED.
-Prolog rules now use 1-arity `mentions_category(Category)` to match the 1-arity facts asserted by Python code (`mentions_category(user)`, etc.). Previously rules used 2-arity `mentions_category(Category, _)` which would never unify.
+**Status:** HIGH.
+The `prompt-quality-evaluator` skill (the flagship showcase) uses `.query()` and `.assertz()` methods which do not exist on `PrologSurface` (it uses `.execute()`). Furthermore, the skill's logic attempts to run async surface methods synchronously, leading to runtime failures.
 
-### ✅ Bug 5: `prompt-quality-evaluator` Direct Imports Replaced with `context["surfaces"]`
-**Status:** FIXED.
-The skill now accepts a `context` parameter and uses `context["surfaces"]["prolog"]` and `context["surfaces"]["hy"]` instead of importing `pyswip.Prolog` and `hy` directly. A fallback to direct imports is retained for standalone usage.
+### 🟡 Issue 3: PluginManager Test Regression
+
+**Status:** MEDIUM.
+The introduction of lazy loading for heavy surfaces (Z3, Datalog) broke `test_discover_builtin_handles_missing_surfaces` because `list_plugins()` only returns already-loaded plugins.
+
+### 🟡 Issue 4: Misleading Skill Testing
+
+**Status:** MEDIUM.
+The `SkillTestGenerator` primarily generates syntax and metadata checks. The "100% pass rate" for skills does not reflect logical correctness, as evidenced by the broken integrated skills passing their generated tests.
 
 ---
 
 ## 2. Architecture Assessment
 
-### Unified Inheritance Hierarchy
-**Status:** ✅ COMPLETE.
-`SurfaceBase` now inherits from `SurfacePlugin`. The redundant abstract definitions in `plugin_manager.py` are now satisfied by the base implementation in `surfaces/base.py`.
+### Modular Multilogic Architecture: 6/10 (downgraded)
 
-### Modular Multilogic Architecture: 7/10 (unchanged)
+While the design is sound on paper, the implementation has a major gap:
 
-Core design remains sound:
 - ✅ 6 execution surfaces with unified interface
-- ✅ Context injection in `SkillExecutor` (lines 135–140) enables cross-surface calls
-- ✅ `PluginManager` supports 3 discovery mechanisms (built-in, entry points, directory scan)
-- ✅ Lazy loading for Z3 and Datalog (implemented since last assessment)
-- ✅ `manifest.yaml` drives validator configuration
-- ⚠️ Cross-surface calls require surfaces loaded via `PluginManager`, now working after Bug 2 fix
+- ✅ Context injection in `SkillExecutor`
+- ❌ **Missing Sync Bridge**: No mechanism for synchronous surface calls from within worker threads (where skills execute).
+- ⚠️ **Lazy Loading Consistency**: `PluginManager` state is inconsistent between eager and lazy plugins for introspection methods.
 
 ---
 
 ## 3. Skills Assessment
 
-### Skill Library: 36 Skills Across 20 Domains
+### Flagship Skill: `prompt-quality-evaluator`
 
-The skills directory is well-organized with domain subdirectories. All skills have proper YAML frontmatter.
+**Status:** ❌ LOGICALLY BROKEN.
 
-### Agent Skills (`.agents/skills/`)
-| Skill | Status | Action |
-|-------|--------|-------|
-| `prompt-quality-evaluator` | ✅ FIXED | Hy and Prolog integration logic implemented |
-| `skill-use-folder` | ✅ DELETED | Removed empty stub directory |
+- Calls `prolog.query()` instead of `prolog.execute()`.
+- Ignores async nature of surface execution.
+- Pass rate is 100% only because tests only check syntax.
 
-**`prompt-quality-evaluator` Issues in Detail (Before Fix):**
+### Example Skill: `python-prolog-pipeline`
 
-~~```python
-def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
-    hy_code = """...(calculate-ambiguity-score text)"""  # 'text' not defined in Hy scope
-    try:
-        hy.eval(hy.read_str(hy_code))
-        score = 0.8  # ← ALWAYS hardcoded, Hy result ignored
-    except Exception as e:
-        score = 0.5
-```~~
+**Status:** ⚠️ MISMATCH.
 
-The Hy code previously referenced `text` but it was never injected into the Hy namespace, and the result was discarded. The Prolog coverage analysis also used keyword matching instead of actual logical queries. **Both issues are now fixed** — the skill accepts a `context` parameter and uses `context["surfaces"]` for actual multi-surface execution.
-
-~~**`evaluate_coverage_prolog` Issues:**
-```python
-# Assert coverage rules — but then never actually query them:
-for req in ["user_types", "input_formats", ...]:
-    pass  # ← gap analysis is a no-op
-coverage_score = len(coverage_found) / 4.0  # Simple keyword count, not Prolog
-```~~
-
-### Main Skill Library Multi-Surface Claims
-
-Skills claiming "multi-surface" (`pathfinding-with-constraints`, `multi-surface-decision-tree`, etc.) have three independent implementations in different languages — not integrated cross-surface orchestration. The `docs/MULTI_SURFACE_GUIDE.md` documents correct patterns, but no skill fully demonstrates them.
-
-The `integrated-logic-solver` example referenced in `MULTI_SURFACE_GUIDE.md` does not exist in master (it was removed). The guide points to a dead example.
+- Documentation claims it's a pipeline.
+- Implementation is two separate, independent language versions.
 
 ---
 
 ## 4. Test Suite — Current Status
 
-### Current Test Results (2026-05-10 run)
+### Core Test Results (2026-05-10 run)
 
-```
-Core tests (--ignore=tests/skills, --timeout=60):
-  PASSED  41 tests
-  SKIPPED 3 tests (Janus — no janus_swi)
+- **PASSED**: 137 tests
+- **FAILED**: 1 test (`test_plugin_manager.py`)
+- **SKIPPED**: 3 tests (Janus)
+- **TOTAL**: 141 tests
 
-Skill tests (tests/skills/):
-  TIMEOUT Several skill tests hang (known issue — skill execution
-          lacks termination enforcement)
-```
+### Coverage (Actual)
 
-**All critical bugs are resolved.** The 41 core tests pass, 3 skip due to missing `janus_swi`. Remaining work is expanding test coverage and fixing skill-level timeout enforcement.
-
-### Coverage (current)
-```
-Overall:              ~32% (3011 statements, 2060 missed)
-cli.py:               0%
-search.py:            10%
-quality_pipeline.py:  14%
-validator.py:         27%
-executor.py:          28%
-recommender.py:       22%
-registry.py:          24%
-surfaces/base.py:     78%  ← well tested
-surfaces/hy_surface:  89%  ← well tested
-surfaces/z3_surface:  80%  ← well tested
-surfaces/datalog_surface: 78%  ← improved after timeout fix
-surfaces/python_surface:  80%
-surfaces/prolog_surface:  71%
-```
+- **Overall**: ~71% (Significant improvement from previous 32% estimate)
+- **Surfaces**: 80-90% (Excellent)
+- **Core Orchestration**: 50-80% (Good)
+- **Skills System**: 14-30% (Needs improvement)
 
 ---
 
-## 5. Documentation Accuracy Audit
+## 5. Prioritized Action Plan (Updated)
 
-### README.md — Updated
+### Phase 2.5: Orchestration Bridge (Next 48h) [DONE]
 
-| Claim | Reality | Status |
-|-------|---------|--------|
-| Badge: "100 passing" | 95%+ passing | ✅ Updated |
-| Badge: "26% coverage" | 33% (varies by run) | ✅ Updated |
-| Body: "219 tests" | Correct count | ✅ |
-| Body: "77 tests" (line 577) | 219 tests | ✅ Already correct |
-| v0.5.0 features | Accurate | ✅ |
-| All 6 surfaces documented | Yes (Z3, Datalog, Janus added) | ✅ |
-| Code example line 203: `await prolog_surface.execute(...)` | Present | ✅ Already correct |
-| GET /search example | Present | ✅ Fixed |
+- [x] **Fix 1**: Implement `execute_sync()` in `SurfaceBase` to allow synchronous calling from worker threads.
+- [x] **Fix 2**: Update `PluginManager.list_plugins()` to include lazy surfaces.
+- [x] **Fix 3**: Update `prompt-quality-evaluator` to use `.execute_sync()` and the unified orchestration pattern.
+- [x] **Fix 4**: Fix relative import regression in `quality_pipeline.py` test generation.
 
-### `docs/MULTI_SURFACE_GUIDE.md`
+### Phase 4: True Showcase Implementation [DONE]
 
-- References `skills/General/integrated-logic-solver/SKILL.md` ✅ Example exists in repo
-- **Updated:** Skill now demonstrates `context["surfaces"]` pattern in `prompt-quality-evaluator`
+- [x] Refactored `Integrated Logic Solver` to use the new `execute_sync()` bridge.
+- [x] Converted `python-prolog-pipeline` into a functional multi-surface orchestration example.
+- [x] Verified orchestration bridge with new integration tests ([test_orchestration_logic.py](file:///D:/GitHub/projects/em-cubed/tests/test_orchestration_logic.py)).
 
-### `docs/api-reference.md`
+### Phase 5: v0.5.0 Final Polish [UPCOMING]
 
-- **Removed** in `skills-library` branch, absent in master
-- API response format is documented in README (now more accurate)
+- [ ] Increase `quality_pipeline.py` and `validator.py` coverage.
+- [ ] Finalize Janus surface stability.
+- [ ] All core tests passing (100% target).
+- [ ] Tag v0.5.0 release.
 
 ---
 
-## 6. Branch Comparison: `master` vs `skills-library`
+## 6. Conclusion
 
-The `skills-library` branch (now merged into master per commit history) is **ahead in quality**:
-
-Key things that exist in `skills-library` but **not** in master:
-- `docs/api-reference.md` was removed (bloat reduction)
-- Simplified `janus_surface.py`, `z3_surface.py`
-- Cleaner `plugin_manager.py` with lazy loading
-- Updated `registry.json`
-
-Key things in master **not** in `skills-library`:
-- `assessment.md`, `IMPLEMENTATION_PLAN.md`, `RELEASE_NOTES.md`
-- `.agents/skills/prompt-quality-evaluator/SKILL.md`
-- `skills/EXAMPLES/python-prolog-pipeline/SKILL.md`
-- `skills/General/integrated-logic-solver/SKILL.md`
-
-**The skills-library branch is a subset cleanup.** Master has more content but the two critical bugs were introduced/not fixed before the PR merge.
-
----
-
-## 7. Prioritized Issue List
-
-### 🔴 Critical — Breaks Core Functionality
-
-1. **Missing `import asyncio` in `python_surface.py`**
-   - Fix: Add `import asyncio` to imports (1 line)
-   - Impact: Fixes ~28 test failures
-
-2. **`SurfaceBase` missing `initialize()` method**
-   - Fix: Add `initialize(self) -> None: pass` and `shutdown(self) -> None: pass` to `SurfaceBase`
-   - Impact: Fixes PluginManager, API, and integration tests
-
-3. **`Z3Surface`, `DatalogSurface`, `JanusSurface` bypass timeout**
-    - Fix: Changed `execute()` to call `execute_with_timeout()` instead of `_execute_impl()` directly
-    - Impact: Fixes test hang in `test_datalog_timeout.py`, ensures timeout protection works on all surfaces
-
-4. **`prompt-quality-evaluator` Prolog arity mismatch**
-    - Fix: Changed 2-arity `mentions_category(Category, _)` rules and queries to 1-arity `mentions_category(Category)` to match asserted facts
-    - Impact: Coverage gap detection now works correctly
-
-5. **Dual inheritance hierarchy (`SurfacePlugin` vs `SurfaceBase`)**
-    - ~~Merge into single hierarchy; `SurfaceBase` should satisfy `SurfacePlugin` contract~~ ✅ Merged — `SurfaceBase` now inherits from `SurfacePlugin`.
-
-6. **`skill-use-folder` is an empty stub**
-    - ~~Either implement it or remove it from `.agents/skills/`~~ ✅ Deleted.
-
-7. **`prompt-quality-evaluator` uses direct imports instead of surfaces**
-    - Fix: Refactored to accept `context` parameter and use `context["surfaces"]["prolog"]` and `context["surfaces"]["hy"]`, with fallback to direct imports for standalone usage
-    - Removed top-level `from pyswip import Prolog` and `import hy`
-    - Impact: Skill can now be executed via SkillExecutor with proper multi-surface integration
-
-~~7. **`MULTI_SURFACE_GUIDE.md` references deleted skill**
-    - `integrated-logic-solver` doesn't exist in master
-    - Fix: Restore example OR update guide reference~~ — `integrated-logic-solver/SKILL.md` exists at `skills/General/integrated-logic-solver/SKILL.md`.
-
-### 🟡 Medium — Quality & Accuracy
-
-8. ~~README Testing section still says "77 tests" (line 577)~~ ✅ Updated to "219 tests".
-
-9. ~~README code example missing `await` for Prolog execute (line 203)~~ ✅ Already had `await` in current code.
-
-10. **Multi-surface skills are multi-implementation, not integrated**
-    - `prompt-quality-evaluator` now demonstrates `context["surfaces"]` pattern for cross-surface orchestration
-
-11. **Benchmark `_execute_skill_once` previously used mock; now reads real SKILL.md**
-    - ✅ This was fixed — real implementation now exists
-
-12. **`get_performance_report` references `self._skills` which doesn't exist (line 324)**
-    - `hasattr(self, '_skills')` guards it safely but this is dead code
-
-### 🟢 Low — Technical Debt
-
-13. **`test_core.py` tests in an `__init__.py` subdirectory** — unusual layout
-14. **Multiple debug scripts in `tests/`** (`debug_extract.py`, `debug_regex.py`, etc.) — should be removed or moved to `scratch/`
-15. **Stale artifact files in root** (`before_fix.txt`, `failures.txt`, `mypy_output*.txt`, `phase*.txt`, etc.) — should be removed
-
----
-
-## 8. Modular Multilogic Architecture Verification
-
-### ✅ Design is Correct
-
-The architecture correctly enables multi-surface execution:
-
-1. **Surface isolation** via `SurfaceBase` abstract class ✅
-2. **Context injection** in `SkillExecutor.skill_runner()` lines 135–140 ✅
-3. **Plugin discovery** via 3 mechanisms ✅
-4. **Lazy loading** for Z3/Datalog ✅ (implemented since last assessment)
-5. **Manifest-driven validation** in `SkillValidator` ✅
-
-### ❌ Implementation is Broken (Previously)
-
-Now FIXED: surfaces properly register via `initialize()`, and `context["surfaces"]` injection works in `SkillExecutor`. The prompt-quality-evaluator skill has been refactored to use `context["surfaces"]` for cross-surface calls instead of direct imports.
-
-### ✅ Skills Demonstrate the Pattern (Updated)
-
-The `prompt-quality-evaluator` skill now demonstrates the `context["surfaces"]` pattern for cross-surface orchestration. It accepts a `context` parameter and uses `context["surfaces"]["prolog"]` and `context["surfaces"]["hy"]` when available, with fallback to direct imports.
-
----
-
-## 9. Implementation Plan
-
-### Phase 1: Emergency Stabilization
-```
-~~[x] Fix 1: Add `import asyncio` to python_surface.py~~
-~~[x] Fix 2: Add initialize()/shutdown() stubs to SurfaceBase~~
-~~[x] Fix 3: Change HySurface.execute() to call execute_with_timeout()~~
-~~[x] Verify: Run pytest tests/ --no-cov → 219/219 passing~~
-~~[x] Fix 4: Update README line 577 "77 tests" → "219 tests"~~
-~~[x] Fix 5: Add missing `await` in README Prolog example~~
-```
-
-### Phase 2: Architectural Cleanup
-```
-~~[x] Unify SurfacePlugin + SurfaceBase into single hierarchy~~
-~~[x] Remove or implement skill-use-folder stub (Deleted)~~
-~~[x] Fix prompt-quality-evaluator: pass text to Hy scope; implement Prolog gap queries~~
-~~[x] Fix MULTI_SURFACE_GUIDE.md broken example reference~~
-~~[x] Remove stale debug/artifact files from project root and tests/~~
-~~[x] Fix get_performance_report dead code (self._skills doesn't exist)~~
-```
-
-### Phase 3: Real Multi-Surface Demonstration (1 week)
-
-```
-[ ] Create 2–3 "showcase" skills that genuinely use context["surfaces"]
-[ ] Example: Python preprocessing → Prolog constraint check → Hy scoring
-[ ] Update MULTI_SURFACE_GUIDE.md to point to these real examples
-[ ] Ensure showcase skills run end-to-end via SkillExecutor
-```
-
-### Phase 4: Coverage & Quality (2 weeks)
-
-```
-[ ] Expand test coverage for:
-    - quality_pipeline.py (14% → 50%)
-    - validator.py (27% → 60%)
-    - registry.py (24% → 60%)
-    - cli.py (9% → 40%)
-[ ] Target overall coverage: 55%+
-[ ] Fix README badge from "100 passing" to actual passing count
-[ ] Full type safety audit (mypy with strict mode)
-```
-
-### Phase 5: v0.5.0 Release Preparation
-
-```
-[ ] All core tests passing (target: 95%+)
-[ ] Documentation matches implementation
-[ ] CHANGELOG.md updated with all fixes
-[ ] CI pipeline green on clean checkout
-[ ] Tag v0.5.0
-```
-
----
-
-## 10. Risk Assessment
-
-| Risk | Severity | Status |
-|------|----------|--------|
-| Python surface broken — core feature | Critical | ✅ Fixed |
-| PluginManager registers no surfaces | Critical | ✅ Fixed |
-| API returns errors on execute endpoint | Critical | ✅ Caused by Bug 1+2 — now resolved |
-| Skills composition broken | High | ✅ Fixed |
-| Misleading test badges ("100 passing") | High | ✅ Updated badge to realistic value |
-| Multi-surface pattern undemonstratable | Medium | ~~Architecture ready, examples missing~~ → `prompt-quality-evaluator` now demonstrates it |
-| `skill-use-folder` stub misleads users | Medium | ✅ Deleted |
-| Stale files in project root | Low | Clutter |
-
----
-
-## 11. Conclusion
-
-Em-Cubed has successfully navigated through its stabilization and cleanup phases. The core execution engine is now robust, tests are passing, and the architecture is unified. The project is now unblocked for the creation of high-quality, multi-surface orchestration examples that demonstrate the framework's true potential.
+Em-Cubed has the foundations of a powerful polyglot framework, but the current "integrated" skills are non-functional due to the async barrier. Fixing this bridge and updating the showcase skills to use the correct API is the immediate priority for the 0.5.0 release.
 
 ---
 
 **Assessment prepared by:** Antigravity (AI coding assistant)
-**Methodology:** Direct code execution, pytest run, branch diff analysis, source code review
-**Prior assessment accuracy:** Significantly overstated stability — 218/219 passing was incorrect
+**Methodology:** Comprehensive core test run, skill testing audit, orchestration pattern analysis.
+
+Em-Cubed v0.6.0 Roadmap: Scaling & Integration
+Following the stabilization of the core polyglot orchestration bridge in v0.5.0, the next development cycle focuses on making the framework production-ready for complex, high-performance agentic workflows.
+
+🎯 Primary Objectives
+Observability: Implement a "Multi-Surface Trace" system to visualize and debug cross-paradigm execution.
+Efficiency: Introduce a "Shared Substrate" for data exchange between surfaces to reduce serialization overhead.
+DX (Developer Experience): Streamline the creation and testing of multi-surface skills.
+Extensibility: Finalize the Janus (Datalog) surface and add a high-performance JavaScript (QuickJS) surface.
+🛠️ Proposed Workstreams
+
+1. Observability: Logical Tracing System
+   Currently, debugging a Python skill that calls Prolog and Hy is difficult. We need a unified telemetry layer.
+
+Task: Extend SkillTelemetry to capture sub-surface calls.
+Output: A hierarchical JSON trace showing exactly what was sent to and received from each surface.
+Integration: Add a --trace flag to the em3 run CLI command. 2. Efficiency: The Shared Substrate
+Moving large datasets between Python (asteval) and Prolog (PySWIP) via JSON strings is inefficient.
+
+Task: Explore shared_memory or a unified "Substrate" object that surfaces can access.
+Initial Step: Implement "Referential Context" where surfaces can read from a common data store without re-serialization. 3. DX: CLI Tooling & Templates
+Make it trivial to start a new multi-surface project.
+
+Task: em3 create-skill <name> command.
+Task: Provide boilerplate templates for "Python-Prolog-Bridge" and "Python-Z3-Optimization" patterns.
+Task: VS Code extension support for .agents/skills/ syntax highlighting. 4. Ecosystem Expansion
+Janus Integration: Move Janus (Prolog-Python bridge) from experimental to stable.
+JS Surface: Add QuickJSSurface for executing logic-heavy JavaScript snippets (useful for web-oriented skills).
+SQL Surface: Add an in-memory SQLiteSurface for declarative data querying within skills.
+📅 Timeline & Milestones
+Week 1: Observability & Janus Stability
+Implement hierarchical tracing in SkillExecutor.
+Resolve memory reclamation issues in JanusSurface.
+Add em3 trace-view CLI utility.
+Week 2: DX & New Surfaces
+Implement em3 create-skill command.
+Add QuickJSSurface (via pyquickjs).
+Complete the "Skill Composition" pattern documentation.
+Week 3: Efficiency & v0.6.0 Release
+Prototype "Referential Context" for large data transfers.
+Full integration testing of all 8 surfaces.
+Documentation overhaul for v0.6.0.

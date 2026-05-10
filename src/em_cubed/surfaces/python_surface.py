@@ -70,6 +70,8 @@ class PythonSurface(SurfaceBase):
                 if context:
                     for key, value in context.items():
                         aeval.symtable[key] = value
+                    # Also provide the context object itself for compatibility
+                    aeval.symtable["context"] = context
 
                 # Execute the code
                 result = aeval(code)

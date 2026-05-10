@@ -211,11 +211,16 @@ class PluginManager:
 
     def list_plugins(self) -> Dict[str, bool]:
         """List all plugins and their availability."""
-        return {name: plugin.available for name, plugin in self._plugins.items()}
+        results = {name: plugin.available for name, plugin in self._plugins.items()}
+        for name in self._lazy_classes:
+            results[name] = True
+        return results
 
     def get_available_surfaces(self) -> List[str]:
         """Get list of available surface names."""
-        return [name for name, plugin in self._plugins.items() if plugin.available]
+        available = [name for name, plugin in self._plugins.items() if plugin.available]
+        available.extend(list(self._lazy_classes.keys()))
+        return available
 
     def get_surface_info(self) -> List[Dict[str, Any]]:
         """Get detailed information about all surfaces."""
@@ -225,5 +230,11 @@ class PluginManager:
                 "name": name,
                 "available": plugin.available,
                 "description": getattr(plugin, "description", f"{name.title()} surface"),
+            })
+        for name in self._lazy_classes:
+            info.append({
+                "name": name,
+                "available": True,
+                "description": f"{name.title()} surface (lazy-loaded)",
             })
         return info

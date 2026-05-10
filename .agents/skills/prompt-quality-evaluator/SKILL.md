@@ -146,10 +146,9 @@ def evaluate_ambiguity_hy(text: str, surfaces: Dict[str, Any] = None) -> Dict[st
 """
     try:
         if surfaces and "hy" in surfaces:
-            # Use the Hy surface from context
-            hy_result = surfaces["hy"].execute(hy_code, {})
-            import asyncio
-            score = float(asyncio.get_event_loop().run_until_complete(hy_result)) if asyncio.iscoroutine(hy_result) else float(hy_result.get("value", 0.5))
+            # Use the Hy surface from context via synchronous bridge
+            res = surfaces["hy"].execute_sync(hy_code, {})
+            score = float(res.get("value", 0.5))
         else:
             # Fallback: direct import
             import hy
@@ -167,9 +166,8 @@ def evaluate_ambiguity_hy(text: str, surfaces: Dict[str, Any] = None) -> Dict[st
 """
     try:
         if surfaces and "hy" in surfaces:
-            hy_result = surfaces["hy"].execute(ambiguous_terms_code, {})
-            import asyncio
-            ambiguous_terms = asyncio.get_event_loop().run_until_complete(hy_result) if asyncio.iscoroutine(hy_result) else hy_result.get("value", [])
+            res = surfaces["hy"].execute_sync(ambiguous_terms_code, {})
+            ambiguous_terms = res.get("value", [])
         else:
             import hy
             ambiguous_terms = hy.eval(hy.read_str(ambiguous_terms_code))
@@ -194,39 +192,43 @@ def evaluate_coverage_prolog(text: str, surfaces: Dict[str, Any] = None) -> Dict
         prolog = Prolog()
 
     # Assert coverage rules
-    prolog.assertz("coverage_requirement(user_types)")
-    prolog.assertz("coverage_requirement(input_formats)")
-    prolog.assertz("coverage_requirement(task_variations)")
-    prolog.assertz("coverage_requirement(error_handling)")
+    prolog.execute_sync("coverage_requirement(user_types).")
+    prolog.execute_sync("coverage_requirement(input_formats).")
+    prolog.execute_sync("coverage_requirement(task_variations).")
+    prolog.execute_sync("coverage_requirement(error_handling).")
+    prolog.execute_sync("mandatory_coverage_category(user_types).")
+    prolog.execute_sync("mandatory_coverage_category(input_formats).")
+    prolog.execute_sync("mandatory_coverage_category(task_variations).")
+    prolog.execute_sync("mandatory_coverage_category(error_handling).")
 
     # Analyze text for coverage indicators
     text_lower = text.lower()
 
     # Assert what we found in the text
     if "user" in text_lower:
-        prolog.assertz("mentions_category(user)")
+        prolog.execute_sync("mentions_category(user).")
     if "input" in text_lower or "format" in text_lower:
-        prolog.assertz("mentions_category(input)")
+        prolog.execute_sync("mentions_category(input).")
     if "task" in text_lower:
-        prolog.assertz("mentions_category(task)")
+        prolog.execute_sync("mentions_category(task).")
     if "error" in text_lower:
-        prolog.assertz("mentions_category(error)")
+        prolog.execute_sync("mentions_category(error).")
 
     # Query Prolog to identify gaps using the defined rules
     gaps = []
     for req in ["user_types", "input_formats", "task_variations", "error_handling"]:
         # Query if this requirement is NOT met
-        # Fixed: use 1-arity mentions_category to match asserted facts
-        query_result = list(prolog.query(f"coverage_gap({req})"))
-        if query_result:  # If we got results, it's a gap
+        # Fixed: use execute_sync which returns results for queries
+        res = prolog.execute_sync(f"coverage_gap({req})")
+        if res.get("status") == "ok" and res.get("result"):
             gaps.append(req)
 
     # Count how many requirements we actually have
     found_count = 0
     for req in ["user_types", "input_formats", "task_variations", "error_handling"]:
-        # Fixed: use 1-arity mentions_category to match asserted facts
-        query_result = list(prolog.query(f"mandatory_coverage_category({req}), mentions_category(_)"))
-        if query_result:
+        # Fixed: use execute_sync for query
+        res = prolog.execute_sync(f"mentions_category({req.split('_')[0]})")
+        if res.get("status") == "ok" and res.get("result"):
             found_count += 1
 
     coverage_score = found_count / 4.0  # 4 requirement categories

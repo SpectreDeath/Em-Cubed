@@ -311,7 +311,7 @@ class Test{safe_name}Skill:
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
         """Test basic skill execution."""
-        from .metadata import SkillMetadata
+        from em_cubed.skills.metadata import SkillMetadata
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         if not metadata_dict:
             pytest.skip("Skill metadata not available")

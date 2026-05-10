@@ -9,8 +9,9 @@ from dataclasses import dataclass
 from typing import Dict, Any, Optional, cast
 from pathlib import Path
 import structlog
+import asyncio
 
-from .telemetry import SkillTelemetry, get_telemetry_collector
+from .telemetry import SkillTelemetry, get_telemetry_collector, TraceContext
 from .registry import SkillRegistry
 
 logger = structlog.get_logger()
@@ -36,6 +37,54 @@ class SkillExecutionResult:
     execution_time_ms: float = 0.0
     surface_used: str = ""
     token_usage: int = 0
+
+
+class TelemetryProxy:
+    """Proxy for surface plugins that records trace spans."""
+    def __init__(self, surface, trace_ctx):
+        self._surface = surface
+        self._trace_ctx = trace_ctx
+
+    def __getattr__(self, name):
+        attr = getattr(self._surface, name)
+        if callable(attr) and name in ("execute", "execute_sync"):
+            def wrapped(*args, **kwargs):
+                code = args[0] if args else kwargs.get("code", "")
+                span = self._trace_ctx.start_span(self._surface.name, code)
+                try:
+                    res = attr(*args, **kwargs)
+                    return self._wrap_result(res, span)
+                except Exception as e:
+                    self._trace_ctx.end_span(span, success=False, error=str(e))
+                    raise
+            return wrapped
+        return attr
+
+    def _wrap_result(self, res, span):
+        if asyncio.iscoroutine(res):
+            async def wrapper():
+                try:
+                    r = await res
+                    self._trace_ctx.end_span(
+                        span, 
+                        output_data=str(r)[:500], 
+                        success=r.get("status") == "ok", 
+                        error=r.get("message")
+                    )
+                    return r
+                except Exception as e:
+                    self._trace_ctx.end_span(span, success=False, error=str(e))
+                    raise
+            return wrapper()
+        else:
+            # Synchronous result
+            self._trace_ctx.end_span(
+                span, 
+                output_data=str(res)[:500], 
+                success=res.get("status") == "ok", 
+                error=res.get("message")
+            )
+            return res
 
 
 class SkillExecutor:
@@ -124,20 +173,24 @@ class SkillExecutor:
             )
 
         # Wrap execution with telemetry
-        async def skill_runner(input_data: Dict[str, Any]) -> Dict[str, Any]:
+        async def skill_runner(input_data: Dict[str, Any], trace_ctx: TraceContext) -> Dict[str, Any]:
             # Prepare execution context with input
             context = {
                 "skill_input": input_data,
                 "skill_metadata": skill.to_registry_dict(),
+                "trace_id": trace_ctx.record.trace_id,
                 **(request.context or {}),
             }
 
-            # Inject surface plugins for cross-surface interaction
+            # Inject surface plugins for cross-surface interaction (wrapped in proxy)
             context["surfaces"] = {}
-            for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
-                surf_plugin = self.plugin_manager.get(surface_name)
+            for s_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+                surf_plugin = self.plugin_manager.get(s_name)
                 if surf_plugin and surf_plugin.available:
-                    context["surfaces"][surface_name] = surf_plugin
+                    context["surfaces"][s_name] = TelemetryProxy(surf_plugin, trace_ctx)
+
+            # Also provide the trace context itself
+            context["trace"] = trace_ctx
 
             # Execute on surface
             result = await plugin.execute(surface_code, context)

@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 
 import structlog
+from .telemetry import SkillTelemetry, get_telemetry_collector
 
 logger = structlog.get_logger()
 
@@ -255,6 +256,7 @@ class SkillTestRunner:
     def __init__(self, plugin_manager, registry):
         self.plugin_manager = plugin_manager
         self.registry = registry
+        self.telemetry = SkillTelemetry(get_telemetry_collector())
         self.logger = logger.bind(component="test_runner")
 
     async def run_test(self, test: TestCase, context: Optional[Dict] = None) -> TestResult:
@@ -272,7 +274,28 @@ class SkillTestRunner:
 
         start = time.perf_counter()
         try:
-            result = await surface.execute(test.code, context)
+            # Prepare a runner for telemetry
+            async def test_runner_impl(input_data, trace_ctx=None):
+                ctx = context or {}
+                if trace_ctx:
+                    from .executor import TelemetryProxy
+                    # Inject proxies for sub-surface calls in tests
+                    surfaces = self.plugin_manager._plugins
+                    proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
+                    ctx["surfaces"] = proxies
+                    ctx["trace"] = trace_ctx
+                    ctx["context"] = ctx
+                
+                return await surface.execute(test.code, ctx)
+
+            # Run via telemetry
+            result = await self.telemetry.execute_with_telemetry(
+                test_runner_impl,
+                skill_id=f"test:{test.name}",
+                input_data={},
+                surface=test.surface,
+                timeout=test.timeout
+            )
             elapsed = (time.perf_counter() - start) * 1000
 
             passed = True

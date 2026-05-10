@@ -44,36 +44,42 @@ Output: {"path": ["a","b","c","d"], "count": 4}
 ### Python Code
 
 ```python
-# Graph pathfinding in Python (BFS)
-# This code runs inside asteval - no async/await or imports allowed
+# Graph pathfinding with Python orchestration and Prolog logic
+# This demonstrates a true multi-surface pipeline
 
 edges = skill_input.get("edges", [])
 start = skill_input.get("start", "")
 end = skill_input.get("end", "")
 
-# Build adjacency list
-graph = {}
-for src, tgt in edges:
-    if src not in graph:
-        graph[src] = []
-    graph[src].append(tgt)
+if not edges or not start or not end:
+    result = {"error": "Missing input data"}
+else:
+    prolog = context["surfaces"]["prolog"]
+    
+    # 1. Reset and load rules into Prolog
+    prolog.execute_sync("retractall(edge(_, _)).")
+    prolog.execute_sync("path(X, X, [X]).")
+    prolog.execute_sync("path(X, Y, [X|Rest]) :- edge(X, Z), path(Z, Y, Rest).")
+    
+    # 2. Assert facts from Python input
+    for src, tgt in edges:
+        prolog.execute_sync(f"edge({src}, {tgt}).")
+    
+    # 3. Query Prolog for the path
+    query = f"path({start}, {end}, Path)"
+    res = prolog.execute_sync(query)
+    
+    if res.get("status") == "ok" and res.get("result"):
+        # Take the first path found
+        found_path = res["result"][0]["Path"]
+        result = {
+            "path": found_path,
+            "count": len(found_path),
+            "method": "python-orchestrated-prolog-inference"
+        }
+    else:
+        result = {"path": None, "count": 0, "error": "No path found"}
 
-# BFS
-queue = [(start, [start])]
-visited = {start}
-found_path = None
-
-while queue:
-    node, path = queue.pop(0)
-    if node == end:
-        found_path = path
-        break
-    for neighbor in graph.get(node, []):
-        if neighbor not in visited:
-            visited.add(neighbor)
-            queue.append((neighbor, path + [neighbor]))
-
-result = {"path": found_path, "count": len(found_path) if found_path else 0}
 result
 ```
 

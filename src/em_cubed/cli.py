@@ -111,6 +111,11 @@ def main():
         type=float,
         help="Maximum execution time in seconds (default: 30)"
     )
+    run_parser.add_argument(
+        "--trace",
+        action="store_true",
+        help="Show hierarchical execution trace after run"
+    )
 
     # Validate command
     validate_parser = subparsers.add_parser("validate", help="Validate all skills")
@@ -201,6 +206,27 @@ def main():
         help="Output file for composition plan (JSON)"
     )
 
+    # Trace-view command
+    trace_parser = subparsers.add_parser("trace-view", help="View skill execution traces")
+    trace_parser.add_argument(
+        "--file",
+        "-f",
+        default="logs/skill_telemetry.jsonl",
+        help="Telemetry file path"
+    )
+    trace_parser.add_argument(
+        "--skill",
+        "-s",
+        help="Filter by skill ID"
+    )
+    trace_parser.add_argument(
+        "--last",
+        "-l",
+        type=int,
+        default=5,
+        help="Show last N traces"
+    )
+
     args = parser.parse_args()
 
     if not args.command:
@@ -226,10 +252,17 @@ def main():
             asyncio.run(_handle_recommend(args))
         elif args.command == "compose":
             asyncio.run(_handle_compose(args))
+        elif args.command == "trace-view":
+            _handle_trace_view(args)
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
         print(f"Error: {e}", file=sys.stderr)
+        from em_cubed.skills.telemetry import get_telemetry_collector
+        get_telemetry_collector().flush()
         sys.exit(1)
+    finally:
+        from em_cubed.skills.telemetry import get_telemetry_collector
+        get_telemetry_collector().flush()
 
 
 def _handle_index(args):
@@ -307,8 +340,56 @@ def _handle_run(args):
     logger.info("Executing code", surface=surface_name, code_length=len(code), timeout=timeout)
 
     async def run_async():
-        result = await surface.execute(code)
-        print(json.dumps(result, indent=2))
+        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
+        
+        if args.trace:
+            # Setup tracing for CLI run
+            from em_cubed.skills.telemetry import initialize_telemetry, TelemetryConfig, ExecutionRecord, TraceContext
+            from datetime import datetime
+            
+            initialize_telemetry(TelemetryConfig(log_every_execution=False))
+            
+            # We mock a request
+            request = SkillExecutionRequest(
+                skill_id="cli_run",
+                input_data={},
+                surface=surface_name,
+                timeout=timeout
+            )
+            # Actually we need to mock the skill file load too... 
+            # Simplified: just run directly if it's a surface run
+            # But tracing is tied to SkillExecutor.
+            # I'll just run it via surface and manually trace it for CLI run if --trace is on
+            from em_cubed.skills.telemetry import ExecutionRecord, TraceContext, datetime
+            record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.utcnow(), success=True, execution_time_ms=0)
+            trace_ctx = TraceContext(record)
+            
+            from em_cubed.skills.executor import TelemetryProxy
+            surfaces = plugin_manager._plugins
+            proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
+            context = {"surfaces": proxies, "skill_input": {}, "trace": trace_ctx}
+            context["context"] = context # compatibility
+            
+            start = asyncio.get_event_loop().time()
+            result = await surface.execute(code, context)
+            elapsed = (asyncio.get_event_loop().time() - start) * 1000
+            
+            print(json.dumps(result, indent=2))
+            
+            print(f"\nExecution Trace: {record.trace_id}")
+            print(f"Total Time: {elapsed:.1f}ms")
+            
+            # Record to collector for persistence
+            from em_cubed.skills.telemetry import get_telemetry_collector
+            get_telemetry_collector().record_execution(record)
+            if record.spans:
+                print("Sub-surface calls:")
+                for span in record.spans:
+                    status = "[OK]" if span.success else "[FAIL]"
+                    print(f"  {status} {span.surface:<10} | {span.to_dict()['duration_ms']:>6.1f}ms")
+        else:
+            result = await surface.execute(code)
+            print(json.dumps(result, indent=2))
 
     asyncio.run(run_async())
 
@@ -509,6 +590,40 @@ async def _handle_compose(args):
             with open(args.output, 'w') as f:
                 json.dump([p.to_dict() if hasattr(p, 'to_dict') else str(p) for p in plans], f, indent=2)
             print(f"\nCompositions saved to {args.output}")
+
+
+def _handle_trace_view(args):
+    """Handle trace-view command."""
+    trace_file = Path(args.file)
+    if not trace_file.exists():
+        print(f"Trace file not found: {trace_file}")
+        return
+
+    traces = []
+    with open(trace_file, "r") as f:
+        for line in f:
+            try:
+                trace = json.loads(line)
+                if args.skill and trace.get("skill_id") != args.skill:
+                    continue
+                traces.append(trace)
+            except json.JSONDecodeError:
+                continue
+    
+    if not traces:
+        print("No traces found.")
+        return
+
+    # Show last N
+    for trace in traces[-args.last:]:
+        print(f"\nTrace: {trace.get('trace_id')} | Skill: {trace.get('skill_id')}")
+        print(f"Status: {'[OK]' if trace.get('success') else '[FAIL]'} | Time: {trace.get('execution_time_ms'):.1f}ms")
+        spans = trace.get("spans", [])
+        if spans:
+            print("  Sub-surface calls:")
+            for span in spans:
+                status = "[OK]" if span.get("success") else "[FAIL]"
+                print(f"    {status} {span.get('surface'):<10} | {span.get('duration_ms'):>6.1f}ms")
 
 
 if __name__ == "__main__":
