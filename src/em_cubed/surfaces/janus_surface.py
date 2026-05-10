@@ -59,7 +59,7 @@ class JanusSurface(SurfaceBase):
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code via Janus with timeout protection."""
-        return await self._execute_impl(code, context)
+        return await self.execute_with_timeout(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code via Janus - implementation with timeout protection."""

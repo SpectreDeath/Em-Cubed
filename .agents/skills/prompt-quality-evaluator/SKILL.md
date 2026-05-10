@@ -53,48 +53,51 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-# Import the multi-surface logic
-from pyswip import Prolog
-import hy
 
-def evaluate_prompt_quality(prompt_text: str, use_llm: bool = False) -> Dict[str, Any]:
+def evaluate_prompt_quality(prompt_text: str, context: Dict[str, Any] = None, use_llm: bool = False) -> Dict[str, Any]:
     """
     Main entry point: orchestrates multi-surface evaluation.
-    
+
     Args:
         prompt_text: The prompt file content to analyze
+        context: Skill execution context with surface plugins
         use_llm: Whether to use LLM for enhanced analysis (requires GitHub Copilot)
-    
+
     Returns:
         Structured evaluation report with all three dimension scores
     """
+    if context is None:
+        context = {}
+
+    surfaces = context.get("surfaces", {})
+
     results = {
         "persona_consistency": evaluate_persona_python(prompt_text),
-        "ambiguity": evaluate_ambiguity_hy(prompt_text),
-        "coverage": evaluate_coverage_prolog(prompt_text),
+        "ambiguity": evaluate_ambiguity_hy(prompt_text, surfaces),
+        "coverage": evaluate_coverage_prolog(prompt_text, surfaces),
         "overall_quality": None,
     }
-    
+
     # Calculate overall quality score (weighted average)
     persona_score = results["persona_consistency"]["score"]
     ambiguity_score = results["ambiguity"]["score"]
     coverage_score = results["coverage"]["score"]
-    
-    results["overall_quality"] = (persona_score * 0.3 + 
-                                 ambiguity_score * 0.4 + 
+
+    results["overall_quality"] = (persona_score * 0.3 +
+                                 ambiguity_score * 0.4 +
                                  coverage_score * 0.3)
-    
+
     # Optionally enhance with LLM analysis
     if use_llm:
         results["llm_enhanced"] = enhance_with_llm(prompt_text)
-    
+
     return results
 
 
 def evaluate_persona_python(text: str) -> Dict[str, Any]:
     """Python-based persona analysis using regex patterns."""
     issues = []
-    
+
     # Define persona conflict patterns (opposing traits)
     conflict_pairs = [
         ("helpful", "sarcastic"),
@@ -105,7 +108,7 @@ def evaluate_persona_python(text: str) -> Dict[str, Any]:
         ("concise", "verbose"),
         ("friendly", "hostile"),
     ]
-    
+
     # Check for conflicting trait pairs in text
     text_lower = text.lower()
     for trait1, trait2 in conflict_pairs:
@@ -116,7 +119,7 @@ def evaluate_persona_python(text: str) -> Dict[str, Any]:
                 "severity": "warning",
                 "suggestion": f"Choose {trait1} OR {trait2}, not both"
             })
-    
+
     return {
         "score": 1.0 - (len(issues) * 0.2),  # 1.0 = perfect, -0.2 per issue
         "issues": issues,
@@ -124,9 +127,8 @@ def evaluate_persona_python(text: str) -> Dict[str, Any]:
     }
 
 
-def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
+def evaluate_ambiguity_hy(text: str, surfaces: Dict[str, Any] = None) -> Dict[str, Any]:
     """Hy-based heuristic ambiguity detection using fuzzy matching."""
-    # Execute Hy code for ambiguity detection
     hy_code = f"""
 (defn detect-quantifier-ambiguity [text]
    "Detect vague quantity terms."
@@ -143,10 +145,18 @@ def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
 (calculate-ambiguity-score {repr(text)})
 """
     try:
-        score = float(hy.eval(hy.read_str(hy_code)))
+        if surfaces and "hy" in surfaces:
+            # Use the Hy surface from context
+            hy_result = surfaces["hy"].execute(hy_code, {})
+            import asyncio
+            score = float(asyncio.get_event_loop().run_until_complete(hy_result)) if asyncio.iscoroutine(hy_result) else float(hy_result.get("value", 0.5))
+        else:
+            # Fallback: direct import
+            import hy
+            score = float(hy.eval(hy.read_str(hy_code)))
     except Exception as e:
         score = 0.5
-    
+
     # Extract ambiguous terms for reporting
     ambiguous_terms_code = f"""
 (defn detect-quantifier-ambiguity [text]
@@ -156,11 +166,17 @@ def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
 (detect-quantifier-ambiguity {repr(text)})
 """
     try:
-        ambiguous_terms = hy.eval(hy.read_str(ambiguous_terms_code))
+        if surfaces and "hy" in surfaces:
+            hy_result = surfaces["hy"].execute(ambiguous_terms_code, {})
+            import asyncio
+            ambiguous_terms = asyncio.get_event_loop().run_until_complete(hy_result) if asyncio.iscoroutine(hy_result) else hy_result.get("value", [])
+        else:
+            import hy
+            ambiguous_terms = hy.eval(hy.read_str(ambiguous_terms_code))
         issues = [{"text": term, "type": "quantifier", "severity": "info"} for term in ambiguous_terms]
     except Exception:
         issues = []
-    
+
     return {
         "score": score,
         "issues": issues,
@@ -168,20 +184,24 @@ def evaluate_ambiguity_hy(text: str) -> Dict[str, Any]:
     }
 
 
-def evaluate_coverage_prolog(text: str) -> Dict[str, Any]:
+def evaluate_coverage_prolog(text: str, surfaces: Dict[str, Any] = None) -> Dict[str, Any]:
     """Prolog-based coverage gap analysis using logical rules."""
-    # Initialize Prolog knowledge base with coverage rules
-    prolog = Prolog()
-    
+    if surfaces and "prolog" in surfaces:
+        prolog = surfaces["prolog"]
+    else:
+        # Fallback: direct import
+        from pyswip import Prolog
+        prolog = Prolog()
+
     # Assert coverage rules
     prolog.assertz("coverage_requirement(user_types)")
     prolog.assertz("coverage_requirement(input_formats)")
     prolog.assertz("coverage_requirement(task_variations)")
     prolog.assertz("coverage_requirement(error_handling)")
-    
+
     # Analyze text for coverage indicators
     text_lower = text.lower()
-    
+
     # Assert what we found in the text
     if "user" in text_lower:
         prolog.assertz("mentions_category(user)")
@@ -191,24 +211,26 @@ def evaluate_coverage_prolog(text: str) -> Dict[str, Any]:
         prolog.assertz("mentions_category(task)")
     if "error" in text_lower:
         prolog.assertz("mentions_category(error)")
-    
+
     # Query Prolog to identify gaps using the defined rules
     gaps = []
     for req in ["user_types", "input_formats", "task_variations", "error_handling"]:
         # Query if this requirement is NOT met
+        # Fixed: use 1-arity mentions_category to match asserted facts
         query_result = list(prolog.query(f"coverage_gap({req})"))
         if query_result:  # If we got results, it's a gap
             gaps.append(req)
-    
+
     # Count how many requirements we actually have
     found_count = 0
     for req in ["user_types", "input_formats", "task_variations", "error_handling"]:
-        query_result = list(prolog.query(f"mandatory_coverage_category({req}), mentions_category(_)."))
+        # Fixed: use 1-arity mentions_category to match asserted facts
+        query_result = list(prolog.query(f"mandatory_coverage_category({req}), mentions_category(_)"))
         if query_result:
             found_count += 1
-    
+
     coverage_score = found_count / 4.0  # 4 requirement categories
-    
+
     return {
         "score": min(1.0, coverage_score),
         "gaps": gaps,
@@ -250,9 +272,10 @@ mandatory_coverage_category(task_variations).
 mandatory_coverage_category(error_handling).
 
 % A gap exists when category is mandatory but not mentioned
+% Fixed: use 1-arity mentions_category to match facts asserted by Python code
 coverage_gap(Category) :-
     mandatory_coverage_category(Category),
-    not(mentions_category(Category, _)).
+    not(mentions_category(Category)).
 
 % Ambiguity Type Classification
 ambiguity_type("a few"; "several"; "some") -> quantifier.

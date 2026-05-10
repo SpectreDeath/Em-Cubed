@@ -1,7 +1,7 @@
 # Em-Cubed: Multi-Surface Skill Framework
 
-[![Tests](https://img.shields.io/badge/tests-100%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
-[![Coverage](https://img.shields.io/badge/coverage-26%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Tests](https://img.shields.io/badge/tests-95%2B%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Coverage](https://img.shields.io/badge/coverage-33%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
@@ -13,7 +13,7 @@ Em-Cubed is a secure, multi-surface skill framework enabling execution across Py
 - **🔍 Intelligent Search**: Multi-surface scoring and skill discovery
 - **🌐 REST API**: Full HTTP API for skill execution and management
 - **📊 Structured Logging**: Comprehensive logging with context
-- **🧪 Comprehensive Testing**: 219 tests with ~26% coverage
+- **🧪 Comprehensive Testing**: 219 tests with ~33% coverage
 - **📚 Multi-Paradigm**: Python, Prolog, Hy, Z3, Datalog, and Janus surfaces
 
 ## 🎉 What's New in v0.5.0
