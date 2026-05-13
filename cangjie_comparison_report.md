@@ -1,19 +1,22 @@
 # Cangjie Migration Validation Report
 
-**Generated:** 12 skill pairs analyzed
+**Generated:** 15 skill pairs analyzed
 
 ## Overall Metrics
 
 | Metric | Original | Cangjie | Change |
 |--------|---------|--------|--------|
-| Total LOC | 305 | 330 | +25 (8.2%) |
-| Surface calls | 0 | 72 | +72 |
+| Total LOC | 378 | 393 | +15 (4.0%) |
+| Surface calls | 0 | 90 | +90 |
 
 ## Per-Skill Comparison
 
 | Skill | LOC (orig->CJ) | Surface calls (orig->CJ) | Complexity improvement |
 |-------|---------------|--------------------------|------------------------|
+| AUTOMATION/workflow-synthesiser | 18 -> 22 | 0 -> 6 | +0.0% |
 | DECISION_MAKING/multi-surface-decision-tree | 11 -> 27 | 0 -> 6 | +0.0% |
+| DISTRIBUTED_SYSTEMS/multi-agent-coordinator | 10 -> 20 | 0 -> 6 | +0.0% |
+| GRAPH_ML/graph-neural-network | 45 -> 21 | 0 -> 6 | +0.0% |
 | MACHINE_LEARNING/reinforcement-learning-agent | 15 -> 20 | 0 -> 6 | +0.0% |
 | ML_OPERATIONS/anomaly-detection-system | 14 -> 25 | 0 -> 6 | +0.0% |
 | MODEL_VALIDATION/model-validation-suite | 52 -> 18 | 0 -> 6 | +0.0% |
