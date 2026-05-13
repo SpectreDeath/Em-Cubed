@@ -1,13 +1,13 @@
 # Cangjie Migration Validation Report
 
-**Generated:** 23 skill pairs analyzed
+**Generated:** 24 skill pairs analyzed
 
 ## Overall Metrics
 
 | Metric | Original | Cangjie | Change |
 |--------|---------|--------|--------|
-| Total LOC | 586 | 564 | -22 (-3.8%) |
-| Surface calls | 0 | 136 | +136 |
+| Total LOC | 648 | 589 | -59 (-9.1%) |
+| Surface calls | 0 | 146 | +146 |
 
 ## Per-Skill Comparison
 
@@ -19,6 +19,7 @@
 | DECISION_MAKING/multi-criteria-weight-calculator | 17 -> 27 | 0 -> 6 | +0.0% |
 | DECISION_MAKING/multi-surface-decision-tree | 11 -> 27 | 0 -> 6 | +0.0% |
 | DISTRIBUTED_SYSTEMS/multi-agent-coordinator | 10 -> 20 | 0 -> 6 | +0.0% |
+| ENSEMBLE/ensemble-method-manager | 62 -> 25 | 0 -> 10 | +0.0% |
 | EXAMPLES/python-prolog-pipeline | 1 -> 15 | 0 -> 4 | +0.0% |
 | FEATURE_ENGINEERING/feature-engineering-pipeline | 62 -> 21 | 0 -> 6 | +0.0% |
 | General/intelligent_planner | 23 -> 24 | 0 -> 6 | +0.0% |
