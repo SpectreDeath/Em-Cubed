@@ -1,25 +1,29 @@
 # Cangjie Migration Validation Report
 
-**Generated:** 19 skill pairs analyzed
+**Generated:** 23 skill pairs analyzed
 
 ## Overall Metrics
 
 | Metric | Original | Cangjie | Change |
 |--------|---------|--------|--------|
-| Total LOC | 517 | 479 | -38 (-7.4%) |
-| Surface calls | 0 | 112 | +112 |
+| Total LOC | 586 | 564 | -22 (-3.8%) |
+| Surface calls | 0 | 136 | +136 |
 
 ## Per-Skill Comparison
 
 | Skill | LOC (orig->CJ) | Surface calls (orig->CJ) | Complexity improvement |
 |-------|---------------|--------------------------|------------------------|
+| AUTOMATION/github-pr-manager | 13 -> 19 | 0 -> 6 | +0.0% |
 | AUTOMATION/workflow-synthesiser | 18 -> 22 | 0 -> 6 | +0.0% |
+| DATA_PROCESSING/data-pipeline-orchestrator | 16 -> 18 | 0 -> 6 | +0.0% |
 | DECISION_MAKING/multi-criteria-weight-calculator | 17 -> 27 | 0 -> 6 | +0.0% |
 | DECISION_MAKING/multi-surface-decision-tree | 11 -> 27 | 0 -> 6 | +0.0% |
 | DISTRIBUTED_SYSTEMS/multi-agent-coordinator | 10 -> 20 | 0 -> 6 | +0.0% |
 | EXAMPLES/python-prolog-pipeline | 1 -> 15 | 0 -> 4 | +0.0% |
 | FEATURE_ENGINEERING/feature-engineering-pipeline | 62 -> 21 | 0 -> 6 | +0.0% |
+| General/intelligent_planner | 23 -> 24 | 0 -> 6 | +0.0% |
 | GRAPH_ML/graph-neural-network | 45 -> 21 | 0 -> 6 | +0.0% |
+| KNOWLEDGE_GRAPH/knowledge-graph-builder | 17 -> 24 | 0 -> 6 | +0.0% |
 | MACHINE_LEARNING/reinforcement-learning-agent | 15 -> 20 | 0 -> 6 | +0.0% |
 | ML_OPERATIONS/anomaly-detection-system | 14 -> 25 | 0 -> 6 | +0.0% |
 | MODEL_VALIDATION/model-validation-suite | 52 -> 18 | 0 -> 6 | +0.0% |
