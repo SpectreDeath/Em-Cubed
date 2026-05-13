@@ -5,7 +5,7 @@ from em_cubed.surfaces.cangjie_surface import CangjieSurface
 
 def test_cangjie_skill_indexing():
     """Verify that a skill with Cangjie is correctly indexed."""
-    skill_path = Path("skills/logic/CANGJIE_ORCHESTRATION.md")
+    skill_path = Path("skills/logic/SKILL.md")
     skills_dir = Path("skills")
     
     metadata = get_skill_metadata(skill_path, skills_dir)
