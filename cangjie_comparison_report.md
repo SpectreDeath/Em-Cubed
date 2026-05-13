@@ -1,25 +1,29 @@
 # Cangjie Migration Validation Report
 
-**Generated:** 15 skill pairs analyzed
+**Generated:** 19 skill pairs analyzed
 
 ## Overall Metrics
 
 | Metric | Original | Cangjie | Change |
 |--------|---------|--------|--------|
-| Total LOC | 378 | 393 | +15 (4.0%) |
-| Surface calls | 0 | 90 | +90 |
+| Total LOC | 517 | 479 | -38 (-7.4%) |
+| Surface calls | 0 | 112 | +112 |
 
 ## Per-Skill Comparison
 
 | Skill | LOC (orig->CJ) | Surface calls (orig->CJ) | Complexity improvement |
 |-------|---------------|--------------------------|------------------------|
 | AUTOMATION/workflow-synthesiser | 18 -> 22 | 0 -> 6 | +0.0% |
+| DECISION_MAKING/multi-criteria-weight-calculator | 17 -> 27 | 0 -> 6 | +0.0% |
 | DECISION_MAKING/multi-surface-decision-tree | 11 -> 27 | 0 -> 6 | +0.0% |
 | DISTRIBUTED_SYSTEMS/multi-agent-coordinator | 10 -> 20 | 0 -> 6 | +0.0% |
+| EXAMPLES/python-prolog-pipeline | 1 -> 15 | 0 -> 4 | +0.0% |
+| FEATURE_ENGINEERING/feature-engineering-pipeline | 62 -> 21 | 0 -> 6 | +0.0% |
 | GRAPH_ML/graph-neural-network | 45 -> 21 | 0 -> 6 | +0.0% |
 | MACHINE_LEARNING/reinforcement-learning-agent | 15 -> 20 | 0 -> 6 | +0.0% |
 | ML_OPERATIONS/anomaly-detection-system | 14 -> 25 | 0 -> 6 | +0.0% |
 | MODEL_VALIDATION/model-validation-suite | 52 -> 18 | 0 -> 6 | +0.0% |
+| NLP/sentiment-intelligence-engine | 59 -> 23 | 0 -> 6 | +0.0% |
 | OPTIMIZATION/constraint-satisfaction-solver | 16 -> 47 | 0 -> 6 | +0.0% |
 | OPTIMIZATION/optimization-landscape-analyzer | 23 -> 25 | 0 -> 6 | +0.0% |
 | OPTIMIZATION/pathfinding-with-constraints | 19 -> 35 | 0 -> 6 | +0.0% |
