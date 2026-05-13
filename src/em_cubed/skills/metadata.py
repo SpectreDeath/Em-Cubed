@@ -266,6 +266,8 @@ class SkillMetadata:
                 surfaces.append("z3")
             elif lang in ("datalog", "pyDatalog"):
                 surfaces.append("datalog")
+            elif lang in ("cangjie", "cj"):
+                surfaces.append("cangjie")
         # Deduplicate preserving order
         return list(dict.fromkeys(surfaces))
 
@@ -284,6 +286,9 @@ class SkillMetadata:
                 tags.append(pred)
         # Hy functions
         for match in re.finditer(r"\(defn\s+([a-zA-Z][a-zA-Z0-9_\-?!]*)", body):
+            tags.append(match.group(1))
+        # Cangjie functions/effects
+        for match in re.finditer(r"(?:func|effect)\s+([a-zA-Z][a-zA-Z0-9_]*)", body):
             tags.append(match.group(1))
         return list(dict.fromkeys(tags))
 

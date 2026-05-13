@@ -79,11 +79,20 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
                 heuristic_tags.extend(PythonSurface.extract_tags(python_source))
             except ImportError:
                 pass
+        
+        # Add Cangjie support
+        cj_source = extract_fenced_block(body, "cangjie") or extract_fenced_block(body, "cj")
+        if cj_source:
+            try:
+                from .surfaces.cangjie_surface import CangjieSurface
+                heuristic_tags.extend(CangjieSurface.extract_tags(cj_source))
+            except ImportError:
+                pass
 
         result["logic_tags"] = logic_tags
         result["heuristic_tags"] = heuristic_tags
         result["last_modified"] = os.path.getmtime(file_path)
-        result["path"] = str(file_path.relative_to(skills_dir.parent))
+        result["path"] = str(file_path.resolve())
 
         # Default surfaces to python if none detected
         if not result["surfaces"]:

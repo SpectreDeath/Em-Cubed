@@ -3,10 +3,41 @@ import asyncio
 import os
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
+import threading
 from typing import Any, Dict, Optional
 import structlog
 
 logger = structlog.get_logger()
+
+
+class _DaemonThreadPoolExecutor(ThreadPoolExecutor):
+    """ThreadPoolExecutor that creates daemon threads so they don't block shutdown."""
+
+    _counter = 0
+
+    def __init__(self, max_workers=1):
+        super().__init__(max_workers=max_workers)
+
+    def _adjust_thread_count(self):
+        # When threads are terminated, spawn new ones if needed
+        if self._work_queue and not self._threads:
+            self._spawn_thread()
+
+    def _spawn_thread(self):
+        """Spawn a new daemon thread."""
+        _DaemonThreadPoolExecutor._counter += 1
+        t = threading.Thread(
+            target=self._worker,
+            name=f"DaemonPool-{_DaemonThreadPoolExecutor._counter}",
+            daemon=True
+        )
+        self._threads.add(t)
+        t.start()
+
+    def shutdown(self, wait=True, *, cancel_futures=False):
+        super().shutdown(wait=False, cancel_futures=cancel_futures)
+
+
 
 
 class SurfaceTimeoutError(Exception):

@@ -14,6 +14,7 @@ PythonSurface = None  # type: _Optional[type]
 Z3Surface = None  # type: _Optional[type]
 DatalogSurface = None  # type: _Optional[type]
 JanusSurface = None  # type: _Optional[type]
+CangjieSurface = None  # type: _Optional[type]
 
 try:
     from .prolog_surface import PrologSurface as _PrologSurface
@@ -51,4 +52,10 @@ try:
 except ImportError:
     pass
 
-__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface"]
+try:
+    from .cangjie_surface import CangjieSurface as _CangjieSurface
+    CangjieSurface = _CangjieSurface  # type: ignore[assignment]
+except ImportError:
+    pass
+
+__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "CangjieSurface"]

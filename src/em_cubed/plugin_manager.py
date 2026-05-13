@@ -117,6 +117,7 @@ class PluginManager:
         heavy_surfaces = [
             ("z3", surfaces.Z3Surface),
             ("datalog", surfaces.DatalogSurface),
+            ("cangjie", surfaces.CangjieSurface),
         ]
         for name, surface_class in heavy_surfaces:
             if surface_class is not None:
