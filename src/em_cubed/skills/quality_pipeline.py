@@ -147,6 +147,8 @@ class SkillQualityPipeline:
 
     def _discover_skill_files(self) -> List[Path]:
         """Discover all skill files."""
+        if not self.skills_dir.exists():
+            raise FileNotFoundError(f"Skills directory not found: {self.skills_dir}")
         skill_files = []
         for skill_file in self.skills_dir.glob("**/SKILL.md"):
             skill_files.append(skill_file)

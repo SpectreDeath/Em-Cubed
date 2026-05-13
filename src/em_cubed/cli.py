@@ -226,6 +226,31 @@ def main():
         default=5,
         help="Show last N traces"
     )
+    trace_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output as JSON"
+    )
+    trace_parser.add_argument(
+        "--surface",
+        help="Filter by surface name"
+    )
+    trace_parser.add_argument(
+        "--success-only",
+        action="store_true",
+        help="Show only successful traces"
+    )
+    trace_parser.add_argument(
+        "--failures-only",
+        action="store_true",
+        help="Show only failed traces"
+    )
+    trace_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show full span details"
+    )
 
     args = parser.parse_args()
 
@@ -604,26 +629,58 @@ def _handle_trace_view(args):
         for line in f:
             try:
                 trace = json.loads(line)
+                # Apply filters
                 if args.skill and trace.get("skill_id") != args.skill:
+                    continue
+                if args.surface:
+                    spans = trace.get("spans", [])
+                    if not any(s.get("surface") == args.surface for s in spans):
+                        continue
+                if args.success_only and not trace.get("success"):
+                    continue
+                if args.failures_only and trace.get("success"):
                     continue
                 traces.append(trace)
             except json.JSONDecodeError:
                 continue
-    
+
     if not traces:
-        print("No traces found.")
+        print("No traces found matching the specified filters.")
         return
 
     # Show last N
-    for trace in traces[-args.last:]:
-        print(f"\nTrace: {trace.get('trace_id')} | Skill: {trace.get('skill_id')}")
-        print(f"Status: {'[OK]' if trace.get('success') else '[FAIL]'} | Time: {trace.get('execution_time_ms'):.1f}ms")
+    traces_to_show = traces[-args.last:]
+
+    if args.json:
+        print(json.dumps(traces_to_show, indent=2))
+        return
+
+    for trace in traces_to_show:
+        status_icon = "✓" if trace.get("success") else "✗"
+        print(f"\n{status_icon} Trace: {trace.get('trace_id')} | Skill: {trace.get('skill_id')}")
+        print(f"  Status: {'[OK]' if trace.get('success') else '[FAIL]'} | Time: {trace.get('execution_time_ms', 0):.1f}ms")
+        print(f"  Surface: {trace.get('surface', 'unknown')} | Timestamp: {trace.get('timestamp', 'N/A')}")
         spans = trace.get("spans", [])
         if spans:
             print("  Sub-surface calls:")
-            for span in spans:
-                status = "[OK]" if span.get("success") else "[FAIL]"
-                print(f"    {status} {span.get('surface'):<10} | {span.get('duration_ms'):>6.1f}ms")
+            for i, span in enumerate(spans):
+                span_status = "✓" if span.get("success") else "✗"
+                indent = "    " * (i + 1)
+                print(f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms")
+                if args.verbose and span.get("error"):
+                    print(f"  {indent}  Error: {span['error']}")
+                if args.verbose and span.get("input_data"):
+                    inp = str(span["input_data"])
+                    if len(inp) > 100:
+                        inp = inp[:100] + "..."
+                    print(f"  {indent}  Input: {inp}")
+                if args.verbose and span.get("output_data"):
+                    out = str(span["output_data"])
+                    if len(out) > 100:
+                        out = out[:100] + "..."
+                    print(f"  {indent}  Output: {out}")
+        elif args.verbose:
+            print("  No sub-surface spans recorded.")
 
 
 if __name__ == "__main__":

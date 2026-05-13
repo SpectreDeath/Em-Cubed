@@ -104,9 +104,19 @@ class PrologSurface(SurfaceBase):
 
             stripped_code = code.strip()
 
-            # Improved mode detection: 
+            # Built-ins that modify the dynamic database and should be
+            # executed as goals, NOT asserted as facts/rules.
+            _IMPURE_BUILTINS = {
+                "retractall", "retract", "asserta", "assertz",
+                "abolish", "flush_output", "flush", "close",
+                "op", "set_prolog_flag", "setof", "bagof",
+                "findall", "maplist", "call", "once",
+            }
+
+            # Improved mode detection:
             # - Explicit queries start with ?-
             # - Arithmetic/evaluation expressions (even with trailing .) are queries
+            # - Impure built-ins that modify the DB are always executed as goals
             # - Otherwise, trailing . indicates assertion (fact/rule)
             is_query = False
             processed_code = stripped_code
@@ -115,30 +125,36 @@ class PrologSurface(SurfaceBase):
                 # Explicit query mode
                 is_query = True
                 processed_code = stripped_code[2:].strip()
-            elif stripped_code.endswith('.'):
-                # Might be assertion or query - check if it looks like an arithmetic/evaluation query
-                # Remove the trailing period for analysis
-                code_without_period = stripped_code[:-1].strip()
-                
-                # Check for arithmetic/evaluation patterns: contains "is" with arithmetic symbols
-                # This handles cases like "X is 1+1." which should be queries, not assertions
-                if ' is ' in code_without_period:
-                    # Look for arithmetic symbols around the "is"
-                    import re
-                    # Pattern: something is something_with_numbers_or_symbols
-                    if re.search(r'\d|\+|\-|\*|\/|//', code_without_period):
-                        is_query = True
-                        processed_code = code_without_period
+            else:
+                # Check if this is an impure built-in (database-modifying command)
+                head_word = stripped_code.split('(')[0].split(' ')[0].strip().rstrip('.')
+                if head_word in _IMPURE_BUILTINS:
+                    is_query = True
+                    processed_code = stripped_code.rstrip('.').strip()
+                elif stripped_code.endswith('.'):
+                    # Might be assertion or query - check if it looks like an arithmetic/evaluation query
+                    # Remove the trailing period for analysis
+                    code_without_period = stripped_code[:-1].strip()
+
+                    # Check for arithmetic/evaluation patterns: contains "is" with arithmetic symbols
+                    # This handles cases like "X is 1+1." which should be queries, not assertions
+                    if ' is ' in code_without_period:
+                        # Look for arithmetic symbols around the "is"
+                        import re
+                        # Pattern: something is something_with_numbers_or_symbols
+                        if re.search(r'\d|\+|\-|\*|\/|//', code_without_period):
+                            is_query = True
+                            processed_code = code_without_period
+                        else:
+                            # Doesn't look like arithmetic, treat as assertion
+                            processed_code = code_without_period
                     else:
-                        # Doesn't look like arithmetic, treat as assertion
+                        # Doesn't look like arithmetic/evaluation, treat as assertion (fact/rule)
                         processed_code = code_without_period
                 else:
-                    # Doesn't look like arithmetic/evaluation, treat as assertion (fact/rule)
-                    processed_code = code_without_period
-            else:
-                # No trailing period, treat as query
-                is_query = True
-                processed_code = stripped_code
+                    # No trailing period, treat as query
+                    is_query = True
+                    processed_code = stripped_code
 
             if is_query:
                 # Query mode: starts with ?- or determined to be query

@@ -299,3 +299,95 @@ Second test skill
         assert isinstance(await python_surface.health(), bool)
         assert isinstance(await prolog_surface.health(), bool)
         assert isinstance(await hy_surface.health(), bool)
+
+    @pytest.mark.asyncio
+    async def test_python_prolog_sync_bridge(self, tmp_path):
+        """Test explicit Python->Prolog sync bridge via context['surfaces']."""
+        # Skip if Prolog not available
+        pytest.importorskip("pyswip", reason="PySWIP not installed")
+
+        # 1. Create a skill directory with explicit sync bridge test
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+
+        skill_dir = skills_dir / "sync_bridge_test"
+        skill_dir.mkdir()
+
+        skill_md = skill_dir / "SKILL.md"
+        skill_content = """---
+name: Sync Bridge Test
+Domain: Testing
+Version: 1.0.0
+surfaces:
+  - python
+  - prolog
+---
+
+## Purpose
+Test Python->Prolog synchronous bridge via context['surfaces']
+
+## Description
+This skill tests that Python code can synchronously call Prolog code
+through the context['surfaces']['prolog'].execute_sync() method.
+
+```python
+# Test that we can call Prolog synchronously from Python
+prolog = context["surfaces"]["prolog"]
+
+# Clear any existing test facts
+clear_result = prolog.execute_sync("retractall(test_fact(_)).")
+assert clear_result["status"] == "ok", f"Failed to retract: {clear_result}"
+
+# Assert a test fact
+assert_result = prolog.execute_sync("assertz(test_fact(hello)).")
+assert assert_result["status"] == "ok", f"Failed to assert: {assert_result}"
+
+# Query the fact back
+query_result = prolog.execute_sync("test_fact(X)")
+assert query_result["status"] == "ok", f"Failed to query: {query_result}"
+assert len(query_result["result"]) > 0, "No results returned"
+
+# Verify the queried value matches expected result (hello)
+first_result = query_result["result"][0]["X"]
+assert first_result == "hello", f"Expected hello, got {first_result}"
+
+# Store result for output (multi-statement code can't return a value via asteval)
+test_passed = True
+
+# Verify we can also assert and query more complex data
+prolog.execute_sync("assertz(test_fact(world)).")
+all_results = prolog.execute_sync("test_fact(X)")
+assert all_results["status"] == "ok"
+assert len(all_results["result"]) == 2
+```
+
+```prolog
+% Minimal Prolog code to ensure Prolog surface is registered
+% The actual Prolog calls are made from Python via context['surfaces']
+```
+"""
+        skill_md.write_text(skill_content)
+
+        # 2. Index the skills
+        registry_file = tmp_path / "registry.json"
+        from em_cubed.indexer import reindex
+        reindex(skills_dir, registry_file)
+
+        # 3. Execute via SkillExecutor (not direct surface)
+        from em_cubed.plugin_manager import PluginManager
+        from em_cubed.skills.registry import SkillRegistry
+        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
+
+        registry = SkillRegistry(skills_dir, registry_file)
+        plugin_manager = PluginManager()
+        executor = SkillExecutor(plugin_manager, registry, skills_dir)
+
+        request = SkillExecutionRequest(
+            skill_id="Testing/Sync Bridge Test",
+            input_data={}
+        )
+
+        result = await executor.execute(request)
+
+        # Verify execution succeeded
+        assert result.success, f"Execution failed: {result.error}"

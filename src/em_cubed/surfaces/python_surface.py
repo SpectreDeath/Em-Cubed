@@ -2,6 +2,7 @@
 
 import asyncio
 import importlib.util
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Optional
 import structlog
 
@@ -28,6 +29,9 @@ class PythonSurface(SurfaceBase):
 
     def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout)
+        # Use a dedicated executor so timeouts can be handled
+        # by replacing the executor (abandoning the stuck thread)
+        self._executor = ThreadPoolExecutor(max_workers=1)
         logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
@@ -49,10 +53,26 @@ class PythonSurface(SurfaceBase):
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Python code and return results using asteval for safety."""
-        return await self.execute_with_timeout(code, context)
+        try:
+            loop = asyncio.get_running_loop()
+            future = loop.run_in_executor(self._executor, self._run_code, code, context)
+            return await asyncio.wait_for(asyncio.shield(future), timeout=self.timeout)
+        except asyncio.TimeoutError:
+            # Replace executor to release the stuck thread
+            self._executor.shutdown(wait=False)
+            self._executor = ThreadPoolExecutor(max_workers=1)
+            logger.warning("Surface execution timed out", timeout=self.timeout)
+            return {
+                "status": "error",
+                "message": f"Execution timed out after {self.timeout}s"
+            }
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Python code - implementation with timeout protection."""
+        """Execute Python code - required by abstract base class."""
+        return self._run_code(code, context)
+
+    def _run_code(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Run asteval code synchronously in the executor thread."""
         logger.info("Executing Python code", code_length=len(code), has_context=context is not None)
 
         if not self.available:
@@ -62,36 +82,31 @@ class PythonSurface(SurfaceBase):
         try:
             from asteval import Interpreter
 
-            def execute_code():
-                # Create asteval interpreter with safe context
-                aeval = Interpreter()
+            # Create asteval interpreter with safe context
+            aeval = Interpreter()
 
-                # Add context variables if provided
-                if context:
-                    for key, value in context.items():
-                        aeval.symtable[key] = value
-                    # Also provide the context object itself for compatibility
-                    aeval.symtable["context"] = context
+            # Add context variables if provided
+            if context:
+                for key, value in context.items():
+                    aeval.symtable[key] = value
+                # Also provide the context object itself for compatibility
+                aeval.symtable["context"] = context
 
-                # Execute the code
-                result = aeval(code)
+            # Execute the code
+            result = aeval(code)
 
-                # Check for errors
-                if aeval.error:
-                    if aeval.error and hasattr(aeval.error[0], "msg"):
-                        # asteval ExceptionHolder
-                        error_msg = str(aeval.error[0].msg)
-                    else:
-                        error_msg = str(aeval.error[0]) if aeval.error else "Unknown error"
-                    logger.info("Python execution failed with error", error=error_msg)
-                    return {"status": "error", "message": error_msg}
+            # Check for errors
+            if aeval.error:
+                if aeval.error and hasattr(aeval.error[0], "msg"):
+                    # asteval ExceptionHolder
+                    error_msg = str(aeval.error[0].msg)
+                else:
+                    error_msg = str(aeval.error[0]) if aeval.error else "Unknown error"
+                logger.info("Python execution failed with error", error=error_msg)
+                return {"status": "error", "message": error_msg}
 
-                logger.info("Python execution successful")
-                return {"status": "ok", "value": result}
-
-            return await asyncio.get_event_loop().run_in_executor(
-                self._executor, execute_code
-            )
+            logger.info("Python execution successful")
+            return {"status": "ok", "value": result}
 
         except Exception as e:
             logger.exception("Python execution failed", error=str(e), code=code)

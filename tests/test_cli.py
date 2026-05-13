@@ -209,9 +209,81 @@ Domain: Test
     def test_compose_command_goal(self, mock_handler, tmp_path, capsys):
         """Test the compose command (goal-based)."""
         mock_handler.return_value = None
-        
+
         with patch('sys.argv', ['em3', 'compose', '--source', 'skill1', '--goal', 'test goal']):
             main()
-        
+
         mock_handler.assert_called_once()
         patch.stopall()
+
+    def test_trace_view_command_no_file(self, capsys):
+        """Test trace-view with non-existent file."""
+        with patch('sys.argv', ['em3', 'trace-view', '--file', '/nonexistent/traces.jsonl']):
+            main()
+
+        captured = capsys.readouterr()
+        assert "not found" in captured.out.lower()
+
+    def test_trace_view_command_empty_file(self, tmp_path, capsys):
+        """Test trace-view with empty file."""
+        trace_file = tmp_path / "traces.jsonl"
+        trace_file.write_text("")
+
+        with patch('sys.argv', ['em3', 'trace-view', '--file', str(trace_file)]):
+            main()
+
+        captured = capsys.readouterr()
+        assert "no traces" in captured.out.lower()
+
+    def test_trace_view_command_json_output(self, tmp_path, capsys):
+        """Test trace-view with --json flag."""
+        trace_file = tmp_path / "traces.jsonl"
+        trace_file.write_text(
+            '{"trace_id": "abc123", "skill_id": "test/skill", "success": true, '
+            '"execution_time_ms": 100.0, "surface": "python", "timestamp": "2026-01-01T00:00:00Z", '
+            '"spans": [{"surface": "prolog", "duration_ms": 50.0, "success": true}]}\n'
+        )
+
+        with patch('sys.argv', ['em3', 'trace-view', '--file', str(trace_file), '--json']):
+            main()
+
+        captured = capsys.readouterr()
+        import json
+        output = json.loads(captured.out.strip())
+        assert len(output) == 1
+        assert output[0]["trace_id"] == "abc123"
+
+    def test_trace_view_command_skill_filter(self, tmp_path, capsys):
+        """Test trace-view with --skill filter."""
+        trace_file = tmp_path / "traces.jsonl"
+        trace_file.write_text(
+            '{"trace_id": "1", "skill_id": "other/skill", "success": true, '
+            '"execution_time_ms": 100.0, "surface": "python", "timestamp": "2026-01-01T00:00:00Z", "spans": []}\n'
+            '{"trace_id": "2", "skill_id": "test/skill", "success": true, '
+            '"execution_time_ms": 200.0, "surface": "python", "timestamp": "2026-01-01T00:00:00Z", "spans": []}\n'
+        )
+
+        with patch('sys.argv', ['em3', 'trace-view', '--file', str(trace_file), '--skill', 'test/skill']):
+            main()
+
+        captured = capsys.readouterr()
+        # Should only show trace with skill_id "test/skill"
+        assert "test/skill" in captured.out
+        assert "other/skill" not in captured.out
+
+    def test_trace_view_command_verbose(self, tmp_path, capsys):
+        """Test trace-view with --verbose flag."""
+        trace_file = tmp_path / "traces.jsonl"
+        trace_file.write_text(
+            '{"trace_id": "abc123", "skill_id": "test/skill", "success": true, '
+            '"execution_time_ms": 100.0, "surface": "python", "timestamp": "2026-01-01T00:00:00Z", '
+            '"spans": [{"surface": "prolog", "duration_ms": 50.0, "success": true, "error": null, '
+            '"input_data": {"query": "fact(X)"}, "output_data": {"X": "test"}}]}\n'
+        )
+
+        with patch('sys.argv', ['em3', 'trace-view', '--file', str(trace_file), '--verbose']):
+            main()
+
+        captured = capsys.readouterr()
+        assert "prolog" in captured.out
+        assert "Input:" in captured.out or "Input" in captured.out

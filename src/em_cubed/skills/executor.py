@@ -108,6 +108,31 @@ class SkillExecutor:
             raise ValueError(f"Skill '{skill_id}' not found or has no path")
 
         skill_file = Path(skill.path)
+
+        # Resolve the skill file path. The stored path may be:
+        # 1. An absolute path (use directly)
+        # 2. A relative path from cwd at indexing time
+        # 3. A relative path from skills_dir
+        if not skill_file.is_absolute():
+            # First try: relative to current cwd (may have changed since indexing)
+            if skill_file.exists():
+                pass  # Use as-is
+            # Second try: relative to skills_dir
+            elif self.skills_dir:
+                candidate = self.skills_dir / skill.path
+                if candidate.exists():
+                    skill_file = candidate
+                # Third try: with leading "skills/" stripped (common double-dir issue)
+                else:
+                    stripped_parts = skill_file.parts
+                    if stripped_parts and stripped_parts[0].lower() == "skills":
+                        candidate = self.skills_dir.joinpath(*stripped_parts[1:])
+                        if candidate.exists():
+                            skill_file = candidate
+            # Final fallback: resolve relative to cwd
+            if not skill_file.exists():
+                skill_file = Path.cwd() / skill.path
+
         if not skill_file.exists():
             raise FileNotFoundError(f"Skill file not found: {skill.path}")
 
