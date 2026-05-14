@@ -61,6 +61,7 @@ htmlcov/
 
 # OS
 Thumbs.db
+
 # Memtext context
 .context/
 
@@ -72,3 +73,29 @@ Thumbs.db
 
 # Extracted logs
 logs_extracted/
+
+# Debug / scratch scripts (root-level, not part of the package)
+debug_*.py
+run_*.py
+batch_tests*.py
+find_hang.py
+generate_test_templates.py
+test_baseline.py
+test_concurrent2.py
+test_daemon*.py
+test_dedicated.py
+test_direct*.py
+test_fresh_executor.py
+test_original.py
+test_process*.py
+test_pytest*.py
+test_seq.py
+test_thread_daemon.py
+test_to_thread*.py
+test_cangjie_comparison.py
+w.py
+write_impl.py
+scratch/
+logs/
+registry_agents.json
+TEST_SUMMARY.md

@@ -6,7 +6,7 @@ and quality. Integrates with the SkillRegistry for persistent storage.
 
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List, cast
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 import statistics
 from pathlib import Path
@@ -37,6 +37,8 @@ class TraceSpan:
             "duration_ms": (self.end_time - self.start_time) * 1000 if self.end_time else 0,
             "success": self.success,
             "error": self.error,
+            "input_size": len(str(self.input_data)) if self.input_data else 0,
+            "output_size": len(str(self.output_data)) if self.output_data else 0,
         }
 
 
@@ -132,7 +134,7 @@ class TelemetryCollector:
 
     def get_skill_metrics(self, skill_id: str, window_seconds: int = 3600) -> Dict[str, Any]:
         """Get metrics for a specific skill over a time window."""
-        cutoff = datetime.utcnow().timestamp() - window_seconds
+        cutoff = datetime.now(timezone.utc).timestamp() - window_seconds
 
         relevant = [
             r for r in self._records
@@ -185,14 +187,14 @@ class TelemetryCollector:
         aggregates = {}
         for skill_id, records in by_skill.items():
             recent = [r for r in records if
-                     (datetime.utcnow() - r.timestamp).total_seconds() < 3600]
+                     (datetime.now(timezone.utc) - r.timestamp).total_seconds() < 3600]
             if recent:
                 times = [r.execution_time_ms for r in recent if r.success]
                 aggregates[skill_id] = {
                     "count_1h": len(recent),
                     "success_rate_1h": sum(1 for r in recent if r.success) / len(recent),
                     "mean_time_ms": statistics.mean(times) if times else 0,
-                    "updated_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
                 }
 
         self._aggregates = aggregates
@@ -275,7 +277,7 @@ class SkillTelemetry:
         
         record = ExecutionRecord(
             skill_id=skill_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             success=False,
             execution_time_ms=0,
             surface=surface,
@@ -343,7 +345,7 @@ def record_skill_execution(skill_id: str, success: bool, execution_time_ms: floa
     collector = get_telemetry_collector()
     record = ExecutionRecord(
         skill_id=skill_id,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         success=success,
         execution_time_ms=execution_time_ms,
         token_usage=token_usage,

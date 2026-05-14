@@ -206,6 +206,13 @@ def main():
         help="Output file for composition plan (JSON)"
     )
 
+    # Create-skill command
+    create_parser = subparsers.add_parser("create-skill", help="Create a new skill from template")
+    create_parser.add_argument("name", help="Name of the skill")
+    create_parser.add_argument("--domain", "-d", default="General", help="Skill domain")
+    create_parser.add_argument("--template", "-t", default="basic_python", choices=["basic_python", "python_prolog"], help="Template to use")
+    create_parser.add_argument("--output-dir", default="skills", help="Skills directory")
+
     # Trace-view command
     trace_parser = subparsers.add_parser("trace-view", help="View skill execution traces")
     trace_parser.add_argument(
@@ -277,6 +284,8 @@ def main():
             asyncio.run(_handle_recommend(args))
         elif args.command == "compose":
             asyncio.run(_handle_compose(args))
+        elif args.command == "create-skill":
+            _handle_create_skill(args)
         elif args.command == "trace-view":
             _handle_trace_view(args)
     except Exception as e:
@@ -385,13 +394,13 @@ def _handle_run(args):
             # Simplified: just run directly if it's a surface run
             # But tracing is tied to SkillExecutor.
             # I'll just run it via surface and manually trace it for CLI run if --trace is on
-            from em_cubed.skills.telemetry import ExecutionRecord, TraceContext, datetime
-            record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.utcnow(), success=True, execution_time_ms=0)
+            from datetime import datetime, timezone
+            record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=0)
             trace_ctx = TraceContext(record)
             
             from em_cubed.skills.executor import TelemetryProxy
-            surfaces = plugin_manager._plugins
-            proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
+            proxies = {name: TelemetryProxy(plugin_manager.get(name), trace_ctx) 
+                       for name in plugin_manager.get_available_surfaces()}
             context = {"surfaces": proxies, "skill_input": {}, "trace": trace_ctx}
             context["context"] = context # compatibility
             
@@ -411,7 +420,8 @@ def _handle_run(args):
                 print("Sub-surface calls:")
                 for span in record.spans:
                     status = "[OK]" if span.success else "[FAIL]"
-                    print(f"  {status} {span.surface:<10} | {span.to_dict()['duration_ms']:>6.1f}ms")
+                    size_info = f" ({len(str(span.input_data)) if span.input_data else 0}b -> {len(str(span.output_data)) if span.output_data else 0}b)"
+                    print(f"  {status} {span.surface:<10} | {span.to_dict()['duration_ms']:>6.1f}ms{size_info}")
         else:
             result = await surface.execute(code)
             print(json.dumps(result, indent=2))
@@ -617,6 +627,46 @@ async def _handle_compose(args):
             print(f"\nCompositions saved to {args.output}")
 
 
+def _handle_create_skill(args):
+    """Handle create-skill command."""
+    name = args.name
+    domain = args.domain
+    template_name = args.template
+    output_base = Path(args.output_dir)
+
+    # Sanitize skill ID
+    safe_name = name.lower().replace(" ", "-")
+    skill_dir = output_base / domain / safe_name
+    skill_file = skill_dir / "SKILL.md"
+
+    if skill_file.exists():
+        print(f"Error: Skill already exists at {skill_file}")
+        return
+
+    # Load template
+    template_path = Path(__file__).parent / "templates" / f"{template_name}.md.j2"
+    if not template_path.exists():
+        print(f"Error: Template {template_name} not found at {template_path}")
+        return
+
+    template_content = template_path.read_text(encoding="utf-8")
+
+    # Simple variable replacement (no Jinja2 dependency for now)
+    content = template_content
+    content = content.replace("{{ name }}", name)
+    content = content.replace("{{ domain }}", domain)
+    content = content.replace("{{ purpose }}", f"A new {name} skill.")
+    content = content.replace("{{ description }}", f"Description for {name} skill.")
+
+    # Write file
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    skill_file.write_text(content, encoding="utf-8")
+
+    print(f"Created new skill: {name}")
+    print(f"Location: {skill_file}")
+    print(f"Skill ID: {domain}/{safe_name}")
+
+
 def _handle_trace_view(args):
     """Handle trace-view command."""
     trace_file = Path(args.file)
@@ -666,7 +716,8 @@ def _handle_trace_view(args):
             for i, span in enumerate(spans):
                 span_status = "✓" if span.get("success") else "✗"
                 indent = "    " * (i + 1)
-                print(f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms")
+                size_info = f" ({span.get('input_size', 0)}b -> {span.get('output_size', 0)}b)"
+                print(f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms{size_info}")
                 if args.verbose and span.get("error"):
                     print(f"  {indent}  Error: {span['error']}")
                 if args.verbose and span.get("input_data"):

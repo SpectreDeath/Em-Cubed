@@ -60,6 +60,17 @@ class SurfacePlugin(ABC):
         """Optional shutdown hook."""
         pass
 
+    @property
+    def substrate(self) -> Dict[str, Any]:
+        """Shared data substrate across surfaces."""
+        if not hasattr(self, "_substrate") or self._substrate is None:
+            self._substrate = {}
+        return self._substrate
+
+    @substrate.setter
+    def substrate(self, value: Dict[str, Any]) -> None:
+        self._substrate = value
+
 
 class PluginManager:
     """Manage surface plugins with multiple discovery mechanisms.
@@ -118,6 +129,8 @@ class PluginManager:
             ("z3", surfaces.Z3Surface),
             ("datalog", surfaces.DatalogSurface),
             ("cangjie", surfaces.CangjieSurface),
+            ("sqlite", surfaces.SQLiteSurface),
+            ("quickjs", surfaces.QuickJSSurface),
         ]
         for name, surface_class in heavy_surfaces:
             if surface_class is not None:

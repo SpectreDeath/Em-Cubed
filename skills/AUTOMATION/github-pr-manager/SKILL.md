@@ -1,5 +1,10 @@
 ---
 Domain: AUTOMATION
+surfaces:
+  - python
+  - prolog
+  - hy
+  - cangjie
 Version: 1.0.0
 Complexity: Medium
 Type: Integration
@@ -164,4 +169,25 @@ class TestGitHubPRManager(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+```
+
+### Cangjie Orchestrator
+
+```cangjie
+struct PRInput {
+    repo: String;
+    head: String;
+    base: String;
+    token: String;  // PAT (masked in logs)
+    title: String;
+    commits: Array<String>;
+    diff_stats: Map<String, Int64>;
+}
+
+struct PROutput {
+    pr_url: String;
+    number: Int64;
+    merged: Bool;
+    validation_errors: Array<String>;
+}
 ```

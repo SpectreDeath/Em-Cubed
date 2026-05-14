@@ -5,7 +5,26 @@ All notable changes to Em-Cubed will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.0] - Unreleased
+## [0.6.0] - 2026-05-14
+
+### Added
+- **Efficiency**: "Shared Substrate" for efficient zero-copy data exchange between surfaces.
+- **DX**: `em3 create-skill` CLI command for instant multi-surface skill generation from templates.
+- **Ecosystem**: `SQLiteSurface` for in-memory relational querying within skill pipelines.
+- **Ecosystem**: `QuickJSSurface` for high-performance JavaScript execution via `pyquickjs`.
+- **Observability**: Enhanced trace visualization in `em3 trace-view` showing data flow and serialization sizes.
+- **Boilerplate**: Standardized skill templates for basic Python and Python-Prolog bridge patterns.
+
+### Changed
+- **Telemetry**: Standardized all timestamps to timezone-aware UTC objects to prevent runtime errors in mixed environments.
+- **Orchestration**: `TelemetryProxy` now supports proxying properties like `substrate`.
+- **CLI**: Improved `run --trace` output with data size reporting.
+
+### Fixed
+- **execute_sync**: Resolved `RuntimeError` when calling synchronous surfaces from within threaded execution environments.
+- **Telemetry persistence**: Fixed mixed naive/aware datetime subtraction bug during metric aggregation.
+
+## [0.5.0] - 2026-05-14
 
 ### Added
 - Optional API key authentication (`X-API-Key` header) via `EM_CUBED_API_KEY`

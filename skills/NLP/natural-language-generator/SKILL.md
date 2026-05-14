@@ -296,6 +296,7 @@ Domain: NLP
 surfaces:
   - python
 ---
+  - cangjie
 
 ## Purpose
 Test NLG
@@ -367,4 +368,36 @@ for constraint in constraints:
 - torch (optional, backend for transformers)
 - numpy (for numerical operations)
 - em_cubed framework
+```
+### Cangjie Orchestrator
+
+```cangjie
+struct NLGInput {
+    prompt: String;
+    template: Option<String>;           // optional template string
+    values: Map<String, String>;        // template variable substitutions
+    constraints: Array<String>;         // required keywords/phrases
+    style_target: StyleParameters;      // desired output characteristics
+    max_length: Int64;                  // generation length limit
+}
+
+struct StyleParameters {
+    tone: String;                       // "formal" | "casual" | "technical"
+    complexity: Float64;                // 0.0 (simple) – 1.0 (complex)
+    formality: Float64;                 // 0.0 (colloquial) – 1.0 (academic)
+}
+
+struct GeneratedText {
+    raw_text: String;                   // Python-generated output
+    token_count: Int64;
+}
+
+struct FinalOutput {
+    final_text: String;                 // post-prolog, post-hy output
+    constraints_met: Array<String>;     // satisfied constraints
+    grammar_valid: Bool;
+    style_score: Float64;               // 0.0–1.0 similarity to target
+    coherence_improvement: Float64;     // hy rewriting delta
+    surfaces_used: Array<String>;       // ["python", "prolog", "hy"]
+}
 ```

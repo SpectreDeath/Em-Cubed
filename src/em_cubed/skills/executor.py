@@ -58,6 +58,8 @@ class TelemetryProxy:
                     self._trace_ctx.end_span(span, success=False, error=str(e))
                     raise
             return wrapped
+        elif name == "substrate":
+            return attr
         return attr
 
     def _wrap_result(self, res, span):
@@ -199,19 +201,25 @@ class SkillExecutor:
 
         # Wrap execution with telemetry
         async def skill_runner(input_data: Dict[str, Any], trace_ctx: TraceContext) -> Dict[str, Any]:
+            # Initialize shared substrate for this execution
+            substrate = {}
+
             # Prepare execution context with input
             context = {
                 "skill_input": input_data,
                 "skill_metadata": skill.to_registry_dict(),
                 "trace_id": trace_ctx.record.trace_id,
+                "substrate": substrate,
                 **(request.context or {}),
             }
 
             # Inject surface plugins for cross-surface interaction (wrapped in proxy)
             context["surfaces"] = {}
-            for s_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+            for s_name in ["python", "prolog", "hy", "z3", "datalog", "janus", "cangjie"]:
                 surf_plugin = self.plugin_manager.get(s_name)
                 if surf_plugin and surf_plugin.available:
+                    # Inject shared substrate into the plugin
+                    surf_plugin.substrate = substrate
                     context["surfaces"][s_name] = TelemetryProxy(surf_plugin, trace_ctx)
 
             # Also provide the trace context itself

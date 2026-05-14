@@ -1,4 +1,4 @@
-"""Tests for model-validation-suite skill."""
+"""Tests for github-pr-manager skill."""
 
 import pytest
 from pathlib import Path
@@ -6,8 +6,8 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path("D:/GitHub/projects/em-cubed/skills/MODEL_VALIDATION/model-validation-suite/SKILL.md")
-SKILL_ID = "MODEL_VALIDATION/model-validation-suite"
+SKILL_FILE = Path("D:/GitHub/projects/em-cubed/skills/AUTOMATION/github-pr-manager/SKILL.md")
+SKILL_ID = "AUTOMATION/github-pr-manager"
 
 
 @pytest.fixture
@@ -28,15 +28,15 @@ def test_runner(plugin_manager):
     return SkillTestRunner(plugin_manager, None)
 
 
-class Testmodel_validation_suiteSkill:
-    """Test suite for model-validation-suite."""
+class Testgithub_pr_managerSkill:
+    """Test suite for github-pr-manager."""
 
     def test_metadata_valid(self):
         """Test skill metadata is valid."""
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "model-validation-suite"
-        assert metadata_dict["domain"] == "MODEL_VALIDATION"
+        assert metadata_dict["name"] == "github-pr-manager"
+        assert metadata_dict["domain"] == "AUTOMATION"
         assert len(metadata_dict["surfaces"]) >= 1
 
     def test_surfaces_implemented(self, plugin_manager):
