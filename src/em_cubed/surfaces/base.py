@@ -2,6 +2,7 @@
 import asyncio
 import os
 from abc import ABC, abstractmethod
+from ..plugin import SurfacePlugin
 from concurrent.futures import ThreadPoolExecutor
 import threading
 from typing import Any, Dict, Optional
@@ -45,7 +46,6 @@ class SurfaceTimeoutError(Exception):
     pass
 
 
-from ..plugin import SurfacePlugin
 
 class SurfaceBase(SurfacePlugin, ABC):
     """Base class for all execution surfaces with timeout support."""
@@ -100,7 +100,7 @@ class SurfaceBase(SurfacePlugin, ABC):
         """Synchronous version of execute for use in non-async contexts."""
         try:
             try:
-                loop = asyncio.get_running_loop()
+                asyncio.get_running_loop()
                 # We are in a thread where a loop is already running
                 # Create a new loop for this synchronous call
                 new_loop = asyncio.new_event_loop()

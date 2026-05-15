@@ -243,10 +243,27 @@ class SkillMetadata:
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
+    @staticmethod
+    def _slugify(text: str) -> str:
+        """Slugify text for consistent IDs."""
+        import re
+        # Lowercase
+        text = text.lower()
+        # Replace spaces, underscores and periods with hyphens
+        text = re.sub(r'[\s_.]+', '-', text)
+        # Remove non-alphanumeric (except hyphens)
+        text = re.sub(r'[^a-z0-9\-]', '', text)
+        # Remove leading/trailing hyphens
+        text = text.strip('-')
+        return text
+
     def __post_init__(self):
         """Compute derived fields after initialization."""
         if self.skill_id is None:
-            self.skill_id = f"{self.domain}/{self.name}"
+            # Use slugified components for internal ID
+            slug_domain = self._slugify(self.domain)
+            slug_name = self._slugify(self.name)
+            self.skill_id = f"{slug_domain}/{slug_name}"
 
     @staticmethod
     def _extract_surfaces_from_body(body: str) -> List[str]:
@@ -299,7 +316,9 @@ class SkillMetadata:
     @property
     def unique_id(self) -> str:
         """Get unique identifier for this skill."""
-        return f"{self.domain}/{self.name}@{self.version}"
+        slug_domain = self._slugify(self.domain)
+        slug_name = self._slugify(self.name)
+        return f"{slug_domain}/{slug_name}@{self.version}"
 
     def check_compatibility(self, other_version: str) -> bool:
         """Check if another skill version is compatible with this one."""

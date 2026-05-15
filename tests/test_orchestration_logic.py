@@ -8,7 +8,7 @@ def plugin_manager():
 @pytest.mark.asyncio
 async def test_python_prolog_orchestration_sync(plugin_manager):
     """Test that a Python skill can call Prolog synchronously via the bridge with tracing."""
-    from em_cubed.skills.telemetry import ExecutionRecord, TraceContext, get_telemetry_collector
+    from em_cubed.skills.telemetry import ExecutionRecord, TraceContext
     from em_cubed.skills.executor import TelemetryProxy
     from datetime import datetime
     

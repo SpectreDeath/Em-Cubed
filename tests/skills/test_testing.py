@@ -1,8 +1,7 @@
 """Tests for skill testing framework module."""
 
 import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, AsyncMock
 
 from em_cubed.skills.testing import (
     SkillTestGenerator,

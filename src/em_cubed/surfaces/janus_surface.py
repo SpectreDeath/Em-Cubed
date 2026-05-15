@@ -135,10 +135,10 @@ class JanusSurface(SurfaceBase):
 
     def _prolog_safe_value(self, value: Any) -> str:
         """Convert a value to a safe Prolog representation."""
-        if isinstance(value, (int, float)):
-            return str(value)
-        elif isinstance(value, bool):
+        if isinstance(value, bool):
             return "true" if value else "fail"
+        elif isinstance(value, (int, float)):
+            return str(value)
         elif isinstance(value, str):
             # Escape single quotes and wrap in single quotes
             escaped = value.replace("\\", "\\\\").replace("'", "\\'")

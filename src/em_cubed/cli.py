@@ -1,4 +1,4 @@
-"""Command-line interface for Em-Cubed."""
+﻿"""Command-line interface for Em-Cubed."""
 
 import argparse
 import sys
@@ -269,6 +269,12 @@ def main():
         "--registry", "-r", default="registry.json", help="Registry file path (default: registry.json)"
     )
 
+    # Workflow command
+    workflow_parser = subparsers.add_parser("workflow", help="Execute a DAG-based skill workflow")
+    workflow_parser.add_argument("workflow_file", help="Path to workflow definition file (JSON/YAML)")
+    workflow_parser.add_argument("--data", "-d", help="Initial input data (JSON string)")
+    workflow_parser.add_argument("--registry", "-r", default="registry.json", help="Registry file path")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -302,6 +308,8 @@ def main():
             _handle_surfaces(args)
         elif args.command == "skill-info":
             _handle_skill_info(args)
+        elif args.command == "workflow":
+            asyncio.run(_handle_workflow(args))
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
         print(f"Error: {e}", file=sys.stderr)
@@ -714,7 +722,7 @@ def _handle_trace_view(args):
         return
 
     for trace in traces_to_show:
-        status_icon = "✓" if trace.get("success") else "✗"
+        status_icon = "âœ“" if trace.get("success") else "âœ—"
         print(f"\n{status_icon} Trace: {trace.get('trace_id')} | Skill: {trace.get('skill_id')}")
         print(f"  Status: {'[OK]' if trace.get('success') else '[FAIL]'} | Time: {trace.get('execution_time_ms', 0):.1f}ms")
         print(f"  Surface: {trace.get('surface', 'unknown')} | Timestamp: {trace.get('timestamp', 'N/A')}")
@@ -722,7 +730,7 @@ def _handle_trace_view(args):
         if spans:
             print("  Sub-surface calls:")
             for i, span in enumerate(spans):
-                span_status = "✓" if span.get("success") else "✗"
+                span_status = "âœ“" if span.get("success") else "âœ—"
                 indent = "    " * (i + 1)
                 size_info = f" ({span.get('input_size', 0)}b -> {span.get('output_size', 0)}b)"
                 print(f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms{size_info}")
@@ -808,8 +816,70 @@ def _handle_skill_info(args):
 
 
 
-
+async def _handle_workflow(args):
+    """Handle workflow command to execute a DAG of skills."""
+    workflow_path = Path(args.workflow_file)
+    registry_path = Path(args.registry)
+    if not workflow_path.exists():
+        print(f"Error: Workflow file not found at {workflow_path}")
+        sys.exit(1)
+    try:
+        with open(workflow_path, encoding="utf-8") as f:
+            if workflow_path.suffix == ".json":
+                wf_data = json.load(f)
+            elif workflow_path.suffix in (".yaml", ".yml"):
+                import yaml
+                wf_data = yaml.safe_load(f)
+            else:
+                print(f"Error: Unsupported workflow file format: {workflow_path.suffix}")
+                sys.exit(1)
+    except Exception as e:
+        print(f"Error loading workflow: {e}")
+        sys.exit(1)
+    initial_data = {}
+    if args.data:
+        try:
+            initial_data = json.loads(args.data)
+        except json.JSONDecodeError as e:
+            print(f"Error parsing initial data JSON: {e}")
+            sys.exit(1)
+    from em_cubed.skills.workflow import WorkflowExecutor, WorkflowDefinition, WorkflowStep
+    from em_cubed.skills.registry import SkillRegistry
+    from em_cubed.skills.composer import SkillComposer
+    from em_cubed.plugin_manager import PluginManager
+    pm = PluginManager()
+    registry = SkillRegistry(Path("skills"), registry_path)
+    composer = SkillComposer(pm, registry)
+    executor = WorkflowExecutor(composer)
+    steps = []
+    for s_data in wf_data.get("steps", []):
+        steps.append(WorkflowStep(
+            id=s_data["id"],
+            skill_id=s_data["skill_id"],
+            input_mapping=s_data.get("input_mapping", {}),
+            output_mapping=s_data.get("output_mapping", {}),
+            dependencies=s_data.get("dependencies", []),
+            condition=s_data.get("condition"),
+            timeout=s_data.get("timeout")
+        ))
+    workflow = WorkflowDefinition(
+        name=wf_data.get("name", workflow_path.stem),
+        steps=steps,
+        description=wf_data.get("description"),
+        timeout=wf_data.get("timeout")
+    )
+    print(f"Executing workflow: {workflow.name} ({len(workflow.steps)} steps)...")
+    result = await executor.execute(workflow, initial_data)
+    if result.success:
+        print("\nWorkflow completed successfully!")
+        print(f"Steps executed: {result.steps_executed}")
+        print("\nFinal Output:")
+        print(json.dumps(result.get_output(), indent=2))
+    else:
+        print(f"\nWorkflow failed: {result.error}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
+

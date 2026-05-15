@@ -209,8 +209,35 @@ class SkillRegistry:
         )
 
     def get_skill(self, skill_id: str) -> Optional[SkillMetadata]:
-        """Retrieve a skill by its ID."""
-        return self._skills.get(skill_id)
+        """Retrieve a skill by its ID, with fallback to fuzzy/slugified matching."""
+        # 1. Exact match
+        if skill_id in self._skills:
+            return self._skills[skill_id]
+
+        # 2. Case-insensitive match
+        for sid, metadata in self._skills.items():
+            if sid.lower() == skill_id.lower():
+                return metadata
+
+        # 3. Slugified match (robust for CLI usage)
+        # Handle cases like "DOMAIN/Name" -> "domain/name"
+        slug_id = SkillMetadata._slugify(skill_id)
+        if "/" in skill_id:
+            domain, name = skill_id.split("/", 1)
+            slug_id = f"{SkillMetadata._slugify(domain)}/{SkillMetadata._slugify(name)}"
+
+        for sid, metadata in self._skills.items():
+            # Already slugified if newly indexed, but for backward compatibility:
+            if sid == slug_id:
+                return metadata
+            
+            # Check if stored ID slugifies to the target
+            if "/" in sid:
+                s_dom, s_nam = sid.split("/", 1)
+                if f"{SkillMetadata._slugify(s_dom)}/{SkillMetadata._slugify(s_nam)}" == slug_id:
+                    return metadata
+
+        return None
 
     def list_skills(self, domain: Optional[str] = None,
                     surface: Optional[str] = None,

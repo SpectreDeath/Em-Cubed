@@ -6,7 +6,6 @@ from typing import List, Dict, Any, Optional
 import structlog
 
 from .base import SurfaceBase
-from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 

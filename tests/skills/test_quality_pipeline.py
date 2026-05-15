@@ -85,7 +85,6 @@ class TestSkillQualityPipeline:
     def test_extract_skill_id(self, pipeline):
         """Test extracting skill ID from file path."""
         skill_file = Path("/some/path/to/skills/test_skill/SKILL.md")
-        skills_dir = Path("/some/path/to/skills")
 
         skill_id = pipeline._extract_skill_id(skill_file)
         assert skill_id is not None
@@ -329,7 +328,6 @@ def test_function():
     def test_extract_skill_id_nested(self, pipeline):
         """Test extracting skill ID from nested path."""
         skill_file = Path("/skills/domain/test_skill/SKILL.md")
-        skills_dir = Path("/skills")
 
         skill_id = pipeline._extract_skill_id(skill_file)
         assert skill_id == "domain/test_skill"

@@ -1,9 +1,6 @@
 """Tests for skill validator module."""
 
 import pytest
-import tempfile
-from pathlib import Path
-from datetime import datetime
 
 from em_cubed.skills.validator import (
     SkillValidator,
