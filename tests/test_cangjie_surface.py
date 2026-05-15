@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import patch, MagicMock
-import asyncio
 from em_cubed.surfaces.cangjie_surface import CangjieSurface
 
 @pytest.mark.asyncio

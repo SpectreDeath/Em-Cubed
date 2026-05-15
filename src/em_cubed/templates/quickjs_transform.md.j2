@@ -1,0 +1,79 @@
+---
+name: {{ name }}
+Domain: {{ domain }}
+Version: 1.0.0
+surfaces:
+  - python
+  - quickjs
+---
+
+## Purpose
+{{ purpose }}
+
+## Description
+{{ description }}
+
+## Implementation
+
+### Python (data preparation)
+```python
+def prepare_data(input_data):
+    """Validate and prepare input for JS transformation."""
+    # Ensure text field exists
+    if "text" not in input_data:
+        raise ValueError("Input must contain 'text' field")
+    return input_data
+```
+
+### QuickJS (text transformation)
+```javascript
+// QuickJS transformation logic
+// Receives `text` variable from Python context
+// Returns `result` variable
+
+// Example: Convert to slug
+function toSlug(str) {
+    return str.toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+var result = toSlug(text);
+```
+
+### Python (result handling)
+```python
+def main(skill_input):
+    data = prepare_data(skill_input)
+    
+    # Inject data into JS context
+    context = {"text": data["text"]}
+    
+    # Execute JS transformation
+    js_code = """
+        // Insert JS code block here (inline for clarity)
+        function toSlug(str) {
+            return str.toLowerCase()
+                .trim()
+                .replace(/[^\\w\\s-]/g, '')
+                .replace(/[\\s_-]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+        var result = toSlug(text);
+    """
+    
+    result = context["surfaces"]["quickjs"].execute_sync(js_code, context)
+    
+    if result["status"] != "ok":
+        return {"status": "error", "message": result.get("message")}
+    
+    return {"status": "ok", "transformed": result["value"]}
+```
+
+## Examples
+```python
+input_data = {"text": "Hello World!"}
+# Expected output: {"status": "ok", "transformed": "hello-world"}
+```

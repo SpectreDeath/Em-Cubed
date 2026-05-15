@@ -1,13 +1,10 @@
 """Tests for skill quality pipeline module."""
 
 import pytest
-import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock
 
 from em_cubed.skills.quality_pipeline import SkillQualityPipeline
-from em_cubed.skills.validator import ValidationResult, ValidationSeverity
-from em_cubed.skills.metadata import SkillMetadata
 
 
 @pytest.fixture
@@ -378,3 +375,41 @@ Test description
         assert "failing_quality" in report
         assert "quality_distribution" in report
         assert "pass_rate" in report
+
+    def test_generate_all_skill_tests(self, tmp_path):
+        """Test that generate_all_skill_tests creates test files for skills."""
+        from em_cubed.skills.quality_pipeline import generate_all_skill_tests
+
+        skills_dir = tmp_path / "skills"
+        skills_dir.mkdir()
+        skill_dir = skills_dir / "demo_skill"
+        skill_dir.mkdir()
+        skill_file = skill_dir / "SKILL.md"
+        skill_file.write_text("""---
+name: Demo Skill
+Domain: General
+Version: 1.0.0
+---
+
+## Purpose
+A demo skill for test generation.
+
+## Description
+This skill is used to verify generate_all_skill_tests.
+
+```python
+def run():
+    return "demo"
+```
+""")
+
+        output_dir = tmp_path / "tests_out"
+        output_dir.mkdir()
+
+        generate_all_skill_tests(skills_dir, output_dir)
+
+        test_files = list(output_dir.glob("test_*.py"))
+        assert len(test_files) == 1
+        # The generated file should contain typical test structure
+        content = test_files[0].read_text()
+        assert "DemoSkill" in content or "Demo Skill" in content

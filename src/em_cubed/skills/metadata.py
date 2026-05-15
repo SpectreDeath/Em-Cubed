@@ -262,12 +262,16 @@ class SkillMetadata:
                 surfaces.append("prolog")
             elif lang == "hy":
                 surfaces.append("hy")
-            elif lang == "z3":
+            elif lang in ("z3", "z3-smt2"):
                 surfaces.append("z3")
             elif lang in ("datalog", "pyDatalog"):
                 surfaces.append("datalog")
             elif lang in ("cangjie", "cj"):
                 surfaces.append("cangjie")
+            elif lang in ("sql", "sqlite"):
+                surfaces.append("sqlite")
+            elif lang in ("js", "javascript", "quickjs"):
+                surfaces.append("quickjs")
         # Deduplicate preserving order
         return list(dict.fromkeys(surfaces))
 
@@ -339,10 +343,15 @@ class SkillMetadata:
         """Construct SkillMetadata from SKILL.md frontmatter."""
         import re
 
-        # Extract surfaces from code blocks in body (preferred) or frontmatter
-        surfaces = cls._extract_surfaces_from_body(body)
+        # Extract surfaces from code blocks in body, merged with explicit frontmatter
+        # Frontmatter declarations take precedence; body detection supplements with
+        # any additionally detected surfaces (e.g. sqlite from a sqlite fence).
+        code_surfaces = cls._extract_surfaces_from_body(body)
+        fm_surfaces = frontmatter.get("surfaces", [])
+        # Merge with frontmatter-first ordering (deduplicates)
+        surfaces = list(dict.fromkeys(fm_surfaces + code_surfaces))
         if not surfaces:
-            surfaces = frontmatter.get("surfaces", [])
+            surfaces = ["python"]  # sensible default
 
         # Extract tags from code blocks
         tags = cls._extract_tags_from_body(body)

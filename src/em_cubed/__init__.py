@@ -28,7 +28,7 @@ from .skills import (
     initialize_executor,
 )
 
-__version__ = "0.6.0"  # Added Shared Substrate, multi-surface CLI generation, SQLite and QuickJS surfaces
+__version__ = "0.7.0"  # Added SQLite session persistence, QuickJS context fix, Cangjie stdin pipe, Jinja2 templates, new CLI commands, ADR 004/005
 __all__ = [
     "reindex",
     "get_skill_metadata",

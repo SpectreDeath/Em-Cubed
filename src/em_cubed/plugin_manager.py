@@ -103,8 +103,8 @@ class PluginManager:
     def _discover_builtin(self):
         """Register built-in surfaces.
 
-        Core surfaces (python, prolog, hy) are instantiated immediately.
-        Heavy surfaces (z3, datalog) are stored as classes for lazy loading.
+        Core surfaces (python, prolog, hy, sqlite) are instantiated immediately.
+        Heavy surfaces (z3, datalog, cangjie, quickjs) are stored as classes for lazy loading.
         """
         from . import surfaces
 
@@ -112,6 +112,7 @@ class PluginManager:
             ("python", surfaces.PythonSurface),
             ("prolog", surfaces.PrologSurface),
             ("hy", surfaces.HySurface),
+            ("sqlite", surfaces.SQLiteSurface),  # stdlib, always available
         ]
 
         # Register core surfaces eagerly
@@ -129,8 +130,7 @@ class PluginManager:
             ("z3", surfaces.Z3Surface),
             ("datalog", surfaces.DatalogSurface),
             ("cangjie", surfaces.CangjieSurface),
-            ("sqlite", surfaces.SQLiteSurface),
-            ("quickjs", surfaces.QuickJSSurface),
+            ("quickjs", surfaces.QuickJSSurface),  # optional dep
         ]
         for name, surface_class in heavy_surfaces:
             if surface_class is not None:
@@ -139,9 +139,9 @@ class PluginManager:
     def _discover_entry_points(self):
         """Discover plugins via setuptools entry points."""
         try:
-            import entry_points
+            from importlib.metadata import entry_points as ep_loader
             discovered = 0
-            for ep in entry_points.get_group_all("em_cubed.surfaces"):
+            for ep in ep_loader(group="em_cubed.surfaces"):
                 try:
                     plugin_class = ep.load()
                     plugin = plugin_class()
@@ -149,11 +149,11 @@ class PluginManager:
                     discovered += 1
                 except Exception as e:
                     logger.warning("Failed to load plugin from entry point",
-                                 entry_point=ep.name, error=str(e))
+                                   entry_point=ep.name, error=str(e))
             if discovered > 0:
                 logger.info("Entry point plugins registered", count=discovered)
         except ImportError:
-            logger.debug("entry-points package not available, skipping entry point discovery")
+            logger.debug("importlib.metadata entry points not available, skipping entry point discovery")
         except Exception as e:
             logger.warning("Failed to discover entry point plugins", error=str(e))
 

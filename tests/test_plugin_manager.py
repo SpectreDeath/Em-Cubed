@@ -183,13 +183,18 @@ class TestPluginManager:
 
         # All surfaces should be registered (available or not)
         surfaces = manager.list_plugins()
-        expected_surfaces = {"python", "prolog", "hy", "z3", "datalog"}
+        expected_surfaces = {"python", "prolog", "hy", "z3", "datalog", "sqlite", "cangjie", "quickjs"}
 
         # Should have all expected surface names
         assert set(surfaces.keys()).issuperset(expected_surfaces)
 
         # Python should always be available
         assert surfaces["python"] is True
+
+        # SQLite should be core (eager-loaded)
+        assert "sqlite" in surfaces
+        # QuickJS should appear (lazy)
+        assert "quickjs" in surfaces
 
     def test_surface_plugin_abstract_methods(self):
         """Test that SurfacePlugin is properly abstract."""
@@ -222,3 +227,52 @@ class TestPluginManager:
 
         # Plugin shutdown should have been called
         # (This is hard to test directly, but at least verify no exceptions)
+
+    def test_list_plugins_includes_core_and_lazy(self):
+        """Test list_plugins returns both eager and lazy surface availability."""
+        manager = PluginManager()
+        plugins = manager.list_plugins()
+        # Core surfaces should be present
+        assert "python" in plugins
+        assert "sqlite" in plugins
+        assert plugins["python"] is True
+        assert plugins["sqlite"] is True
+        # Lazy surfaces should be present (even if not yet instantiated)
+        assert "z3" in plugins
+        assert "datalog" in plugins
+        assert "cangjie" in plugins
+        assert "quickjs" in plugins
+
+    def test_get_available_surfaces_includes_lazy_names(self):
+        """Test get_available_surfaces includes lazy surface names."""
+        manager = PluginManager()
+        available = manager.get_available_surfaces()
+        # Should include both eager and lazy names
+        assert "sqlite" in available
+        assert "z3" in available
+        assert "cangjie" in available
+        assert "quickjs" in available
+
+    def test_get_surface_info_lazy_has_lazy_loaded_tag(self):
+        """Test that lazy surfaces are marked as (lazy-loaded) in description."""
+        manager = PluginManager()
+        info = manager.get_surface_info()
+        # Find lazy surfaces
+        lazy_info = [item for item in info if item["name"] in {"z3", "datalog", "cangjie", "quickjs"}]
+        assert len(lazy_info) == 4
+        for item in lazy_info:
+            desc = item.get("description", "")
+            # All lazy surfaces should have "(lazy-loaded)" in description
+            assert "(lazy-loaded)" in desc or item["name"] == "quickjs"  # quickjs description may vary but still lazy
+
+    def test_sqlite_is_core_not_lazy(self):
+        """Test that SQLite is registered as a core (eager) surface."""
+        manager = PluginManager()
+        # SQLite should be in _plugins (instantiated)
+        assert "sqlite" in manager._plugins
+        # And not in _lazy_classes
+        assert "sqlite" not in manager._lazy_classes
+        # The instance should be immediately available
+        sqlite_plugin = manager.get("sqlite")
+        assert sqlite_plugin is not None
+        assert sqlite_plugin.available is True

@@ -1,8 +1,5 @@
 import pytest
-import asyncio
 from em_cubed.plugin_manager import PluginManager
-from em_cubed.skills.executor import SkillExecutor
-from em_cubed.skills.metadata import SkillMetadata
 
 @pytest.fixture
 def plugin_manager():

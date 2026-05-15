@@ -1,6 +1,5 @@
 """QuickJS surface integration for executing JavaScript code."""
 
-import asyncio
 import importlib.util
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Optional, List
@@ -57,14 +56,14 @@ class QuickJSSurface(SurfaceBase):
             
             # Inject context variables if provided (primitive types only)
             if context:
+                import json
                 for key, value in context.items():
                     if isinstance(value, (int, float, str, bool, list, dict)) or value is None:
                         try:
-                            # Use JSON as bridge for complex types
-                            import json
-                            ctx.set(key, ctx.parse_json(json.dumps(value)))
+                            # Use JS assignment via eval; more compatible than parse_json
+                            ctx.eval(f"var {key} = {json.dumps(value)};")
                         except Exception:
-                            pass # Skip if serialization fails
+                            pass  # Skip if injection fails
 
             # Execute the code
             result = ctx.eval(code)

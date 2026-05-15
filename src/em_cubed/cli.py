@@ -210,7 +210,7 @@ def main():
     create_parser = subparsers.add_parser("create-skill", help="Create a new skill from template")
     create_parser.add_argument("name", help="Name of the skill")
     create_parser.add_argument("--domain", "-d", default="General", help="Skill domain")
-    create_parser.add_argument("--template", "-t", default="basic_python", choices=["basic_python", "python_prolog"], help="Template to use")
+    create_parser.add_argument("--template", "-t", default="basic_python", choices=["basic_python", "python_prolog", "sqlite_analysis", "z3_optimization", "quickjs_transform"], help="Template to use")
     create_parser.add_argument("--output-dir", default="skills", help="Skills directory")
 
     # Trace-view command
@@ -259,6 +259,16 @@ def main():
         help="Show full span details"
     )
 
+    # Surfaces command
+    subparsers.add_parser("surfaces", help="List all registered surfaces")
+
+    # Skill-info command
+    skill_info_parser = subparsers.add_parser("skill-info", help="Display full metadata for a skill")
+    skill_info_parser.add_argument("skill_id", help="Skill ID (domain/skill-name)")
+    skill_info_parser.add_argument(
+        "--registry", "-r", default="registry.json", help="Registry file path (default: registry.json)"
+    )
+
     args = parser.parse_args()
 
     if not args.command:
@@ -288,6 +298,10 @@ def main():
             _handle_create_skill(args)
         elif args.command == "trace-view":
             _handle_trace_view(args)
+        elif args.command == "surfaces":
+            _handle_surfaces(args)
+        elif args.command == "skill-info":
+            _handle_skill_info(args)
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
         print(f"Error: {e}", file=sys.stderr)
@@ -374,27 +388,18 @@ def _handle_run(args):
     logger.info("Executing code", surface=surface_name, code_length=len(code), timeout=timeout)
 
     async def run_async():
-        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
-        
         if args.trace:
             # Setup tracing for CLI run
             from em_cubed.skills.telemetry import initialize_telemetry, TelemetryConfig, ExecutionRecord, TraceContext
-            from datetime import datetime
+            from datetime import timezone
             
             initialize_telemetry(TelemetryConfig(log_every_execution=False))
             
-            # We mock a request
-            request = SkillExecutionRequest(
-                skill_id="cli_run",
-                input_data={},
-                surface=surface_name,
-                timeout=timeout
-            )
-            # Actually we need to mock the skill file load too... 
+            # Actually we need to mock the skill file load too...
             # Simplified: just run directly if it's a surface run
             # But tracing is tied to SkillExecutor.
             # I'll just run it via surface and manually trace it for CLI run if --trace is on
-            from datetime import datetime, timezone
+            from datetime import datetime
             record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=0)
             trace_ctx = TraceContext(record)
             
@@ -651,12 +656,15 @@ def _handle_create_skill(args):
 
     template_content = template_path.read_text(encoding="utf-8")
 
-    # Simple variable replacement (no Jinja2 dependency for now)
-    content = template_content
-    content = content.replace("{{ name }}", name)
-    content = content.replace("{{ domain }}", domain)
-    content = content.replace("{{ purpose }}", f"A new {name} skill.")
-    content = content.replace("{{ description }}", f"Description for {name} skill.")
+    # Render using Jinja2
+    from jinja2 import Template
+    template = Template(template_content)
+    content = template.render(
+        name=name,
+        domain=domain,
+        purpose=f"A {name} skill.",
+        description=f"Detailed description for {name}."
+    )
 
     # Write file
     skill_dir.mkdir(parents=True, exist_ok=True)
@@ -732,6 +740,75 @@ def _handle_trace_view(args):
                     print(f"  {indent}  Output: {out}")
         elif args.verbose:
             print("  No sub-surface spans recorded.")
+
+
+def _handle_surfaces(args):
+    """Handle surfaces command to list all registered surfaces."""
+    pm = PluginManager()
+    info = pm.get_surface_info()
+
+    # Determine load status: eager (instantiated) vs lazy (not yet loaded)
+    load_status = {}
+    for name in pm._plugins:
+        load_status[name] = "eager"
+    for name in pm._lazy_classes:
+        load_status[name] = "lazy"
+
+    # Print table header
+    header = f"{'SURFACE':<12} {'AVAILABLE':<10} {'LOADED':<10} {'DESCRIPTION'}"
+    separator = "-" * 12 + " " + "-" * 10 + " " + "-" * 10 + " " + "-" * 40
+    print(header)
+    print(separator)
+    for item in info:
+        name = item["name"]
+        avail = "yes" if item["available"] else "no"
+        loaded = load_status.get(name, "?")
+        desc = item.get("description", "")
+        print(f"{name:<12} {avail:<10} {loaded:<10} {desc}")
+
+
+def _handle_skill_info(args):
+    """Handle skill-info command to display skill metadata."""
+    skill_id = args.skill_id
+    registry_path = Path(args.registry)
+
+    # Default skills_dir relative to registry or cwd?
+    # Assume skills directory is in default location 'skills'
+    skills_dir = Path("skills")
+
+    from em_cubed.skills.registry import SkillRegistry
+    if not registry_path.exists():
+        print(f"Error: Registry file not found at {registry_path}")
+        sys.exit(1)
+
+    registry = SkillRegistry(skills_dir, registry_path)
+    metadata = registry.get_skill(skill_id)
+    if not metadata:
+        print(f"Skill '{skill_id}' not found in registry")
+        sys.exit(1)
+
+    # Print metadata
+    print(f"Skill ID        : {metadata.skill_id}")
+    print(f"Name            : {metadata.name}")
+    print(f"Domain          : {metadata.domain}")
+    print(f"Version         : {metadata.version}")
+    print(f"Surfaces        : {', '.join(metadata.surfaces)}")
+    print(f"Purpose         : {metadata.purpose}")
+    print(f"Description     : {metadata.description}")
+    print(f"Path            : {metadata.path}")
+    qm = registry.get_quality(skill_id)
+    if qm:
+        print(f"Validation Score: {qm.validation_score:.2f}")
+        print(f"Test Coverage   : {qm.test_coverage:.2f}")
+        print(f"Success Rate    : {qm.success_rate:.2f}")
+        print(f"Avg Exec Time   : {qm.avg_execution_time:.2f}ms")
+        print(f"Usage Count     : {qm.usage_count}")
+    else:
+        print("Quality metrics : not available")
+
+
+
+
 
 
 if __name__ == "__main__":

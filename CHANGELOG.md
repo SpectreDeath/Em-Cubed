@@ -5,6 +5,28 @@ All notable changes to Em-Cubed will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-05-15
+
+### Added
+- **Ecosystem**: `SQLiteSurface` with session-persistent in-memory execution
+- **Ecosystem**: `QuickJSSurface` for JavaScript execution via `pyquickjs` (lazy-loaded)
+- **CLI**: `em3 surfaces` — list all registered surfaces with availability and load status
+- **CLI**: `em3 skill-info <skill_id>` — display full metadata and quality metrics for a skill
+- **Templates**: three new skill templates: `sqlite_analysis`, `z3_optimization`, `quickjs_transform`
+- **Skills**: four new example skills: `sql-aggregator`, `z3-schedule-solver`, `js-text-transformer`, `sqlite-pipeline`
+- **Docs**: two new ADRs: `004-plugin-discovery-mechanisms.md`, `005-surface-isolation-and-bridge.md`
+
+### Changed
+- **CLI**: `em3 create-skill` now uses Jinja2 for robust template rendering
+- **Surface registration**: `SQLiteSurface` registered as core (eager); `QuickJSSurface` registered as lazy
+- **Cangjie surface**: context is now piped to stdin instead of passing a JSON file path as an argument
+- **Validation**: `SkillValidator` now acknowledges `cangjie`, `sqlite`, and `quickjs` as valid surfaces
+
+### Fixed
+- **Entry point discovery**: replaced deprecated `import entry_points` with `from importlib.metadata import entry_points`
+- **QuickJS compatibility**: context injection switched from `ctx.parse_json` to `ctx.eval()` for broader pyquickjs compatibility
+- **Surfaces**: `SQLiteSurface` and `QuickJSSurface` are properly exported from `surfaces/__init__.py`
+
 ## [0.6.0] - 2026-05-14
 
 ### Added

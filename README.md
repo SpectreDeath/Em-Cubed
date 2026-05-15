@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-Em-Cubed is a secure, multi-surface skill framework enabling execution across Python, Prolog, Hy Lisp, Z3 SMT solving, Datalog logic, and Janus Python-Prolog bridge surfaces with unified indexing and search capabilities. It allows developers to create composable skills that leverage different programming paradigms for optimal problem-solving.
+Em-Cubed is a secure, multi-surface skill framework enabling execution across Python, Prolog, Hy Lisp, Z3 SMT solving, Datalog logic, Janus bridge, SQLite, QuickJS JavaScript, and Cangjie surfaces with unified indexing and search capabilities. It allows developers to create composable skills that leverage different programming paradigms for optimal problem-solving.
 
 ## ✨ Key Features
 
@@ -87,12 +87,15 @@ em-cubed/
 │   ├── indexer.py         # SKILL.md parsing & registry generation
 │   ├── search.py          # Multi-surface scoring search
 │   └── surfaces/          # Execution surfaces
-│       ├── python_surface.py  # Safe Python via asteval
-│       ├── prolog_surface.py  # PySWIP Prolog integration
-│       ├── hy_surface.py      # Hy Lisp execution
-│       ├── z3_surface.py      # Z3 SMT solving
-│       ├── datalog_surface.py # Datalog logic programming
-│       └── janus_surface.py   # Python-Prolog bridge (experimental)
+│       ├── python_surface.py   # Safe Python via asteval
+│       ├── prolog_surface.py   # PySWIP Prolog integration
+│       ├── hy_surface.py       # Hy Lisp execution
+│       ├── z3_surface.py       # Z3 SMT solving
+│       ├── datalog_surface.py  # Datalog logic programming
+│       ├── janus_surface.py    # Python-Prolog bridge (experimental)
+│       ├── sqlite_surface.py   # In-memory SQLite execution
+│       ├── quickjs_surface.py  # JavaScript via QuickJS
+│       └── cangjie_surface.py  # High-performance logic orchestrator
 ├── api/main.py            # FastAPI REST API
 ├── examples/              # Multi-surface skill examples
 ├── tests/                 # Comprehensive test suite (219 tests)
@@ -186,6 +189,12 @@ em3 test NLP/natural-language-generator --generate
 
 # Get skill recommendations
 em3 recommend "need to optimize a function"
+
+# List all available surfaces
+em3 surfaces
+
+# Show detailed metadata for a skill
+em3 skill-info <skill_id>
 
 # Search for skills
 results = search_registry("optimization", "registry.json")
@@ -355,6 +364,54 @@ if surface.available:
 
 **Requirements**: janus_swi package. This surface provides tight integration between Python and SWI-Prolog, allowing embedding of Prolog calls within Python code. May be unstable; consider using PySWIP directly for production.
 
+### SQLite Surface
+
+**Capabilities**: In-memory SQLite execution for declarative data querying and aggregation.
+
+```python
+from em_cubed.surfaces import SQLiteSurface
+
+surface = SQLiteSurface()
+# Supports multi-statement SQL; session persistence for multi-step skills
+result = await surface.execute(
+    "CREATE TABLE test (id INT); INSERT INTO test VALUES (1); SELECT * FROM test;",
+    context={"session_id": "demo"}
+)
+print(result['value'])  # [{'id': 1}]
+```
+
+**Requirements**: None (stdlib). Supports session-persistent connections via `context["session_id"]`.
+
+### QuickJS Surface
+
+**Capabilities**: JavaScript execution via the QuickJS engine.
+
+```python
+from em_cubed.surfaces import QuickJSSurface
+
+surface = QuickJSSurface()
+if surface.available:
+    result = await surface.execute("1 + 2 * 3", {})
+    print(result['value'])  # 7
+```
+
+**Requirements**: `quickjs` package (`pip install quickjs`).
+
+### Cangjie Surface
+
+**Capabilities**: High-performance logic orchestration via the Cangjie/LLVM compiler.
+
+```python
+from em_cubed.surfaces import CangjieSurface
+
+surface = CangjieSurface()
+if surface.available:
+    result = await surface.execute('main() { print(2 + 3) }')
+    print(result['value'])  # prints 5
+```
+
+**Requirements**: `cjc` compiler in PATH. Context is passed via stdin as JSON.
+
 ## 🎯 Skills Quality Framework
 
 Em-Cubed includes a comprehensive quality assurance system for skills:
@@ -388,6 +445,12 @@ em3 recommend "generate text from prompt"
 
 # Compose skills
 em3 compose --source NLP/text-preprocessor --target NLP/sentiment-analyzer
+
+# List all available surfaces
+em3 surfaces
+
+# Display full metadata for a skill
+em3 skill-info <skill_id>
 ```
 
 ### Quality Standards
