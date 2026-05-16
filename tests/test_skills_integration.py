@@ -106,12 +106,12 @@ def skill_b_execute(result):
         """Test sequential skill composition."""
         # Create pipeline: Skill A -> Skill B
         step_a = CompositionStep(
-            skill_id="General/Skill A",
+            skill_id="general/skill-a",
             input_mapping={"value": "input.value"},
             output_mapping={"result": "data.intermediate"},
         )
         step_b = CompositionStep(
-            skill_id="General/Skill B",
+            skill_id="general/skill-b",
             input_mapping={"result": "data.intermediate"},
             output_mapping={"final": "data.output"},
         )
@@ -126,19 +126,19 @@ def skill_b_execute(result):
 
         assert result.success
         assert result.get_output() == 20  # 5*2 + 10 = 20
-        assert "General/Skill A" in result.context.skills_used
-        assert "General/Skill B" in result.context.skills_used
+        assert "general/skill-a" in result.context.skills_used
+        assert "general/skill-b" in result.context.skills_used
 
     async def test_parallel_composition(self, composer, test_registry):
         """Test parallel skill execution."""
         # Use Skill A twice with different inputs in parallel
         step1 = CompositionStep(
-            skill_id="General/Skill A",
+            skill_id="general/skill-a",
             input_mapping={"value": "input.x"},
             output_mapping={"result": "data.out1"},
         )
         step2 = CompositionStep(
-            skill_id="General/Skill A",
+            skill_id="general/skill-a",
             input_mapping={"value": "input.y"},
             output_mapping={"result": "data.out2"},
         )
@@ -153,7 +153,7 @@ def skill_b_execute(result):
 
         assert result.success
         outputs = result.context.data["output"]
-        assert outputs["General/Skill A"]["value"]["result"] in [6, 14]
+        assert outputs["general/skill-a"]["value"]["result"] in [6, 14]
 
     async def test_conditional_composition(self, composer, test_registry):
         """Test conditional skill execution."""
@@ -162,7 +162,7 @@ def skill_b_execute(result):
             return context.data.get("should_run", True)
 
         step = CompositionStep(
-            skill_id="General/Skill A",
+            skill_id="general/skill-a",
             input_mapping={"value": "input.base"},
             condition=condition,
         )
@@ -185,14 +185,14 @@ def skill_b_execute(result):
 
     def test_compatibility_detection(self, test_registry):
         """Test finding compatible skills."""
-        compatible = test_registry.find_compatible_skills("General/Skill A")
+        compatible = test_registry.find_compatible_skills("general/skill-a")
         # Skill B should be compatible (output of A matches input of B)
-        assert "General/Skill B" in compatible
+        assert "general/skill-b" in compatible
 
     def test_composition_validation(self, test_registry):
         """Test validating skill composition."""
-        skill_a = test_registry.get_skill("General/Skill A")
-        skill_b = test_registry.get_skill("General/Skill B")
+        skill_a = test_registry.get_skill("general/skill-a")
+        skill_b = test_registry.get_skill("general/skill-b")
 
         # Validate composition
         validator = SkillValidator()
@@ -202,12 +202,12 @@ def skill_b_execute(result):
 
     def test_skill_suggestion(self, composer, test_registry):
         """Test skill recommendation for composition."""
-        suggestions = composer.suggest_composition("General/Skill A", "Transform and add")
+        suggestions = composer.suggest_composition("general/skill-a", "Transform and add")
 
         assert len(suggestions) > 0
         # Should suggest Skill B as it's compatible
         suggested_ids = [p.steps[0].skill_id for p in suggestions]
-        assert "General/Skill B" in suggested_ids
+        assert "general/skill-b" in suggested_ids
 
 
 class TestSkillValidationIntegration:
@@ -283,9 +283,9 @@ def test():
         )
 
         # Benchmark the test skill (pure Python, no external deps)
-        result = await benchmark.benchmark_skill("General/Benchmark Test", config)
+        result = await benchmark.benchmark_skill("general/benchmark-test", config)
         assert result is not None
-        assert result.skill_id == "General/Benchmark Test"
+        assert result.skill_id == "general/benchmark-test"
 
 
 class TestSkillRecommendation:
@@ -332,7 +332,7 @@ class TestSkillRecommendation:
         recommender = SkillRecommender(registry)
 
         # Find skills similar to natural-language-generator
-        nlg_id = "NLP/natural-language-generator"
+        nlg_id = "nlp/natural-language-generator"
         similar = recommender.get_similar_skills(nlg_id)
 
         assert len(similar) >= 0

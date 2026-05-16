@@ -210,7 +210,7 @@ def main():
     create_parser = subparsers.add_parser("create-skill", help="Create a new skill from template")
     create_parser.add_argument("name", help="Name of the skill")
     create_parser.add_argument("--domain", "-d", default="General", help="Skill domain")
-    create_parser.add_argument("--template", "-t", default="basic_python", choices=["basic_python", "python_prolog", "sqlite_analysis", "z3_optimization", "quickjs_transform"], help="Template to use")
+    create_parser.add_argument("--template", "-t", default="basic_python", choices=["basic_python", "python_prolog", "sqlite_analysis", "z3_optimization", "quickjs_transform", "llm_decision_maker", "rag_pipeline", "llm_advanced_features"], help="Template to use")
     create_parser.add_argument("--output-dir", default="skills", help="Skills directory")
 
     # Trace-view command

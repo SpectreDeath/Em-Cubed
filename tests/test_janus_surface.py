@@ -22,7 +22,8 @@ def janus_surface(mock_janus_swi):
     surface._check_availability = MagicMock(return_value=True)
     surface._janus = mock_janus_swi
     yield surface
-    if "janus_swi" in sys.modules: del sys.modules["janus_swi"]
+    if "janus_swi" in sys.modules:
+        del sys.modules["janus_swi"]
 
 @pytest.mark.asyncio
 async def test_execute_unavailable():

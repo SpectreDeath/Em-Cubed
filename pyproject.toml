@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "em-cubed"
-version = "0.7.0"
+version = "0.8.0"
 description = "Multi-Surface Skill Framework for Python, Prolog, Hy, Z3, Datalog, Janus, SQLite, and QuickJS execution surfaces"
 authors = [
     {name = "SpectreDeath", email = "spectre@example.com"},
@@ -20,6 +20,7 @@ dependencies = [
     "pydantic>=2.5.0,<3.0.0",
     "structlog>=23.0.0,<25.0.0",
     "jinja2>=3.0.0",
+    "litellm>=1.0.0",
 ]
 
 [project.scripts]

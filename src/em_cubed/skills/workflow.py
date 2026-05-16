@@ -10,7 +10,6 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Set
 from datetime import datetime
 
-from .metadata import SkillMetadata
 from .composer import ExecutionContext, CompositionStep, CompositionResult
 
 logger = structlog.get_logger()
@@ -52,17 +51,39 @@ class WorkflowExecutor:
         
         # 1. Build dependency graph
         graph: Dict[str, Set[str]] = {step.id: set(step.dependencies) for step in workflow.steps}
-        steps_by_id: Dict[str, WorkflowStep] = {step.id: step for step in workflow.steps}
+        _steps_by_id: Dict[str, WorkflowStep] = {step.id: step for step in workflow.steps}
         
         # 2. Check for cycles
-        if self._has_cycle(graph):
-            error_msg = "Workflow contains a circular dependency"
-            self.logger.error(error_msg)
-            return CompositionResult(success=False, context=context, error=error_msg)
-
+        visited: Set[str] = set()
+        rec_stack: Set[str] = set()
+        
+        def has_cycle(step_id: str) -> bool:
+            visited.add(step_id)
+            rec_stack.add(step_id)
+            
+            for dependency in graph.get(step_id, set()):
+                if dependency not in visited:
+                    if has_cycle(dependency):
+                        return True
+                elif dependency in rec_stack:
+                    return True
+            
+            rec_stack.remove(step_id)
+            return False
+        
+        # Check for cycles in all nodes
+        for step_id in graph:
+            if step_id not in visited:
+                if has_cycle(step_id):
+                    return CompositionResult(
+                        success=False,
+                        context=context,
+                        steps_executed=0,
+                        error=f"circular dependency detected involving step {step_id}"
+                    )
+        
         # 3. Execute steps layer by layer or as tasks complete
         completed_steps: Set[str] = set()
-        in_progress: Set[str] = set()
         failed_steps: Set[str] = set()
         
         # Use a lock for context access during parallel execution

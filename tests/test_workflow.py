@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from unittest.mock import MagicMock
 from em_cubed.skills.workflow import WorkflowExecutor, WorkflowDefinition, WorkflowStep
-from em_cubed.skills.composer import SkillComposer, ExecutionContext
+from em_cubed.skills.composer import SkillComposer
 
 @pytest.fixture
 def mock_composer():

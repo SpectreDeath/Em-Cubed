@@ -112,6 +112,7 @@ class PluginManager:
             ("python", surfaces.PythonSurface),
             ("prolog", surfaces.PrologSurface),
             ("hy", surfaces.HySurface),
+            ("llm", surfaces.LLMSurface),  # LLM surface - lightweight, load eagerly
             ("sqlite", surfaces.SQLiteSurface),  # stdlib, always available
         ]
 
