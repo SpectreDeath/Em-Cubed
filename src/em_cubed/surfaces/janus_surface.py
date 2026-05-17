@@ -1,4 +1,19 @@
-"""Janus surface integration for Python-Prolog bridge."""
+"""Janus surface integration for Python-Prolog bridge using Janus/SWI-Prolog.
+
+This surface provides a high-performance, bidirectional bridge between Python and Prolog,
+allowing complex data sharing and advanced interoperation capabilities. Unlike the simpler
+PrologSurface (which uses PySWIP), JanusSurface enables:
+- Sharing complex data structures between Python and Prolog without serialization
+- Calling Prolog predicates from Python and vice versa with minimal overhead
+- Access to SWI-Prolog's full feature set including modules, threading, and JIT
+
+Note: This surface is optional and requires the janus-swi Python package to be installed.
+If janus-swi is not available, the surface will report as unavailable and gracefully
+degrade to allow the system to function with other surfaces.
+
+For simpler Prolog use cases that do not require deep integration, consider using
+PrologSurface instead, which has fewer dependencies and is easier to set up.
+"""
 
 import asyncio
 import importlib.util
@@ -11,7 +26,7 @@ logger = structlog.get_logger()
 
 
 class JanusSurface(SurfaceBase):
-    """Handle Janus/SWI-Prolog bridge integration."""
+    """Handle Janus/SWI-Prolog bridge integration for advanced Python-Prolog interop."""
 
     @property
     def name(self) -> str:
@@ -19,7 +34,7 @@ class JanusSurface(SurfaceBase):
 
     @property
     def description(self) -> str:
-        return "Janus bridge for Python-Prolog interop"
+        return "Janus bridge for Python-Prolog interop (optional, requires janus-swi)"
 
     @property
     def available(self) -> bool:

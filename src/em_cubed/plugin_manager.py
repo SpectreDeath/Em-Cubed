@@ -1,249 +1,154 @@
 """Plugin system for extensible surface architecture."""
 import importlib.util
-from abc import ABC, abstractmethod
+import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List, cast
 import structlog
 
+from .plugin_discovery import PluginDiscovery
+from .plugin_registry import PluginRegistry
+
 logger = structlog.get_logger()
 
 
-class SurfaceTimeoutError(Exception):
-    """Raised when a surface operation times out."""
-    pass
-
-
-class SurfacePlugin(ABC):
-    """Base class for surface plugins."""
-
-    def __init__(self, timeout: Optional[float] = None) -> None:
-        """Initialize surface plugin with optional timeout.
-
-        Args:
-            timeout: Optional timeout in seconds for surface operations
-        """
-        self.timeout = timeout
-        self._executor = None  # Thread pool executor for async execution
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Surface name (e.g., 'python', 'prolog')."""
-        pass
-
-    @property
-    @abstractmethod
-    def available(self) -> bool:
-        """Check if surface dependencies are available."""
-        pass
-
-    @abstractmethod
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute code on this surface."""
-        pass
-
-    @abstractmethod
-    async def health(self) -> bool:
-        """Health check for this surface."""
-        pass
-
-    @abstractmethod
-    def extract_tags(self, source: Optional[str]) -> List[str]:
-        """Extract relevant tags from source code."""
-        pass
-
-    def initialize(self) -> None:
-        """Optional initialization hook."""
-        pass
-
-    def shutdown(self) -> None:
-        """Optional shutdown hook."""
-        pass
-
-    @property
-    def substrate(self) -> Dict[str, Any]:
-        """Shared data substrate across surfaces."""
-        if not hasattr(self, "_substrate") or self._substrate is None:
-            self._substrate = {}
-        return self._substrate
-
-    @substrate.setter
-    def substrate(self, value: Dict[str, Any]) -> None:
-        self._substrate = value
-
-
 class PluginManager:
-    """Manage surface plugins with multiple discovery mechanisms.
-
-    Core surfaces (python, prolog, hy) are loaded eagerly at startup.
-    Heavy surfaces (z3, datalog) are loaded on first use to avoid
-    expensive imports when dependencies may not be installed.
+    """Manage surface plugins with separated discovery, registry, and lifecycle concerns.
+    
+    This class now follows the Single Responsibility Principle by delegating:
+    - Discovery: PluginDiscovery class
+    - Registry: PluginRegistry class  
+    - Lifecycle: Handled by PluginRegistry with PluginManager coordination
     """
-
-    _LAZY_SURFACES = frozenset({"z3", "datalog"})
-
+    
     def __init__(self):
-        self._plugins: Dict[str, SurfacePlugin] = {}
+        self.discovery = PluginDiscovery()
+        self.registry = PluginRegistry()
         self._lazy_classes: Dict[str, type] = {}
-
-        self._discover_builtin()
-        self._discover_entry_points()
-        self._discover_directory()
-
-        logger.info("PluginManager initialized", loaded=list(self._plugins.keys()), lazy=list(self._lazy_classes.keys()))
-
+        
+        self._load_plugins()
+        
+        logger.info(
+            "PluginManager initialized", 
+            loaded=list(self.registry.get_plugin_names()),
+            lazy=list(self._lazy_classes.keys())
+        )
+    
     def __del__(self):
         """Clean up plugins on deletion."""
-        for plugin in self._plugins.values():
-            try:
-                plugin.shutdown()
-            except Exception as e:
-                logger.warning("Failed to shutdown plugin", plugin=plugin.name, error=str(e))
-
-    def _discover_builtin(self):
-        """Register built-in surfaces.
-
-        Core surfaces (python, prolog, hy, sqlite) are instantiated immediately.
-        Heavy surfaces (z3, datalog, cangjie, quickjs) are stored as classes for lazy loading.
-        """
-        from . import surfaces
-
-        core_surfaces = [
-            ("python", surfaces.PythonSurface),
-            ("prolog", surfaces.PrologSurface),
-            ("hy", surfaces.HySurface),
-            ("llm", surfaces.LLMSurface),  # LLM surface - lightweight, load eagerly
-            ("sqlite", surfaces.SQLiteSurface),  # stdlib, always available
-        ]
-
-        # Register core surfaces eagerly
-        for name, surface_class in core_surfaces:
+        self.shutdown_all()
+    
+    def _load_plugins(self):
+        """Load plugins from all discovery mechanisms."""
+        # Import SurfacePlugin locally to avoid circular imports
+        from .plugin import SurfacePlugin
+        
+        # Discover built-in surfaces
+        eager_builtin, lazy_builtin, entry_point, directory = \
+            self.discovery.discover_all_plugins()
+        
+        # Register eager built-in surfaces
+        for name, surface_class in eager_builtin.items():
             if surface_class is not None:
                 try:
-                    instance = surface_class()
-                    instance.initialize()
-                    self.register(name, instance)
+                    # Verify it's a SurfacePlugin subclass
+                    if issubclass(surface_class, SurfacePlugin):
+                        instance = surface_class()
+                        self.registry.register(name, instance)
+                    else:
+                        logger.warning("Discovered class is not a SurfacePlugin", 
+                                     surface=name, class_name=surface_class.__name__)
                 except Exception as e:
                     logger.warning("Failed to instantiate surface", surface=name, error=str(e))
-
-        # Store heavy surfaces for lazy loading
-        heavy_surfaces = [
-            ("z3", surfaces.Z3Surface),
-            ("datalog", surfaces.DatalogSurface),
-            ("cangjie", surfaces.CangjieSurface),
-            ("quickjs", surfaces.QuickJSSurface),  # optional dep
-        ]
-        for name, surface_class in heavy_surfaces:
+        
+        # Store lazy built-in surfaces for later loading
+        for name, surface_class in lazy_builtin.items():
             if surface_class is not None:
-                self._lazy_classes[name] = surface_class
-
-    def _discover_entry_points(self):
-        """Discover plugins via setuptools entry points."""
-        try:
-            from importlib.metadata import entry_points as ep_loader
-            discovered = 0
-            for ep in ep_loader(group="em_cubed.surfaces"):
-                try:
-                    plugin_class = ep.load()
-                    plugin = plugin_class()
-                    self.register(ep.name, plugin)
-                    discovered += 1
-                except Exception as e:
-                    logger.warning("Failed to load plugin from entry point",
-                                   entry_point=ep.name, error=str(e))
-            if discovered > 0:
-                logger.info("Entry point plugins registered", count=discovered)
-        except ImportError:
-            logger.debug("importlib.metadata entry points not available, skipping entry point discovery")
-        except Exception as e:
-            logger.warning("Failed to discover entry point plugins", error=str(e))
-
-    def _discover_directory(self, plugin_dir: Optional[Path] = None):
-        """Discover plugins by scanning directory."""
-        plugin_dir = plugin_dir or Path("plugins")
-        if not plugin_dir.exists():
-            return
-
-        discovered = 0
-        try:
-            # Scan for Python files in plugin directory
-            for py_file in plugin_dir.glob("**/*.py"):
-                try:
-                    # Load the module
-                    spec = importlib.util.spec_from_file_location(py_file.stem, py_file)
-                    if spec and spec.loader:
-                        module = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(module)
-
-                        # Look for plugin classes (inherit from SurfacePlugin)
-                        for attr_name in dir(module):
-                            attr = getattr(module, attr_name)
-                            if (isinstance(attr, type) and
-                                issubclass(attr, SurfacePlugin) and
-                                attr != SurfacePlugin):
-                                try:
-                                    plugin = attr()
-                                    plugin_name = plugin.name
-                                    self.register(plugin_name, plugin)
-                                    discovered += 1
-                                    logger.debug("Directory plugin loaded", plugin=plugin_name, file=str(py_file))
-                                except Exception as e:
-                                    logger.warning("Failed to instantiate plugin class",
-                                                 class_name=attr_name, file=str(py_file), error=str(e))
-                except Exception as e:
-                    logger.warning("Failed to load plugin file", file=str(py_file), error=str(e))
-
-            if discovered > 0:
-                logger.info("Directory plugins registered", count=discovered, directory=str(plugin_dir))
-        except Exception as e:
-            logger.warning("Failed to discover directory plugins", directory=str(plugin_dir), error=str(e))
-
-    def register(self, name: str, plugin: SurfacePlugin):
-        """Register a plugin."""
-        if name in self._plugins:
-            logger.warning("Plugin already registered, replacing", plugin=name)
-        self._plugins[name] = plugin
-        logger.debug("Plugin registered", plugin=name)
-
-    def get(self, name: str) -> Optional[SurfacePlugin]:
+                # Verify it's a SurfacePlugin subclass
+                if issubclass(surface_class, SurfacePlugin):
+                    self._lazy_classes[name] = surface_class
+                else:
+                    logger.warning("Discovered lazy class is not a SurfacePlugin", 
+                                 surface=name, class_name=surface_class.__name__)
+        
+        # Register entry point plugins
+        for name, surface_class in entry_point.items():
+            try:
+                # Verify it's a SurfacePlugin subclass
+                if issubclass(surface_class, SurfacePlugin):
+                    instance = surface_class()
+                    self.registry.register(name, instance)
+                else:
+                    logger.warning("Entry point class is not a SurfacePlugin", 
+                                 entry_point=name, class_name=surface_class.__name__)
+            except Exception as e:
+                logger.warning("Failed to load entry point plugin", 
+                             entry_point=name, error=str(e))
+        
+        # Register directory plugins
+        for name, surface_class in directory.items():
+            try:
+                # Verify it's a SurfacePlugin subclass
+                if issubclass(surface_class, SurfacePlugin):
+                    instance = surface_class()
+                    self.registry.register(name, instance)
+                else:
+                    logger.warning("Directory class is not a SurfacePlugin", 
+                                 plugin_name=name, class_name=surface_class.__name__)
+            except Exception as e:
+                logger.warning("Failed to load directory plugin", 
+                             plugin_name=name, error=str(e))
+    
+    def get(self, name: str):
         """Get plugin by name, lazily loading heavy surfaces on first use."""
-        if name in self._plugins:
-            return self._plugins[name]
-
+        # Import SurfacePlugin locally to avoid circular imports
+        from .plugin import SurfacePlugin
+        
+        # Try to get from registry first
+        plugin = self.registry.get(name)
+        if plugin is not None:
+            return plugin
+        
+        # If not found, check if it's a lazy surface
         if name in self._lazy_classes:
             try:
                 surface_class = self._lazy_classes.pop(name)
-                instance = surface_class()
-                instance.initialize()
-                self.register(name, instance)
-                logger.info("Lazily loaded surface", surface=name)
-                return cast(SurfacePlugin, instance)
+                # Verify it's a SurfacePlugin subclass
+                if issubclass(surface_class, SurfacePlugin):
+                    instance = surface_class()
+                    self.registry.register(name, instance)
+                    logger.info("Lazily loaded surface", surface=name)
+                    return instance
+                else:
+                    logger.warning("Lazily loaded class is not a SurfacePlugin", 
+                                 surface=name, class_name=surface_class.__name__)
+                    return None
             except Exception as e:
                 logger.warning("Failed to lazily load surface", surface=name, error=str(e))
                 return None
-
+        
         return None
-
+    
+    def register(self, name: str, plugin):
+        """Register a plugin instance."""
+        self.registry.register(name, plugin)
+    
     def list_plugins(self) -> Dict[str, bool]:
         """List all plugins and their availability."""
-        results = {name: plugin.available for name, plugin in self._plugins.items()}
-        for name in self._lazy_classes:
-            results[name] = True
-        return results
-
+        return self.registry.list_plugins()
+    
     def get_available_surfaces(self) -> List[str]:
         """Get list of available surface names."""
-        available = [name for name, plugin in self._plugins.items() if plugin.available]
+        available = [name for name, plugin in self.registry.get_plugins().items() if getattr(plugin, 'available', True)]
         available.extend(list(self._lazy_classes.keys()))
         return available
-
+    
     def get_surface_info(self) -> List[Dict[str, Any]]:
         """Get detailed information about all surfaces."""
         info = []
-        for name, plugin in self._plugins.items():
+        for name, plugin in self.registry.get_plugins().items():
             info.append({
                 "name": name,
-                "available": plugin.available,
+                "available": getattr(plugin, 'available', True),
                 "description": getattr(plugin, "description", f"{name.title()} surface"),
             })
         for name in self._lazy_classes:
@@ -253,3 +158,19 @@ class PluginManager:
                 "description": f"{name.title()} surface (lazy-loaded)",
             })
         return info
+    
+    def initialize_all(self) -> Dict[str, bool]:
+        """Initialize all registered plugins."""
+        return self.registry.initialize_all()
+    
+    def shutdown_all(self) -> Dict[str, bool]:
+        """Shutdown all registered plugins."""
+        return self.registry.shutdown_all()
+    
+    def get_plugin_count(self) -> int:
+        """Get the number of registered plugins."""
+        return self.registry.get_plugin_count()
+
+    def get_plugin_names(self) -> set:
+        """Get the set of registered plugin names."""
+        return self.registry.get_plugin_names()

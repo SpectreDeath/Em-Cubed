@@ -7,6 +7,7 @@ Category: ML Skills
 Estimated Execution Time: 5-15 minutes
 name: time-series-forecaster
 Source: community
+description: Multi-surface time series forecaster with Python for statistical forecasting, Prolog for temporal logic, and Hy for fuzzy temporal patterns.
 ---
 origin: manual
 triggers:

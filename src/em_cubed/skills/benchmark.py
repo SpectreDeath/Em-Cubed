@@ -256,9 +256,10 @@ class SkillBenchmark:
         )
 
     async def _execute_skill_once(self, skill: SkillMetadata, plugin, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute a skill once using the actual surface plugin."""
-        import re
-
+        """Execute a skill once using the actual SkillExecutor for realistic execution conditions."""
+        from .executor import SkillExecutor, SkillExecutionRequest
+        
+        # Resolve skill path
         skill_path = None
         if skill.path:
             skill_path = Path(skill.path)
@@ -268,22 +269,24 @@ class SkillBenchmark:
         if not skill_path or not skill_path.exists():
             return {"status": "error", "message": f"Skill file not found for {skill.skill_id}"}
 
-        content = skill_path.read_text(encoding="utf-8")
-
-        code_blocks: Dict[str, str] = {}
-        for match in re.finditer(r"```(\w+)\s*\r?\n(.*?)```", content, re.DOTALL):
-            lang = match.group(1).lower()
-            code = match.group(2).strip()
-            code_blocks[lang] = code
-
-        code = code_blocks.get(plugin.name, "")
-        if not code:
-            return {"status": "error", "message": f"No {plugin.name} code block found in {skill.skill_id}"}
-
-        context = {"input": input_data}
+        # Create executor and execute skill
+        executor = SkillExecutor(plugin_manager=self.plugin_manager, registry=self.registry, skills_dir=self.skills_dir)
+        
+        # Create execution request
+        request = SkillExecutionRequest(
+            skill_id=skill.skill_id,
+            input_data=input_data,
+            surface=plugin.name,
+            timeout=self.config.timeout if hasattr(self, 'config') else None
+        )
+        
         try:
-            result = await plugin.execute(code, context)
-            return cast(Dict[str, Any], result)
+            result = await executor.execute(request)
+            return {
+                "status": "ok" if result.success else "error",
+                "value": result.output,
+                "message": result.error
+            }
         except Exception as e:
             return {"status": "error", "message": str(e)}
 

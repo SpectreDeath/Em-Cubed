@@ -757,7 +757,7 @@ def _handle_surfaces(args):
 
     # Determine load status: eager (instantiated) vs lazy (not yet loaded)
     load_status = {}
-    for name in pm._plugins:
+    for name in pm.get_plugin_names():
         load_status[name] = "eager"
     for name in pm._lazy_classes:
         load_status[name] = "lazy"

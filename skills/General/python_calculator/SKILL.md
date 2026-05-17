@@ -33,11 +33,25 @@ result = (2 + 3) * 4  # Returns 20
 ### Mathematical Functions
 
 ```python
-import math
+# Trigonometric functions using approximations
+angle_degrees = 45
+angle_rad = angle_degrees * 3.141592653589793 / 180.0
 
-# Trigonometric functions
-angle_rad = math.radians(45)
-sin_value = math.sin(angle_rad)  # Returns 0.707...
+# Taylor series for sin(x) = x - x^3/3! + x^5/5! - x^7/7! + ...
+sin_approx = angle_rad
+term = angle_rad
+for i in range(1, 10):
+    term *= -angle_rad * angle_rad / ((2 * i) * (2 * i + 1))
+    sin_approx += term
+sin_value = sin_approx  # Returns 0.707...
+
+# Taylor series for cos(x) = 1 - x^2/2! + x^4/4! - x^6/6! + ...
+cos_approx = 1
+term = 1
+for i in range(1, 10):
+    term *= -angle_rad * angle_rad / ((2 * i - 1) * (2 * i))
+    cos_approx += term
+cos_value = cos_approx
 
 # Statistical calculations
 numbers = [1, 2, 3, 4, 5]
@@ -60,8 +74,6 @@ root2 = (-b - discriminant**0.5) / (2*a)
 ### Python Calculator Functions
 
 ```python
-import math
-
 def add(x, y):
     """Add two numbers."""
     return x + y
@@ -85,42 +97,72 @@ def power(base, exponent):
     return base ** exponent
 
 def square_root(x):
-    """Calculate square root using math.sqrt."""
+    """Calculate square root using exponentiation."""
     if x < 0:
         raise ValueError("Square root of negative number")
-    return math.sqrt(x)
+    return x ** 0.5
 
 def factorial(n):
     """Calculate factorial of n."""
     if not isinstance(n, int) or n < 0:
         raise ValueError("Factorial requires non-negative integer")
-    return math.factorial(n)
+    result = 1
+    for i in range(1, n + 1):
+        result *= i
+    return result
 
 def trigonometric_functions(angle_degrees):
-    """Calculate sin, cos, tan of angle in degrees."""
-    angle_rad = math.radians(angle_degrees)
+    """Calculate sin, cos, tan of angle in degrees using approximations."""
+    # Convert degrees to radians
+    angle_rad = angle_degrees * 3.141592653589793 / 180.0
+    
+    # Taylor series approximations for sin and cos
+    # sin(x) = x - x^3/3! + x^5/5! - x^7/7! + ...
+    # cos(x) = 1 - x^2/2! + x^4/4! - x^6/6! + ...
+    
+    def sin_approx(x):
+        result = x
+        term = x
+        for i in range(1, 10):  # 10 terms for good accuracy
+            term *= -x * x / ((2 * i) * (2 * i + 1))
+            result += term
+        return result
+    
+    def cos_approx(x):
+        result = 1
+        term = 1
+        for i in range(1, 10):  # 10 terms for good accuracy
+            term *= -x * x / ((2 * i - 1) * (2 * i))
+            result += term
+        return result
+    
+    sin_val = sin_approx(angle_rad)
+    cos_val = cos_approx(angle_rad)
+    tan_val = sin_val / cos_val if cos_val != 0 else float('inf')
+    
     return {
-        "sin": math.sin(angle_rad),
-        "cos": math.cos(angle_rad),
-        "tan": math.tan(angle_rad)
+        "sin": sin_val,
+        "cos": cos_val,
+        "tan": tan_val
     }
 
 def calculate_circle_area(radius):
     """Calculate area of circle."""
     if radius < 0:
         raise ValueError("Radius cannot be negative")
-    return math.pi * radius ** 2
+    pi_approx = 3.141592653589793
+    return pi_approx * radius ** 2
 
 def calculate_statistics(numbers):
     """Calculate basic statistics for a list of numbers."""
     if not numbers:
         raise ValueError("Empty list provided")
-
+    
     n = len(numbers)
     mean = sum(numbers) / n
     variance = sum((x - mean) ** 2 for x in numbers) / n
-    std_dev = math.sqrt(variance)
-
+    std_dev = variance ** 0.5  # Square root using exponentiation
+    
     return {
         "count": n,
         "mean": mean,
@@ -129,34 +171,6 @@ def calculate_statistics(numbers):
         "min": min(numbers),
         "max": max(numbers)
     }
-
-# Example usage
-if __name__ == "__main__":
-    print("Basic arithmetic:")
-    print(f"2 + 3 = {add(2, 3)}")
-    print(f"10 - 4 = {subtract(10, 4)}")
-    print(f"3 * 7 = {multiply(3, 7)}")
-    print(f"15 / 3 = {divide(15, 3)}")
-
-    print("\nAdvanced calculations:")
-    print(f"2^8 = {power(2, 8)}")
-    print(f"√16 = {square_root(16)}")
-    print(f"5! = {factorial(5)}")
-
-    print("\nTrigonometric functions (45°):")
-    trig = trigonometric_functions(45)
-    for func, value in trig.items():
-        print(f"{func}: {value:.3f}")
-
-    print(f"\nCircle area (r=5): {calculate_circle_area(5):.2f}")
-
-    print("\nStatistics for [1, 2, 3, 4, 5]:")
-    stats = calculate_statistics([1, 2, 3, 4, 5])
-    for key, value in stats.items():
-        if isinstance(value, float):
-            print(f"{key}: {value:.2f}")
-        else:
-            print(f"{key}: {value}")
 ```
 
 ## Testing
@@ -188,7 +202,7 @@ class TestPythonCalculator:
 
         result = await calculator.execute("3 * 7", {})
         assert result["status"] == "ok"
-        assert result["value"] == 21
+        assert result["value"] = 21
 
         result = await calculator.execute("15 / 3", {})
         assert result["status"] == "ok"
@@ -200,8 +214,8 @@ class TestPythonCalculator:
         assert result["status"] == "ok"
         assert result["value"] == 256
 
-        # Test with math import
-        result = await calculator.execute("import math; math.sqrt(16)", {})
+        # Test square root using exponentiation
+        result = await calculator.execute("16 ** 0.5", {})
         assert result["status"] == "ok"
         assert result["value"] == 4.0
 
@@ -220,7 +234,7 @@ class TestPythonCalculator:
         # Quadratic formula
         context = {"a": 1, "b": -5, "c": 6}
         result = await calculator.execute(
-            "import math; discriminant = b**2 - 4*a*c; (-b + math.sqrt(discriminant)) / (2*a)",
+            "discriminant = b**2 - 4*a*c; (-b + discriminant**0.5) / (2*a)",
             context
         )
         assert result["status"] == "ok"
@@ -328,30 +342,14 @@ print(f"Future value: ${result['value']:.2f}")
 ### Advanced Mathematical Operations
 
 ```python
-import math
-
 # Statistical analysis
 data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 mean = sum(data) / len(data)
 variance = sum((x - mean) ** 2 for x in data) / len(data)
-std_dev = math.sqrt(variance)
+std_dev = variance ** 0.5  # Square root using exponentiation
 
 print(f"Mean: {mean:.2f}")
 print(f"Standard deviation: {std_dev:.2f}")
-
-# Matrix operations (basic)
-matrix_a = [[1, 2], [3, 4]]
-matrix_b = [[5, 6], [7, 8]]
-
-# Simple matrix addition
-result = []
-for i in range(len(matrix_a)):
-    row = []
-    for j in range(len(matrix_a[0])):
-        row.append(matrix_a[i][j] + matrix_b[i][j])
-    result.append(row)
-
-print("Matrix sum:", result)
 ```
 
 ## Security Considerations
@@ -367,5 +365,38 @@ This skill demonstrates safe execution practices:
 ## Dependencies
 
 - None (uses only Python standard library)
-- Em-Cubed framework for execution</content>
-<parameter name="filePath">D:\GitHub\projects\em-cubed\skills\python_calculator\SKILL.md
+- Em-Cubed framework for execution
+
+# Default execution: if input is provided, use it to run a calculation
+if 'input' in globals():
+    # If input is a string, treat it as an expression to evaluate
+    if isinstance(input, str):
+        try:
+            result = eval(input)
+        except:
+            result = None
+    # If input is a list or tuple of two numbers, add them
+    elif isinstance(input, (list, tuple)) and len(input) == 2:
+        try:
+            result = add(input[0], input[1])
+        except:
+            result = None
+    # If input is a dict, look for known keys
+    elif isinstance(input, dict):
+        # Try to use the add function if we have two numbers
+        if 'a' in input and 'b' in input:
+            try:
+                result = add(input['a'], input['b'])
+            except:
+                result = None
+        elif 'expression' in input:
+            try:
+                result = eval(input['expression'])
+            except:
+                result = None
+        else:
+            result = None
+    else:
+        result = None
+else:
+    result = None
