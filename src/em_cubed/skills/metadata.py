@@ -444,9 +444,9 @@ class SkillMetadata:
             file_path_str = None
 
         return cls(
-            name=frontmatter.get("name", file_path.parent.name if file_path else "Unknown"),
-            domain=frontmatter.get("Domain", "General"),
-            version=frontmatter.get("Version", "0.1.0"),
+            name=frontmatter.get("name", frontmatter.get("Name", file_path.parent.name if file_path else "Unknown")),
+            domain=frontmatter.get("domain", frontmatter.get("Domain", "General")),
+            version=frontmatter.get("version", frontmatter.get("Version", "0.1.0")),
             surfaces=surfaces,
             purpose=purpose,
             description=description,
@@ -459,7 +459,7 @@ class SkillMetadata:
             metrics=metrics,
             skill_id=None,  # Computed in __post_init__
             path=file_path_str,
-            schema_version=frontmatter.get("schema_version", 1),
+            schema_version=frontmatter.get("schema_version", frontmatter.get("Schema_Version", 1)),
             tags=tags,  # Use detected tags from code blocks
             created_at=datetime.fromisoformat(frontmatter["created_at"]) if frontmatter.get("created_at") else None,
             updated_at=datetime.fromisoformat(frontmatter["updated_at"]) if frontmatter.get("updated_at") else None,

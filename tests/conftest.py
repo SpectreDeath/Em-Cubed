@@ -1,6 +1,6 @@
 """Test fixtures and utilities for em_cubed tests."""
 
-from em_cubed.plugin_manager import SurfacePlugin
+from em_cubed.plugin import SurfacePlugin
 from typing import Dict, Any, Optional
 
 

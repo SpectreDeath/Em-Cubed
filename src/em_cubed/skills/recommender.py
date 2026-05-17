@@ -7,11 +7,12 @@ to recommend appropriate skills for a given problem.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 
 import structlog
 
 from .registry import SkillRegistry
+from .semantic_search import get_semantic_search_manager
 
 logger = structlog.get_logger()
 
@@ -70,9 +71,14 @@ class SkillRecommender:
     def __init__(self, registry: SkillRegistry):
         self.registry = registry
         self.logger = logger.bind(component="skill_recommender")
+        # Initialize semantic search manager if not already initialized
+        from .semantic_search import initialize_semantic_search, get_semantic_search_manager
+        initialize_semantic_search(registry)
+        self.semantic_search = get_semantic_search_manager()
 
     def recommend(self, requirement: TaskRequirement, limit: int = 5) -> List[RecommendationResult]:
         """Find skills matching the given requirements."""
+        # First, get keyword-based recommendations
         candidates = self.registry.list_skills()
         scored = []
 
@@ -84,6 +90,35 @@ class SkillRecommender:
                 scored.append((score, skill, criteria))
 
         # Sort by score descending
+        scored.sort(key=lambda x: x[0], reverse=True)
+
+        # Get semantic search enhancement if available
+        semantic_results = []
+        if self.semantic_search and self.semantic_search.model:
+            # Create a query from the requirement
+            query_parts = [
+                requirement.category,
+                " ".join(requirement.surfaces),
+                " ".join(requirement.capabilities),
+                requirement.complexity
+            ]
+            query = " ".join(filter(None, query_parts)).strip()
+            
+            if query:
+                try:
+                    semantic_matches = self.semantic_search.search(query, limit=limit*2)
+                    # Convert to same format as keyword results
+                    for skill, similarity in semantic_matches:
+                        # Only add if not already in keyword results or if it has higher similarity
+                        existing_scores = [s[0] for s in scored if s[1].skill_id == skill.skill_id]
+                        if not existing_scores or similarity > max(existing_scores):
+                            # Create criteria for semantic match
+                            semantic_criteria = [f"Semantic match: {similarity:.2f}"]
+                            scored.append((similarity, skill, semantic_criteria))
+                except Exception as e:
+                    self.logger.warning("Semantic search failed", error=str(e))
+
+        # Re-score and re-sort with semantic results included
         scored.sort(key=lambda x: x[0], reverse=True)
 
         results = []

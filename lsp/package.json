@@ -1,0 +1,11 @@
+{
+  "name": "em-cubed-lsp",
+  "version": "0.1.0",
+  "description": "Language Server Protocol implementation for SKELL.md files in Em-Cubed",
+  "author": "Em-Cubed Team",
+  "license": "MIT",
+  "dependencies": {
+    "pygls": "^1.0.0",
+    "yaml": "^6.0"
+  }
+}

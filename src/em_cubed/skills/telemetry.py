@@ -316,6 +316,31 @@ class SkillTelemetry:
             return (len(input_str) + len(output_str)) // 4
         except Exception:
             return 0
+    
+    def estimate_cost(self, token_usage: int, surface: str = "python") -> float:
+        """Estimate cost based on token usage and surface type.
+        
+        Args:
+            token_usage: Number of tokens used
+            surface: Surface type (for different pricing models)
+            
+        Returns:
+            Estimated cost in USD
+        """
+        # Rough cost estimates (would be made configurable in production)
+        cost_per_1k_tokens = {
+            "python": 0.0001,   # Minimal cost for local execution
+            "prolog": 0.0001,
+            "hy": 0.0001,
+            "z3": 0.0001,
+            "datalog": 0.0001,
+            "janus": 0.0001,
+            "cangjie": 0.0001,
+            "llm": 0.002,       # Example LLM cost (would vary by model)
+        }
+        
+        rate = cost_per_1k_tokens.get(surface, 0.0001)
+        return (token_usage / 1000) * rate
 
 
 # Global telemetry collector (singleton)
