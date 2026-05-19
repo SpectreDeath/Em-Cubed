@@ -5,7 +5,7 @@ import os
 import structlog
 import tempfile
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, cast
 from .plugin import SurfacePlugin
 
 logger = structlog.get_logger()
@@ -48,7 +48,7 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
     @property
     def available(self) -> bool:
         """Check if surface dependencies are available."""
-        return self._docker_available and super().available
+        return self._docker_available
     
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute code in isolated container.
@@ -114,7 +114,7 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
                         result_str = stdout.decode('utf-8').strip()
                         try:
                             result = json.loads(result_str)
-                            return result
+                            return cast(Dict[str, Any], result)
                         except json.JSONDecodeError:
                             return {
                                 "status": "error",
@@ -166,7 +166,7 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
         based on code content, not execution environment.
         """
         # Import the actual surface to reuse its tag extraction
-        from . import python_surface, prolog_surface, hy_surface, z3_surface, datalog_surface
+        from .surfaces import python_surface, prolog_surface, hy_surface, z3_surface, datalog_surface
         
         surface_map = {
             "python": python_surface.PythonSurface,
@@ -176,10 +176,10 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
             "datalog": datalog_surface.DatalogSurface,
         }
         
-        surface_class = surface_map.get(self.surface_name)
+        surface_class: Any = surface_map.get(self._surface_name)
         if surface_class:
             surface_instance = surface_class()
-            return surface_instance.extract_tags(source)
+            return cast(List[str], surface_instance.extract_tags(source))
         return []
 
 

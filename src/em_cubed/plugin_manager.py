@@ -1,5 +1,5 @@
 """Plugin system for extensible surface architecture."""
-from typing import Dict, Any, Optional, List, Set
+from typing import Dict, Any, Optional, List, Set, cast
 import structlog
 
 from .plugin_discovery import PluginDiscovery
@@ -20,9 +20,9 @@ class PluginManager:
     Additionally, supports containerized execution for enhanced security.
     """
     
-    def __init__(self):
-        self.discovery = PluginDiscovery()
-        self.registry = PluginRegistry()
+    def __init__(self) -> None:
+        self.discovery: PluginDiscovery = PluginDiscovery()
+        self.registry: PluginRegistry = PluginRegistry()
         self._lazy_classes: Dict[str, type] = {}
         # Containerized execution settings
         self._containerized_surfaces: Set[str] = set()
@@ -186,7 +186,7 @@ class PluginManager:
     
     def list_plugins(self) -> Dict[str, bool]:
         """List all plugins and their availability."""
-        return self.registry.list_plugins()
+        return cast(Dict[str, bool], self.registry.list_plugins())
     
     def get_available_surfaces(self) -> List[str]:
         """Get list of available surface names."""
@@ -218,16 +218,16 @@ class PluginManager:
     
     def initialize_all(self) -> Dict[str, bool]:
         """Initialize all registered plugins."""
-        return self.registry.initialize_all()
+        return cast(Dict[str, bool], self.registry.initialize_all())
     
     def shutdown_all(self) -> Dict[str, bool]:
         """Shutdown all registered plugins."""
-        return self.registry.shutdown_all()
+        return cast(Dict[str, bool], self.registry.shutdown_all())
     
     def get_plugin_count(self) -> int:
         """Get the number of registered plugins."""
-        return self.registry.get_plugin_count()
+        return cast(int, self.registry.get_plugin_count())
 
-    def get_plugin_names(self) -> set:
+    def get_plugin_names(self) -> Set[str]:
         """Get the set of registered plugin names."""
-        return self.registry.get_plugin_names()
+        return cast(Set[str], self.registry.get_plugin_names())

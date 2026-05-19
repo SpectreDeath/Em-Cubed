@@ -1,10 +1,10 @@
 """Plugin discovery mechanisms for the PluginManager."""
 import importlib.util
-import logging
+import structlog
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Type
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger()
 
 
 class PluginDiscovery:
@@ -76,9 +76,9 @@ class PluginDiscovery:
             try:
                 from importlib.metadata import entry_points
             except ImportError:
-                from importlib_metadata import entry_points
+                from importlib_metadata import entry_points  # type: ignore[no-redef]
             
-            from .plugin_manager import SurfacePlugin
+            from .plugin import SurfacePlugin
             
             entry_point_group = "em_cubed.surfaces"
             discovered_eps = entry_points(group=entry_point_group)
@@ -123,14 +123,14 @@ class PluginDiscovery:
             Dictionary mapping plugin names to classes
         """
         plugin_dir = plugin_dir or Path("plugins")
-        plugins = {}
+        plugins: Dict[str, Type] = {}
         
         if not plugin_dir.exists():
             logger.debug("Plugin directory does not exist", directory=str(plugin_dir))
             return plugins
         
         try:
-            from .plugin_manager import SurfacePlugin
+            from .plugin import SurfacePlugin
             
             # Scan for Python files in plugin directory
             for py_file in plugin_dir.glob("**/*.py"):

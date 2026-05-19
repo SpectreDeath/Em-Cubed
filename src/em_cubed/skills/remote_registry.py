@@ -4,7 +4,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, cast
 import structlog
 import requests
 
@@ -131,7 +131,7 @@ class RemoteSkillRegistry:
                 data = json.load(f)
                 self.logger.debug("Loaded cached registry data", 
                                 registry=registry_name, count=len(data))
-                return data
+                return cast(List[Dict[str, Any]], data)
         except Exception as e:
             self.logger.warning("Failed to load cached registry", 
                               registry=registry_name, error=str(e))
@@ -188,7 +188,7 @@ class RemoteSkillRegistry:
                 
                 self.logger.info("Fetched remote registry data", 
                                 registry=registry_name, count=len(skills_data))
-                return skills_data
+                return cast(List[Dict[str, Any]], skills_data)
             else:
                 self.logger.error("Failed to fetch remote registry", 
                                 registry=registry_name, 

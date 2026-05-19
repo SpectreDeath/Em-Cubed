@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar, Callable
 import structlog
 
 logger = structlog.get_logger()
@@ -27,16 +27,16 @@ class TypeDefinition:
     datalog_predicate: str  # Datalog predicate name
     
     # Conversion functions
-    to_python: callable
-    from_python: callable
-    to_prolog: callable
-    from_prolog: callable
-    to_hy: callable
-    from_hy: callable
-    to_z3: callable
-    from_z3: callable
-    to_datalog: callable
-    from_datalog: callable
+    to_python: Callable
+    from_python: Callable
+    to_prolog: Callable
+    from_prolog: Callable
+    to_hy: Callable
+    from_hy: Callable
+    to_z3: Callable
+    from_z3: Callable
+    to_datalog: Callable
+    from_datalog: Callable
 
 
 class TypeRegistry:

@@ -2,7 +2,7 @@
 
 import time
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, cast
 import structlog
 import asyncio
 
@@ -21,11 +21,11 @@ class TelemetryAPI:
     
     def get_skill_metrics(self, skill_id: str, window_seconds: int = 3600) -> Dict[str, Any]:
         """Get metrics for a specific skill."""
-        return self.collector.get_skill_metrics(skill_id, window_seconds)
+        return cast(Dict[str, Any], self.collector.get_skill_metrics(skill_id, window_seconds))
     
     def get_overall_stats(self) -> Dict[str, Any]:
         """Get overall telemetry statistics."""
-        return self.collector.get_overall_stats()
+        return cast(Dict[str, Any], self.collector.get_overall_stats())
     
     def get_recent_executions(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get recent skill executions."""

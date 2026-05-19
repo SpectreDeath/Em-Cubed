@@ -281,7 +281,7 @@ class TraceContext:
         self.record.record_span(span)
         return span
     
-    def end_span(self, span: TraceSpan, output_data: Any = None, success: bool = True, error: str = None):
+    def end_span(self, span: TraceSpan, output_data: Any = None, success: bool = True, error: Optional[str] = None):
         span.end_time = time.perf_counter()
         span.output_data = output_data
         span.success = success

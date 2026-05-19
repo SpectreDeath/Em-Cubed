@@ -150,7 +150,7 @@ class SkillBenchmark:
     def __init__(self, plugin_manager, skill_registry: SkillRegistry, skills_dir: Optional[Path] = None):
         self.plugin_manager = plugin_manager
         self.registry = skill_registry
-        self.skills_dir = skills_dir
+        self.skills_dir: Path = skills_dir or Path("skills")
         self.logger = logger.bind(component="skill_benchmark")
         self._benchmark_data: Dict[str, List[BenchmarkResult]] = defaultdict(list)
 
@@ -258,6 +258,9 @@ class SkillBenchmark:
     async def _execute_skill_once(self, skill: SkillMetadata, plugin, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a skill once using the actual SkillExecutor for realistic execution conditions."""
         from .executor import SkillExecutor, SkillExecutionRequest
+        
+        if not skill.skill_id:
+            return {"status": "error", "message": "Skill ID is missing"}
         
         # Resolve skill path
         skill_path = None

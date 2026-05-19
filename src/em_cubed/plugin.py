@@ -23,8 +23,8 @@ class SurfacePlugin(ABC):
             timeout: Optional timeout in seconds for surface operations
         """
         self.timeout = timeout
-        self._executor = None  # Thread pool executor for async execution
-        self._substrate = {}   # Shared data substrate across surfaces
+        self._executor: Optional[Any] = None  # Thread pool executor for async execution
+        self._substrate: Dict[str, Any] = {}   # Shared data substrate across surfaces
 
     @property
     @abstractmethod

@@ -213,10 +213,10 @@ class CheckpointManager:
         self._checkpoints: Dict[str, Checkpoint] = {}  # In-memory cache
     
     def create_checkpoint(self, workflow_id: str, execution_id: str, 
-                         step_name: str, state_data: Dict[str, Any] = None,
-                         variables: Dict[str, Any] = None,
-                         context: Dict[str, Any] = None,
-                         substrate: Dict[str, Any] = None) -> str:
+                         step_name: str, state_data: Optional[Dict[str, Any]] = None,
+                         variables: Optional[Dict[str, Any]] = None,
+                         context: Optional[Dict[str, Any]] = None,
+                         substrate: Optional[Dict[str, Any]] = None) -> str:
         """Create a new checkpoint.
         
         Args:

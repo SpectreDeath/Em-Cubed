@@ -207,7 +207,7 @@ class SkillExecutor:
         # Wrap execution with telemetry
         async def skill_runner(input_data: Dict[str, Any], trace_ctx: TraceContext) -> Dict[str, Any]:
             # Initialize shared substrate for this execution
-            substrate = {}
+            substrate: Dict[str, Any] = {}
 
             # Prepare execution context with input
             # Apply type conversion for cross-surface compatibility
