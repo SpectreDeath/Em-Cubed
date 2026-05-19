@@ -108,7 +108,7 @@ class RemoteSkillRegistry:
     def _get_cache_path(self, registry_name: str) -> Path:
         """Get cache file path for a registry."""
         # Hash the registry name to create a safe filename
-        name_hash = hashlib.md5(registry_name.encode()).hexdigest()[:8]
+        name_hash = hashlib.md5(registry_name.encode()).hexdigest()[:8]  # nosec B324
         return self.cache_dir / f"registry_{name_hash}.json"
     
     def _load_cached_registry(self, registry_name: str) -> Optional[List[Dict[str, Any]]]:

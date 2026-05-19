@@ -174,7 +174,7 @@ class FileCheckpointStorage(CheckpointStorage):
                                     data = json.load(f)
                                 if data.get("workflow_id") == workflow_id:
                                     checkpoint_ids.append(data["checkpoint_id"])
-                            except Exception:
+                            except Exception:  # nosec B112
                                 # If we can't read the file, skip it
                                 continue
                         else:

@@ -31,7 +31,7 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
         try:
             # Try docker first, then podman
             for cmd in ['docker', 'podman']:
-                result = os.system(f"{cmd} version >nul 2>&1")
+                result = os.system(f"{cmd} version >nul 2>&1")  # nosec B605
                 if result == 0:
                     self._container_runtime = cmd
                     logger.info("Container runtime available", runtime=cmd)

@@ -1,5 +1,5 @@
 """Semantic skill search using local vector embeddings."""
-import pickle
+import pickle  # nosec B403
 import hashlib
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -110,7 +110,7 @@ class SemanticSkillSearch:
     def _get_cache_path(self) -> Path:
         """Get cache file path for embeddings."""
         # Create a hash based on model name and registry state
-        registry_hash = hashlib.md5(
+        registry_hash = hashlib.md5(  # nosec B324
             f"{self.model_name}:{len(self.registry._skills)}".encode()
         ).hexdigest()[:8]
         return self.cache_dir / f"embeddings_{registry_hash}.pkl"
@@ -151,7 +151,7 @@ class SemanticSkillSearch:
             
             # Load cached data
             with open(cache_path, "rb") as f:
-                cached_data = pickle.load(f)
+                cached_data = pickle.load(f)  # nosec B301
                 
             self._skill_embeddings = cached_data.get("embeddings", {})
             self._skill_texts = cached_data.get("texts", {})

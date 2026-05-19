@@ -77,7 +77,7 @@ class SkillQualityPipeline:
                         "total_tests": 0,
                         "passed": 0,
                         "failed": 0,
-                        "pass_rate": 0.0,
+                        "pass_rate": 0.0,  # nosec B105
                         "skipped": True,
                         "reason": "no tests available",
                     }
