@@ -1,5 +1,4 @@
 """Tests for the context/type system."""
-import pytest
 
 from em_cubed.context import get_type_converter, get_type_registry, initialize_type_system
 

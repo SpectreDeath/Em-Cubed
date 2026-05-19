@@ -4,14 +4,10 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import structlog
-import asyncio
-import json
-from datetime import datetime, timezone
 
-from fastapi import Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
+from fastapi import Depends, status
 
 from em_cubed.search import search_registry
 from em_cubed.plugin_manager import PluginManager

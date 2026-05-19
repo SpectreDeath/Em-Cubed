@@ -7,9 +7,8 @@ for data moving between different execution surfaces (Python, Prolog, Hy, Z3, Da
 from __future__ import annotations
 
 import json
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Dict, List, Optional, TypeVar
 import structlog
 
 logger = structlog.get_logger()

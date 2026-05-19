@@ -5,7 +5,7 @@ resource usage, and quality metrics across different surfaces.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, cast
+from typing import Dict, List, Optional, Any
 import time
 try:
     import psutil

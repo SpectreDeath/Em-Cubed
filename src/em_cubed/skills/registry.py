@@ -5,7 +5,7 @@ benchmarks, usage analytics, composition relationships, and remote skill discove
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Set, TYPE_CHECKING
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from pathlib import Path
 import json
 import structlog

@@ -1,8 +1,5 @@
 """Plugin system for extensible surface architecture."""
-import importlib.util
-import logging
-from pathlib import Path
-from typing import Dict, Any, Optional, List, cast, Set
+from typing import Dict, Any, Optional, List, Set
 import structlog
 
 from .plugin_discovery import PluginDiscovery

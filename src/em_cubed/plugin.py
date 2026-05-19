@@ -2,8 +2,6 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, List
 import asyncio
-import threading
-from concurrent.futures import ThreadPoolExecutor
 import os
 import structlog
 

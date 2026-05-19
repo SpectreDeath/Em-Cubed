@@ -1,8 +1,6 @@
 """WASM surface integration for executing WebAssembly code."""
 
 import asyncio
-import json
-import os
 from typing import Dict, Any, Optional
 import structlog
 

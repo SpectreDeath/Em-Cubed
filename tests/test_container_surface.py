@@ -1,8 +1,4 @@
 """Test for containerized surface execution."""
-import json
-import tempfile
-from pathlib import Path
-import pytest
 
 from em_cubed.container_surface import ContainerizedSurfacePlugin
 

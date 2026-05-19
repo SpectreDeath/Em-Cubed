@@ -137,7 +137,7 @@ def test_get_latest_checkpoint():
         manager = CheckpointManager(storage)
         
         # Create checkpoints with small time differences
-        cp1 = manager.create_checkpoint(
+        manager.create_checkpoint(
             workflow_id="test-workflow",
             execution_id="exec-1",
             step_name="step-1"
@@ -147,7 +147,7 @@ def test_get_latest_checkpoint():
         import time
         time.sleep(0.01)
         
-        cp2 = manager.create_checkpoint(
+        manager.create_checkpoint(
             workflow_id="test-workflow",
             execution_id="exec-2",
             step_name="step-2"

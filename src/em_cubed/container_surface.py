@@ -4,10 +4,9 @@ import json
 import os
 import structlog
 import tempfile
-import time
 from pathlib import Path
-from typing import Dict, Any, Optional
-from .plugin import SurfacePlugin, SurfaceTimeoutError
+from typing import Dict, Any, Optional, List
+from .plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
@@ -66,14 +65,6 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
                 "status": "error",
                 "message": f"Container runtime ({self._container_runtime}) not available"
             }
-        
-        # Prepare execution environment
-        execution_context = {
-            "code": code,
-            "context": context or {},
-            "surface": self.surface_name,
-            "timeout": self.timeout or 30
-        }
         
         # Create temporary directory for volume mounts
         with tempfile.TemporaryDirectory() as temp_dir:

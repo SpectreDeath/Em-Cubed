@@ -1,10 +1,8 @@
 """Telemetry API for real-time observability dashboard."""
 
-import json
 import time
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
-from pathlib import Path
 import structlog
 import asyncio
 

@@ -1,9 +1,8 @@
 """LLM surface integration for executing prompts via LiteLLM."""
 
 import asyncio
-import json
 import os
-from typing import Dict, Any, Optional, Union, AsyncIterator
+from typing import Dict, Any, Optional
 import structlog
 
 from .base import SurfaceBase

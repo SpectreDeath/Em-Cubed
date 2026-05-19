@@ -2,7 +2,7 @@
 
 import asyncio
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock
 from em_cubed.surfaces.llm_surface import LLMSurface
 
 

@@ -3,10 +3,6 @@ import json
 import sys
 import traceback
 from pathlib import Path
-from typing import Dict, Any
-
-# Add the src directory to Python path
-sys.path.insert(0, "/app/src")
 
 from em_cubed.skills.executor import SkillExecutor
 from em_cubed.plugin_manager import PluginManager
@@ -22,13 +18,12 @@ def main():
         }))
         sys.exit(1)
     
-    code_file = Path(sys.argv[1])
     context_file = Path(sys.argv[2])
     timeout = float(sys.argv[3]) if sys.argv[3] != "null" else None
     
     try:
         # Read code and context
-        code = code_file.read_text(encoding="utf-8")
+        _ = Path(sys.argv[1]).read_text(encoding="utf-8")
         context = {}
         if context_file.exists() and not context_file.is_symlink():
             context_content = context_file.read_text(encoding="utf-8")

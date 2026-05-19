@@ -1,6 +1,6 @@
 """Plugin registry and lifecycle management for the PluginManager."""
 import logging
-from typing import Dict, Optional, Set
+from typing import Dict, Set
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class PluginRegistry:
             logger.warning("Plugin already registered, replacing: %s", name)
         
         self._plugins[name] = plugin
-        logger.debug("Plugin registered", plugin=name)
+        logger.debug("Plugin registered: %s", name)
     
     def unregister(self, name: str) -> bool:
         """
@@ -42,10 +42,9 @@ class PluginRegistry:
                 if hasattr(plugin, 'shutdown'):
                     plugin.shutdown()
             except Exception as e:
-                logger.warning("Error shutting down plugin during unregister", 
-                             plugin=name, error=str(e))
+                logger.warning("Error shutting down plugin during unregister {}: {}".format(name, str(e)))
             self._initialized.discard(name)
-            logger.debug("Plugin unregistered", plugin=name)
+            logger.debug("Plugin unregistered: %s", name)
             return True
         return False
     
@@ -77,10 +76,10 @@ class PluginRegistry:
                 if hasattr(plugin, 'initialize'):
                     plugin.initialize()
                 self._initialized.add(name)
-                logger.debug("Plugin initialized", plugin=name)
+                logger.debug("Plugin initialized: %s", name)
                 return True
             except Exception as e:
-                logger.error("Failed to initialize plugin", plugin=name, error=str(e))
+                logger.error("Failed to initialize plugin %s: %s", name, str(e))
                 return False
         return plugin is not None and name in self._initialized
     
@@ -100,10 +99,10 @@ class PluginRegistry:
                 if hasattr(plugin, 'shutdown'):
                     plugin.shutdown()
                 self._initialized.discard(name)
-                logger.debug("Plugin shutdown", plugin=name)
+                logger.debug("Plugin shutdown: %s", name)
                 return True
             except Exception as e:
-                logger.error("Error shutting down plugin", plugin=name, error=str(e))
+                logger.error("Error shutting down plugin %s: %s", name, str(e))
                 return False
         return False
     

@@ -1,10 +1,8 @@
 """Semantic skill search using local vector embeddings."""
-import json
-import os
 import pickle
 import hashlib
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 import structlog
 import numpy as np
 
@@ -143,9 +141,6 @@ class SemanticSkillSearch:
             return False
         
         try:
-            # Check if cache is still fresh (compare with skill modification times)
-            cache_time = cache_path.stat().st_mtime
-            
             # Check if any skill has been modified since cache was created
             for skill_id, skill in self.registry._skills.items():
                 if skill_id not in self._last_indexed:

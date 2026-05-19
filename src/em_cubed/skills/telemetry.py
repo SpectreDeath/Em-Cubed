@@ -220,7 +220,7 @@ class TelemetryCollector:
             websocket_handler = get_websocket_handler()
             if websocket_handler and self._aggregates:
                 # Prepare telemetry update data
-                update_data = {
+                {
                     "type": "telemetry_update",
                     "data": {
                         "timestamp": datetime.now(timezone.utc).isoformat(),

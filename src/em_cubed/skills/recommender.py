@@ -7,7 +7,7 @@ to recommend appropriate skills for a given problem.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 
 import structlog
 
@@ -72,7 +72,7 @@ class SkillRecommender:
         self.registry = registry
         self.logger = logger.bind(component="skill_recommender")
         # Initialize semantic search manager if not already initialized
-        from .semantic_search import initialize_semantic_search, get_semantic_search_manager
+        from .semantic_search import initialize_semantic_search
         initialize_semantic_search(registry)
         self.semantic_search = get_semantic_search_manager()
 
@@ -93,7 +93,6 @@ class SkillRecommender:
         scored.sort(key=lambda x: x[0], reverse=True)
 
         # Get semantic search enhancement if available
-        semantic_results = []
         if self.semantic_search and self.semantic_search.model:
             # Create a query from the requirement
             query_parts = [

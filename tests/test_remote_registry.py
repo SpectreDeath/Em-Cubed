@@ -2,12 +2,10 @@
 import json
 import tempfile
 from pathlib import Path
-import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from em_cubed.skills.remote_registry import RemoteSkillRegistry
 from em_cubed.skills.registry import SkillRegistry
-from em_cubed.skills.metadata import SkillMetadata
 
 
 def test_remote_registry_creation():

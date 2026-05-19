@@ -14,7 +14,6 @@ import asyncio
 
 from .telemetry import SkillTelemetry, get_telemetry_collector, TraceContext
 from .registry import SkillRegistry
-from ..context import get_type_converter
 
 logger = structlog.get_logger()
 
@@ -212,7 +211,6 @@ class SkillExecutor:
 
             # Prepare execution context with input
             # Apply type conversion for cross-surface compatibility
-            type_converter = get_type_converter()
             converted_input = {}
             for key, value in input_data.items():
                 # Attempt to preserve type information through conversion

@@ -2,7 +2,6 @@
 
 import pytest
 from hypothesis import given, strategies as st
-from em_cubed.surfaces import PythonSurface
 
 # Global variable to hold the asteval interpreter with the skill's functions defined
 _aeval = None

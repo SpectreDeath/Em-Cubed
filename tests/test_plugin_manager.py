@@ -148,7 +148,6 @@ class TestPluginManager:
 
     def test_discover_directory_nonexistent_dir(self):
         """Test directory discovery with nonexistent directory."""
-        from pathlib import Path
         manager = PluginManager()
          
         # Should not raise exception - just call the internal discovery method if it exists

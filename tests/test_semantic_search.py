@@ -1,9 +1,7 @@
 """Tests for semantic skill search functionality."""
-import json
 import tempfile
 from pathlib import Path
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
 from em_cubed.skills.semantic_search import SemanticSkillSearch
 from em_cubed.skills.registry import SkillRegistry
