@@ -4,14 +4,20 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import structlog
+import asyncio
+import json
+from datetime import datetime, timezone
 
 from fastapi import Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 
 from em_cubed.search import search_registry
 from em_cubed.plugin_manager import PluginManager
 from em_cubed import __version__
+from em_cubed.telemetry.api import initialize_telemetry_api, get_telemetry_api, initialize_websocket_handler, get_websocket_handler
+from em_cubed.skills.telemetry import get_telemetry_collector
 
 logger = structlog.get_logger()
 
@@ -42,6 +48,11 @@ def require_api_key(api_key: str = Depends(get_api_key)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing API key",
         )
+
+# Initialize telemetry
+telemetry_collector = get_telemetry_collector()
+telemetry_api = initialize_telemetry_api(telemetry_collector)
+websocket_handler = initialize_websocket_handler(telemetry_collector)
 
 class SearchRequest(BaseModel):
     query: str
@@ -88,6 +99,81 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         status_code=exc.status_code,
         content={"detail": exc.detail},
     )
+
+
+# Telemetry endpoints
+@app.get("/telemetry/health")
+async def telemetry_health(api_key: str = Depends(require_api_key)):
+    """Get telemetry system health."""
+    api = get_telemetry_api()
+    if api:
+        return api.get_system_health()
+    return {"status": "unavailable"}
+
+
+@app.get("/telemetry/skills")
+async def get_available_skills(api_key: str = Depends(require_api_key)):
+    """Get list of skills with telemetry data."""
+    api = get_telemetry_api()
+    if api:
+        return {"skills": api.get_available_skills()}
+    return {"skills": []}
+
+
+@app.get("/telemetry/skill/{skill_id}")
+async def get_skill_metrics(skill_id: str, window_seconds: int = 3600, api_key: str = Depends(require_api_key)):
+    """Get metrics for a specific skill."""
+    api = get_telemetry_api()
+    if api:
+        return api.get_skill_metrics(skill_id, window_seconds)
+    return {"count": 0}
+
+
+@app.get("/telemetry/stats")
+async def get_overall_stats(api_key: str = Depends(require_api_key)):
+    """Get overall telemetry statistics."""
+    api = get_telemetry_api()
+    if api:
+        return api.get_overall_stats()
+    return {"total_executions": 0}
+
+
+@app.get("/telemetry/recent")
+async def get_recent_executions(limit: int = 50, api_key: str = Depends(require_api_key)):
+    """Get recent skill executions."""
+    api = get_telemetry_api()
+    if api:
+        return {"executions": api.get_recent_executions(limit)}
+    return {"executions": []}
+
+
+@app.get("/telemetry/skill/{skill_id}/executions")
+async def get_skill_executions(skill_id: str, limit: int = 50, api_key: str = Depends(require_api_key)):
+    """Get executions for a specific skill."""
+    api = get_telemetry_api()
+    if api:
+        return {"executions": api.get_skill_executions(skill_id, limit)}
+    return {"executions": []}
+
+
+# WebSocket endpoint for real-time updates
+@app.websocket("/telemetry/ws")
+async def websocket_endpoint(websocket):
+    """WebSocket endpoint for real-time telemetry updates."""
+    await websocket.accept()
+    handler = get_websocket_handler()
+    if handler:
+        handler.subscribe(websocket)
+        try:
+            while True:
+                # Keep connection alive, in a real implementation we'd handle incoming messages
+                data = await websocket.receive_text()
+                # Echo back or handle as needed
+                await websocket.send_text(f"Echo: {data}")
+        except Exception:
+            if handler:
+                handler.unsubscribe(websocket)
+
 
 @app.post("/execute")
 async def execute_code(request: ExecuteRequest, api_key: str = Depends(require_api_key)):

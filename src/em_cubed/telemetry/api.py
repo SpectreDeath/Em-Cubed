@@ -1,10 +1,12 @@
 """Telemetry API for real-time observability dashboard."""
 
 import json
+import time
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 import structlog
+import asyncio
 
 # These would be imported from a web framework like FastAPI in a real implementation
 # For now, we'll define the interface and data structures
@@ -69,33 +71,84 @@ class WebSocketTelemetryHandler:
         self.collector = telemetry_collector
         self.logger = logger.bind(component="websocket_telemetry")
         self._subscribers: List[Any] = []  # Would be WebSocket connections
+        self._last_broadcast = time.time()
+        self._broadcast_interval = 5.0  # Broadcast every 5 seconds
+        self._broadcast_task: Optional[asyncio.Task] = None
     
     def subscribe(self, websocket):
         """Subscribe a WebSocket client to telemetry updates."""
         self._subscribers.append(websocket)
         self.logger.info("WebSocket client subscribed", count=len(self._subscribers))
+        # Start broadcast task if not already running
+        if self._broadcast_task is None or self._broadcast_task.done():
+            self._broadcast_task = asyncio.create_task(self._broadcast_loop())
     
     def unsubscribe(self, websocket):
         """Unsubscribe a WebSocket client."""
         if websocket in self._subscribers:
             self._subscribers.remove(websocket)
         self.logger.info("WebSocket client unsubscribed", count=len(self._subscribers))
+        # Stop broadcast task if no subscribers
+        if len(self._subscribers) == 0 and self._broadcast_task and not self._broadcast_task.done():
+            self._broadcast_task.cancel()
     
-    async def broadcast_telemetry_update(self, data: Dict[str, Any]):
+    async def _broadcast_loop(self):
+        """Background task to periodically broadcast telemetry updates."""
+        try:
+            while True:
+                await asyncio.sleep(self._broadcast_interval)
+                if self._subscribers:  # Only broadcast if we have subscribers
+                    await self.broadcast_telemetry_update()
+        except asyncio.CancelledError:
+            self.logger.info("WebSocket broadcast task cancelled")
+        except Exception as e:
+            self.logger.error("Error in WebSocket broadcast loop", error=str(e))
+    
+    async def broadcast_telemetry_update(self):
         """Broadcast telemetry update to all subscribers."""
-        # In a real implementation, this would send to all WebSocket connections
-        self.logger.debug("Broadcasting telemetry update", data_keys=list(data.keys()))
-        # Placeholder for actual WebSocket broadcasting
-        pass
+        if not self._subscribers:
+            return
+            
+        # Get current telemetry data
+        try:
+            overall_stats = self.collector.get_overall_stats()
+            available_skills = self.collector.get_available_skills() if hasattr(self.collector, 'get_available_skills') else []
+            
+            # Prepare update data
+            update_data = {
+                "type": "telemetry_update",
+                "data": {
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "overall_stats": overall_stats,
+                    "available_skills": available_skills,
+                    "total_executions": overall_stats.get("total_executions", 0),
+                    "success_rate": overall_stats.get("overall_success_rate", 0),
+                    "unique_skills": overall_stats.get("unique_skills", 0)
+                }
+            }
+            
+            # Send to each WebSocket connection
+            disconnected = []
+            for websocket in self._subscribers[:]:  # Copy list to avoid modification during iteration
+                try:
+                    await websocket.send_json(update_data)
+                except Exception:
+                    # Mark for removal if we can't send
+                    disconnected.append(websocket)
+            
+            # Remove disconnected clients
+            for ws in disconnected:
+                if ws in self._subscribers:
+                    self._subscribers.remove(ws)
+                        
+        except Exception as e:
+            self.logger.error("Failed to prepare or send telemetry update", error=str(e))
     
     def record_execution_with_notification(self, record):
         """Record execution and notify subscribers."""
         self.collector.record_execution(record)
-        # Notify subscribers of new execution
-        # In real implementation: await self.broadcast_telemetry_update({
-        #     "type": "execution_record",
-        #     "data": record.to_dict()
-        # })
+        # Notify subscribers of new execution - we'll rely on the periodic broadcast
+        # for simplicity, but in a high-frequency scenario we might want to broadcast immediately
 
 
 # Global instances (would be initialized in main app)

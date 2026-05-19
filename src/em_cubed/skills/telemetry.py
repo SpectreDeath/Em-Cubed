@@ -120,13 +120,24 @@ class TelemetryCollector:
         # Log if configured
         if self.config.log_every_execution:
             self.logger.info("Execution recorded",
-                           skill_id=record.skill_id,
-                           success=record.success,
-                           time_ms=record.execution_time_ms)
+                        skill_id=record.skill_id,
+                        success=record.success,
+                        time_ms=record.execution_time_ms)
 
         # Periodically aggregate
         if time.time() - self._last_aggregate > self.config.aggregate_interval_seconds:
             self._aggregate_and_persist()
+            
+        # Notify WebSocket subscribers of new execution (non-blocking)
+        try:
+            from em_cubed.telemetry.api import get_websocket_handler
+            websocket_handler = get_websocket_handler()
+            if websocket_handler:
+                # In a real implementation, we would use asyncio.create_task or similar
+                # For now, we'll just note that we have a record to broadcast
+                pass
+        except ImportError:
+            pass  # WebSocket handler not available
 
     def flush(self) -> None:
         """Force immediate aggregation and persistence."""
@@ -202,6 +213,26 @@ class TelemetryCollector:
         # Persist to disk if configured
         if self.config.persist_path:
             self._persist()
+            
+        # Broadcast telemetry update via WebSocket (non-blocking)
+        try:
+            from em_cubed.telemetry.api import get_websocket_handler
+            websocket_handler = get_websocket_handler()
+            if websocket_handler and self._aggregates:
+                # Prepare telemetry update data
+                update_data = {
+                    "type": "telemetry_update",
+                    "data": {
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "overall_stats": self.get_overall_stats(),
+                        "aggregates": self._aggregates
+                    }
+                }
+                # In a real implementation, we would use asyncio to broadcast
+                # For now, we'll just prepare the data - actual broadcasting would happen in the API layer
+                pass
+        except ImportError:
+            pass  # WebSocket handler not available
 
     def _persist(self) -> None:
         """Write telemetry data to disk."""

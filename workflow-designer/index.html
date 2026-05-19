@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Em-Cubed Visual Workflow Designer</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Em-Cubed Visual Workflow Designer</h1>
+            <p>Drag and drop skills to create workflow definitions</p>
+        </header>
+        
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Skill Library</h2>
+                    <input type="text" id="skill-search" placeholder="Search skills...">
+                </div>
+                <div class="skill-categories">
+                    <div class="category">
+                        <h3><i class="fas fa-calculator"></i> Math</h3>
+                        <div class="skills-list" id="math-skills">
+                            <div class="skill-item" data-skill="python_calculator">
+                                <i class="fas fa-plus"></i> Python Calculator
+                            </div>
+                            <div class="skill-item" data-skill="basic-stats">
+                                <i class="fas fa-chart-bar"></i> Basic Statistics
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category">
+                        <h3><i class="fas fa-terminal"></i> System</h3>
+                        <div class="skills-list" id="system-skills">
+                            <div class="skill-item" data-skill="shell-executor">
+                                <i class="fas fa-terminal"></i> Shell Executor
+                            </div>
+                            <div class="skill-item" data-skill="file-processor">
+                                <i class="fas fa-file"></i> File Processor
+                            </div>
+                        </div>
+                    </div>
+                    <div class="category">
+                        <h3><i class="fas fa-robot"></i> AI/ML</h3>
+                        <div class="skills-list" id="ai-skills">
+                            <div class="skill-item" data-skill="llm-processor">
+                                <i class="fas fa-brain"></i> LLM Processor
+                            </div>
+                            <div class="skill-item" data-skill="text-analyzer">
+                                <i class="fas fa-font"></i> Text Analyzer
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <section class="workflow-canvas">
+                <div class="canvas-header">
+                    <h2>Workflow Designer</h2>
+                    <div class="canvas-actions">
+                        <button id="clear-workflow" class="btn btn-danger"><i class="fas fa-trash"></i> Clear</button>
+                        <button id="save-workflow" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
+                        <button id="load-workflow" class="btn btn-primary"><i class="fas fa-folder-open"></i> Load</button>
+                        <button id="export-workflow" class="btn btn-info"><i class="fas fa-code"></i> Export YAML</button>
+                    </div>
+                </div>
+                
+                <div class="canvas-info">
+                    <p>Drag skills from the library to create your workflow. Connect steps by dragging from output ports to input ports.</p>
+                </div>
+                
+                <div class="canvas-grid" id="workflow-canvas">
+                    <!-- Workflow steps will be added here dynamically -->
+                </div>
+            </section>
+            
+            <aside class="properties-panel">
+                <div class="panel-header">
+                    <h2>Step Properties</h2>
+                </div>
+                <div class="panel-content" id="properties-content">
+                    <p>Select a step to view its properties</p>
+                </div>
+            </aside>
+        </div>
+        
+        <footer>
+            <p>Em-Cubed Visual Workflow Designer &copy; 2026</p>
+        </footer>
+    </div>
+    
+    <script src="js/workflow-designer.js"></script>
+</body>
+</html>
