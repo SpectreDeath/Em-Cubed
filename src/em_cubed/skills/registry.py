@@ -1,18 +1,22 @@
-"""Enhanced skill registry with quality metrics and telemetry.
+"""Enhanced skill registry with quality metrics, telemetry, and remote federation.
 
 This registry extends the basic skill index with quality tracking, performance
-benchmarks, usage analytics, and composition relationships.
+benchmarks, usage analytics, composition relationships, and remote skill discovery.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from pathlib import Path
 import json
 import structlog
 from datetime import datetime
 from collections import defaultdict
+import os
 
 from .metadata import SkillMetadata, RuntimeMetrics
+
+if TYPE_CHECKING:
+    from .remote_registry import RemoteSkillRegistry
 
 logger = structlog.get_logger()
 
@@ -83,7 +87,7 @@ class CompositionEdge:
 
 
 class SkillRegistry:
-    """Enhanced skill registry with quality tracking and composition awareness."""
+    """Enhanced skill registry with quality tracking, telemetry, and remote federation."""
 
     def __init__(self, skills_dir: Path, registry_file: Path):
         self.skills_dir = skills_dir
@@ -92,7 +96,91 @@ class SkillRegistry:
         self._skills: Dict[str, SkillMetadata] = {}
         self._quality_metrics: Dict[str, QualityMetrics] = {}
         self._composition_graph: Dict[str, List[CompositionEdge]] = defaultdict(list)
+        # Remote registry federation
+        self._remote_registry_manager: Optional[RemoteSkillRegistry] = None
+        self._remote_skill_cache: Dict[str, List[SkillMetadata]] = {}  # Cache for discovered skills
+        
         self._load_registry()
+        
+        # Initialize remote registry if configured
+        self._initialize_remote_registry()
+
+    def _initialize_remote_registry(self):
+        """Initialize remote registry federation from environment configuration."""
+        # Check if remote registry is enabled via environment variable
+        if os.getenv("EM_CUBED_REMOTE_REGISTRY_ENABLED", "false").lower() == "true":
+            # The remote registry manager will be initialized externally and set via setter
+            # For now, we'll just note that remote registry is expected to be configured
+            self.logger.info("Remote registry federation enabled (will be configured externally)")
+        else:
+            self.logger.debug("Remote registry federation disabled")
+
+    def set_remote_registry_manager(self, manager):
+        """Set the remote registry manager for federation.
+        
+        Args:
+            manager: The RemoteSkillRegistry instance to use for federation
+        """
+        self._remote_registry_manager = manager
+        self.logger.info("Remote registry manager set for federation")
+
+    def sync_with_remote_registries(self, force: bool = False) -> Dict[str, bool]:
+        """Synchronize with all configured remote registries.
+        
+        Args:
+            force: Whether to force sync even if not due
+            
+        Returns:
+            Dictionary mapping registry names to sync success boolean
+        """
+        if self._remote_registry_manager is None:
+            self.logger.warning("Remote registry manager not configured")
+            return {}
+        
+        return self._remote_registry_manager.sync_all_registries(force=force)
+
+    def discover_remote_skills(self, query: str, limit: int = 10) -> List[SkillMetadata]:
+        """Discover skills from remote registries matching a query.
+        
+        Args:
+            query: Search query
+            limit: Maximum number of results to return
+            
+        Returns:
+            List of matching SkillMetadata objects from remote registries
+        """
+        if self._remote_registry_manager is None:
+            self.logger.warning("Remote registry manager not configured")
+            return []
+        
+        # Check cache first
+        cache_key = f"{query}:{limit}"
+        if cache_key in self._remote_skill_cache:
+            # Check if cache is fresh (5 minutes)
+            # In a real implementation, we'd timestamp cache entries
+            return self._remote_skill_cache[cache_key]
+        
+        # Discover from remote registries
+        skills = self._remote_registry_manager.discover_skills(query, limit)
+        
+        # Cache results
+        self._remote_skill_cache[cache_key] = skills
+        
+        return skills
+
+    def get_remote_registry_info(self) -> Dict[str, Dict[str, Any]]:
+        """Get information about configured remote registries.
+        
+        Returns:
+            Dictionary with registry configuration and status
+        """
+        if self._remote_registry_manager is None:
+            return {}
+        
+        return self._remote_registry_manager.get_registry_info()
+        
+        # Initialize remote registry if configured
+        self._initialize_remote_registry()
 
     def _load_registry(self) -> None:
         """Load skills from registry file."""
@@ -209,8 +297,35 @@ class SkillRegistry:
         )
 
     def get_skill(self, skill_id: str) -> Optional[SkillMetadata]:
-        """Retrieve a skill by its ID."""
-        return self._skills.get(skill_id)
+        """Retrieve a skill by its ID, with fallback to fuzzy/slugified matching."""
+        # 1. Exact match
+        if skill_id in self._skills:
+            return self._skills[skill_id]
+
+        # 2. Case-insensitive match
+        for sid, metadata in self._skills.items():
+            if sid.lower() == skill_id.lower():
+                return metadata
+
+        # 3. Slugified match (robust for CLI usage)
+        # Handle cases like "DOMAIN/Name" -> "domain/name"
+        slug_id = SkillMetadata._slugify(skill_id)
+        if "/" in skill_id:
+            domain, name = skill_id.split("/", 1)
+            slug_id = f"{SkillMetadata._slugify(domain)}/{SkillMetadata._slugify(name)}"
+
+        for sid, metadata in self._skills.items():
+            # Already slugified if newly indexed, but for backward compatibility:
+            if sid == slug_id:
+                return metadata
+            
+            # Check if stored ID slugifies to the target
+            if "/" in sid:
+                s_dom, s_nam = sid.split("/", 1)
+                if f"{SkillMetadata._slugify(s_dom)}/{SkillMetadata._slugify(s_nam)}" == slug_id:
+                    return metadata
+
+        return None
 
     def list_skills(self, domain: Optional[str] = None,
                     surface: Optional[str] = None,

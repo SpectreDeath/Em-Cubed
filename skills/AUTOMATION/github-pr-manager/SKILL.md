@@ -1,5 +1,10 @@
 ---
 Domain: AUTOMATION
+surfaces:
+  - python
+  - prolog
+  - hy
+  - cangjie
 Version: 1.0.0
 Complexity: Medium
 Type: Integration
@@ -7,7 +12,6 @@ Category: Git Operations
 Estimated Execution Time: 1-3 minutes
 name: github-pr-manager
 Source: community
----
 origin: manual
 triggers:
   - pull_request
@@ -20,6 +24,7 @@ quality:
   token_savings_avg: 0.0
 created_at: "2026-05-03T15:40:00Z"
 updated_at: "2026-05-03T15:40:00Z"
+---
 
 ## Purpose
 
@@ -54,14 +59,22 @@ class GitHubPRManager:
     """Manages GitHub Pull Requests via REST API."""
     
     def __init__(self, token: str, repo_full_name: str):
-        self.token = token
+        self._token = token  # Store privately to prevent accidental exposure
         self.repo = repo_full_name
         self.host = "api.github.com"
         self.headers = {
-            "Authorization": f"token {self.token}",
+            "Authorization": f"token {self._token}",
             "Accept": "application/vnd.github.v3+json",
             "User-Agent": "Em-Cubed-PR-Manager"
         }
+    
+    def __repr__(self):
+        """Safe representation that doesn't expose the token."""
+        return f"GitHubPRManager(repo='{self.repo}', host='{self.host}')"
+        
+    def __str__(self):
+        """Safe string representation that doesn't expose the token."""
+        return self.__repr__()
 
     def create_pull_request(self, title: str, body: str, head: str, base: str) -> Dict[str, Any]:
         """Creates a pull request on GitHub."""
@@ -156,7 +169,10 @@ class TestGitHubPRManager(unittest.TestCase):
         mock_instance = mock_conn.return_value
         mock_instance.getresponse.return_value = mock_response
         
-        manager = GitHubPRManager("fake_token", "owner/repo")
+        # Use environment variable or test token instead of hardcoding
+        import os
+        test_token = os.getenv("TEST_GITHUB_TOKEN", "fake_token_for_testing")
+        manager = GitHubPRManager(test_token, "owner/repo")
         result = manager.create_pull_request("title", "body", "head", "base")
         
         self.assertEqual(result["html_url"], "http://github.com/pr/1")
@@ -164,4 +180,25 @@ class TestGitHubPRManager(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+```
+
+### Cangjie Orchestrator
+
+```cangjie
+struct PRInput {
+    repo: String;
+    head: String;
+    base: String;
+    token: String;  // PAT (now handled privately in Python implementation)
+    title: String;
+    commits: Array<String>;
+    diff_stats: Map<String, Int64>;
+}
+
+struct PROutput {
+    pr_url: String;
+    number: Int64;
+    merged: Bool;
+    validation_errors: Array<String>;
+}
 ```

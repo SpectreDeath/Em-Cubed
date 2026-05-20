@@ -7,7 +7,6 @@ from typing import Dict, Any, Optional
 import structlog
 
 from .base import SurfaceBase
-from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
@@ -59,7 +58,8 @@ class PythonSurface(SurfaceBase):
             return await asyncio.wait_for(asyncio.shield(future), timeout=self.timeout)
         except asyncio.TimeoutError:
             # Replace executor to release the stuck thread
-            self._executor.shutdown(wait=False)
+            if self._executor is not None:
+                self._executor.shutdown(wait=False)
             self._executor = ThreadPoolExecutor(max_workers=1)
             logger.warning("Surface execution timed out", timeout=self.timeout)
             return {

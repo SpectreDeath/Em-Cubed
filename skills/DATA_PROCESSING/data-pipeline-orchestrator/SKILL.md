@@ -1,5 +1,10 @@
 ---
 Domain: DATA_PROCESSING
+surfaces:
+  - python
+  - prolog
+  - hy
+  - cangjie
 Version: 1.0.0
 Complexity: High
 Type: Process
@@ -249,4 +254,26 @@ pipeline.add_stage(PipelineStage("transform", transform, dependencies=["extract"
 # Run pipeline
 results = asyncio.run(pipeline.execute())
 assert results["transform"]["transformed"] == [2, 4, 6]
+```
+### Cangjie Orchestrator
+
+```cangjie
+struct PipelineStage {
+    name: String;
+    transform_code: String;    // Python snippet
+    input_schema: Array<String>;
+    output_schema: Array<String>;
+    dependencies: Array<String>;
+}
+
+struct PipelineInput {
+    stages: Array<PipelineStage>;
+    initial_data: Map<String, Array<Any>>;  // {col: [values]}
+}
+
+struct PipelineOutput {
+    results: Map<String, Map<String, Array<Any>>>;  // stage_name -> {columns: values}
+    lineage: Array<(String, String)>;  // (from_stage, to_stage)
+    schema_valid: Bool;
+}
 ```

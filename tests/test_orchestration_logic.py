@@ -1,8 +1,5 @@
 import pytest
-import asyncio
 from em_cubed.plugin_manager import PluginManager
-from em_cubed.skills.executor import SkillExecutor
-from em_cubed.skills.metadata import SkillMetadata
 
 @pytest.fixture
 def plugin_manager():
@@ -11,7 +8,7 @@ def plugin_manager():
 @pytest.mark.asyncio
 async def test_python_prolog_orchestration_sync(plugin_manager):
     """Test that a Python skill can call Prolog synchronously via the bridge with tracing."""
-    from em_cubed.skills.telemetry import ExecutionRecord, TraceContext, get_telemetry_collector
+    from em_cubed.skills.telemetry import ExecutionRecord, TraceContext
     from em_cubed.skills.executor import TelemetryProxy
     from datetime import datetime
     
@@ -30,7 +27,7 @@ result
     trace_ctx = TraceContext(record)
     
     # Prepare context with proxies
-    surfaces = plugin_manager._plugins
+    surfaces = plugin_manager.registry.get_plugins()
     proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
     context = {"surfaces": proxies, "skill_input": {}, "trace": trace_ctx, "context": {}}
     # Inject context itself for compatibility as fixed earlier
@@ -66,7 +63,7 @@ result
     trace_ctx = TraceContext(record)
     
     # Prepare context
-    surfaces = plugin_manager._plugins
+    surfaces = plugin_manager.registry.get_plugins()
     proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
     context = {"surfaces": proxies, "skill_input": {}, "trace": trace_ctx}
     context["context"] = context

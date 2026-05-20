@@ -1,0 +1,586 @@
+/* Workflow Designer Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #fff;
+}
+
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+}
+
+header p {
+    opacity: 0.9;
+    font-size: 1.2rem;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 280px;
+    background-color: #f8f9fa;
+    border-right: 1px solid #eee;
+    overflow-y: auto;
+    transition: width 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.sidebar-header h2 {
+    margin-bottom: 1rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#skill-search {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+#skill-search:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.skill-categories {
+    padding: 1.5rem;
+}
+
+.category {
+    margin-bottom: 1.5rem;
+}
+
+.category h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: #555;
+    font-size: 1.1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+.skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skill-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.skill-item:hover {
+    border-color: #667eea;
+    background-color: #f8f9ff;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.skill-item:active {
+    cursor: grabbing;
+}
+
+.skill-item i {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    color: #667eea;
+}
+
+.workflow-canvas {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.canvas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+    background-color: #f8f9fa;
+}
+
+.canvas-header h2 {
+    margin: 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.canvas-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.canvas-info {
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.canvas-grid {
+    flex: 1;
+    position: relative;
+    background-color: #fafafa;
+    overflow: auto;
+    /* Grid pattern */
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.workflow-step {
+    position: absolute;
+    background-color: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    width: 200px;
+    min-height: 100px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: move;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.workflow-step:hover {
+    border-color: #667eea;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+}
+
+.workflow-step:active {
+    cursor: grabbing;
+    transform: scale(0.98);
+}
+
+.workflow-step.selected {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+}
+
+.step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.step-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.step-header i {
+    color: #667eea;
+}
+
+.step-header .btn-remove {
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-header .btn-remove:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.step-content {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+.step-content p {
+    margin-bottom: 0.75rem;
+}
+
+.port {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: #28a745;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s ease;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.port:hover {
+    background-color: #218838;
+    transform: scale(1.2);
+}
+
+.port.input {
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.port.output {
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.port.connected {
+    background-color: #17a2b8;
+}
+
+.port.connected:hover {
+    background-color: #138496;
+}
+
+.connection-line {
+    position: absolute;
+    stroke: #28a745;
+    stroke-width: 2;
+    fill: none;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.connection-line.hover {
+    stroke: #17a2b8;
+    stroke-dasharray: 5 5;
+}
+
+.connection-line.invalid {
+    stroke: #dc3545;
+    stroke-dasharray: 5 5;
+}
+
+.properties-panel {
+    width: 320px;
+    background-color: #f8f9fa;
+    border-left: 1px solid #eee;
+    overflow-y: auto;
+    transition: width 0.3s ease;
+}
+
+.panel-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.panel-header h2 {
+    margin-bottom: 1rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panel-content {
+    padding: 1.5rem;
+}
+
+.properties-section {
+    margin-bottom: 1.5rem;
+}
+
+.properties-section h3 {
+    margin-bottom: 0.75rem;
+    color: #555;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.properties-section h3 i {
+    color: #667eea;
+}
+
+.property-group {
+    margin-bottom: 1rem;
+}
+
+.property-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.property-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.property-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.property-input.textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.property-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.property-option {
+    display: flex;
+    align-items: center;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.property-option:hover {
+    background-color: #dde2e9;
+}
+
+.property-option.active {
+    background-color: #667eea;
+    color: white;
+}
+
+.property-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.property-checkbox input {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+}
+
+.btn-save-properties {
+    width: 100%;
+    padding: 1rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-save-properties:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.btn-save-properties:active {
+    transform: translateY(0);
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tooltip.visible {
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .sidebar {
+        width: 240px;
+    }
+    
+    .properties-panel {
+        width: 280px;
+    }
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        width: 0;
+        overflow-x: hidden;
+    }
+    
+    .sidebar.collapsed {
+        width: 240px;
+    }
+    
+    .properties-panel {
+        width: 0;
+        overflow-x: hidden;
+    }
+    
+    .properties-panel.expanded {
+        width: 280px;
+    }
+    
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .sidebar, .properties-panel {
+        height: auto;
+        max-height: 300px;
+    }
+    
+    .sidebar-header, .panel-header {
+        display: none;
+    }
+    
+    .canvas-header {
+        flex-wrap: wrap;
+    }
+    
+    .canvas-actions {
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2rem;
+    }
+    
+    header p {
+        font-size: 1rem;
+    }
+    
+    .canvas-header h2 {
+        font-size: 1.5rem;
+    }
+}

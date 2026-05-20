@@ -19,7 +19,7 @@ The key to multi-surface orchestration is the automatic injection of available s
 # In skill_executor.py, lines 135-140:
 # Inject surface plugins for cross-surface interaction
 context["surfaces"] = {}
-for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus", "sqlite", "quickjs", "cangjie"]:
     surf_plugin = self.plugin_manager.get(surface_name)
     if surf_plugin and surf_plugin.available:
         context["surfaces"][surface_name] = surf_plugin
@@ -94,6 +94,50 @@ def pipeline_processing(input_data):
     stage3_result = context["surfaces"]["python"].execute(stage3_code, {})
     
     return stage3_result["value"]
+```
+
+### Pattern 4: Python → SQLite → Python
+
+Use SQLite for structured data aggregation within a skill pipeline:
+
+```python
+def aggregate_data(input_table):
+    # Build and execute SQL via the sqlite surface (session persistence)
+    sql = f"SELECT category, SUM(amount) as total FROM {input_table} GROUP BY category;"
+    result = context["surfaces"]["sqlite"].execute_sync(sql, {"session_id": "agg_session"})
+    if result["status"] != "ok":
+        return {"status": "error", "message": result.get("message")}
+    return {"status": "ok", "aggregates": result["value"]}
+```
+
+### Pattern 5: Python → QuickJS → Python
+
+Offload text transformations to JavaScript:
+
+```python
+def transform_text(text):
+    js_code = """
+        var result = text.toLowerCase().trim().replace(/[^\\w\\s-]/g, '').replace(/[\\s_-]+/g, '-');
+    """
+    result = context["surfaces"]["quickjs"].execute_sync(js_code, {"text": text})
+    if result["status"] != "ok":
+        return {"status": "error"}
+    return {"status": "ok", "slug": result["value"]}
+```
+
+### Pattern 6: Cangjie for Performance-Critical Logic
+
+When execution speed is paramount, offload compute-heavy kernels to Cangjie:
+
+```python
+def heavy_compute(data):
+    cangjie_code = f"""
+        main() {{
+            // data injected as stdin JSON
+        }}
+    """
+    result = context["surfaces"]["cangjie"].execute(cangjie_code)
+    return result
 ```
 
 ## Best Practices for Multi-Surface Skills

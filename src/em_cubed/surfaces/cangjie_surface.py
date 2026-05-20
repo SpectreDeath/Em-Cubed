@@ -1,12 +1,11 @@
 """Cangjie surface integration for high-performance logic orchestration."""
 
 import asyncio
-import os
+import json
 import shutil
-import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import structlog
 
 from .base import SurfaceBase
@@ -101,23 +100,17 @@ class CangjieSurface(SurfaceBase):
                 logger.error("Cangjie compilation failed", error=error_msg)
                 return {"status": "error", "message": f"Compilation failed: {error_msg}"}
             
-            # 3. Execute
+            # 3. Execute via stdin-based context passing
             logger.info("Executing Cangjie binary", path=str(bin_file))
-            
-            # Context passing via JSON file
-            args = [str(bin_file)]
-            if context:
-                context_file = tmpdir_path / "context.json"
-                import json
-                context_file.write_text(json.dumps(context), encoding="utf-8")
-                args.append(str(context_file))
-            
+
             exec_proc = await asyncio.create_subprocess_exec(
-                *args,
+                str(bin_file),
+                stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
-            stdout, stderr = await exec_proc.communicate()
+            stdin_data = json.dumps(context).encode() if context else b""
+            stdout, stderr = await exec_proc.communicate(input=stdin_data)
             
             if exec_proc.returncode != 0:
                 error_msg = stderr.decode().strip()

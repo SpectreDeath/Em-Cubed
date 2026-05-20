@@ -1,0 +1,74 @@
+---
+name: Z3 Test Skill
+Domain: Testing
+Version: 1.0.0
+surfaces:
+  - python
+  - z3
+---
+
+## Purpose
+A Z3 Test Skill skill.
+
+## Description
+Detailed description for Z3 Test Skill.
+
+## Implementation
+
+### Python (constraint definition)
+```python
+def define_constraints(solver, input_data):
+    """Define problem constraints using Z3 Python API."""
+    from z3 import Int, And, Or, Not, Implies, If
+    
+    # Example: define integer variables
+    x = Int("x")
+    y = Int("y")
+    
+    # Add constraints (customize per problem)
+    constraints = [
+        x >= 0,
+        y >= 0,
+        x + y <= 10
+    ]
+    
+    for c in constraints:
+        solver.add(c)
+    
+    return solver, [x, y]
+```
+
+### Z3 (solver)
+```z3
+; Z3 will be invoked via Python API typically
+; This placeholder indicates Z3 surface usage
+; The actual solving happens in Python code above
+```
+
+### Python (result parsing)
+```python
+def main(input_data):
+    from z3 import Solver, sat
+    
+    # 1. Create solver
+    solver = Solver()
+    
+    # 2. Define constraints
+    define_constraints(solver, input_data)
+    
+    # 3. Check satisfiability
+    if solver.check() == sat:
+        model = solver.model()
+        # Extract variable assignments
+        result = {"status": "ok", "model": str(model)}
+    else:
+        result = {"status": "unsat"}
+    
+    return result
+```
+
+## Examples
+```python
+input_data = {}
+# Expected output: {"status": "ok", "model": "..."} or {"status": "unsat"}
+```

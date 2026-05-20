@@ -123,11 +123,12 @@ def reindex_incremental(skills_dir: Path, registry_output: Path) -> None:
             logger.warning("Could not load existing registry, starting fresh", error=str(e))
             existing_registry = []
 
-    # Build lookup by path for existing skills
+     # Build lookup by path for existing skills
     existing_by_path = {skill["path"]: skill for skill in existing_registry}
 
     updated_registry = []
     processed_paths = set()
+    actually_updated_count = 0  # Track actual re-indexed skills
 
     # Check all skill files
     for skill_file in _discover_skill_files(skills_dir):
@@ -147,6 +148,7 @@ def reindex_incremental(skills_dir: Path, registry_output: Path) -> None:
             metadata = get_skill_metadata(skill_file, skills_dir)
             if metadata:
                 updated_registry.append(metadata)
+                actually_updated_count += 1  # Increment for actual updates
                 if existing_skill:
                     logger.debug("Skill updated", path=rel_path)
                 else:
@@ -171,7 +173,7 @@ def reindex_incremental(skills_dir: Path, registry_output: Path) -> None:
         total_skills=len(updated_registry),
         multi_surface=len(multi),
         single_surface=len(updated_registry) - len(multi),
-        updated=len(updated_registry) - len(existing_registry) + removed_count,
+        updated=actually_updated_count,  # Actually updated skills (new + changed)
         removed=removed_count,
         registry_path=str(registry_output),
     )

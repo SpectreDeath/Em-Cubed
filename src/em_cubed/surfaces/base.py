@@ -2,6 +2,7 @@
 import asyncio
 import os
 from abc import ABC, abstractmethod
+from ..plugin import SurfacePlugin
 from concurrent.futures import ThreadPoolExecutor
 import threading
 from typing import Any, Dict, Optional
@@ -45,7 +46,6 @@ class SurfaceTimeoutError(Exception):
     pass
 
 
-from ..plugin import SurfacePlugin
 
 class SurfaceBase(SurfacePlugin, ABC):
     """Base class for all execution surfaces with timeout support."""
@@ -97,15 +97,10 @@ class SurfaceBase(SurfacePlugin, ABC):
             }
 
     def execute_sync(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Synchronous version of execute for use in non-async contexts.
-        
-        This is primarily used for cross-surface orchestration where a skill
-        running in one surface (e.g. Python/asteval) needs to call another surface.
-        """
+        """Synchronous version of execute for use in non-async contexts."""
         try:
-            # Try to use current loop if possible, otherwise use asyncio.run
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
+            try:
+                asyncio.get_running_loop()
                 # We are in a thread where a loop is already running
                 # Create a new loop for this synchronous call
                 new_loop = asyncio.new_event_loop()
@@ -113,11 +108,11 @@ class SurfaceBase(SurfacePlugin, ABC):
                     return new_loop.run_until_complete(self.execute(code, context))
                 finally:
                     new_loop.close()
-            else:
-                return loop.run_until_complete(self.execute(code, context))
-        except RuntimeError:
-            # No event loop in this thread, use asyncio.run
-            return asyncio.run(self.execute(code, context))
+            except RuntimeError:
+                # No event loop in this thread, use asyncio.run
+                return asyncio.run(self.execute(code, context))
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
     @abstractmethod
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

@@ -514,6 +514,7 @@ Domain: NLP
 surfaces:
   - python
 ---
+  - cangjie
 
 ## Purpose
 Test sentiment
@@ -606,4 +607,21 @@ engine = SentimentIntelligenceEngine()
 result = engine.analyze("I love this product! It's amazing.")
 assert result.sentiment in ["positive", "negative", "neutral"]
 assert 0 <= result.confidence <= 1
+```
+### Cangjie Orchestrator
+
+```cangjie
+struct SentimentInput {
+    texts: Array<String>;
+    lexicon: Map<String, Float64>;
+    confidence_threshold: Float64;  // 0.0–1.0
+    enable_trend_analysis: Bool;
+}
+
+struct SentimentOutput {
+    overall_sentiment: String;      // "positive" | "negative" | "neutral"
+    confidence: Float64;
+    contradictions: Array<String>;  // texts with conflicting signals
+    trend: Option<Float64>;         // slope of sentiment over time
+}
 ```

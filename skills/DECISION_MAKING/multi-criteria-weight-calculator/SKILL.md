@@ -1,5 +1,10 @@
 ---
 Domain: DECISION_MAKING
+surfaces:
+  - python
+  - prolog
+  - hy
+  - cangjie
 Version: 1.0.0
 Complexity: Medium
 Type: Utility
@@ -298,4 +303,22 @@ assert all(w >= 0 for w in weights)
 
 ci, cr = ahp.calculate_consistency_ratio()
 assert cr < 0.1  # Should be consistent
+```
+### Cangjie Orchestrator
+
+```cangjie
+struct MCDAInput {
+    criteria: Array<String>;
+    alternatives: Array<String>;
+    decision_matrix: Array<Array<Float64>>;  // [alt][crit] scores
+    ahp_pairwise: Option<Array<Array<Float64>>>;  // optional comparison matrix
+    consistency_threshold: Float64;  // CR < 0.1 required
+}
+
+struct MCDAOutput {
+    weights: Array<Float64>;
+    rankings: Array<(String, Float64)>;  // (alternative, score)
+    consistency_ratio: Float64;
+    method_used: String;  // "ahp" | "entropy" | "topsis"
+}
 ```

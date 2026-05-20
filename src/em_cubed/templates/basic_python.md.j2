@@ -1,0 +1,39 @@
+---
+name: {{ name }}
+Domain: {{ domain }}
+Version: 1.0.0
+surfaces:
+  - python
+---
+
+## Purpose
+{{ purpose }}
+
+## Description
+{{ description }}
+
+## Implementation
+
+### Python
+```python
+def main(input_data):
+    """Main entry point for {{ name }} skill.
+    
+    Args:
+        input_data: Input dictionary
+        
+    Returns:
+        Output dictionary
+    """
+    # TODO: Implement skill logic
+    return {"status": "ok", "message": "Hello from {{ name }}!"}
+
+# Execute
+result = main(skill_input)
+```
+
+## Examples
+```python
+input_data = {}
+# Expected output: {"status": "ok", "message": "Hello from {{ name }}!"}
+```
