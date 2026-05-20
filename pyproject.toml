@@ -44,6 +44,7 @@ dev = [
     "python-dotenv>=1.0.0,<2.0.0",
     "types-PyYAML>=6.0.0",
     "httpx>=0.27.0",
+    "hypothesis",
 ]
 
 [tool.setuptools.packages.find]
