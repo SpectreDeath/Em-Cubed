@@ -2,6 +2,7 @@
 
 import pytest
 from hypothesis import given, strategies as st
+from pathlib import Path
 
 # Global variable to hold the asteval interpreter with the skill's functions defined
 _aeval = None
@@ -14,7 +15,7 @@ def setup_module():
     _aeval = Interpreter()
 
     # Read the skill file and extract the Python code block
-    skill_path = "D:/GitHub/projects/em-cubed/skills/General/python_calculator/SKILL.md"
+    skill_path = str(Path(__file__).parent.parent.parent / "skills" / "General" / "python_calculator" / "SKILL.md")
     with open(skill_path, "r", encoding="utf-8") as f:
         content = f.read()
 

@@ -6,7 +6,7 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path("D:/GitHub/projects/em-cubed/skills/General/intelligent_planner/SKILL.md")
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "Intelligent Task Planner" / "SKILL.md")
 SKILL_ID = "General/Intelligent Task Planner"
 
 
