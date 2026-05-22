@@ -6,8 +6,8 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "Python Calculator" / "SKILL.md")
-SKILL_ID = "General/Python Calculator"
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "python_calculator" / "SKILL.md")
+SKILL_ID = "General/python_calculator"
 
 
 @pytest.fixture
