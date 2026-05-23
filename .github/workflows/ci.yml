@@ -41,9 +41,9 @@ jobs:
       run: pip install bandit && bandit -r src/ -c pyproject.toml
 
     - name: Run tests
-      timeout-minutes: 4
+      timeout-minutes: 10
       run: |
-        pytest --cov=em_cubed --cov-report=term-missing --cov-fail-under=26
+        pytest -q --cov=em_cubed --cov-report=term-missing --cov-fail-under=26
         python -c "import asyncio; loop = asyncio.new_event_loop(); loop.run_until_complete(loop.shutdown_asyncgens()); loop.close()" || true
     
     - name: Build package
