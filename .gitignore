@@ -97,5 +97,11 @@ w.py
 write_impl.py
 scratch/
 logs/
+logs.zip
 registry_agents.json
-TEST_SUMMARY.md
+skills_registry.json
+registry.json
+scratch_*.py
+test_data.json
+test_workflow.json
+simple_data.json
