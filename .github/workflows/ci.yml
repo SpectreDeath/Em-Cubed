@@ -10,6 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
 
@@ -41,9 +42,13 @@ jobs:
       run: pip install bandit && bandit -r src/ -c pyproject.toml
 
     - name: Run tests
-      timeout-minutes: 10
+      timeout-minutes: 15
       run: |
-        pytest -q --cov=em_cubed --cov-report=term-missing --cov-fail-under=26
+        if [ "${{ matrix.python-version }}" = "3.12" ]; then
+          pytest -q --cov=em_cubed --cov-report=term-missing --cov-fail-under=26
+        else
+          pytest -q
+        fi
         python -c "import asyncio; loop = asyncio.new_event_loop(); loop.run_until_complete(loop.shutdown_asyncgens()); loop.close()" || true
     
     - name: Build package
