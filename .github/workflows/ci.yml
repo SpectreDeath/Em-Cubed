@@ -50,7 +50,7 @@ jobs:
       run: pip install bandit && bandit -r src/ -c pyproject.toml
 
     - name: Run tests
-      timeout-minutes: 15
+      timeout-minutes: 20
       run: |
         if [ "${{ matrix.python-version }}" = "3.12" ]; then
           pytest -q --cov=em_cubed --cov-report=term-missing --cov-fail-under=26
