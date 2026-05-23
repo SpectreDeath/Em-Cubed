@@ -83,7 +83,7 @@ class PythonSurface(SurfaceBase):
             from asteval import Interpreter
 
             # Create asteval interpreter with safe context
-            aeval = Interpreter()
+            aeval = Interpreter(excluded_symes=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
 
             # Add context variables if provided
             if context:

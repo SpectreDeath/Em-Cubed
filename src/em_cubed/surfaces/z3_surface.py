@@ -108,12 +108,12 @@ class Z3Surface(SurfaceBase):
             def execute_code():
                 # Determine if this is an optimization problem based on keywords
                 is_optimization = any(keyword in code.lower() for keyword in ['maximize', 'minimize', 'optimize'])
-                
+                 
                 # Create appropriate solver (expose to user code)
                 solver_instance = Optimize() if is_optimization else Solver()
 
                 # Create asteval interpreter with Z3 symbols pre-registered
-                aeval = Interpreter()
+                aeval = Interpreter(excluded_symes=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
 
                 # Inject Z3 symbols and solver into interpreter's namespace
                 aeval.symtable['Solver'] = Solver
