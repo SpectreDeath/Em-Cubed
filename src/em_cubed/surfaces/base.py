@@ -11,32 +11,22 @@ import structlog
 logger = structlog.get_logger()
 
 
-class _DaemonThreadPoolExecutor(ThreadPoolExecutor):
-    """ThreadPoolExecutor that creates daemon threads so they don't block shutdown."""
+def _make_daemon_executor(max_workers: int = 1) -> ThreadPoolExecutor:
+    """Create a ThreadPoolExecutor whose worker threads are daemons.
+    This prevents them from keeping the Python process alive after tests/CI complete.
+    """
+    original_thread = threading.Thread
 
-    _counter = 0
+    def _daemon_thread(*args, **kwargs):
+        kwargs.setdefault("daemon", True)
+        return original_thread(*args, **kwargs)
 
-    def __init__(self, max_workers=1):
-        super().__init__(max_workers=max_workers)
-
-    def _adjust_thread_count(self):
-        # When threads are terminated, spawn new ones if needed
-        if self._work_queue and not self._threads:
-            self._spawn_thread()
-
-    def _spawn_thread(self):
-        """Spawn a new daemon thread."""
-        _DaemonThreadPoolExecutor._counter += 1
-        t = threading.Thread(
-            target=self._worker,
-            name=f"DaemonPool-{_DaemonThreadPoolExecutor._counter}",
-            daemon=True
-        )
-        self._threads.add(t)
-        t.start()
-
-    def shutdown(self, wait=True, *, cancel_futures=False):
-        super().shutdown(wait=False, cancel_futures=cancel_futures)
+    # Temporarily patch Thread so the executor spawns daemon threads
+    threading.Thread = _daemon_thread
+    try:
+        return ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="SurfaceExec-")
+    finally:
+        threading.Thread = original_thread
 
 
 
@@ -58,7 +48,7 @@ class SurfaceBase(SurfacePlugin, ABC):
                     Defaults to EM_CUBED_TIMEOUT env var or 30 seconds.
         """
         self.timeout = timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
-        self._executor = ThreadPoolExecutor(max_workers=1)
+        self._executor = _make_daemon_executor(max_workers=1)
 
     def initialize(self) -> None:
         """Initialize the surface. Subclasses can override this."""

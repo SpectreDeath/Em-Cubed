@@ -114,6 +114,9 @@ class Z3Surface(SurfaceBase):
 
                 # Create asteval interpreter with Z3 symbols pre-registered
                 aeval = Interpreter(excluded_symbols=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
+                # Explicitly remove dangerous names (excluded_symbols alone is not sufficient in asteval 1.x)
+                for bad in ['open', '__import__', 'eval', 'exec', 'compile', '__builtins__']:
+                    aeval.symtable.pop(bad, None)
 
                 # Inject Z3 symbols and solver into interpreter's namespace
                 aeval.symtable['Solver'] = Solver

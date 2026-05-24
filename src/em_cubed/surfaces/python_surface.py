@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Optional
 import structlog
 
-from .base import SurfaceBase
+from .base import SurfaceBase, _make_daemon_executor
 
 logger = structlog.get_logger()
 
@@ -30,7 +30,7 @@ class PythonSurface(SurfaceBase):
         super().__init__(timeout)
         # Use a dedicated executor so timeouts can be handled
         # by replacing the executor (abandoning the stuck thread)
-        self._executor = ThreadPoolExecutor(max_workers=1)
+        self._executor = _make_daemon_executor(max_workers=1)
         logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
@@ -84,6 +84,9 @@ class PythonSurface(SurfaceBase):
 
             # Create asteval interpreter with safe context
             aeval = Interpreter(excluded_symbols=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
+            # Explicitly remove dangerous names (excluded_symbols alone is not sufficient in asteval 1.x)
+            for bad in ['open', '__import__', 'eval', 'exec', 'compile', '__builtins__']:
+                aeval.symtable.pop(bad, None)
 
             # Add context variables if provided
             if context:
