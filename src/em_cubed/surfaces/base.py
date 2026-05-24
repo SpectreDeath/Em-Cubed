@@ -22,11 +22,11 @@ def _make_daemon_executor(max_workers: int = 1) -> ThreadPoolExecutor:
         return original_thread(*args, **kwargs)
 
     # Temporarily patch Thread so the executor spawns daemon threads
-    threading.Thread = _daemon_thread
+    threading.Thread = _daemon_thread  # type: ignore[assignment, misc]
     try:
         return ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="SurfaceExec-")
     finally:
-        threading.Thread = original_thread
+        threading.Thread = original_thread  # type: ignore[assignment, misc]
 
 
 
