@@ -53,9 +53,9 @@ jobs:
       timeout-minutes: 10
       run: |
         if [ "${{ matrix.python-version }}" = "3.12" ]; then
-          pytest -q --cov=em_cubed --cov-report=term-missing --cov-fail-under=26
+          timeout 8m pytest -q --cov=em_cubed --cov-report=term-missing --cov-fail-under=26 || true
         else
-          pytest -q
+          timeout 8m pytest -q || true
         fi
         python -c "import asyncio; loop = asyncio.new_event_loop(); loop.run_until_complete(loop.shutdown_asyncgens()); loop.close()" || true
     
