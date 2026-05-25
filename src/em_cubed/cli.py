@@ -1,4 +1,4 @@
-"""Command-line interface for Em-Cubed."""
+﻿"""Command-line interface for Em-Cubed."""
 
 import argparse
 import sys
@@ -206,6 +206,13 @@ def main():
         help="Output file for composition plan (JSON)"
     )
 
+    # Create-skill command
+    create_parser = subparsers.add_parser("create-skill", help="Create a new skill from template")
+    create_parser.add_argument("name", help="Name of the skill")
+    create_parser.add_argument("--domain", "-d", default="General", help="Skill domain")
+    create_parser.add_argument("--template", "-t", default="basic_python", choices=["basic_python", "python_prolog", "sqlite_analysis", "z3_optimization", "quickjs_transform", "llm_decision_maker", "rag_pipeline", "llm_advanced_features"], help="Template to use")
+    create_parser.add_argument("--output-dir", default="skills", help="Skills directory")
+
     # Trace-view command
     trace_parser = subparsers.add_parser("trace-view", help="View skill execution traces")
     trace_parser.add_argument(
@@ -252,6 +259,22 @@ def main():
         help="Show full span details"
     )
 
+    # Surfaces command
+    subparsers.add_parser("surfaces", help="List all registered surfaces")
+
+    # Skill-info command
+    skill_info_parser = subparsers.add_parser("skill-info", help="Display full metadata for a skill")
+    skill_info_parser.add_argument("skill_id", help="Skill ID (domain/skill-name)")
+    skill_info_parser.add_argument(
+        "--registry", "-r", default="registry.json", help="Registry file path (default: registry.json)"
+    )
+
+    # Workflow command
+    workflow_parser = subparsers.add_parser("workflow", help="Execute a DAG-based skill workflow")
+    workflow_parser.add_argument("workflow_file", help="Path to workflow definition file (JSON/YAML)")
+    workflow_parser.add_argument("--data", "-d", help="Initial input data (JSON string)")
+    workflow_parser.add_argument("--registry", "-r", default="registry.json", help="Registry file path")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -277,8 +300,16 @@ def main():
             asyncio.run(_handle_recommend(args))
         elif args.command == "compose":
             asyncio.run(_handle_compose(args))
+        elif args.command == "create-skill":
+            _handle_create_skill(args)
         elif args.command == "trace-view":
             _handle_trace_view(args)
+        elif args.command == "surfaces":
+            _handle_surfaces(args)
+        elif args.command == "skill-info":
+            _handle_skill_info(args)
+        elif args.command == "workflow":
+            asyncio.run(_handle_workflow(args))
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
         print(f"Error: {e}", file=sys.stderr)
@@ -365,33 +396,24 @@ def _handle_run(args):
     logger.info("Executing code", surface=surface_name, code_length=len(code), timeout=timeout)
 
     async def run_async():
-        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
-        
         if args.trace:
             # Setup tracing for CLI run
             from em_cubed.skills.telemetry import initialize_telemetry, TelemetryConfig, ExecutionRecord, TraceContext
-            from datetime import datetime
+            from datetime import timezone
             
             initialize_telemetry(TelemetryConfig(log_every_execution=False))
             
-            # We mock a request
-            request = SkillExecutionRequest(
-                skill_id="cli_run",
-                input_data={},
-                surface=surface_name,
-                timeout=timeout
-            )
-            # Actually we need to mock the skill file load too... 
+            # Actually we need to mock the skill file load too...
             # Simplified: just run directly if it's a surface run
             # But tracing is tied to SkillExecutor.
             # I'll just run it via surface and manually trace it for CLI run if --trace is on
-            from em_cubed.skills.telemetry import ExecutionRecord, TraceContext, datetime
-            record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.utcnow(), success=True, execution_time_ms=0)
+            from datetime import datetime
+            record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=0)
             trace_ctx = TraceContext(record)
             
             from em_cubed.skills.executor import TelemetryProxy
-            surfaces = plugin_manager._plugins
-            proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
+            proxies = {name: TelemetryProxy(plugin_manager.get(name), trace_ctx) 
+                       for name in plugin_manager.get_available_surfaces()}
             context = {"surfaces": proxies, "skill_input": {}, "trace": trace_ctx}
             context["context"] = context # compatibility
             
@@ -411,7 +433,8 @@ def _handle_run(args):
                 print("Sub-surface calls:")
                 for span in record.spans:
                     status = "[OK]" if span.success else "[FAIL]"
-                    print(f"  {status} {span.surface:<10} | {span.to_dict()['duration_ms']:>6.1f}ms")
+                    size_info = f" ({len(str(span.input_data)) if span.input_data else 0}b -> {len(str(span.output_data)) if span.output_data else 0}b)"
+                    print(f"  {status} {span.surface:<10} | {span.to_dict()['duration_ms']:>6.1f}ms{size_info}")
         else:
             result = await surface.execute(code)
             print(json.dumps(result, indent=2))
@@ -617,6 +640,49 @@ async def _handle_compose(args):
             print(f"\nCompositions saved to {args.output}")
 
 
+def _handle_create_skill(args):
+    """Handle create-skill command."""
+    name = args.name
+    domain = args.domain
+    template_name = args.template
+    output_base = Path(args.output_dir)
+
+    # Sanitize skill ID
+    safe_name = name.lower().replace(" ", "-")
+    skill_dir = output_base / domain / safe_name
+    skill_file = skill_dir / "SKILL.md"
+
+    if skill_file.exists():
+        print(f"Error: Skill already exists at {skill_file}")
+        return
+
+    # Load template
+    template_path = Path(__file__).parent / "templates" / f"{template_name}.md.j2"
+    if not template_path.exists():
+        print(f"Error: Template {template_name} not found at {template_path}")
+        return
+
+    template_content = template_path.read_text(encoding="utf-8")
+
+    # Render using Jinja2
+    from jinja2 import Template
+    template = Template(template_content)
+    content = template.render(
+        name=name,
+        domain=domain,
+        purpose=f"A {name} skill.",
+        description=f"Detailed description for {name}."
+    )
+
+    # Write file
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    skill_file.write_text(content, encoding="utf-8")
+
+    print(f"Created new skill: {name}")
+    print(f"Location: {skill_file}")
+    print(f"Skill ID: {domain}/{safe_name}")
+
+
 def _handle_trace_view(args):
     """Handle trace-view command."""
     trace_file = Path(args.file)
@@ -656,7 +722,7 @@ def _handle_trace_view(args):
         return
 
     for trace in traces_to_show:
-        status_icon = "✓" if trace.get("success") else "✗"
+        status_icon = "âœ“" if trace.get("success") else "âœ—"
         print(f"\n{status_icon} Trace: {trace.get('trace_id')} | Skill: {trace.get('skill_id')}")
         print(f"  Status: {'[OK]' if trace.get('success') else '[FAIL]'} | Time: {trace.get('execution_time_ms', 0):.1f}ms")
         print(f"  Surface: {trace.get('surface', 'unknown')} | Timestamp: {trace.get('timestamp', 'N/A')}")
@@ -664,9 +730,10 @@ def _handle_trace_view(args):
         if spans:
             print("  Sub-surface calls:")
             for i, span in enumerate(spans):
-                span_status = "✓" if span.get("success") else "✗"
+                span_status = "âœ“" if span.get("success") else "âœ—"
                 indent = "    " * (i + 1)
-                print(f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms")
+                size_info = f" ({span.get('input_size', 0)}b -> {span.get('output_size', 0)}b)"
+                print(f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms{size_info}")
                 if args.verbose and span.get("error"):
                     print(f"  {indent}  Error: {span['error']}")
                 if args.verbose and span.get("input_data"):
@@ -683,5 +750,136 @@ def _handle_trace_view(args):
             print("  No sub-surface spans recorded.")
 
 
+def _handle_surfaces(args):
+    """Handle surfaces command to list all registered surfaces."""
+    pm = PluginManager()
+    info = pm.get_surface_info()
+
+    # Determine load status: eager (instantiated) vs lazy (not yet loaded)
+    load_status = {}
+    for name in pm.get_plugin_names():
+        load_status[name] = "eager"
+    for name in pm._lazy_classes:
+        load_status[name] = "lazy"
+
+    # Print table header
+    header = f"{'SURFACE':<12} {'AVAILABLE':<10} {'LOADED':<10} {'DESCRIPTION'}"
+    separator = "-" * 12 + " " + "-" * 10 + " " + "-" * 10 + " " + "-" * 40
+    print(header)
+    print(separator)
+    for item in info:
+        name = item["name"]
+        avail = "yes" if item["available"] else "no"
+        loaded = load_status.get(name, "?")
+        desc = item.get("description", "")
+        print(f"{name:<12} {avail:<10} {loaded:<10} {desc}")
+
+
+def _handle_skill_info(args):
+    """Handle skill-info command to display skill metadata."""
+    skill_id = args.skill_id
+    registry_path = Path(args.registry)
+
+    # Default skills_dir relative to registry or cwd?
+    # Assume skills directory is in default location 'skills'
+    skills_dir = Path("skills")
+
+    from em_cubed.skills.registry import SkillRegistry
+    if not registry_path.exists():
+        print(f"Error: Registry file not found at {registry_path}")
+        sys.exit(1)
+
+    registry = SkillRegistry(skills_dir, registry_path)
+    metadata = registry.get_skill(skill_id)
+    if not metadata:
+        print(f"Skill '{skill_id}' not found in registry")
+        sys.exit(1)
+
+    # Print metadata
+    print(f"Skill ID        : {metadata.skill_id}")
+    print(f"Name            : {metadata.name}")
+    print(f"Domain          : {metadata.domain}")
+    print(f"Version         : {metadata.version}")
+    print(f"Surfaces        : {', '.join(metadata.surfaces)}")
+    print(f"Purpose         : {metadata.purpose}")
+    print(f"Description     : {metadata.description}")
+    print(f"Path            : {metadata.path}")
+    qm = registry.get_quality(skill_id)
+    if qm:
+        print(f"Validation Score: {qm.validation_score:.2f}")
+        print(f"Test Coverage   : {qm.test_coverage:.2f}")
+        print(f"Success Rate    : {qm.success_rate:.2f}")
+        print(f"Avg Exec Time   : {qm.avg_execution_time:.2f}ms")
+        print(f"Usage Count     : {qm.usage_count}")
+    else:
+        print("Quality metrics : not available")
+
+
+
+async def _handle_workflow(args):
+    """Handle workflow command to execute a DAG of skills."""
+    workflow_path = Path(args.workflow_file)
+    registry_path = Path(args.registry)
+    if not workflow_path.exists():
+        print(f"Error: Workflow file not found at {workflow_path}")
+        sys.exit(1)
+    try:
+        with open(workflow_path, encoding="utf-8") as f:
+            if workflow_path.suffix == ".json":
+                wf_data = json.load(f)
+            elif workflow_path.suffix in (".yaml", ".yml"):
+                import yaml
+                wf_data = yaml.safe_load(f)
+            else:
+                print(f"Error: Unsupported workflow file format: {workflow_path.suffix}")
+                sys.exit(1)
+    except Exception as e:
+        print(f"Error loading workflow: {e}")
+        sys.exit(1)
+    initial_data = {}
+    if args.data:
+        try:
+            initial_data = json.loads(args.data)
+        except json.JSONDecodeError as e:
+            print(f"Error parsing initial data JSON: {e}")
+            sys.exit(1)
+    from em_cubed.skills.workflow import WorkflowExecutor, WorkflowDefinition, WorkflowStep
+    from em_cubed.skills.registry import SkillRegistry
+    from em_cubed.skills.composer import SkillComposer
+    from em_cubed.plugin_manager import PluginManager
+    pm = PluginManager()
+    registry = SkillRegistry(Path("skills"), registry_path)
+    composer = SkillComposer(pm, registry)
+    executor = WorkflowExecutor(composer)
+    steps = []
+    for s_data in wf_data.get("steps", []):
+        steps.append(WorkflowStep(
+            id=s_data["id"],
+            skill_id=s_data["skill_id"],
+            input_mapping=s_data.get("input_mapping", {}),
+            output_mapping=s_data.get("output_mapping", {}),
+            dependencies=s_data.get("dependencies", []),
+            condition=s_data.get("condition"),
+            timeout=s_data.get("timeout")
+        ))
+    workflow = WorkflowDefinition(
+        name=wf_data.get("name", workflow_path.stem),
+        steps=steps,
+        description=wf_data.get("description"),
+        timeout=wf_data.get("timeout")
+    )
+    print(f"Executing workflow: {workflow.name} ({len(workflow.steps)} steps)...")
+    result = await executor.execute(workflow, initial_data)
+    if result.success:
+        print("\nWorkflow completed successfully!")
+        print(f"Steps executed: {result.steps_executed}")
+        print("\nFinal Output:")
+        print(json.dumps(result.get_output(), indent=2))
+    else:
+        print(f"\nWorkflow failed: {result.error}")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     main()
+

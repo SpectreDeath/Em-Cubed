@@ -96,6 +96,24 @@ def test():
         assert result["status"] == "ok"
         assert result["value"] == 2
 
+    def test_run_command_sqlite(self, capsys):
+        """Test the run command with SQLite."""
+        # Simple SELECT query; column name will be '1' if not aliased
+        with patch('sys.argv', ['em3', 'run', '--surface', 'sqlite', '--code', 'SELECT 1']):
+            main()
+
+        captured = capsys.readouterr()
+        result = json.loads(captured.out.strip())
+        assert result["status"] == "ok"
+        # SQLite returns list of rows; each row is a dict. For SELECT 1, column name is "1".
+        # Result format: {"value": [{"1": 1}]}
+        assert "value" in result
+        rows = result["value"]
+        assert isinstance(rows, list)
+        assert len(rows) >= 1
+        # The first row should have key "1" with value 1
+        assert rows[0].get("1") == 1 or rows[0].get("value") == 1  # Accept aliased or plain
+
     def test_run_command_unknown_surface(self, capsys):
         """Test the run command with unknown surface."""
         with patch('sys.argv', ['em3', 'run', '--surface', 'unknown', '--code', 'test']):
@@ -105,7 +123,21 @@ def test():
         captured = capsys.readouterr()
         assert "Surface 'unknown' not found" in captured.err
 
-    def test_no_command(self, capsys):
+    def test_surfaces_command(self, capsys):
+        """Test the surfaces command lists surfaces."""
+        with patch('sys.argv', ['em3', 'surfaces']):
+            main()
+
+        captured = capsys.readouterr()
+        output = captured.out.strip()
+        # At minimum should list python, prolog, hy surfaces
+        assert "python" in output
+        assert "prolog" in output
+        assert "hy" in output
+        # Header line should contain AVAILABLE, LOADED, DESCRIPTION
+        assert "AVAILABLE" in output
+        assert "LOADED" in output
+
         """Test running without command."""
         with patch('sys.argv', ['em3']):
             main()

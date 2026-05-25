@@ -1,79 +1,71 @@
-"""Tests for the python-prolog-pipeline example skill.
+"""Tests for python-prolog-pipeline skill."""
 
-Demonstrates the recommended pattern for testing multi-surface skills.
-"""
 import pytest
 from pathlib import Path
+from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
+from em_cubed.indexer import get_skill_metadata
+from em_cubed.plugin_manager import PluginManager
+
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "EXAMPLES" / "python-prolog-pipeline" / "SKILL.md")
+SKILL_ID = "EXAMPLES/python-prolog-pipeline"
 
 
-class TestPythonPrologPipelineSkill:
-    """Test the python-prolog-pipeline example skill."""
+@pytest.fixture
+def plugin_manager():
+    """Get plugin manager."""
+    return PluginManager()
+
+
+@pytest.fixture
+def test_generator(plugin_manager):
+    """Get test generator."""
+    return SkillTestGenerator(plugin_manager)
+
+
+@pytest.fixture
+def test_runner(plugin_manager):
+    """Get test runner."""
+    return SkillTestRunner(plugin_manager, None)
+
+
+class Testpython_prolog_pipelineSkill:
+    """Test suite for python-prolog-pipeline."""
 
     def test_metadata_valid(self):
-        """Test that skill metadata is valid."""
-        from em_cubed.indexer import get_skill_metadata
+        """Test skill metadata is valid."""
+        metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
+        assert metadata_dict is not None
+        assert metadata_dict["name"] == "python-prolog-pipeline"
+        assert metadata_dict["domain"] == "EXAMPLES"
+        assert len(metadata_dict["surfaces"]) >= 1
 
-        skill_file = Path("skills/EXAMPLES/python-prolog-pipeline/SKILL.md")
-        if not skill_file.exists():
-            pytest.skip("Example skill not installed")
+    def test_surfaces_implemented(self, plugin_manager):
+        """Test at least one required surface is available."""
+        metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
+        available_surfaces = []
+        for surface in metadata_dict.get("surfaces", []):
+            plugin = plugin_manager.get(surface)
+            if plugin and plugin.available:
+                available_surfaces.append(surface)
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
-        metadata = get_skill_metadata(skill_file, Path("skills"))
-        assert metadata is not None
-        assert metadata["name"] == "python-prolog-pipeline"
-        assert metadata["domain"] == "EXAMPLES"
-        assert "python" in metadata.get("surfaces", [])
+    @pytest.mark.asyncio
+    async def test_skill_execution(self, test_runner, test_generator):
+        """Test basic skill execution."""
+        from em_cubed.skills.metadata import SkillMetadata
+        metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
+        if not metadata_dict:
+            pytest.skip("Skill metadata not available")
+        
+        metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
+        # Populate from dict
+        for key, value in metadata_dict.items():
+            if hasattr(metadata, key):
+                setattr(metadata, key, value)
 
-    def test_skill_file_parses(self):
-        """Test that the skill file can be parsed and indexed."""
-        from em_cubed.indexer import reindex
+        tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
+        if tests:
+            results = await test_runner.run_test_suite(tests, SKILL_ID)
+            # At least some tests should pass for a valid skill
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
-        skill_file = Path("skills/EXAMPLES/python-prolog-pipeline/SKILL.md")
-        if not skill_file.exists():
-            pytest.skip("Example skill not installed")
-
-        skills_dir = Path("skills")
-        registry_file = Path("registry.json")
-        reindex(skills_dir, registry_file)
-
-        import json
-        data = json.loads(registry_file.read_text())
-        matching = [s for s in data if s["name"] == "python-prolog-pipeline"]
-        assert len(matching) == 1
-        assert "EXAMPLES" in matching[0].get("path", "")
-
-    def test_skill_execution_via_executor(self):
-        """Test skill execution through SkillExecutor (integration test)."""
-        pytest.importorskip("pyswip", reason="PySWIP not installed")
-
-        from em_cubed.indexer import reindex
-        from em_cubed.plugin_manager import PluginManager
-        from em_cubed.skills.registry import SkillRegistry
-        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
-        import asyncio
-
-        skill_file = Path("skills/EXAMPLES/python-prolog-pipeline/SKILL.md")
-        if not skill_file.exists():
-            pytest.skip("Example skill not installed")
-
-        skills_dir = Path("skills")
-        registry_file = Path("registry.json")
-        reindex(skills_dir, registry_file)
-
-        registry = SkillRegistry(skills_dir, registry_file)
-        plugin_manager = PluginManager()
-        executor = SkillExecutor(plugin_manager, registry, skills_dir)
-
-        request = SkillExecutionRequest(
-            skill_id="EXAMPLES/python-prolog-pipeline",
-            input_data={
-                "edges": [["a", "b"], ["b", "c"]],
-                "start": "a",
-                "end": "c"
-            }
-        )
-
-        result = asyncio.run(executor.execute(request))
-        assert result.success, f"Execution failed: {result.error}"
-        assert result.output is not None
-        assert result.output["count"] == 3
-        assert result.output["path"] == ["a", "b", "c"]

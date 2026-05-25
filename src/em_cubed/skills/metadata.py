@@ -243,10 +243,27 @@ class SkillMetadata:
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
+    @staticmethod
+    def _slugify(text: str) -> str:
+        """Slugify text for consistent IDs."""
+        import re
+        # Lowercase
+        text = text.lower()
+        # Replace spaces, underscores and periods with hyphens
+        text = re.sub(r'[\s_.]+', '-', text)
+        # Remove non-alphanumeric (except hyphens)
+        text = re.sub(r'[^a-z0-9\-]', '', text)
+        # Remove leading/trailing hyphens
+        text = text.strip('-')
+        return text
+
     def __post_init__(self):
         """Compute derived fields after initialization."""
         if self.skill_id is None:
-            self.skill_id = f"{self.domain}/{self.name}"
+            # Use slugified components for internal ID
+            slug_domain = self._slugify(self.domain)
+            slug_name = self._slugify(self.name)
+            self.skill_id = f"{slug_domain}/{slug_name}"
 
     @staticmethod
     def _extract_surfaces_from_body(body: str) -> List[str]:
@@ -262,12 +279,16 @@ class SkillMetadata:
                 surfaces.append("prolog")
             elif lang == "hy":
                 surfaces.append("hy")
-            elif lang == "z3":
+            elif lang in ("z3", "z3-smt2"):
                 surfaces.append("z3")
             elif lang in ("datalog", "pyDatalog"):
                 surfaces.append("datalog")
             elif lang in ("cangjie", "cj"):
                 surfaces.append("cangjie")
+            elif lang in ("sql", "sqlite"):
+                surfaces.append("sqlite")
+            elif lang in ("js", "javascript", "quickjs"):
+                surfaces.append("quickjs")
         # Deduplicate preserving order
         return list(dict.fromkeys(surfaces))
 
@@ -295,7 +316,9 @@ class SkillMetadata:
     @property
     def unique_id(self) -> str:
         """Get unique identifier for this skill."""
-        return f"{self.domain}/{self.name}@{self.version}"
+        slug_domain = self._slugify(self.domain)
+        slug_name = self._slugify(self.name)
+        return f"{slug_domain}/{slug_name}@{self.version}"
 
     def check_compatibility(self, other_version: str) -> bool:
         """Check if another skill version is compatible with this one."""
@@ -339,10 +362,15 @@ class SkillMetadata:
         """Construct SkillMetadata from SKILL.md frontmatter."""
         import re
 
-        # Extract surfaces from code blocks in body (preferred) or frontmatter
-        surfaces = cls._extract_surfaces_from_body(body)
+        # Extract surfaces from code blocks in body, merged with explicit frontmatter
+        # Frontmatter declarations take precedence; body detection supplements with
+        # any additionally detected surfaces (e.g. sqlite from a sqlite fence).
+        code_surfaces = cls._extract_surfaces_from_body(body)
+        fm_surfaces = frontmatter.get("surfaces", [])
+        # Merge with frontmatter-first ordering (deduplicates)
+        surfaces = list(dict.fromkeys(fm_surfaces + code_surfaces))
         if not surfaces:
-            surfaces = frontmatter.get("surfaces", [])
+            surfaces = ["python"]  # sensible default
 
         # Extract tags from code blocks
         tags = cls._extract_tags_from_body(body)
@@ -416,9 +444,9 @@ class SkillMetadata:
             file_path_str = None
 
         return cls(
-            name=frontmatter.get("name", file_path.parent.name if file_path else "Unknown"),
-            domain=frontmatter.get("Domain", "General"),
-            version=frontmatter.get("Version", "0.1.0"),
+            name=frontmatter.get("name", frontmatter.get("Name", file_path.parent.name if file_path else "Unknown")),
+            domain=frontmatter.get("domain", frontmatter.get("Domain", "General")),
+            version=frontmatter.get("version", frontmatter.get("Version", "0.1.0")),
             surfaces=surfaces,
             purpose=purpose,
             description=description,
@@ -431,7 +459,7 @@ class SkillMetadata:
             metrics=metrics,
             skill_id=None,  # Computed in __post_init__
             path=file_path_str,
-            schema_version=frontmatter.get("schema_version", 1),
+            schema_version=frontmatter.get("schema_version", frontmatter.get("Schema_Version", 1)),
             tags=tags,  # Use detected tags from code blocks
             created_at=datetime.fromisoformat(frontmatter["created_at"]) if frontmatter.get("created_at") else None,
             updated_at=datetime.fromisoformat(frontmatter["updated_at"]) if frontmatter.get("updated_at") else None,

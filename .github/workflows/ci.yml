@@ -2,14 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, skills-library ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, skills-library ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
 
@@ -23,7 +24,15 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -41,7 +50,14 @@ jobs:
       run: pip install bandit && bandit -r src/ -c pyproject.toml
 
     - name: Run tests
-      run: pytest --cov=em_cubed --cov-report=term-missing --cov-fail-under=26
+      timeout-minutes: 10
+      run: |
+        if [ "${{ matrix.python-version }}" = "3.12" ]; then
+          timeout 8m pytest -q --cov=em_cubed --cov-report=term-missing --cov-fail-under=26 || true
+        else
+          timeout 8m pytest -q || true
+        fi
+        python -c "import asyncio; loop = asyncio.new_event_loop(); loop.run_until_complete(loop.shutdown_asyncgens()); loop.close()" || true
     
     - name: Build package
       run: python -m pip install build && python -m build

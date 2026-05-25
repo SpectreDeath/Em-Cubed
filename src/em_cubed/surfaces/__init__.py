@@ -14,7 +14,10 @@ PythonSurface = None  # type: _Optional[type]
 Z3Surface = None  # type: _Optional[type]
 DatalogSurface = None  # type: _Optional[type]
 JanusSurface = None  # type: _Optional[type]
+LLMSurface = None  # type: _Optional[type]
 CangjieSurface = None  # type: _Optional[type]
+SQLiteSurface = None  # type: _Optional[type]
+QuickJSSurface = None  # type: _Optional[type]
 
 try:
     from .prolog_surface import PrologSurface as _PrologSurface
@@ -53,9 +56,27 @@ except ImportError:
     pass
 
 try:
+    from .llm_surface import LLMSurface as _LLMSurface
+    LLMSurface = _LLMSurface  # type: ignore[assignment]
+except ImportError:
+    pass
+
+try:
     from .cangjie_surface import CangjieSurface as _CangjieSurface
     CangjieSurface = _CangjieSurface  # type: ignore[assignment]
 except ImportError:
     pass
 
-__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "CangjieSurface"]
+try:
+    from .sqlite_surface import SQLiteSurface as _SQLiteSurface
+    SQLiteSurface = _SQLiteSurface  # type: ignore[assignment]
+except ImportError:
+    pass
+
+try:
+    from .quickjs_surface import QuickJSSurface as _QuickJSSurface
+    QuickJSSurface = _QuickJSSurface  # type: ignore[assignment]
+except ImportError:
+    pass
+
+__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "CangjieSurface", "SQLiteSurface", "QuickJSSurface"]

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "em-cubed"
-version = "0.5.0"
-description = "Multi-Surface Skill Framework for Python, Prolog, Hy, Z3, and Datalog execution surfaces"
+version = "0.8.0"
+description = "Multi-Surface Skill Framework for Python, Prolog, Hy, Z3, Datalog, Janus, SQLite, and QuickJS execution surfaces"
 authors = [
     {name = "SpectreDeath", email = "spectre@example.com"},
 ]
@@ -19,6 +19,9 @@ dependencies = [
     "uvicorn[standard]>=0.27.0,<0.30.0",
     "pydantic>=2.5.0,<3.0.0",
     "structlog>=23.0.0,<25.0.0",
+    "jinja2>=3.0.0",
+    "litellm>=1.0.0",
+    "numpy>=1.20.0",
 ]
 
 [project.scripts]
@@ -30,16 +33,19 @@ surfaces = [
     "hy>=0.28.0",
     "z3-solver>=4.13.0",
     "pyDatalog>=0.18.0",
+    "quickjs>=1.19.0",
 ]
 dev = [
     "pytest>=8.3.4",
     "pytest-asyncio>=0.24.0",
+    "pytest-timeout>=2.3.0",
     "pytest-cov>=4.1.0,<6.0.0",
     "ruff>=0.11.0",
     "mypy>=1.15.0",
     "python-dotenv>=1.0.0,<2.0.0",
     "types-PyYAML>=6.0.0",
     "httpx>=0.27.0",
+    "hypothesis",
 ]
 
 [tool.setuptools.packages.find]
@@ -52,8 +58,9 @@ target-version = "py311"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-addopts = "--cov=em_cubed --cov-report=term-missing -W ignore"
+addopts = "--cov=em_cubed --cov-report=term-missing -W ignore --timeout=60 --timeout-method=thread"
 asyncio_mode = "auto"
+timeout = 60
 
 [tool.mypy]
 python_version = "3.11"

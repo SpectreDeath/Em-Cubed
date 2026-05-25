@@ -6,7 +6,7 @@ and quality. Integrates with the SkillRegistry for persistent storage.
 
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List, cast
-from datetime import datetime
+from datetime import datetime, timezone
 import time
 import statistics
 from pathlib import Path
@@ -37,6 +37,8 @@ class TraceSpan:
             "duration_ms": (self.end_time - self.start_time) * 1000 if self.end_time else 0,
             "success": self.success,
             "error": self.error,
+            "input_size": len(str(self.input_data)) if self.input_data else 0,
+            "output_size": len(str(self.output_data)) if self.output_data else 0,
         }
 
 
@@ -118,13 +120,24 @@ class TelemetryCollector:
         # Log if configured
         if self.config.log_every_execution:
             self.logger.info("Execution recorded",
-                           skill_id=record.skill_id,
-                           success=record.success,
-                           time_ms=record.execution_time_ms)
+                        skill_id=record.skill_id,
+                        success=record.success,
+                        time_ms=record.execution_time_ms)
 
         # Periodically aggregate
         if time.time() - self._last_aggregate > self.config.aggregate_interval_seconds:
             self._aggregate_and_persist()
+            
+        # Notify WebSocket subscribers of new execution (non-blocking)
+        try:
+            from em_cubed.telemetry.api import get_websocket_handler
+            websocket_handler = get_websocket_handler()
+            if websocket_handler:
+                # In a real implementation, we would use asyncio.create_task or similar
+                # For now, we'll just note that we have a record to broadcast
+                pass
+        except ImportError:
+            pass  # WebSocket handler not available
 
     def flush(self) -> None:
         """Force immediate aggregation and persistence."""
@@ -132,7 +145,7 @@ class TelemetryCollector:
 
     def get_skill_metrics(self, skill_id: str, window_seconds: int = 3600) -> Dict[str, Any]:
         """Get metrics for a specific skill over a time window."""
-        cutoff = datetime.utcnow().timestamp() - window_seconds
+        cutoff = datetime.now(timezone.utc).timestamp() - window_seconds
 
         relevant = [
             r for r in self._records
@@ -185,14 +198,14 @@ class TelemetryCollector:
         aggregates = {}
         for skill_id, records in by_skill.items():
             recent = [r for r in records if
-                     (datetime.utcnow() - r.timestamp).total_seconds() < 3600]
+                     (datetime.now(timezone.utc) - r.timestamp).total_seconds() < 3600]
             if recent:
                 times = [r.execution_time_ms for r in recent if r.success]
                 aggregates[skill_id] = {
                     "count_1h": len(recent),
                     "success_rate_1h": sum(1 for r in recent if r.success) / len(recent),
                     "mean_time_ms": statistics.mean(times) if times else 0,
-                    "updated_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
                 }
 
         self._aggregates = aggregates
@@ -200,6 +213,26 @@ class TelemetryCollector:
         # Persist to disk if configured
         if self.config.persist_path:
             self._persist()
+            
+        # Broadcast telemetry update via WebSocket (non-blocking)
+        try:
+            from em_cubed.telemetry.api import get_websocket_handler
+            websocket_handler = get_websocket_handler()
+            if websocket_handler and self._aggregates:
+                # Prepare telemetry update data
+                {
+                    "type": "telemetry_update",
+                    "data": {
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "overall_stats": self.get_overall_stats(),
+                        "aggregates": self._aggregates
+                    }
+                }
+                # In a real implementation, we would use asyncio to broadcast
+                # For now, we'll just prepare the data - actual broadcasting would happen in the API layer
+                pass
+        except ImportError:
+            pass  # WebSocket handler not available
 
     def _persist(self) -> None:
         """Write telemetry data to disk."""
@@ -248,7 +281,7 @@ class TraceContext:
         self.record.record_span(span)
         return span
     
-    def end_span(self, span: TraceSpan, output_data: Any = None, success: bool = True, error: str = None):
+    def end_span(self, span: TraceSpan, output_data: Any = None, success: bool = True, error: Optional[str] = None):
         span.end_time = time.perf_counter()
         span.output_data = output_data
         span.success = success
@@ -275,7 +308,7 @@ class SkillTelemetry:
         
         record = ExecutionRecord(
             skill_id=skill_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             success=False,
             execution_time_ms=0,
             surface=surface,
@@ -314,6 +347,31 @@ class SkillTelemetry:
             return (len(input_str) + len(output_str)) // 4
         except Exception:
             return 0
+    
+    def estimate_cost(self, token_usage: int, surface: str = "python") -> float:
+        """Estimate cost based on token usage and surface type.
+        
+        Args:
+            token_usage: Number of tokens used
+            surface: Surface type (for different pricing models)
+            
+        Returns:
+            Estimated cost in USD
+        """
+        # Rough cost estimates (would be made configurable in production)
+        cost_per_1k_tokens = {
+            "python": 0.0001,   # Minimal cost for local execution
+            "prolog": 0.0001,
+            "hy": 0.0001,
+            "z3": 0.0001,
+            "datalog": 0.0001,
+            "janus": 0.0001,
+            "cangjie": 0.0001,
+            "llm": 0.002,       # Example LLM cost (would vary by model)
+        }
+        
+        rate = cost_per_1k_tokens.get(surface, 0.0001)
+        return (token_usage / 1000) * rate
 
 
 # Global telemetry collector (singleton)
@@ -343,7 +401,7 @@ def record_skill_execution(skill_id: str, success: bool, execution_time_ms: floa
     collector = get_telemetry_collector()
     record = ExecutionRecord(
         skill_id=skill_id,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         success=success,
         execution_time_ms=execution_time_ms,
         token_usage=token_usage,

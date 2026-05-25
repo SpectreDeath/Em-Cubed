@@ -7,6 +7,7 @@ Category: ML Skills
 Estimated Execution Time: 5-10 minutes
 name: recommendation-engine
 Source: community
+description: Multi-surface recommendation engine combining Python for collaborative/content filtering, Prolog for logical consistency rules, and Hy for fuzzy preference aggregation.
 ---
 origin: manual
 triggers:

@@ -1,7 +1,8 @@
-"""Skill executor - loads and executes skills with telemetry.
+"""Skill executor - loads and executes skills with telemetry and type conversion.
 
 Provides runtime execution of skills by extracting code from SKILL.md files
-and running it on appropriate surfaces with full telemetry.
+and running it on appropriate surfaces with full telemetry and automatic
+type conversion between surfaces.
 """
 
 import time
@@ -58,6 +59,8 @@ class TelemetryProxy:
                     self._trace_ctx.end_span(span, success=False, error=str(e))
                     raise
             return wrapped
+        elif name == "substrate":
+            return attr
         return attr
 
     def _wrap_result(self, res, span):
@@ -108,32 +111,36 @@ class SkillExecutor:
             raise ValueError(f"Skill '{skill_id}' not found or has no path")
 
         skill_file = Path(skill.path)
-
-        # Resolve the skill file path. The stored path may be:
-        # 1. An absolute path (use directly)
-        # 2. A relative path from cwd at indexing time
-        # 3. A relative path from skills_dir
-        if not skill_file.is_absolute():
-            # First try: relative to current cwd (may have changed since indexing)
+        
+        # Track if we've found the file
+        found = False
+        
+        if skill_file.is_absolute():
+            # Absolute path - use directly or fail
             if skill_file.exists():
-                pass  # Use as-is
+                found = True
+            # If not found, we'll fail below
+        else:
+            # Relative path - try multiple strategies
+            # First try: relative to current cwd
+            if skill_file.exists():
+                found = True
             # Second try: relative to skills_dir
             elif self.skills_dir:
                 candidate = self.skills_dir / skill.path
                 if candidate.exists():
                     skill_file = candidate
-                # Third try: with leading "skills/" stripped (common double-dir issue)
+                    found = True
                 else:
+                    # Third try: with leading "skills/" stripped (common double-dir issue)
                     stripped_parts = skill_file.parts
                     if stripped_parts and stripped_parts[0].lower() == "skills":
                         candidate = self.skills_dir.joinpath(*stripped_parts[1:])
                         if candidate.exists():
                             skill_file = candidate
-            # Final fallback: resolve relative to cwd
-            if not skill_file.exists():
-                skill_file = Path.cwd() / skill.path
-
-        if not skill_file.exists():
+                            found = True
+        
+        if not found:
             raise FileNotFoundError(f"Skill file not found: {skill.path}")
 
         content = skill_file.read_text(encoding="utf-8")
@@ -199,19 +206,32 @@ class SkillExecutor:
 
         # Wrap execution with telemetry
         async def skill_runner(input_data: Dict[str, Any], trace_ctx: TraceContext) -> Dict[str, Any]:
+            # Initialize shared substrate for this execution
+            substrate: Dict[str, Any] = {}
+
             # Prepare execution context with input
+            # Apply type conversion for cross-surface compatibility
+            converted_input = {}
+            for key, value in input_data.items():
+                # Attempt to preserve type information through conversion
+                # In a full implementation, we might have type hints from schemas
+                converted_input[key] = value  # Keep as-is for now, conversion happens at surface boundary
+            
             context = {
-                "skill_input": input_data,
+                "skill_input": converted_input,
                 "skill_metadata": skill.to_registry_dict(),
                 "trace_id": trace_ctx.record.trace_id,
+                "substrate": substrate,
                 **(request.context or {}),
             }
 
             # Inject surface plugins for cross-surface interaction (wrapped in proxy)
             context["surfaces"] = {}
-            for s_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+            for s_name in ["python", "prolog", "hy", "z3", "datalog", "janus", "cangjie"]:
                 surf_plugin = self.plugin_manager.get(s_name)
                 if surf_plugin and surf_plugin.available:
+                    # Inject shared substrate into the plugin
+                    surf_plugin.substrate = substrate
                     context["surfaces"][s_name] = TelemetryProxy(surf_plugin, trace_ctx)
 
             # Also provide the trace context itself
@@ -219,6 +239,8 @@ class SkillExecutor:
 
             # Execute on surface
             result = await plugin.execute(surface_code, context)
+            # Apply type conversion for cross-surface compatibility if needed
+            # In a full implementation, we would use type hints from skill schemas
             return cast(Dict[str, Any], result)
 
         # Execute with telemetry
@@ -243,13 +265,20 @@ class SkillExecutor:
             error_msg = str(e)
 
         # Record telemetry
-        from .telemetry import record_skill_execution
+        from .telemetry import record_skill_execution, SkillTelemetry
+        # Estimate token usage
+        token_usage = SkillTelemetry(get_telemetry_collector())._estimate_tokens(request.input_data, {
+            "status": "ok" if success else "error",
+            "value": output,
+            "message": error_msg
+        })
         record_skill_execution(
             skill_id=skill_id,
             success=success,
             execution_time_ms=elapsed,
             surface=surface_name,
             error_message=error_msg,
+            token_usage=token_usage,
         )
 
         # Update registry metrics

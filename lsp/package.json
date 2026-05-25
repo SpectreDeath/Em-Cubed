@@ -1,0 +1,58 @@
+{
+  "name": "em-cubed-skill-lsp",
+  "displayName": "Em-Cubed Skill Language Support",
+  "description": "Language Server Protocol support for SKILL.md files in Em-Cubed",
+  "version": "0.1.0",
+  "publisher": "em-cubed",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "activationEvents": [
+    "onLanguage:yaml"
+  ],
+  "main": "./lsp/src/skill_lsp.py",
+  "contributes": {
+    "languages": [
+      {
+        "id": "skill",
+        "aliases": [
+          "Em-Cubed Skill",
+          "skill"
+        ],
+        "extensions": [
+          ".skill.md"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "skill",
+        "scopeName": "text.yaml.skill",
+        "path": "./syntaxes/skill.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.60.0",
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "14.x",
+    "eslint": "^8.8.0",
+    "glob": "^7.2.0",
+    "mocha": "^9.1.1",
+    "typescript": "^4.5.0",
+    "vscode-test": "^1.5.0"
+  }
+}

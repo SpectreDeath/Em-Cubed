@@ -1,0 +1,60 @@
+---
+name: {{ name }}
+Domain: {{ domain }}
+Version: 1.0.0
+surfaces:
+  - python
+  - sqlite
+---
+
+## Purpose
+{{ purpose }}
+
+## Description
+{{ description }}
+
+## Implementation
+
+### Python (pre-processing)
+```python
+def preprocess(input_data):
+    """Validate and prepare data for SQL analysis."""
+    # Ensure required fields
+    if "table" not in input_data:
+        raise ValueError("Input must contain 'table' key")
+    return input_data
+
+def postprocess(sql_result):
+    """Format SQL results into final output."""
+    return {"aggregated": sql_result, "status": "ok"}
+```
+
+### SQLite
+```sql
+-- Expected input data: table name and optional columns
+-- Example: SELECT COUNT(*) as count FROM data_table
+-- Placeholder: replace with actual aggregation query
+SELECT 1 as placeholder;
+```
+
+### Python (post-processing)
+```python
+# Orchestrator logic
+def main(skill_input):
+    data = preprocess(skill_input)
+    
+    # Build and execute SQL via sqlite surface
+    sql = "SELECT COUNT(*) as count FROM data_table;"  # TODO: customize
+    result = context["surfaces"]["sqlite"].execute_sync(sql, {"session_id": "analysis_session"})
+    
+    if result["status"] != "ok":
+        return {"status": "error", "message": result.get("message")}
+    
+    return postprocess(result["value"])
+```
+
+## Examples
+```python
+input_data = {"table": "sales", "group_by": "region"}
+# Expected output: aggregated results with counts/sums etc.
+```

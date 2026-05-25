@@ -280,12 +280,12 @@ class SkillTestRunner:
                 if trace_ctx:
                     from .executor import TelemetryProxy
                     # Inject proxies for sub-surface calls in tests
-                    surfaces = self.plugin_manager._plugins
+                    surfaces = self.plugin_manager.registry.get_plugins()
                     proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
                     ctx["surfaces"] = proxies
                     ctx["trace"] = trace_ctx
                     ctx["context"] = ctx
-                
+
                 return await surface.execute(test.code, ctx)
 
             # Run via telemetry
