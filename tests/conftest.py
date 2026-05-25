@@ -1,9 +1,13 @@
 """Test fixtures and utilities for em_cubed tests."""
 
 import asyncio
-from em_cubed.plugin import SurfacePlugin
+import os
+import signal
 from typing import Dict, Any, Optional
+
 import pytest
+
+from em_cubed.plugin import SurfacePlugin
 
 
 class TestSurfacePlugin(SurfacePlugin):
@@ -43,3 +47,13 @@ def cleanup_event_loop():
             loop.run_until_complete(loop.shutdown_asyncgens())
     except RuntimeError:
         pass
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Force-kill the process immediately after the test session.
+    
+    This prevents the 15-20 minute CI hangs when background threads
+    (from surfaces, pyswip, z3-solver, hy, prolog, etc.) refuse to
+    die cleanly after pytest has already finished running all tests.
+    """
+    os.kill(os.getpid(), signal.SIGKILL)
