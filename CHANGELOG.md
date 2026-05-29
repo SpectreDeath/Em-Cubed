@@ -242,3 +242,20 @@ Em-Cubed follows [Semantic Versioning](https://semver.org/):
 - **Community**: Bug reports, feature requests, and contributions welcome!
 
 For more information about contributing, see [CONTRIBUTING.md](CONTRIBUTING.md).
+## [0.8.0] - 2026-05-29
+
+### Added
+- **Optimization Skills**: Completed P2 and P3 optimization algorithm skills
+  - Dialectic Search (DA): Thesis-antithesis-synthesis thinker types - 8/8 tests
+  - Chaos Optimization (COA): Logistic/Tent/Sinusoidal chaotic maps - 9/9 tests
+  - Fractal-Based Algorithm (FBA): Hierarchical space partitioning - 7/7 tests
+  - Central Force Optimization (CFO): Gravitational attraction between probes - 9/9 tests
+  - Spiral Dynamics Optimization (SDO): Damped harmonic oscillations - 7/7 tests
+- **Multi-Surface Implementation**: All optimization skills include Python core, Prolog validation, and Hy helpers
+- **SKILL_CANGJIE.md**: Cangjie orchestrator files for all optimization algorithms
+
+### Changed
+- **Test Suite**: Updated to 57 optimization skill tests (all passing)
+
+### Notes
+- NOA2 (Neuroboids Optimization 2) NOT implemented - requires deep learning/PyTorch (outside scope)
