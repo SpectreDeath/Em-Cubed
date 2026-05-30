@@ -1,9 +1,11 @@
 """Cangjie surface integration for high-performance logic orchestration."""
 
 import asyncio
+import concurrent.futures as _cf
 import json
 import shutil
 import tempfile
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, Any, Optional
 import structlog
@@ -11,6 +13,21 @@ import structlog
 from .base import SurfaceBase
 
 logger = structlog.get_logger()
+
+
+@lru_cache(maxsize=1)
+def _find_cjc(timeout: float = 2.0) -> Optional[str]:
+    """Return the path to `cjc` or None.
+
+    Runs `shutil.which` in a worker thread so that a stalled network PATH
+    entry on Windows cannot block the event loop indefinitely.
+    """
+    with _cf.ThreadPoolExecutor(max_workers=1, thread_name_prefix="cjc_which") as pool:
+        fut = pool.submit(shutil.which, "cjc")
+        try:
+            return fut.result(timeout=timeout)
+        except (_cf.TimeoutError, Exception):
+            return None
 
 
 class CangjieSurface(SurfaceBase):
@@ -30,12 +47,13 @@ class CangjieSurface(SurfaceBase):
 
     def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout)
-        self.cjc_path = shutil.which("cjc")
+        # Use the cached, timeout-guarded lookup so we never block indefinitely.
+        self.cjc_path = _find_cjc()
         logger.info("CangjieSurface initialized", available=self.available, cjc_path=self.cjc_path)
 
     def _check_availability(self) -> bool:
         """Check if cjc (Cangjie Compiler) is available in the system path."""
-        return shutil.which("cjc") is not None
+        return _find_cjc() is not None
 
     @staticmethod
     def extract_tags(source: Optional[str]) -> list:

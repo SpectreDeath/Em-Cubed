@@ -295,7 +295,7 @@ class SkillExecutor:
             error=error_msg,
             execution_time_ms=elapsed,
             surface_used=surface_name,
-            token_usage=0,  # TODO: estimate tokens
+            token_usage=token_usage,
         )
 
 

@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
+import time
 import uuid
-from typing import Dict, List, Optional, Any
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Optional, Any
 import structlog
-import time
 
 logger = structlog.get_logger()
 
@@ -160,6 +163,165 @@ class DistributedExecutor:
         self.logger.info("Workflow cancelled", workflow_id=workflow_id)
         return True
 
+    def shutdown(self) -> None:
+        """Shutdown the executor."""
+        pass
+
+
+def _execute_distributed_task(task_dict: Dict[str, Any], skills_dir_str: str) -> Dict[str, Any]:
+    """Independent worker process function that executes a skill task."""
+    try:
+        from pathlib import Path
+        import asyncio
+        from em_cubed.plugin_manager import PluginManager
+        from em_cubed.skills.registry import SkillRegistry
+        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
+        
+        # Initialize an isolated event loop for this worker process
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        skills_dir = Path(skills_dir_str)
+        plugin_manager = PluginManager()
+        
+        # Load registry dynamically relative to skills_dir or current working dir
+        registry = SkillRegistry(skills_dir)
+        executor = SkillExecutor(plugin_manager, registry, skills_dir)
+        
+        # Construct and dispatch execution request
+        request = SkillExecutionRequest(
+            skill_id=task_dict["skill_id"],
+            input_data=task_dict.get("input_data", {})
+        )
+        
+        async def run():
+            return await executor.execute(request)
+            
+        result = loop.run_until_complete(run())
+        loop.close()
+        
+        return {
+            "success": result.success,
+            "output": result.output,
+            "error": result.error,
+            "execution_time_ms": result.execution_time_ms
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "output": None,
+            "error": str(e),
+            "execution_time_ms": 0.0
+        }
+
+
+class ProcessDistributedExecutor(DistributedExecutor):
+    """Actual distributed task executor that runs tasks in separate sandboxed OS processes."""
+    
+    def __init__(self, skills_dir: Path, max_workers: int = 4):
+        super().__init__()
+        self.skills_dir = skills_dir
+        self._max_workers = max_workers
+        self._process_executor = ProcessPoolExecutor(max_workers=max_workers)
+        self._futures: Dict[str, Any] = {}
+        self._scheduler_tasks: Dict[str, asyncio.Task] = {}
+        
+    def submit_workflow(self, workflow_id: str, tasks: List[DistributedTask]) -> bool:
+        """Submit a workflow and start scheduling tasks across workers."""
+        success = super().submit_workflow(workflow_id, tasks)
+        if not success:
+            return False
+            
+        # Spawn asynchronous scheduling pipeline
+        loop = asyncio.get_running_loop()
+        task = loop.create_task(self._scheduler_loop(workflow_id))
+        self._scheduler_tasks[workflow_id] = task
+        return True
+        
+    async def _scheduler_loop(self, workflow_id: str):
+        """Asynchronous scheduler that submits tasks when dependencies are completed."""
+        task_ids = self._workflows.get(workflow_id, [])
+        
+        while True:
+            # Check if all tasks in the workflow are done/failed
+            all_done = True
+            for tid in task_ids:
+                task = self._tasks[tid]
+                if task.status in [TaskStatus.PENDING, TaskStatus.RUNNING]:
+                    all_done = False
+                    
+            if all_done:
+                break
+                
+            for tid in task_ids:
+                task = self._tasks[tid]
+                if task.status != TaskStatus.PENDING:
+                    continue
+                    
+                # Verify that all parent task dependencies are fully completed
+                deps_satisfied = True
+                for dep_id in task.dependencies:
+                    dep_task = self._tasks.get(dep_id)
+                    if not dep_task or dep_task.status != TaskStatus.COMPLETED:
+                        deps_satisfied = False
+                        break
+                        
+                if deps_satisfied:
+                    # Promote task to RUNNING status
+                    task.status = TaskStatus.RUNNING
+                    task.started_at = time.time()
+                    
+                    # Offload compilation/execution to ProcessPoolExecutor
+                    loop = asyncio.get_running_loop()
+                    fut = loop.run_in_executor(
+                        self._process_executor,
+                        _execute_distributed_task,
+                        task.to_dict(),
+                        str(self.skills_dir)
+                    )
+                    
+                    self._futures[task.task_id] = fut
+                    fut.add_done_callback(
+                        lambda f, t_id=task.task_id: self._task_completed_callback(t_id, f)
+                    )
+                    
+            await asyncio.sleep(0.05)
+            
+    def _task_completed_callback(self, task_id: str, future: Any):
+        """Callback triggered when a worker process finishes task execution."""
+        try:
+            res = future.result()
+            task = self._tasks[task_id]
+            task.completed_at = time.time()
+            if res["success"]:
+                task.status = TaskStatus.COMPLETED
+                task.result = res["output"]
+                self.logger.info("Distributed task completed successfully", task_id=task_id)
+                
+                # Checkpoint progress durably using global manager
+                from em_cubed.workflow.checkpoint import get_checkpoint_manager
+                manager = get_checkpoint_manager()
+                if manager:
+                    manager.create_checkpoint(
+                        workflow_id=task.workflow_id,
+                        execution_id=task_id,
+                        step_name=f"task_{task.skill_id}",
+                        state_data={"result": task.result}
+                    )
+            else:
+                task.status = TaskStatus.FAILED
+                task.error = res["error"]
+                self.logger.error("Distributed task failed", task_id=task_id, error=res["error"])
+        except Exception as e:
+            task = self._tasks[task_id]
+            task.status = TaskStatus.FAILED
+            task.error = str(e)
+            self.logger.exception("Error retrieving distributed task result", task_id=task_id)
+            
+    def shutdown(self):
+        """Clean up worker process execution pools."""
+        self._process_executor.shutdown(wait=False)
+
 
 # Global distributor instance
 _distributed_executor: Optional[DistributedExecutor] = None
@@ -171,9 +333,13 @@ def get_distributed_executor() -> Optional[DistributedExecutor]:
     return _distributed_executor
 
 
-def initialize_distributed_executor() -> DistributedExecutor:
+def initialize_distributed_executor(skills_dir: Optional[Path] = None) -> DistributedExecutor:
     """Initialize the global distributed executor."""
     global _distributed_executor
-    _distributed_executor = DistributedExecutor()
-    logger.info("Distributed executor initialized")
+    if skills_dir:
+        _distributed_executor = ProcessDistributedExecutor(skills_dir)
+        logger.info("Distributed Process executor initialized", skills_dir=str(skills_dir))
+    else:
+        _distributed_executor = DistributedExecutor()
+        logger.info("In-memory Distributed executor initialized (portable mode)")
     return _distributed_executor

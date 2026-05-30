@@ -1,5 +1,6 @@
 """Tests for WASM surface functionality."""
 
+import pytest
 from em_cubed.surfaces.wasm_surface import WASMSurface
 
 
@@ -13,7 +14,6 @@ def test_wasm_surface_creation():
 def test_wasm_surface_available():
     """Test that WASM surface reports availability."""
     surface = WASMSurface()
-    # In our implementation, we simulate availability
     assert hasattr(surface, '_wasm_available')
 
 
@@ -28,17 +28,43 @@ def test_wasm_surface_extract_tags():
     tags = surface.extract_tags("")
     assert tags == []
     
-    # Test with simple function (simplified pattern matching)
-    # Note: Our implementation is simplistic, so this may not work perfectly
-    # but we're mainly testing that the method exists and doesn't crash
-    wasm_code = "(func $add (param i32 i32) (result i32))"
+    # Test with simple function in WAT format
+    wasm_code = "(module (func $add (param i32 i32) (result i32)) (export \"add\" (func $add)))"
     tags = surface.extract_tags(wasm_code)
-    # Just verify it returns a list
     assert isinstance(tags, list)
+    if surface.available:
+        assert "add" in tags
+
+
+@pytest.mark.asyncio
+async def test_wasm_surface_execution():
+    """Test actual execution of a WebAssembly module in WAT format."""
+    surface = WASMSurface()
+    if not surface.available:
+        pytest.skip("WASM runtime not available")
+
+    # Simple WAT module exporting 'add'
+    wat_code = """
+    (module
+      (func $add (param $lhs i32) (param $rhs i32) (result i32)
+        local.get $lhs
+        local.get $rhs
+        i32.add)
+      (export "add" (func $add))
+    )
+    """
+    
+    # Run the module
+    context = {
+        "skill_input": {
+            "a": 15,
+            "b": 27
+        }
+    }
+    result = await surface.execute(wat_code, context)
+    assert result["status"] == "ok"
+    assert result["value"] == 42
 
 
 if __name__ == "__main__":
-    test_wasm_surface_creation()
-    test_wasm_surface_available()
-    test_wasm_surface_extract_tags()
-    print("All tests passed!")
+    pytest.main(["-v", __file__])

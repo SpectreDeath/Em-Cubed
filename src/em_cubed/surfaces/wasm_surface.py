@@ -1,7 +1,8 @@
-"""WASM surface integration for executing WebAssembly code."""
+"""WASM surface integration for executing WebAssembly code using wasmtime."""
 
 import asyncio
-from typing import Dict, Any, Optional
+import base64
+from typing import Dict, Any, Optional, List
 import structlog
 
 from .base import SurfaceBase
@@ -10,7 +11,7 @@ logger = structlog.get_logger()
 
 
 class WASMSurface(SurfaceBase):
-    """Handle WebAssembly code execution."""
+    """Handle WebAssembly code compilation and execution using wasmtime."""
 
     def __init__(self, timeout: Optional[float] = None):
         """Initialize WASM surface.
@@ -20,22 +21,28 @@ class WASMSurface(SurfaceBase):
         """
         super().__init__(timeout)
         self._wasm_available = self._check_wasm_availability()
+        self._engine: Optional[wasmtime.Engine] = None
         logger.info("WASMSurface initialized", available=self._wasm_available, timeout=self.timeout)
 
+    def initialize(self) -> None:
+        """Initialize the WASM surface."""
+        if self._wasm_available:
+            self._engine = wasmtime.Engine()
+            logger.debug("WASM engine initialized")
+
+    def shutdown(self) -> None:
+        """Shutdown the WASM surface."""
+        self._engine = None
+        logger.debug("WASM engine shut down")
+        super().shutdown()
+
     def _check_wasm_availability(self) -> bool:
-        """Check if WASM execution is available.
-        
-        In a real implementation, this would check for a WASM runtime like Wasmer or Wasmtime.
-        For now, we'll simulate availability.
-        """
-        # Placeholder: In reality, check for wasmer or wasmtime
-        # For this implementation, we'll assume it's available if we can import a mock
+        """Check if wasmtime library is installed."""
         try:
-            # Try to import a WASM module (this would be replaced with actual WASM runtime)
-            # We're simulating availability for now
+            import wasmtime  # noqa: F401
             return True
         except ImportError:
-            logger.warning("WASM runtime not available for WASM surface")
+            logger.warning("wasmtime not installed for WASM surface")
             return False
 
     @property
@@ -50,74 +57,169 @@ class WASMSurface(SurfaceBase):
     def available(self) -> bool:
         return self._wasm_available
 
-    def extract_tags(self, wasm_source: Optional[str]) -> list:
-        """Extract function names from WASM source as heuristic_tags.
-        
-        This is a simplified implementation. In reality, we would parse the WASM binary
-        or text format to extract exported functions.
-        """
+    def extract_tags(self, wasm_source: Optional[str]) -> List[str]:
+        """Extract exported function names from WASM source as heuristic_tags."""
         if not wasm_source:
             return []
-        # Simple heuristic: look for common function patterns in text format
-        import re
-        # This is a placeholder - real WASM function extraction would be more complex
-        funcs = re.findall(r'\(func\s+(?:\$?(\w+))', wasm_source)
-        return list(dict.fromkeys(funcs))
+        
+        try:
+            import wasmtime
+            engine = wasmtime.Engine()
+            
+            # Identify if it is .wat text format or raw/base64 binary wasm
+            source_stripped = wasm_source.strip()
+            if source_stripped.startswith("(module"):
+                module = wasmtime.Module(engine, wasm_source)
+            else:
+                try:
+                    binary_data = base64.b64decode(source_stripped)
+                    module = wasmtime.Module(engine, binary_data)
+                except Exception:
+                    module = wasmtime.Module(engine, wasm_source)
+            
+            # Extract exported functions
+            funcs = []
+            for exp in module.exports:
+                if isinstance(exp, wasmtime.ExportType) and exp.type.func() is not None:
+                    funcs.append(exp.name)
+            return funcs
+            
+        except Exception as e:
+            logger.warning("Failed to extract WASM exports using wasmtime, falling back to regex", error=str(e))
+            import re
+            funcs = re.findall(r'\(func\s+(?:\$?(\w+))', wasm_source)
+            return list(dict.fromkeys(funcs))
+
+    def _run_wasm(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Synchronous WASM compilation and execution to run inside the thread pool executor."""
+        # Import wasmtime here to handle case where it's not available
+        try:
+            import wasmtime
+        except ImportError:
+            return {"status": "error", "message": "WASM runtime (wasmtime) not available"}
+        
+        # Use initialized engine if available, otherwise create a temporary one
+        engine = self._engine if self._engine is not None else wasmtime.Engine()
+        store = wasmtime.Store(engine)
+        
+        # 1. Compile WASM source
+        code_stripped = code.strip()
+        if code_stripped.startswith("(module"):
+            module = wasmtime.Module(engine, code_stripped)
+        else:
+            try:
+                binary_data = base64.b64decode(code_stripped)
+                module = wasmtime.Module(engine, binary_data)
+            except Exception:
+                module = wasmtime.Module(engine, code_stripped)
+        
+        # 2. Setup linker and WASI config
+        linker = wasmtime.Linker(engine)
+        linker.define_wasi()
+        
+        wasi_config = wasmtime.WasiConfig()
+        wasi_config.inherit_stdout()
+        wasi_config.inherit_stderr()
+        store.set_wasi(wasi_config)
+        
+        # 3. Instantiate the module
+        instance = linker.instantiate(store, module)
+        exports = instance.exports(store)
+        
+        # 4. Locate entry function
+        entry_point = (context or {}).get("entry_point")
+        func = None
+        if entry_point and entry_point in exports:
+            func = exports[entry_point]
+        else:
+            # Fallback to look for common entry points
+            for name in ["main", "run", "execute", "solve", "add"]:
+                if name in exports and isinstance(exports[name], wasmtime.Func):
+                    func = exports[name]
+                    break
+            if not func:
+                # Fallback to the first exported function in the module
+                for name, item in exports.items():
+                    if isinstance(item, wasmtime.Func):
+                        func = item
+                        break
+                        
+        if not func:
+            return {"status": "error", "message": "No exported function found in WASM module"}
+            
+        # 5. Extract input values and map them to arguments
+        params = func.type(store).params
+        args = []
+        
+        input_data = (context or {}).get("skill_input", {})
+        if "args" in (context or {}):
+            raw_args = context["args"]
+        elif isinstance(input_data, dict):
+            # Sort keys to ensure deterministic ordering of dictionary parameters
+            raw_args = [input_data[k] for k in sorted(input_data.keys())]
+        elif isinstance(input_data, list):
+            raw_args = input_data
+        else:
+            raw_args = []
+            
+        for i, param_type in enumerate(params):
+            val = raw_args[i] if i < len(raw_args) else 0
+            
+            # Cast python values based on expected WASM parameters
+            try:
+                type_str = str(param_type)
+                if "i32" in type_str:
+                    args.append(int(val))
+                elif "i64" in type_str:
+                    args.append(int(val))
+                elif "f32" in type_str:
+                    args.append(float(val))
+                elif "f64" in type_str:
+                    args.append(float(val))
+                else:
+                    args.append(val)
+            except Exception:
+                args.append(val)
+                
+        # 6. Execute exported function
+        result_val = func(store, *args)
+        
+        # In case of multiple return values, return the list or first item
+        if isinstance(result_val, list) and len(result_val) == 1:
+            result_val = result_val[0]
+            
+        return {
+            "status": "ok",
+            "value": result_val
+        }
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute WebAssembly code and return results.
-        
-        Args:
-            code: The WASM code (in text format or base64 encoded binary) to execute
-            context: Optional execution context
-            
-        Returns:
-            Dict with status, value/error message
-        """
-        if not self.available:
-            return {
-                "status": "error",
-                "message": "WASM runtime not available"
-            }
+        """Execute WebAssembly code and return results."""
+        return await self.execute_with_timeout(code, context)
 
-        # In a real implementation, we would:
-        # 1. Compile the WASM code (if in text format) or decode (if base64)
-        # 2. Instantiate the WASM module with the provided context
-        # 3. Execute the exported functions
-        # 4. Handle memory and imports/exports
-        
-        # For this implementation, we'll simulate execution
+    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Compile and execute WebAssembly code safely on the thread executor."""
+        logger.info("Executing WebAssembly code", code_length=len(code))
+
+        if not self.available:
+            return {"status": "error", "message": "WASM runtime (wasmtime) not available"}
+
         try:
-            # Simulate WASM execution
-            # In reality, this would involve:
-            # - Setting up a WASM runtime (Wasmer, Wasmtime, etc.)
-            # - Creating a store and module
-            # - Importing functions from context if needed
-            # - Executing the main function or specified entry point
-            
-            # Simulate a simple computation
-            await asyncio.sleep(0.1)  # Simulate execution time
-            
-            # Return a mock result
-            return {
-                "status": "ok",
-                "value": {
-                    "result": "WASM execution simulated",
-                    "input": context or {}
-                }
-            }
+            loop = asyncio.get_running_loop()
+            result = await loop.run_in_executor(
+                self._executor,
+                self._run_wasm,
+                code,
+                context
+            )
+            logger.info("WASM execution successful")
+            return result
         except Exception as e:
-            logger.error("WASM execution failed", error=str(e))
+            logger.exception("WASM execution failed", error=str(e))
             return {
                 "status": "error",
                 "message": f"WASM execution failed: {str(e)}"
             }
-
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute WebAssembly code - required by abstract base class."""
-        # For this implementation, we'll delegate to the execute method
-        # In a real implementation, this would contain the core WASM execution logic
-        return await self.execute(code, context)
 
     async def health(self) -> bool:
         """Check if the WASM surface is available."""

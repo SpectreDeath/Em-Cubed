@@ -27,7 +27,6 @@ class QuickJSSurface(SurfaceBase):
 
     def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout)
-        self._executor = ThreadPoolExecutor(max_workers=1)
         logger.info("QuickJSSurface initialized", available=self.available)
 
     def _check_availability(self) -> bool:
@@ -36,6 +35,28 @@ class QuickJSSurface(SurfaceBase):
         if not available:
             logger.warning("pyquickjs not available for QuickJS surface")
         return available
+
+    def _run_quickjs(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Synchronous QuickJS execution to run inside the executor thread."""
+        import quickjs
+        import json
+        
+        # Use a fresh context for each execution
+        ctx = quickjs.Context()
+        
+        # Inject context variables if provided (primitive types only)
+        if context:
+            for key, value in context.items():
+                if isinstance(value, (int, float, str, bool, list, dict)) or value is None:
+                    try:
+                        # Use JS assignment via eval; more compatible than parse_json
+                        ctx.eval(f"var {key} = {json.dumps(value)};")
+                    except Exception:
+                        pass  # Skip if injection fails
+
+        # Execute the code
+        result = ctx.eval(code)
+        return {"status": "ok", "value": result}
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute JavaScript code and return results."""
@@ -49,30 +70,16 @@ class QuickJSSurface(SurfaceBase):
             return {"status": "error", "message": "pyquickjs not available"}
 
         try:
-            import quickjs
-            
-            # Use a fresh context for each execution
-            ctx = quickjs.Context()
-            
-            # Inject context variables if provided (primitive types only)
-            if context:
-                import json
-                for key, value in context.items():
-                    if isinstance(value, (int, float, str, bool, list, dict)) or value is None:
-                        try:
-                            # Use JS assignment via eval; more compatible than parse_json
-                            ctx.eval(f"var {key} = {json.dumps(value)};")
-                        except Exception:
-                            pass  # Skip if injection fails
-
-            # Execute the code
-            result = ctx.eval(code)
-            
-            # Convert result back to Python if it's a QuickJS object
-            # Note: result might be a simple type or a QuickJS object
-            
+            import asyncio
+            loop = asyncio.get_running_loop()
+            result = await loop.run_in_executor(
+                self._executor,
+                self._run_quickjs,
+                code,
+                context
+            )
             logger.info("JavaScript execution successful")
-            return {"status": "ok", "value": result}
+            return result
 
         except Exception as e:
             logger.exception("JavaScript execution failed", error=str(e))
