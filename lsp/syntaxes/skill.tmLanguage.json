@@ -1,0 +1,34 @@
+{
+    "scopeName": "text.skill",
+    "name": "Em-Cubed Skill",
+    "patterns": [
+        {
+            "name": "keyword.control.skill",
+            "match": "^(name|domain|version|surfaces|triggers|description):(\\s*)?$"
+        },
+        {
+            "name": "string.unquoted.skill",
+            "match": "^\\s+-\\s+([a-zA-Z0-9_-]+)$"
+        },
+        {
+            "begin": "^---\\s*$",
+            "end": "^---\\s*$",
+            "name": "meta.frontmatter.skill",
+            "patterns": [
+                {
+                    "include": "#frontmatter-key"
+                }
+            ]
+        }
+    ],
+    "repository": {
+        "frontmatter-key": {
+            "patterns": [
+                {
+                    "name": "keyword.control.skill",
+                    "match": "^(name|domain|version|surfaces|triggers|description)$"
+                }
+            ]
+        }
+    }
+}

@@ -17,7 +17,7 @@ from src.em_cubed.skills.executor import (
 from src.em_cubed.skills.registry import SkillRegistry
 from src.em_cubed.skills.metadata import SkillMetadata
 from src.em_cubed.skills.metadata import SkillMetadata
-from src.em_cubed.telemetry import SkillTelemetry, TraceContext
+from src.em_cubed.skills.telemetry import SkillTelemetry, TraceContext
 
 
 class TestSkillExecutor:

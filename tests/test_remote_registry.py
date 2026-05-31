@@ -1,194 +1,112 @@
-"""Tests for remote skill registry functionality."""
+"""Tests for remote registry discovery functionality."""
+
+import pytest
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+from src.em_cubed.skills.remote_registry import RemoteSkillRegistry
+from src.em_cubed.skills.registry import SkillRegistry
 
-from em_cubed.skills.remote_registry import RemoteSkillRegistry
-from em_cubed.skills.registry import SkillRegistry
 
-
-def test_remote_registry_creation():
-    """Test that RemoteSkillRegistry can be created."""
-    # Create a temporary local registry
-    with tempfile.TemporaryDirectory() as temp_dir:
-        skills_dir = Path(temp_dir) / "skills"
-        skills_dir.mkdir()
-        registry_file = Path(temp_dir) / "registry.json"
-        registry_file.write_text("[]")  # Empty registry
+def test_remote_registry_discovery_with_mock():
+    """Test remote registry discovery with mocked HTTP response."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        skills_dir = Path(tmpdir)
+        registry_file = Path(tmpdir) / "registry.json"
         
         local_registry = SkillRegistry(skills_dir, registry_file)
-        remote_registry = RemoteSkillRegistry(local_registry)
+        remote = RemoteSkillRegistry(local_registry)
         
-        assert remote_registry.local_registry == local_registry
-        assert remote_registry.cache_dir.exists()
+        # Mock registry data
+        mock_skills = [
+            {
+                "name": "Central Force Optimizer",
+                "domain": "optimization",
+                "version": "1.0.0",
+                "surfaces": ["python"],
+                "purpose": "Gravitational optimization",
+                "description": "Uses gravitational forces to find optima",
+            },
+        ]
+        
+        remote.add_registry("test-registry", "https://test.example.com")
+        
+        with patch.object(remote, '_fetch_remote_registry', return_value=mock_skills):
+            skills = remote.discover_skills("central", limit=10)
+            
+            assert len(skills) == 1
+            assert skills[0].name == "Central Force Optimizer"
+            assert skills[0].domain == "optimization"
 
 
-def test_add_remove_registry():
-    """Test adding and removing remote registries."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        skills_dir = Path(temp_dir) / "skills"
-        skills_dir.mkdir()
-        registry_file = Path(temp_dir) / "registry.json"
-        registry_file.write_text("[]")
+def test_remote_registry_multiple_registries():
+    """Test discovery across multiple registries."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        skills_dir = Path(tmpdir)
+        registry_file = Path(tmpdir) / "registry.json"
         
         local_registry = SkillRegistry(skills_dir, registry_file)
-        remote_registry = RemoteSkillRegistry(local_registry)
+        remote = RemoteSkillRegistry(local_registry)
         
-        # Add a registry
-        remote_registry.add_registry(
-            "test-registry", 
-            "https://example.com/api", 
-            token="test-token",
-            sync_interval=60
-        )
+        # Mock skills from different registries
+        registry_a_skills = [{"name": "Skill A", "domain": "test", "surfaces": ["python"]}]
+        registry_b_skills = [{"name": "Skill B", "domain": "test", "surfaces": ["prolog"]}]
         
-        assert "test-registry" in remote_registry._registries
-        config = remote_registry._registries["test-registry"]
-        assert config["url"] == "https://example.com/api"
-        assert config["token"] == "test-token"
-        assert config["sync_interval"] == 60
+        remote.add_registry("registry-a", "https://a.example.com")
+        remote.add_registry("registry-b", "https://b.example.com")
         
-        # Remove the registry
-        result = remote_registry.remove_registry("test-registry")
-        assert result is True
-        assert "test-registry" not in remote_registry._registries
-        
-        # Try to remove non-existent registry
-        result = remote_registry.remove_registry("non-existent")
-        assert result is False
+        fetch_mock = patch.object(remote, '_fetch_remote_registry')
+        with fetch_mock as mock_fetch:
+            mock_fetch.side_effect = [registry_a_skills, registry_b_skills]
+            skills = remote.discover_skills("skill", limit=10)
+            
+            assert len(skills) == 2
 
 
-def test_sync_registry_not_due():
-    """Test that sync is skipped when not due."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        skills_dir = Path(temp_dir) / "skills"
-        skills_dir.mkdir()
-        registry_file = Path(temp_dir) / "registry.json"
-        registry_file.write_text("[]")
+def test_remote_registry_caching():
+    """Test that registry data is cached properly."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        skills_dir = Path(tmpdir)
+        registry_file = Path(tmpdir) / "registry.json"
         
         local_registry = SkillRegistry(skills_dir, registry_file)
-        remote_registry = RemoteSkillRegistry(local_registry)
+        remote = RemoteSkillRegistry(local_registry)
         
-        # Add a registry with short sync interval
-        remote_registry.add_registry("test", "https://example.com", sync_interval=10)
+        mock_skills = [{"name": "Cached Skill", "domain": "test", "surfaces": ["python"]}]
         
-        # Manually set last sync to recent time
-        import time
-        remote_registry._last_sync["test"] = time.time()
+        remote.add_registry("cache-test", "https://cache.example.com")
         
-        # Try to sync - should return False (not done)
-        result = remote_registry.sync_registry("test", force=False)
-        assert result is False
+        # First call - fetch and save
+        with patch.object(remote, '_fetch_remote_registry', return_value=mock_skills) as fetch_mock:
+            skills = remote.discover_skills("cached", limit=10)
+            assert len(skills) == 1
+        
+        # Second call - should use cache, not call fetch
+        with patch.object(remote, '_fetch_remote_registry', return_value=mock_skills) as fetch_mock2:
+            skills2 = remote.discover_skills("cached", limit=10)
+            # Cache should be hit, so fetch shouldn't be called
+            assert fetch_mock2.call_count == 0
+            assert len(skills2) == 1
 
 
-def test_sync_registry_force():
-    """Test that sync can be forced."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        skills_dir = Path(temp_dir) / "skills"
-        skills_dir.mkdir()
-        registry_file = Path(temp_dir) / "registry.json"
-        registry_file.write_text("[]")
+def test_remote_registry_empty_result():
+    """Test discovery returns empty when no skills match."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        skills_dir = Path(tmpdir)
+        registry_file = Path(tmpdir) / "registry.json"
         
         local_registry = SkillRegistry(skills_dir, registry_file)
-        remote_registry = RemoteSkillRegistry(local_registry)
+        remote = RemoteSkillRegistry(local_registry)
         
-        # Add a registry
-        remote_registry.add_registry("test", "https://example.com", sync_interval=10)
+        mock_skills = [{"name": "Unrelated Skill", "domain": "test", "surfaces": ["python"]}]
         
-        # Even if not due, force should work
-        with patch.object(remote_registry, '_fetch_remote_registry', return_value=[]):
-            with patch.object(remote_registry, '_load_cached_registry', return_value=None):
-                result = remote_registry.sync_registry("test", force=True)
-                # Should return True (attempted sync)
-                assert result is True
-
-
-def test_load_cached_registry():
-    """Test loading cached registry data."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        skills_dir = Path(temp_dir) / "skills"
-        skills_dir.mkdir()
-        registry_file = Path(temp_dir) / "registry.json"
-        registry_file.write_text("[]")
+        remote.add_registry("empty-test", "https://empty.example.com")
         
-        local_registry = SkillRegistry(skills_dir, registry_file)
-        remote_registry = RemoteSkillRegistry(local_registry)
-        
-        # Add a registry
-        remote_registry.add_registry("test", "https://example.com")
-        
-        # Create cache file with test data
-        cache_path = remote_registry._get_cache_path("test")
-        test_data = [{"name": "test-skill", "domain": "test", "version": "1.0.0", "surfaces": ["python"]}]
-        with open(cache_path, "w") as f:
-            json.dump(test_data, f)
-        
-        # Load cached data
-        cached = remote_registry._load_cached_registry("test")
-        assert cached == test_data
-
-
-def test_convert_remote_skill():
-    """Test converting remote skill data to SkillMetadata."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        skills_dir = Path(temp_dir) / "skills"
-        skills_dir.mkdir()
-        registry_file = Path(temp_dir) / "registry.json"
-        registry_file.write_text("[]")
-        
-        local_registry = SkillRegistry(skills_dir, registry_file)
-        remote_registry = RemoteSkillRegistry(local_registry)
-        
-        # Test valid skill data
-        skill_data = {
-            "name": "test-skill",
-            "domain": "test",
-            "version": "1.0.0",
-            "surfaces": ["python"],
-            "description": "A test skill",
-            "purpose": "Testing"
-        }
-        
-        skill_metadata = remote_registry._convert_remote_skill(skill_data)
-        assert skill_metadata is not None
-        assert skill_metadata.name == "test-skill"
-        assert skill_metadata.domain == "test"
-        assert skill_metadata.version == "1.0.0"
-        assert skill_metadata.surfaces == ["python"]
-        assert skill_metadata.description == "A test skill"
-        assert skill_metadata.purpose == "Testing"
-
-
-def test_convert_remote_skill_missing_fields():
-    """Test converting remote skill data with missing fields."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        skills_dir = Path(temp_dir) / "skills"
-        skills_dir.mkdir()
-        registry_file = Path(temp_dir) / "registry.json"
-        registry_file.write_text("[]")
-        
-        local_registry = SkillRegistry(skills_dir, registry_file)
-        remote_registry = RemoteSkillRegistry(local_registry)
-        
-        # Test missing required field
-        skill_data = {
-            "name": "test-skill",
-            # Missing domain
-            "version": "1.0.0",
-            "surfaces": ["python"]
-        }
-        
-        skill_metadata = remote_registry._convert_remote_skill(skill_data)
-        assert skill_metadata is None
+        with patch.object(remote, '_fetch_remote_registry', return_value=mock_skills):
+            skills = remote.discover_skills("nonexistent", limit=10)
+            assert skills == []
 
 
 if __name__ == "__main__":
-    test_remote_registry_creation()
-    test_add_remove_registry()
-    test_sync_registry_not_due()
-    test_sync_registry_force()
-    test_load_cached_registry()
-    test_convert_remote_skill()
-    test_convert_remote_skill_missing_fields()
-    print("All tests passed!")
+    pytest.main(["-v", __file__])

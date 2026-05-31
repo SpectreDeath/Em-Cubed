@@ -366,17 +366,50 @@ class RemoteSkillRegistry:
         Returns:
             List of matching SkillMetadata objects
         """
-        # This would implement actual search across registries
-        # For now, we'll return an empty list as a placeholder
-        # In a full implementation, this would:
-        # 1. Query each registry's search API
-        # 2. Collect and deduplicate results
-        # 3. Rank by relevance
-        # 4. Return top results
+        all_skills = []
         
-        self.logger.info("Skill discovery requested", query=query, limit=limit)
-        # Placeholder implementation
-        return []
+        for name in self._registries:
+            # Try cache first
+            cache = self._load_cached_registry(name)
+            if cache is None:
+                cache = self._fetch_remote_registry(name)
+                if cache is not None:
+                    self._save_cached_registry(name, cache)
+            
+            if cache:
+                # Filter by query (simple substring match on name/description)
+                for skill_data in cache:
+                    skill_name = skill_data.get("name", "").lower()
+                    skill_desc = skill_data.get("description", "").lower()
+                    if query.lower() in skill_name or query.lower() in skill_desc:
+                        try:
+                            skill = SkillMetadata(
+                                name=skill_data.get("name", ""),
+                                domain=skill_data.get("domain", "remote"),
+                                version=skill_data.get("version", "0.0.0"),
+                                surfaces=skill_data.get("surfaces", ["python"]),
+                                purpose=skill_data.get("purpose", ""),
+                                description=skill_data.get("description", ""),
+                                dependencies=[],
+                                input_schema={},
+                                output_schema={},
+                                capabilities={},
+                                compatibility={},
+                                quality_thresholds={},
+                                metrics={},
+                                skill_id=skill_data.get("skill_id", f"remote/{skill_data.get('name', '')}"),
+                                path="",
+                                schema_version=skill_data.get("schema_version", 1),
+                                tags=skill_data.get("tags", []),
+                            )
+                            all_skills.append(skill)
+                        except Exception as e:
+                            self.logger.warning("Failed to parse remote skill", 
+                                              registry=name, error=str(e))
+        
+        self._last_sync.update({name: time.time() for name in self._registries})
+        
+        return all_skills[:limit]
     
     def get_registry_info(self) -> Dict[str, Dict[str, Any]]:
         """Get information about configured registries.

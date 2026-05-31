@@ -110,7 +110,7 @@ class WebSocketTelemetryHandler:
         # Get current telemetry data
         try:
             overall_stats = self.collector.get_overall_stats()
-            available_skills = self.collector.get_available_skills() if hasattr(self.collector, 'get_available_skills') else []
+            available_skills = self.get_available_skills()
             
             # Prepare update data
             update_data = {

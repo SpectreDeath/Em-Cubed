@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  em-cubed-python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    image: em-cubed-python:latest
+    volumes:
+      - ./skills:/app/skills:ro
+    command: ["python", "-c", "print('Container ready')"]
+
+  em-cubed-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: em-cubed-api:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./skills:/app/skills:ro
+      - ./registry.json:/app/registry.json:ro
+    environment:
+      - PYTHONPATH=/app/src
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  em-cubed-wasm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: em-cubed-wasm:latest
+    volumes:
+      - ./skills:/app/skills:ro
+    environment:
+      - PYTHONPATH=/app/src
+    command: ["python", "-m", "em_cubed.container_executor"]
