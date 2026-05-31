@@ -290,6 +290,10 @@ console.log("hello");
     
     def test_get_skill_executor(self):
         """Test getting global skill executor."""
+        # Reset singleton before test (because test_initialize_executor ran first)
+        import src.em_cubed.skills.executor as executor_module
+        executor_module._global_executor = None
+        
         # Initially should be None
         assert get_skill_executor() is None
         
@@ -301,6 +305,9 @@ console.log("hello");
         
         # Now should return the executor
         assert get_skill_executor() == executor
+        
+        # Clean up for other tests
+        executor_module._global_executor = None
 
 
 class TestSkillExecutionRequest:
@@ -380,3 +387,5 @@ class TestSkillExecutionResult:
 
 if __name__ == "__main__":
     pytest.main([__file__])
+
+
