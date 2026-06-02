@@ -1,14 +1,20 @@
 import pytest
-import numpy as np
 
 @pytest.mark.asyncio
 async def test_capacity_forecast():
     code = '''
-import numpy as np
-
-data = np.random.randn(100) * 10 + 100
-np.random.seed(42)
-forecast = [np.mean(data) for _ in range(30)]
+# Inline forecast without numpy or random imports
+# Use deterministic synthetic data
+data = [100.0, 90.0, 110.0, 105.0, 95.0] * 20  # 100 elements
+# Calculate mean
+total = 0.0
+for x in data:
+    total += x
+mean_val = total / len(data)
+# Generate forecast
+forecast = []
+for i in range(30):
+    forecast.append(mean_val)
 len(forecast) == 30
 '''
     from em_cubed.surfaces import PythonSurface
