@@ -11,7 +11,8 @@ Complete the implementation of next phase features (observability dashboard, WAS
 - ✅ Created EPIDEMIOLOGY/gradient-descent-optimizer (Python + Z3 surfaces)
 - ✅ Created CLINICAL_TRIALS/k-means-clustering (Python surface)
 - ✅ Created FORENSIC_ECONOMICS/linear-regression (Python + SQLite surfaces)
-- ✅ All ML skills tested and verified working
+- ✅ Created MACHINE_LEARNING/logistic-regression-classifier (Python + Z3 surfaces)
+- ✅ Created STATISTICS/naive-bayes-classifier (Python + SQLite surfaces)
 
 **In Progress:** (none)
 **Blocked:** (none)
