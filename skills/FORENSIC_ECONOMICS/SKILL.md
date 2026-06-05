@@ -107,25 +107,23 @@ def linear_regression(features, targets):
 ## SQLite Surface
 
 ```sql
--- Create k-means state table for iterative clustering
-CREATE TABLE IF NOT EXISTS k_means_state (
-    iteration INTEGER PRIMARY KEY,
-    point_index INTEGER,
-    cluster_id INTEGER,
-    coord_x REAL,
-    coord_y REAL,
-    centroid_x REAL,
-    centroid_y REAL
+-- Create regression state table for iterative model fitting
+CREATE TABLE IF NOT EXISTS regression_state (
+    iteration INTEGER,
+    feature_index INTEGER,
+    slope REAL,
+    intercept REAL,
+    r_squared REAL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Query to assign point to nearest centroid
--- Parameters: ? = iteration, ? = point_x, ? = point_y
--- Returns: nearest cluster id and distance
-SELECT cluster_id, MIN(distance) as min_dist
-FROM (
-    SELECT cluster_id, 
-           SQRT((coord_x - ?) * (coord_x - ?) + (coord_y - ?) * (coord_y - ?)) as distance
-    FROM (SELECT DISTINCT cluster_id, centroid_x as coord_x, centroid_y as coord_y 
-          FROM k_means_state)
-) WHERE min_dist IS NOT NULL;
+-- Insert regression coefficients for persistence
+-- Parameters: ? = iteration, ? = slope, ? = intercept, ? = r_squared
+INSERT INTO regression_state (iteration, feature_index, slope, intercept, r_squared)
+VALUES (?, 0, ?, ?, ?);
+
+-- Query latest regression model
+SELECT slope, intercept, r_squared 
+FROM regression_state 
+WHERE iteration = (SELECT MAX(iteration) FROM regression_state);
 ```
