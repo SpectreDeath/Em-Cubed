@@ -3,14 +3,12 @@
 import asyncio
 import time
 import pytest
-from pathlib import Path
 from em_cubed.workflow.distributed import (
     DistributedExecutor,
     DistributedTask,
     TaskStatus,
     ProcessDistributedExecutor,
-    initialize_distributed_executor,
-    get_distributed_executor
+    initialize_distributed_executor
 )
 from em_cubed.workflow.checkpoint import initialize_checkpoint_manager
 

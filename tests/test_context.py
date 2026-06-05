@@ -1,7 +1,6 @@
 """Additional tests for the context/type system to improve coverage."""
 
 from em_cubed.context import get_type_converter, get_type_registry, TypeDefinition, TypeRegistry, TypeConverter
-import json
 
 
 def test_type_register_type():
@@ -164,7 +163,7 @@ def test_infer_type_comprehensive():
 
 def test_initialize_type_system_idempotent():
     """Test that initialize_type_system can be called multiple times."""
-    from em_cubed.context import initialize_type_system, _type_registry, _type_converter
+    from em_cubed.context import initialize_type_system
     
     # Reset globals for clean test
     import em_cubed.context as context_module
@@ -211,7 +210,7 @@ def test_type_definition_creation():
     )
     
     assert type_def.name == "test_type"
-    assert type_def.python_type == int
+    assert type_def.python_type is int
     assert type_def.prolog_term == "test"
     assert type_def.hy_form == "test"
     assert type_def.z3_sort == "Test"
@@ -280,7 +279,7 @@ def test_type_registry_register_duplicate_type():
     
     # Should get the second type (the one that overwrote)
     retrieved = registry.get_type("duplicate")
-    assert retrieved.python_type == int
+    assert retrieved.python_type is int
 
 
 def test_type_converter_convert_to_surface_all_surfaces():

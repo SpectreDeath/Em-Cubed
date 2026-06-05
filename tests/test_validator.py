@@ -1,9 +1,7 @@
 """Tests for the skill validator module."""
 
 import pytest
-from unittest.mock import Mock, patch
-from datetime import datetime
-from pathlib import Path
+from unittest.mock import Mock
 
 from src.em_cubed.skills.validator import (
     SkillValidator,

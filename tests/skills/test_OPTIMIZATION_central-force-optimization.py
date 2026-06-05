@@ -99,7 +99,6 @@ class TestCentralForceOptimizationSkill:
 
         pop_size, g, alpha, beta, max_iter = 30, 1.0, 0.1, 0.1, 80
         dim = 2
-        bounds = [(-5.0, 5.0)] * dim
 
         probes = []
         accelerations = []
@@ -110,7 +109,6 @@ class TestCentralForceOptimizationSkill:
 
         fitness = [sphere(pos) for pos in probes]
         best_score = max(fitness)
-        best_x = probes[fitness.index(best_score)][:]
 
         for epoch in range(max_iter):
             # Calculate accelerations
@@ -140,7 +138,6 @@ class TestCentralForceOptimizationSkill:
             current_best = max(fitness)
             if current_best > best_score:
                 best_score = current_best
-                best_x = probes[fitness.index(current_best)][:]
 
         assert best_score > -1.0, f"CFO sphere result = {best_score}"
 

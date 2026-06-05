@@ -138,7 +138,6 @@ class PrologSurface(SurfaceBase):
                         # pyswip assertz expects the rule without trailing period
                         rule_clean = rule_flat.rstrip('.')
                         # Use the internal call to handle multi-line rules
-                        from pyswip.prolog import Prolog as _Prolog
                         prolog.assertz(rule_clean)
                         logger.info("Prolog rule asserted successfully")
                     except Exception as assert_err:

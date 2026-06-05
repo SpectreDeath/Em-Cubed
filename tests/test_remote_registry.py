@@ -1,10 +1,9 @@
 """Tests for remote registry discovery functionality."""
 
 import pytest
-import json
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from src.em_cubed.skills.remote_registry import RemoteSkillRegistry
 from src.em_cubed.skills.registry import SkillRegistry
 
@@ -78,7 +77,7 @@ def test_remote_registry_caching():
         remote.add_registry("cache-test", "https://cache.example.com")
         
         # First call - fetch and save
-        with patch.object(remote, '_fetch_remote_registry', return_value=mock_skills) as fetch_mock:
+        with patch.object(remote, '_fetch_remote_registry', return_value=mock_skills):
             skills = remote.discover_skills("cached", limit=10)
             assert len(skills) == 1
         

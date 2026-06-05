@@ -1,5 +1,4 @@
 ﻿import pytest
-import numpy as np
 
 @pytest.mark.asyncio
 async def test_quorum_calculation():

@@ -130,7 +130,7 @@ current_level >= 0
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
-    assert result["value"] == True
+    assert result["value"]
 
 
 @pytest.mark.asyncio
@@ -147,4 +147,4 @@ current_level >= 0
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
-    assert result["value"] == True
+    assert result["value"]

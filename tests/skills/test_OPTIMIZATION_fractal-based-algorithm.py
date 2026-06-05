@@ -1,7 +1,6 @@
 """Tests for fractal-based-algorithm skill."""
 
 import pytest
-import math
 from pathlib import Path
 from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
@@ -104,9 +103,8 @@ class TestFractalBasedAlgorithmSkill:
                 return max(out_min, min(out_max, center + r * (out_max - center)))
             return max(out_min, min(out_max, center - r * (center - out_min)))
 
-        pop_size, p1, p2, p3, m_value, max_iter = 30, 60, 30, 0.8, 5, 100
+        pop_size, p3, max_iter = 30, 0.8, 100
         dim = 2
-        bounds = [(-5.0, 5.0)] * dim
 
         population = [[random.uniform(-5, 5) for _ in range(dim)] for _ in range(pop_size)]
         best_score = min(sphere(ind) for ind in population)
@@ -145,8 +143,6 @@ class TestFractalBasedAlgorithmSkill:
     @pytest.mark.asyncio
     async def test_point_in_subspace(self):
         """Point containment check should work correctly."""
-        subspace = {'min': [0.0, 0.0], 'max': [1.0, 1.0]}
-
         # Inside
         inside = all(0 <= p <= 1 for p in [0.5, 0.5])
         assert inside

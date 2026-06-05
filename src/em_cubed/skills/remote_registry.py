@@ -9,7 +9,7 @@ import structlog
 import requests
 
 from .registry import SkillRegistry
-from .metadata import SkillMetadata
+from .metadata import SkillMetadata, InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds, RuntimeMetrics
 
 logger = structlog.get_logger()
 
@@ -391,12 +391,12 @@ class RemoteSkillRegistry:
                                 purpose=skill_data.get("purpose", ""),
                                 description=skill_data.get("description", ""),
                                 dependencies=[],
-                                input_schema={},
-                                output_schema={},
-                                capabilities={},
-                                compatibility={},
-                                quality_thresholds={},
-                                metrics={},
+                                input_schema=InputOutputSchema(),
+                                output_schema=InputOutputSchema(),
+                                capabilities=SkillCapability(),
+                                compatibility=CompatibilityRange(),
+                                quality_thresholds=QualityThresholds(),
+                                metrics=RuntimeMetrics(),
                                 skill_id=skill_data.get("skill_id", f"remote/{skill_data.get('name', '')}"),
                                 path="",
                                 schema_version=skill_data.get("schema_version", 1),

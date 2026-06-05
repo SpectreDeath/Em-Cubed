@@ -1,7 +1,6 @@
 """QuickJS surface integration for executing JavaScript code."""
 
 import importlib.util
-from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Optional, List
 import structlog
 

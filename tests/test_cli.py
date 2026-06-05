@@ -2,8 +2,6 @@
 
 import pytest
 import json
-import sys
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from em_cubed.cli import main

@@ -1,7 +1,7 @@
 # Em-Cubed: Multi-Surface Skill Framework
 
-[![Tests](https://img.shields.io/badge/tests-95%2B%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
-[![Coverage](https://img.shields.io/badge/coverage-33%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Tests](https://img.shields.io/badge/tests-232%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Coverage](https://img.shields.io/badge/coverage-~33%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
@@ -636,7 +636,7 @@ double(X, Result) :- Result is X * 2.
 - Document any external dependencies
 
 ## 🧪 Testing
-Em-Cubed includes a comprehensive test suite with 219 tests covering:
+Em-Cubed includes a comprehensive test suite with 232 tests covering:
 
 ```bash
 # Run all tests

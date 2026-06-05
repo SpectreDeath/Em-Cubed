@@ -1,7 +1,6 @@
 """Tests for chaos-optimization skill."""
 
 import pytest
-import math
 from pathlib import Path
 from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
@@ -107,7 +106,7 @@ class TestChaosOptimizationSkill:
                 return max(out_min, min(out_max, center + r * (out_max - center)))
             return max(out_min, min(out_max, center - r * (center - out_min)))
 
-        pop_size, s1, s2, p3, max_iter = 30, 40, 60, 0.8, 100
+        pop_size, s1, p3, max_iter = 30, 40, 0.8, 100
         dim = 2
         bounds = [(-5.0, 5.0)] * dim
 

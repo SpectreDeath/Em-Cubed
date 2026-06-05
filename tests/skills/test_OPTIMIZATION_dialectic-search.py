@@ -101,9 +101,8 @@ class TestDialecticSearchSkill:
         def sphere(x):
             return sum(xi ** 2 for xi in x)
 
-        pop_size, k1, k2, max_iter = 30, 3, 10, 80
+        pop_size, k1, max_iter = 30, 3, 80
         dim = 2
-        bounds = [(-5.0, 5.0)] * dim
 
         population = [[random.uniform(-5, 5) for _ in range(dim)] for _ in range(pop_size)]
         fitness = [sphere(ind) for ind in population]
