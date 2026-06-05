@@ -185,7 +185,7 @@ def _execute_distributed_task(task_dict: Dict[str, Any], skills_dir_str: str) ->
         plugin_manager = PluginManager()
         
         # Load registry dynamically relative to skills_dir or current working dir
-        registry = SkillRegistry(skills_dir)
+        registry = SkillRegistry(skills_dir, skills_dir / "registry.json")
         executor = SkillExecutor(plugin_manager, registry, skills_dir)
         
         # Construct and dispatch execution request
@@ -282,11 +282,11 @@ class ProcessDistributedExecutor(DistributedExecutor):
                     
                     self._futures[task.task_id] = fut
                     fut.add_done_callback(
-                        lambda f, t_id=task.task_id: self._task_completed_callback(t_id, f)
+                        lambda f, t_id=task.task_id: self._task_completed_callback(t_id, f)  # type: ignore[misc]
                     )
                     
             await asyncio.sleep(0.05)
-            
+    
     def _task_completed_callback(self, task_id: str, future: Any):
         """Callback triggered when a worker process finishes task execution."""
         try:
@@ -318,7 +318,7 @@ class ProcessDistributedExecutor(DistributedExecutor):
             task.error = str(e)
             self.logger.exception("Error retrieving distributed task result", task_id=task_id)
             
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Clean up worker process execution pools."""
         self._process_executor.shutdown(wait=False)
 

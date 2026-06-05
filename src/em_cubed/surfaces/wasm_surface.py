@@ -2,7 +2,7 @@
 
 import asyncio
 import base64
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, cast
 import structlog
 import wasmtime
 
@@ -152,15 +152,24 @@ class WASMSurface(SurfaceBase):
             return {"status": "error", "message": "No exported function found in WASM module"}
             
         # 5. Extract input values and map them to arguments
-        func_type = func.type(store)
-        params = list(func_type.params.vals) if hasattr(func_type.params, 'vals') else list(func_type.params)  # type: ignore[union-attr]
+        import wasmtime
+        func_val = cast(wasmtime.Func, func)
+        func_typed = cast("Any", func_val.type(store))
+        params: List[Any] = []
+        if hasattr(func_typed, 'params'):
+            params_val = getattr(func_typed, 'params')
+            if hasattr(params_val, 'vals'):
+                params = list(getattr(params_val, 'vals'))
+            else:
+                params = list(params_val)
+        
         args: List[Any] = []
         
         input_data = (context or {}).get("skill_input", {})
-        if "args" in (context or {}):
-            raw_args = context["args"]  # type: ignore[union-attr]
+        ctx = context or {}
+        if "args" in ctx:
+            raw_args = ctx["args"]
         elif isinstance(input_data, dict):
-            # Sort keys to ensure deterministic ordering of dictionary parameters
             raw_args = [input_data[k] for k in sorted(input_data.keys())]
         elif isinstance(input_data, list):
             raw_args = input_data
@@ -170,7 +179,6 @@ class WASMSurface(SurfaceBase):
         for i, param_type in enumerate(params):
             val = raw_args[i] if i < len(raw_args) else 0
             
-            # Cast python values based on expected WASM parameters
             try:
                 type_str = str(param_type)
                 if "i32" in type_str:
@@ -178,14 +186,14 @@ class WASMSurface(SurfaceBase):
                 elif "i64" in type_str:
                     args.append(int(val))
                 elif "f32" in type_str or "f64" in type_str:
-                    args.append(int(val))  # wasmtime expects int for numeric params via this path
+                    args.append(int(val))
                 else:
                     args.append(val)
             except Exception:
                 args.append(val)
                 
         # 6. Execute exported function
-        result_val = func(store, *args)  # type: ignore[union-attr,misc]
+        result_val = func_val(store, *args)  # type: ignore[no-untyped-def,misc]
         
         # In case of multiple return values, return the list or first item
         if isinstance(result_val, list) and len(result_val) == 1:
