@@ -46,9 +46,13 @@ def k_means(data_points, k, max_iterations=100):
         return ([], [])
     
     dimension = len(points[0])
+    # Initialize centroids using first k data points (simple approach)
     centroids = []
-    for i in range(k):
-        centroids.append([float(i * 10.0 / k) for _ in range(dimension)])
+    for i in range(min(k, n)):
+        centroids.append([float(points[i][d]) for d in range(dimension)])
+    # If we need more centroids than data points, repeat the last one
+    while len(centroids) < k:
+        centroids.append([float(points[-1][d]) for d in range(dimension)] if n > 0 else [0.0] * dimension)
     
     assignments = [0] * n
     for _ in range(max_iterations):
