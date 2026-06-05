@@ -17,13 +17,24 @@ Core inputs: feature matrix (list of vectors), binary labels (list of 0/1), lear
 def my_exp(x):
     if x > 50:
         return 1e21
-    if x < -50:
-        return 0.0
+    if x < -30:
+        result = 1.0
+        term = 1.0
+        for i in range(1, 100):
+            term = term * (-x) / i
+            result = result + term
+            if term > 1e15:
+                return 1e-20
+            if term < 1e-15 * result:
+                break
+        return 1.0 / result
     result = 1.0
     term = 1.0
-    for i in range(1, 30):
+    for i in range(1, 50):
         term = term * x / i
         result = result + term
+        if term < 1e-15 * result and i > 10:
+            break
     return result
 
 def sigmoid(z):
