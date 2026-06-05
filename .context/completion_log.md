@@ -24,7 +24,7 @@
 
 ## 2026-06-05 - Polyglot ML Skills Implementation
 
-### ✅ Created 3 Machine Learning Skills (zero-dependency)
+### ✅ Created 5 Machine Learning Skills (zero-dependency)
 
 **EPIDEMIOLOGY/gradient-descent-optimizer** (Python + Z3 surfaces):
 - Core inputs: initial parameters (list), learning rate (float), max iterations (int), cost function (callable)
@@ -44,6 +44,17 @@
 - Only uses primitive arithmetic and loops (no numpy/scipy)
 - SQLite surface provides schema for regression state management
 - Successfully tested fitting y = 2x + 1 with R² ≈ 0.99998
+
+**MACHINE_LEARNING/logistic-regression-classifier** (Python + Z3 surfaces):
+- Core inputs: feature matrix (list of vectors), binary labels (list), learning rate, iterations
+- Zero-dependency sigmoid via Taylor series + Gaussian probability verification with Z3
+- Tested correctly classifying points with decision boundary ~2.5
+
+**STATISTICS/naive-bayes-classifier** (Python + SQLite surfaces):
+- Core inputs: feature matrix, class labels, test features
+- Gaussian PDF via custom exp for probability estimation
+- SQLite surface for model persistence
+- Tested correctly predicting class A/B based on feature likelihoods
 
 ### 📊 Technical Compliance
 - All skills use YAML frontmatter with name, domain, version, surfaces
