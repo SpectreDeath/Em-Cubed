@@ -59,11 +59,10 @@ COMMON_SURFACES = [
     "prolog", 
     "hy",
     "z3",
-    "janus",
+    "datalog",
     "sqlite",
     "quickjs",
-    "cangjie",
-    "llm"
+    "cangjie"
 ]
 
 class SkillLanguageServer(LanguageServer):

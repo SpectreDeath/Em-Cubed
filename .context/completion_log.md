@@ -1,4 +1,3 @@
-﻿@
 # Completion Log
 
 ## 2026-06-05 - Linting Error Fixes
@@ -66,6 +65,18 @@
 - Added EPIDEMIOLOGY, FORENSIC_ECONOMICS, CLINICAL_TRIALS domains
 
 ### Final Validation
-- 68/68 skills passing
-- Registry updated with skills across 21 domains
+- 72/72 skills passing
+- Registry updated with skills across 28 domains
 
+---
+
+## 2026-06-06 - DISTRIBUTED_SYSTEMS Domain: DAG Scheduling, WASM, Observability
+
+### Created 4 Distributed Systems Skills
+- DISTRIBUTED_SYSTEMS/dag-task-scheduler: Topological sort, critical path, Z3 verification
+- DISTRIBUTED_SYSTEMS/wasm-execution-sandbox: Secure WASM loader, resource bounds
+- DISTRIBUTED_SYSTEMS/durable-execution-engine: Checkpoint management, SQLite persistence
+- DISTRIBUTED_SYSTEMS/observability-dashboard: Metrics collection, alert detection
+
+### Updated LSP
+- Removed deprecated janus/llm surfaces from COMMON_SURFACES list
