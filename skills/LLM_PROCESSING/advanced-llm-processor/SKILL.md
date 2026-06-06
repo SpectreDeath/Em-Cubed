@@ -1,168 +1,68 @@
----
-name: Advanced LLM Processor
-Domain: LLM_PROCESSING
+﻿---
+name: advanced-llm-processor
+Domain: NLP
 Version: 1.0.0
 surfaces:
-  - llm
   - python
 ---
 
 ## Purpose
-A Advanced LLM Processor skill.
+
+Advanced text processing workflow with tool orchestration and response generation using pure Python.
 
 ## Description
-Detailed description for Advanced LLM Processor.
+
+Processes prompts through structured workflows simulating advanced LLM features like streaming and function calling.
 
 ## Implementation
 
-### Advanced LLM Processing with Streaming and Function Calling
+### Python Processor
+
 ```python
 from typing import Dict, Any, List, Optional
-import json
 
-def process_with_advanced_llm_features(prompt: str, 
-                                      use_streaming: bool = False,
-                                      tools: Optional[List[Dict]] = None,
-                                      temperature: float = 0.7,
-                                      max_tokens: int = 1000) -> Dict[str, Any]:
-    """
-    Process a prompt using advanced LLM features like streaming and function calling.
-    
-    Args:
-        prompt: The input prompt for the LLM
-        use_streaming: Whether to use streaming mode
-        tools: Optional list of function definitions for function calling
-        temperature: Sampling temperature (0.0 to 1.0)
-        max_tokens: Maximum tokens to generate
-        
-    Returns:
-        Dictionary containing the LLM response and metadata
-    """
-    # Prepare context for LLM surface
-    context = {
-        "prompt": prompt,
-        "stream": use_streaming,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
-        "task": "advanced_llm_processing"
-    }
-    
-    # Add tools if provided (for function calling)
-    if tools:
-        context["tools"] = tools
-        context["tool_choice"] = "auto"  # Let the model decide when to use tools
-    
-    # In a real implementation, this would execute via the LLM surface
-    # For demonstration, we return a structured response indicating what features would be used
-    features_used = []
+def process_with_features(prompt: str, 
+                        use_streaming: bool = False,
+                        tools: Optional[List[Dict]] = None,
+                        temperature: float = 0.7) -> Dict[str, Any]:
+    """Process prompt with configurable features."""
+    features = ["standard"]
     if use_streaming:
-        features_used.append("streaming")
+        features.append("streaming")
     if tools:
-        features_used.append("function_calling")
-    if not features_used:
-        features_used.append("standard_completion")
+        features.append("tool_orchestration")
     
     return {
         "prompt": prompt,
-        "response": f"[LLM RESPONSE USING {', '.join(features_used).upper()}] Response to: {prompt[:50]}...",
-        "features_used": features_used,
-        "context": context,
-        "usage": {
-            "prompt_tokens": len(prompt.split()),
-            "completion_tokens": 25,  # Estimated
-            "total_tokens": len(prompt.split()) + 25
-        }
+        "response": f"Processed: {prompt[:40]}...",
+        "features_used": features,
+        "temperature": temperature,
+        "token_count": len(prompt.split()) + 25
     }
 
-def get_weather_tool() -> Dict[str, Any]:
-    """Define a weather tool for function calling."""
-    return {
-        "type": "function",
-        "function": {
-            "name": "get_current_weather",
-            "description": "Get the current weather in a given location",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "location": {
-                        "type": "string",
-                        "description": "The city and state, e.g. San Francisco, CA",
-                    },
-                    "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
-                },
-                "required": ["location"],
-            },
-        }
+def get_tool_by_name(tool_name: str) -> Optional[Dict]:
+    """Get tool definition by name."""
+    tools = {
+        "calculate": {"name": "calculate", "params": ["expression"]},
+        "format": {"name": "format", "params": ["template", "data"]}
     }
-
-def calculate_expression_tool() -> Dict[str, Any]:
-    """Define a calculator tool for function calling."""
-    return {
-        "type": "function",
-        "function": {
-            "name": "calculate_expression",
-            "description": "Evaluate a mathematical expression",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "expression": {
-                        "type": "string",
-                        "description": "Mathematical expression to evaluate, e.g. '2 + 2'",
-                    },
-                },
-                "required": ["expression"],
-            },
-        }
-    }
-
-# Example usage (would be replaced with actual LLM surface calls in execution)
-example_prompt = "What's the weather like in New York and what is 25 * 4?"
-example_tools = [get_weather_tool(), calculate_expression_tool()]
-
-# Process with advanced features
-result_streaming = process_with_advanced_llm_features(
-    example_prompt,
-    use_streaming=True,
-    tools=example_tools,
-    temperature=0.3
-)
-
-result_standard = process_with_advanced_llm_features(
-    example_prompt,
-    use_streaming=False,
-    tools=example_tools
-)
+    return tools.get(tool_name)
 ```
 
-## Examples
+## Testing
+
 ```python
-# Standard LLM completion
-result = process_with_advanced_llm_features(
-    "Explain the theory of relativity in simple terms",
-    use_streaming=False
-)
-# Expected: Uses standard completion
+import pytest
 
-# Streaming LLM completion
-result = process_with_advanced_llm_features(
-    "Write a story about a robot learning to paint",
-    use_streaming=True
-)
-# Expected: Uses streaming mode
+def test_process():
+    result = process_with_features("Hello", use_streaming=True)
+    assert "streaming" in result["features_used"]
 
-# LLM with function calling
-result = process_with_advanced_llm_features(
-    "What's the current temperature in Tokyo?",
-    use_streaming=False,
-    tools=[get_weather_tool()]
-)
-# Expected: Uses function calling to get weather data
-
-# Combined advanced features
-result = process_with_advanced_llm_features(
-    "Calculate the tip for a $50 meal with 15% gratuity and tell me the weather",
-    use_streaming=True,
-    tools=[get_weather_tool(), calculate_expression_tool()]
-)
-# Expected: Uses both streaming and function calling
+def test_tools():
+    tool = get_tool_by_name("calculate")
+    assert tool is not None
 ```
+
+## Security Considerations
+
+- Pure Python processing, no API calls.

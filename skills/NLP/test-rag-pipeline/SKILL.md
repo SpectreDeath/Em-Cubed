@@ -1,124 +1,69 @@
----
-name: Test RAG Pipeline
+﻿---
+name: test-rag-pipeline
 Domain: NLP
 Version: 1.0.0
 surfaces:
-  - llm
   - python
 ---
 
 ## Purpose
-A Test RAG Pipeline skill.
+
+Retrieval-Augmented Generation pipeline with keyword-based context retrieval and template text generation.
 
 ## Description
-Detailed description for Test RAG Pipeline.
+
+Retrieves relevant documents from a knowledge base and generates responses using pure Python string processing.
 
 ## Implementation
 
-### RAG Pipeline
+### Python RAG Pipeline
+
 ```python
-from typing import Dict, Any, List, Optional
-import json
+from typing import Dict, List, Any
 
 def retrieve_context(query: str, knowledge_base: List[Dict[str, Any]], top_k: int = 3) -> List[Dict[str, Any]]:
-    """
-    Retrieve relevant context from a knowledge base based on the query.
-    This is a simple implementation that does keyword matching.
-    In a production system, this would use vector embeddings or a search engine.
-    
-    Args:
-        query: The user's query
-        knowledge_base: List of documents, each with 'content' and optional 'metadata'
-        top_k: Number of top results to return
-        
-    Returns:
-        List of retrieved documents
-    """
+    """Retrieve relevant documents using keyword matching."""
     if not query or not knowledge_base:
         return []
     
-    # Simple keyword matching (for demonstration)
     query_words = set(query.lower().split())
     scored_docs = []
     
     for doc in knowledge_base:
         content = doc.get("content", "").lower()
-        # Simple overlap score
-        words_in_content = set(content.split())
-        overlap = len(query_words.intersection(words_in_content))
+        content_words = set(content.split())
+        overlap = len(query_words.intersection(content_words))
         if overlap > 0:
             scored_docs.append((doc, overlap))
     
-    # Sort by score descending and take top_k
     scored_docs.sort(key=lambda x: x[1], reverse=True)
     return [doc for doc, score in scored_docs[:top_k]]
 
 def generate_response(query: str, context_docs: List[Dict[str, Any]]) -> str:
-    """
-    Generate a response based on the query and retrieved context using an LLM.
+    """Generate response from query and context."""
+    if not context_docs:
+        return f"No relevant context found for: {query}"
     
-    Args:
-        query: The user's query
-        context_docs: List of retrieved documents
-        
-    Returns:
-        Generated response string
-    """
-    # Prepare context string from retrieved documents
-    context_str = "\n\n".join([doc.get("content", "") for doc in context_docs])
-    
-    # Prepare prompt for LLM
-    prompt = f"""
-    Context information:
-    {context_str}
-    
-    Query: {query}
-    
-    Please provide a comprehensive answer based on the context information.
-    If the context doesn't contain enough information to answer the query, 
-    say so and provide a general answer based on your knowledge.
-    """
-    
-    # In a real implementation, this would call the LLM surface
-    # For now, we'll return a placeholder response
-    if context_docs:
-        return f"Based on the retrieved context, here's an answer to: {query}\n\n[Generated response would go here]"
-    else:
-        return f"No relevant context found for query: {query}. [Generated response would go here]"
-
-# Execute RAG pipeline
-retrieved_docs = retrieve_context(
-    skill_input.get("query", ""),
-    skill_input.get("knowledge_base", []),
-    skill_input.get("top_k", 3)
-)
-
-response = generate_response(
-    skill_input.get("query", ""),
-    retrieved_docs
-)
-
-result = {
-    "query": skill_input.get("query", ""),
-    "retrieved_docs": retrieved_docs,
-    "generated_response": response,
-    "context_used": len(retrieved_docs) > 0
-}
+    context_str = " ".join([doc.get("content", "")[:50] for doc in context_docs[:2]])
+    return f"Retrieved {len(context_docs)} relevant documents. Based on context: {context_str}... For query: {query}"
 ```
-## Examples
+
+## Testing
+
 ```python
-query = "What is the capital of France?"
-knowledge_base = [
-    {"content": "Paris is the capital and most populous city of France.", "metadata": {"source": "encyclopedia"}},
-    {"content": "The Eiffel Tower is located in Paris, France.", "metadata": {"source": "travel_guide"}},
-    {"content": "Berlin is the capital of Germany.", "metadata": {"source": "encyclopedia"}}
-]
+import pytest
 
-# Expected output format:
-# {
-#     "query": "What is the capital of France?",
-#     "retrieved_docs": [{"content": "Paris is the capital and most populous city of France.", ...}],
-#     "generated_response": "Based on the retrieved context, here's an answer to: What is the capital of France?\n\n[Generated response would go here]",
-#     "context_used": true
-# }
+def test_retrieve():
+    kb = [{"content": "Paris is capital of France"}, {"content": "Berlin is capital of Germany"}]
+    docs = retrieve_context("Paris France", kb, top_k=1)
+    assert len(docs) == 1
+
+def test_generate():
+    docs = [{"content": "Paris is capital of France"}]
+    resp = generate_response("What is capital?", docs)
+    assert "Paris" in resp
 ```
+
+## Security Considerations
+
+- Pure string processing, no external dependencies.

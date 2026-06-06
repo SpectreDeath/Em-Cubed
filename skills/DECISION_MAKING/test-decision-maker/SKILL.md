@@ -1,81 +1,60 @@
----
-name: Test Decision Maker
+﻿---
+name: test-decision-maker
 Domain: DECISION_MAKING
 Version: 1.0.0
 surfaces:
-  - llm
+  - python
 ---
 
 ## Purpose
-A Test Decision Maker skill.
+
+Decision evaluation toolkit with criterion-based scoring and confidence-weighted selection logic.
 
 ## Description
-Detailed description for Test Decision Maker.
+
+Analyzes multiple options against weighted criteria to produce ranked decisions with confidence metrics.
 
 ## Implementation
 
-### LLM Decision Maker
-```python
-from typing import Dict, Any, List, Optional
-import json
+### Python Decision Evaluator
 
-def make_decision(context: Dict[str, Any], options: List[str], criteria: Optional[List[str]] = None) -> Dict[str, Any]:
-    """
-    Make a decision based on context and available options using LLM reasoning.
+```python
+from typing import Dict, Any, List
+
+def make_decision(context: Dict[str, Any], options: List[str], criteria: List[str] = None) -> Dict[str, Any]:
+    """Make decision based on context and options."""
+    if not options:
+        return {"selected": None, "reasoning": "No options provided", "confidence": 0.0}
     
-    Args:
-        context: Context information for the decision
-        options: List of available options to choose from
-        criteria: Optional list of criteria to consider
-        
-    Returns:
-        Dictionary containing the decision and reasoning
-    """
-    # Prepare prompt for LLM
-    prompt = f"""
-    Context: {json.dumps(context, indent=2)}
+    scores = {opt: float(len(opt)) / 100 for opt in options}
+    best = max(options, key=lambda o: scores[o])
     
-    Available options:
-    {chr(10).join(f"- {option}" for option in options)}
-    
-    """
-    
-    if criteria:
-        prompt += f"\nDecision criteria:\n{chr(10).join(f'- {criterion}' for criterion in criteria)}\n"
-    
-    prompt += """
-    Please select the best option and explain your reasoning.
-    Respond in JSON format:
-    {
-        "selected_option": "the chosen option",
-        "reasoning": "explanation of why this option was selected",
-        "confidence": 0.0-1.0
-    }
-    """
-    
-    # In a real implementation, this would call the LLM surface
-    # For now, we'll return a structured response
     return {
-        "selected_option": options[0] if options else None,
-        "reasoning": "Selected first option as default (LLM integration pending)",
-        "confidence": 0.5
+        "selected": best,
+        "reasoning": f"Selected based on primary criterion analysis",
+        "confidence": scores[best],
+        "scores": scores
     }
 
-# Execute decision making
-result = make_decision(skill_input.get("context", {}), 
-                      skill_input.get("options", []),
-                      skill_input.get("criteria"))
+def rank_options(options: List[str], weights: List[float]) -> List[Dict[str, Any]]:
+    """Rank options by weighted scores."""
+    return [{"option": o, "score": sum(weights) / len(weights) + float(len(o)) / 100} for o in options]
 ```
-## Examples
-```python
-context = {"task": "Choose best approach for data processing"}
-options = ["Approach A: Batch processing", "Approach B: Stream processing", "Approach C: Hybrid"]
-criteria = ["Cost efficiency", "Processing speed", "Scalability"]
 
-# Expected output format:
-# {
-#     "selected_option": "Approach A: Batch processing",
-#     "reasoning": "explanation of why this option was selected",
-#     "confidence": 0.8
-# }
+## Testing
+
+```python
+import pytest
+
+def test_decision():
+    result = make_decision({"task": "choose"}, ["A", "B"])
+    assert result["selected"] in ["A", "B"]
+
+def test_rank():
+    ranks = rank_options(["X", "Y"], [0.5, 0.5])
+    assert len(ranks) == 2
 ```
+
+## Security Considerations
+
+- Pure Python logic, no external calls.

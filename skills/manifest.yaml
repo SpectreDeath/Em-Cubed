@@ -1,4 +1,4 @@
-name: em_cubed_skills
+﻿name: em_cubed_skills
 version: 1.0.0
 description: Multi-surface skill framework for Em-Cubed
 schema_version: 1
@@ -19,6 +19,7 @@ skill_categories:
   - DECISION_MAKING
   - DISTRIBUTED_SYSTEMS
   - ENSEMBLE
+  - EPIDEMIOLOGY
   - FEATURE_ENGINEERING
   - General
   - GRAPH_ML
@@ -33,3 +34,5 @@ skill_categories:
   - SIMULATION
   - STATISTICS
   - TIME_SERIES
+  - FORENSIC_ECONOMICS
+  - CLINICAL_TRIALS

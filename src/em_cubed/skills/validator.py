@@ -1,4 +1,4 @@
-"""Skill validation framework for enforcing quality standards.
+﻿"""Skill validation framework for enforcing quality standards.
 
 Provides validation for skill structure, content quality, code correctness,
 surface implementations, and composition readiness.
@@ -117,10 +117,10 @@ class SkillValidator:
         # Default fallback domains (hardcoded)
         self.valid_domains = {
             "AUTOMATION", "DATA_PROCESSING", "DECISION_MAKING", "DISTRIBUTED_SYSTEMS",
-            "ENSEMBLE", "FEATURE_ENGINEERING", "General", "GRAPH_ML", "KNOWLEDGE_GRAPH",
+            "ENSEMBLE", "EPIDEMIOLOGY", "FEATURE_ENGINEERING", "General", "GRAPH_ML", "KNOWLEDGE_GRAPH",
             "MACHINE_LEARNING", "ML_OPERATIONS", "MODEL_VALIDATION", "NLP",
             "OPTIMIZATION", "RECOMMENDER_SYSTEMS", "RESOURCE_MANAGEMENT",
-            "SIMULATION", "STATISTICS", "TIME_SERIES"
+            "SIMULATION", "STATISTICS", "FORENSIC_ECONOMICS", "CLINICAL_TRIALS", "TIME_SERIES"
         }
         self.default_required_surfaces = 1
 
