@@ -39,6 +39,7 @@ class SkillField:
     type: str = "string"
 
 VALID_DOMAINS = [
+    "ANALYTICS",
     "AUTOMATION",
     "DATA_PROCESSING", 
     "DECISION_MAKING",
