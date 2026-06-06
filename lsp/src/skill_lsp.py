@@ -7,6 +7,7 @@ import json
 import logging
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
+from pathlib import Path
 import yaml
 
 from pygls.lsp import LanguageServer
@@ -42,6 +43,32 @@ class SkillField:
     description: str
     required: bool = False
     type: str = "string"
+
+# Valid domains from manifest.yaml
+VALID_DOMAINS = [
+    "AUTOMATION",
+    "DATA_PROCESSING", 
+    "DECISION_MAKING",
+    "DISTRIBUTED_SYSTEMS",
+    "ENSEMBLE",
+    "EPIDEMIOLOGY",
+    "FEATURE_ENGINEERING",
+    "General",
+    "GRAPH_ML",
+    "KNOWLEDGE_GRAPH",
+    "MACHINE_LEARNING",
+    "ML_OPERATIONS",
+    "MODEL_VALIDATION",
+    "NLP",
+    "OPTIMIZATION",
+    "RECOMMENDER_SYSTEMS",
+    "RESOURCE_MANAGEMENT",
+    "SIMULATION",
+    "STATISTICS",
+    "TIME_SERIES",
+    "FORENSIC_ECONOMICS",
+    "CLINICAL_TRIALS",
+]
 
 # Define expected fields in SKILL.md frontmatter
 SKILL_FIELDS = {
@@ -142,7 +169,6 @@ class SkillLanguageServer(LanguageServer):
         document = self.documents[uri]
         position = params.position
         
-        # Get line content up to cursor position
         lines = document.split('\n')
         if position.line >= len(lines):
             return CompletionList(is_incomplete=False, items=[])
@@ -150,17 +176,13 @@ class SkillLanguageServer(LanguageServer):
         line = lines[position.line]
         before_cursor = line[:position.character]
         
-        # Determine completion context
         completions = []
         
-        # If we're in the frontmatter (between --- lines)
         if self._is_in_frontmatter(document, position):
             completions.extend(self._get_frontmatter_completions(before_cursor, position))
         elif before_cursor.strip().startswith("- ") and self._is_in_list(document, position):
-            # Inside a YAML list
-            completions.extend(self._get_list_item_completions(before_cursor, position))
+            completions.extend(self._get_list_item_completions(before_cursor, position, document))
         elif before_cursor.endswith(":"):
-            # After a colon, suggest values
             completions.extend(self._get_value_completions(before_cursor, position, document))
         
         return CompletionList(is_incomplete=False, items=completions)
@@ -171,7 +193,6 @@ class SkillLanguageServer(LanguageServer):
         if position.line >= len(lines):
             return False
             
-        # Find frontmatter boundaries
         frontmatter_start = -1
         frontmatter_end = -1
         
@@ -189,12 +210,9 @@ class SkillLanguageServer(LanguageServer):
         """Get completions for frontmatter fields."""
         completions = []
         
-        # If we're at the start of a line or after whitespace, suggest field names
         stripped = before_cursor.rstrip()
         if not stripped or stripped.endswith(":") or stripped.endswith("- ") or stripped == "":
-            # Suggest field names
             for field_name, field_info in SKILL_FIELDS.items():
-                # Don't suggest already present fields (simple check)
                 if f"{field_name}:" not in before_cursor:
                     completions.append(CompletionItem(
                         label=field_name,
@@ -202,17 +220,14 @@ class SkillLanguageServer(LanguageServer):
                         detail=field_info.description,
                         documentation=field_info.description,
                         insert_text=f"{field_name}: " if not stripped.endswith(":") else "",
-                        insert_text_format=2  # PlainText
+                        insert_text_format=2
                     ))
         
-        # If we're typing a field value
         elif ":" in before_cursor and not before_cursor.strip().startswith("-"):
-            field_part = before_cursor.split(":")[0].strip()
             if field_name := self._get_field_name_at_position(before_cursor):
                 if field_name in SKILL_FIELDS:
                     field_info = SKILL_FIELDS[field_name]
                     if field_info.type == "list":
-                        # Suggest list item start
                         completions.append(CompletionItem(
                             label="- ",
                             kind=CompletionItemKind.Snippet,
@@ -222,7 +237,6 @@ class SkillLanguageServer(LanguageServer):
                             insert_text_format=2
                         ))
                     elif field_name == "surfaces":
-                        # Suggest surface types
                         for surface in COMMON_SURFACES:
                             completions.append(CompletionItem(
                                 label=surface,
@@ -232,14 +246,23 @@ class SkillLanguageServer(LanguageServer):
                                 insert_text=surface,
                                 insert_text_format=2
                             ))
+                    elif field_name == "domain":
+                        for domain in VALID_DOMAINS:
+                            completions.append(CompletionItem(
+                                label=domain,
+                                kind=CompletionItemKind.Value,
+                                detail=f"Skill domain: {domain}",
+                                documentation=f"Use the {domain} domain",
+                                insert_text=domain,
+                                insert_text_format=2
+                            ))
         
         return completions
     
-    def _get_list_item_completions(self, before_cursor: str, position: Position) -> List[CompletionItem]:
+    def _get_list_item_completions(self, before_cursor: str, position: Position, document: str) -> List[CompletionItem]:
         """Get completions for list items."""
         completions = []
         
-        # Determine what kind of list we're in
         if self._is_in_surfaces_list(before_cursor, position):
             for surface in COMMON_SURFACES:
                 completions.append(CompletionItem(
@@ -255,13 +278,11 @@ class SkillLanguageServer(LanguageServer):
     
     def _is_in_surfaces_list(self, before_cursor: str, position: Position) -> bool:
         """Check if we're inside the surfaces list."""
-        # Simple heuristic: if we've seen "surfaces:" recently
         lines = before_cursor.split('\n')
         for line in reversed(lines):
             if "surfaces:" in line:
                 return True
             if line.strip() and not line.strip().startswith("-") and ":" in line:
-                # We've moved past the surfaces list
                 break
         return False
     
@@ -269,7 +290,6 @@ class SkillLanguageServer(LanguageServer):
         """Get completions for values after a colon."""
         completions = []
         
-        # Get the field name
         lines = document.split('\n')
         if position.line < len(lines):
             line = lines[position.line]
@@ -292,7 +312,6 @@ class SkillLanguageServer(LanguageServer):
     
     def _get_field_name_at_position(self, before_cursor: str) -> Optional[str]:
         """Extract field name from text before cursor."""
-        # Find the last word before colon
         parts = before_cursor.rstrip().split()
         if not parts:
             return None
@@ -311,13 +330,7 @@ class SkillLanguageServer(LanguageServer):
             return
             
         document = self.documents[uri]
-        diagnostics = []
-        
-        # Validate frontmatter
         frontmatter_diagnostics = self._validate_frontmatter(document)
-        diagnostics.extend(frontmatter_diagnostics)
-        
-        # Publish diagnostics
         self.publish_diagnostics(uri, frontmatter_diagnostics)
     
     def _validate_frontmatter(self, document: str) -> List[Diagnostic]:
@@ -325,7 +338,6 @@ class SkillLanguageServer(LanguageServer):
         diagnostics = []
         lines = document.split('\n')
         
-        # Find frontmatter boundaries
         frontmatter_start = -1
         frontmatter_end = -1
         
@@ -338,7 +350,6 @@ class SkillLanguageServer(LanguageServer):
                     break
         
         if frontmatter_start == -1 or frontmatter_end == -1:
-            # No proper frontmatter
             diagnostics.append(Diagnostic(
                 range=Range(
                     start=Position(line=0, character=0),
@@ -350,7 +361,6 @@ class SkillLanguageServer(LanguageServer):
             ))
             return diagnostics
         
-        # Extract frontmatter content
         frontmatter_lines = lines[frontmatter_start + 1:frontmatter_end]
         frontmatter_text = '\n'.join(frontmatter_lines)
         
@@ -368,10 +378,8 @@ class SkillLanguageServer(LanguageServer):
                 ))
                 return diagnostics
             
-            # Check required fields
             for field_name, field_info in SKILL_FIELDS.items():
                 if field_info.required and field_name not in data:
-                    # Find approximate line for the field
                     diagnostics.append(Diagnostic(
                         range=Range(
                             start=Position(line=frontmatter_start + 1, character=0),
@@ -382,7 +390,6 @@ class SkillLanguageServer(LanguageServer):
                         source="skill-lsp"
                     ))
             
-            # Validate field types
             for field_name, value in data.items():
                 if field_name in SKILL_FIELDS:
                     expected_type = SKILL_FIELDS[field_name].type
