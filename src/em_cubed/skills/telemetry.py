@@ -225,20 +225,9 @@ class TelemetryCollector:
             from em_cubed.telemetry.api import get_websocket_handler
             websocket_handler = get_websocket_handler()
             if websocket_handler and self._aggregates:
-                # Prepare telemetry update data
-                {
-                    "type": "telemetry_update",
-                    "data": {
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                        "overall_stats": self.get_overall_stats(),
-                        "aggregates": self._aggregates
-                    }
-                }
-                # In a real implementation, we would use asyncio to broadcast
-                # For now, we'll just prepare the data - actual broadcasting would happen in the API layer
                 pass
         except ImportError:
-            pass  # WebSocket handler not available
+            pass
 
     def _persist(self) -> None:
         """Write telemetry data to disk."""
