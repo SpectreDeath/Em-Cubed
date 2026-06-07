@@ -1,12 +1,8 @@
 """Integration tests for distributed execution and stress testing."""
 
 import pytest
-import asyncio
-import json
 import time
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-
 
 class TestUciCensusRandomForest:
     """E1: Stress-test Async Timeouts: UCI Census Income via Random Forest."""
@@ -19,7 +15,7 @@ class TestUciCensusRandomForest:
     async def test_distributed_executor_event_loop_safety(self, skills_dir):
         """Verify submit_workflow works from both sync and async contexts."""
         from em_cubed.workflow.distributed import (
-            ProcessDistributedExecutor, DistributedTask, initialize_distributed_executor
+            DistributedTask, initialize_distributed_executor
         )
         from em_cubed.skills.telemetry import initialize_telemetry
         
