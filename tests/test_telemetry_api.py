@@ -4,8 +4,8 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock
 from datetime import datetime, timezone
-from src.em_cubed.telemetry.api import TelemetryAPI, WebSocketTelemetryHandler, get_telemetry_api
-from src.em_cubed.skills.telemetry import TelemetryCollector, ExecutionRecord
+from em_cubed.telemetry.api import TelemetryAPI, WebSocketTelemetryHandler, get_telemetry_api
+from em_cubed.skills.telemetry import TelemetryCollector, ExecutionRecord
 
 
 def test_telemetry_api_get_available_skills():
