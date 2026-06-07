@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import threading
 import time
 import uuid
 from concurrent.futures import ProcessPoolExecutor
@@ -225,17 +226,36 @@ class ProcessDistributedExecutor(DistributedExecutor):
         self._process_executor = ProcessPoolExecutor(max_workers=max_workers)
         self._futures: Dict[str, Any] = {}
         self._scheduler_tasks: Dict[str, asyncio.Task] = {}
+        self._callback_lock = threading.Lock()  # Guards _tasks mutations in done-callbacks
         
     def submit_workflow(self, workflow_id: str, tasks: List[DistributedTask]) -> bool:
         """Submit a workflow and start scheduling tasks across workers."""
         success = super().submit_workflow(workflow_id, tasks)
         if not success:
             return False
-            
-        # Spawn asynchronous scheduling pipeline
-        loop = asyncio.get_running_loop()
-        task = loop.create_task(self._scheduler_loop(workflow_id))
-        self._scheduler_tasks[workflow_id] = task
+
+        # Spawn asynchronous scheduling pipeline.
+        # Prefer an already-running loop (async call sites); fall back to
+        # creating and setting a new loop (sync CLI call sites).
+        try:
+            loop = asyncio.get_running_loop()
+            sched_task = loop.create_task(self._scheduler_loop(workflow_id))
+            self._scheduler_tasks[workflow_id] = sched_task
+        except RuntimeError:
+            # No running event loop — caller is synchronous (e.g. CLI).
+            # Schedule via a dedicated thread so the caller is not blocked.
+            import threading as _threading
+
+            def _run_loop():
+                new_loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(new_loop)
+                try:
+                    new_loop.run_until_complete(self._scheduler_loop(workflow_id))
+                finally:
+                    new_loop.close()
+
+            t = _threading.Thread(target=_run_loop, daemon=True, name=f"dag-scheduler-{workflow_id[:8]}")
+            t.start()
         return True
         
     async def _scheduler_loop(self, workflow_id: str):
@@ -289,34 +309,40 @@ class ProcessDistributedExecutor(DistributedExecutor):
     
     def _task_completed_callback(self, task_id: str, future: Any):
         """Callback triggered when a worker process finishes task execution."""
-        try:
-            res = future.result()
-            task = self._tasks[task_id]
-            task.completed_at = time.time()
-            if res["success"]:
-                task.status = TaskStatus.COMPLETED
-                task.result = res["output"]
-                self.logger.info("Distributed task completed successfully", task_id=task_id)
-                
-                # Checkpoint progress durably using global manager
-                from em_cubed.workflow.checkpoint import get_checkpoint_manager
-                manager = get_checkpoint_manager()
-                if manager:
-                    manager.create_checkpoint(
-                        workflow_id=task.workflow_id,
-                        execution_id=task_id,
-                        step_name=f"task_{task.skill_id}",
-                        state_data={"result": task.result}
-                    )
-            else:
+        with self._callback_lock:
+            try:
+                res = future.result()
+                task = self._tasks[task_id]
+                task.completed_at = time.time()
+                if res["success"]:
+                    task.status = TaskStatus.COMPLETED
+                    task.result = res["output"]
+                    self.logger.info("Distributed task completed successfully", task_id=task_id)
+                    
+                    # Checkpoint progress durably using global manager (if initialised)
+                    from em_cubed.workflow.checkpoint import get_checkpoint_manager
+                    manager = get_checkpoint_manager()
+                    if manager is not None:
+                        manager.create_checkpoint(
+                            workflow_id=task.workflow_id,
+                            execution_id=task_id,
+                            step_name=f"task_{task.skill_id}",
+                            state_data={"result": task.result}
+                        )
+                    else:
+                        self.logger.warning(
+                            "CheckpointManager not initialised; task result not persisted",
+                            task_id=task_id,
+                        )
+                else:
+                    task.status = TaskStatus.FAILED
+                    task.error = res["error"]
+                    self.logger.error("Distributed task failed", task_id=task_id, error=res["error"])
+            except Exception:
+                task = self._tasks[task_id]
                 task.status = TaskStatus.FAILED
-                task.error = res["error"]
-                self.logger.error("Distributed task failed", task_id=task_id, error=res["error"])
-        except Exception as e:
-            task = self._tasks[task_id]
-            task.status = TaskStatus.FAILED
-            task.error = str(e)
-            self.logger.exception("Error retrieving distributed task result", task_id=task_id)
+                task.error = str(future.exception())
+                self.logger.exception("Error retrieving distributed task result", task_id=task_id)
             
     def shutdown(self) -> None:
         """Clean up worker process execution pools."""

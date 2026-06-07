@@ -18,6 +18,7 @@ LLMSurface = None  # type: _Optional[type]
 CangjieSurface = None  # type: _Optional[type]
 SQLiteSurface = None  # type: _Optional[type]
 QuickJSSurface = None  # type: _Optional[type]
+WASMSurface = None  # type: _Optional[type]
 
 try:
     from .prolog_surface import PrologSurface as _PrologSurface
@@ -79,4 +80,10 @@ try:
 except ImportError:
     pass
 
-__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "CangjieSurface", "SQLiteSurface", "QuickJSSurface"]
+try:
+    from .wasm_surface import WASMSurface as _WASMSurface
+    WASMSurface = _WASMSurface  # type: ignore[assignment]
+except ImportError:
+    pass
+
+__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "CangjieSurface", "SQLiteSurface", "QuickJSSurface", "WASMSurface"]

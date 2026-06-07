@@ -7,7 +7,7 @@ import time
 import uuid
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from pathlib import Path
 import structlog
 
@@ -57,7 +57,7 @@ class Checkpoint:
         )
 
 
-class CheckpointStorage:
+class CheckpointStorage(ABC):
     """Abstract base class for checkpoint storage backends."""
     
     @abstractmethod

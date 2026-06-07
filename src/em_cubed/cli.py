@@ -11,6 +11,9 @@ from em_cubed.indexer import reindex, get_skill_metadata
 from em_cubed.search import search_registry
 from em_cubed.plugin_manager import PluginManager
 
+# Bootstrap initialization for distributed execution and telemetry
+from em_cubed.workflow.checkpoint import initialize_checkpoint_manager
+
 __all__ = ["main"]
 
 # Configure structlog for CLI
@@ -35,8 +38,27 @@ structlog.configure(
 logger = structlog.get_logger()
 
 
+def _bootstrap_services():
+    """Initialize global services required for distributed execution and telemetry."""
+    # Initialize checkpoint manager for durable execution
+    initialize_checkpoint_manager()
+    
+    # Initialize telemetry for observability
+    from em_cubed.skills.telemetry import initialize_telemetry
+    initialize_telemetry()
+    
+    # Initialize telemetry API for dashboard endpoints
+    from em_cubed.telemetry.api import initialize_telemetry_api, initialize_websocket_handler
+    from em_cubed.skills.telemetry import get_telemetry_collector
+    initialize_telemetry_api(get_telemetry_collector())
+    initialize_websocket_handler(get_telemetry_collector())
+
+
 def main():
     """Main CLI entrypoint."""
+    # Bootstrap: Initialize checkpoint manager and telemetry API for durable execution
+    _bootstrap_services()
+    
     parser = argparse.ArgumentParser(
         description="Em-Cubed: Multi-Surface Skill Framework",
         prog="em3"

@@ -6,9 +6,6 @@ from typing import Dict, List, Optional, Any, cast
 import structlog
 import asyncio
 
-# These would be imported from a web framework like FastAPI in a real implementation
-# For now, we'll define the interface and data structures
-
 logger = structlog.get_logger()
 
 
@@ -29,24 +26,25 @@ class TelemetryAPI:
     
     def get_recent_executions(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get recent skill executions."""
-        # Get records from collector
-        records = self.collector._records[-limit:] if self.collector._records else []
+        records = self.collector.get_records(limit)
         return [record.to_dict() for record in records]
     
     def get_skill_executions(self, skill_id: str, limit: int = 50) -> List[Dict[str, Any]]:
         """Get executions for a specific skill."""
-        cutoff = datetime.now(timezone.utc).timestamp() - 3600  # Last hour
+        records = self.collector.get_records()
+        cutoff = datetime.now(timezone.utc).timestamp() - 3600
         relevant = [
-            r for r in self.collector._records
+            r for r in records
             if r.skill_id == skill_id and r.timestamp.timestamp() > cutoff
-        ][-limit:] if self.collector._records else []
+        ][-limit:]
         return [record.to_dict() for record in relevant]
     
     def get_available_skills(self) -> List[str]:
         """Get list of skills with telemetry data."""
-        if not self.collector._records:
+        records = self.collector.get_records()
+        if not records:
             return []
-        skill_ids = set(r.skill_id for r in self.collector._records)
+        skill_ids = set(r.skill_id for r in records)
         return list(skill_ids)
     
     def get_system_health(self) -> Dict[str, Any]:
@@ -68,16 +66,15 @@ class WebSocketTelemetryHandler:
     def __init__(self, telemetry_collector):
         self.collector = telemetry_collector
         self.logger = logger.bind(component="websocket_telemetry")
-        self._subscribers: List[Any] = []  # Would be WebSocket connections
+        self._subscribers: List[Any] = []
         self._last_broadcast = time.time()
-        self._broadcast_interval = 5.0  # Broadcast every 5 seconds
+        self._broadcast_interval = 5.0
         self._broadcast_task: Optional[asyncio.Task] = None
     
     def subscribe(self, websocket):
         """Subscribe a WebSocket client to telemetry updates."""
         self._subscribers.append(websocket)
         self.logger.info("WebSocket client subscribed", count=len(self._subscribers))
-        # Start broadcast task if not already running
         if self._broadcast_task is None or self._broadcast_task.done():
             self._broadcast_task = asyncio.create_task(self._broadcast_loop())
     
@@ -86,7 +83,6 @@ class WebSocketTelemetryHandler:
         if websocket in self._subscribers:
             self._subscribers.remove(websocket)
         self.logger.info("WebSocket client unsubscribed", count=len(self._subscribers))
-        # Stop broadcast task if no subscribers
         if len(self._subscribers) == 0 and self._broadcast_task and not self._broadcast_task.done():
             self._broadcast_task.cancel()
     
@@ -95,7 +91,7 @@ class WebSocketTelemetryHandler:
         try:
             while True:
                 await asyncio.sleep(self._broadcast_interval)
-                if self._subscribers:  # Only broadcast if we have subscribers
+                if self._subscribers:
                     await self.broadcast_telemetry_update()
         except asyncio.CancelledError:
             self.logger.info("WebSocket broadcast task cancelled")
@@ -107,12 +103,10 @@ class WebSocketTelemetryHandler:
         if not self._subscribers:
             return
             
-        # Get current telemetry data
         try:
             overall_stats = self.collector.get_overall_stats()
-            available_skills = self.get_available_skills()
+            available_skills = self._get_available_skills()
             
-            # Prepare update data
             update_data = {
                 "type": "telemetry_update",
                 "data": {
@@ -125,31 +119,31 @@ class WebSocketTelemetryHandler:
                 }
             }
             
-            # Send to each WebSocket connection
             disconnected = []
-            for websocket in self._subscribers[:]:  # Copy list to avoid modification during iteration
+            for websocket in self._subscribers[:]:
                 try:
                     await websocket.send_json(update_data)
                 except Exception:
-                    # Mark for removal if we can't send
                     disconnected.append(websocket)
             
-            # Remove disconnected clients
             for ws in disconnected:
                 if ws in self._subscribers:
                     self._subscribers.remove(ws)
-                        
+                    
         except Exception as e:
             self.logger.error("Failed to prepare or send telemetry update", error=str(e))
     
     def record_execution_with_notification(self, record):
         """Record execution and notify subscribers."""
         self.collector.record_execution(record)
-        # Notify subscribers of new execution - we'll rely on the periodic broadcast
-        # for simplicity, but in a high-frequency scenario we might want to broadcast immediately
+    
+    def _get_available_skills(self) -> List[str]:
+        """Get list of skill IDs that have at least one telemetry record."""
+        records = self.collector.get_records()
+        return list({r.skill_id for r in records})
 
 
-# Global instances (would be initialized in main app)
+# Global instances
 _telemetry_api: Optional[TelemetryAPI] = None
 _websocket_handler: Optional[WebSocketTelemetryHandler] = None
 

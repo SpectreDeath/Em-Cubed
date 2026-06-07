@@ -10,6 +10,10 @@ import structlog
 
 logger = structlog.get_logger()
 
+# Lock protecting the temporary threading.Thread monkey-patch in _make_daemon_executor.
+# Without this, two surfaces initialising concurrently race on the global symbol.
+_executor_init_lock = threading.Lock()
+
 
 def _make_daemon_executor(max_workers: int = 1) -> ThreadPoolExecutor:
     """Create a ThreadPoolExecutor whose worker threads are daemons.
@@ -21,12 +25,13 @@ def _make_daemon_executor(max_workers: int = 1) -> ThreadPoolExecutor:
         kwargs.setdefault("daemon", True)
         return original_thread(*args, **kwargs)
 
-    # Temporarily patch Thread so the executor spawns daemon threads
-    threading.Thread = _daemon_thread  # type: ignore[assignment, misc]
-    try:
-        return ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="SurfaceExec-")
-    finally:
-        threading.Thread = original_thread  # type: ignore[assignment, misc]
+    # Serialise the global monkey-patch so concurrent surface inits don't race.
+    with _executor_init_lock:
+        threading.Thread = _daemon_thread  # type: ignore[assignment, misc]
+        try:
+            return ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="SurfaceExec-")
+        finally:
+            threading.Thread = original_thread  # type: ignore[assignment, misc]
 
 
 

@@ -186,6 +186,12 @@ class TelemetryCollector:
             "total_token_usage": sum(r.token_usage for r in self._records),
         }
 
+    def get_records(self, limit: int = -1) -> List[ExecutionRecord]:
+        """Get recent execution records (public accessor for telemetry API)."""
+        if limit < 0:
+            return list(self._records)
+        return list(self._records[-limit:])
+
     def _aggregate_and_persist(self) -> None:
         """Aggregate metrics and persist to disk."""
         self._last_aggregate = time.time()

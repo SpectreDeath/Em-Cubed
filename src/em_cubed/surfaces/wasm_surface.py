@@ -186,7 +186,7 @@ class WASMSurface(SurfaceBase):
                 elif "i64" in type_str:
                     args.append(int(val))
                 elif "f32" in type_str or "f64" in type_str:
-                    args.append(int(val))
+                    args.append(float(val))
                 else:
                     args.append(val)
             except Exception:
