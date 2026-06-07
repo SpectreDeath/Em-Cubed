@@ -154,7 +154,7 @@ async def test_websocket_handler_broadcast():
 def test_global_telemetry_api_singleton():
     """Test global telemetry API singleton pattern works."""
     # Reset any existing singleton
-    import src.em_cubed.telemetry.api as api_module
+    import em_cubed.telemetry.api as api_module
     api_module._telemetry_api = None
     
     collector = TelemetryCollector()
