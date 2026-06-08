@@ -1,7 +1,5 @@
 """Answer Set Programming surface via clingo."""
 
-import asyncio
-import importlib.util
 from typing import Any, Dict, Optional
 
 from .base import SurfaceBase
@@ -29,6 +27,7 @@ class ClingoSurface(SurfaceBase):
 
     @property
     def _spec_available(self) -> bool:
+        import importlib.util
         return importlib.util.find_spec("clingo") is not None
 
     def _check_availability(self) -> bool:
@@ -64,13 +63,13 @@ class ClingoSurface(SurfaceBase):
         import clingo
 
         control = clingo.Control()
-        control.configuration.solve.models = 0
-        control.configuration.solve.project = 1
+        control.configuration.solve.models = 0  # type: ignore[union-attr]
+        control.configuration.solve.project = 1  # type: ignore[union-attr]
 
         try:
             control.add("base", [], code)
             control.ground([("base", [])])
-        except clingo.ClingoError as exc:
+        except clingo.ClingoError as exc:  # type: ignore[attr-defined,union-attr]
             return {"status": "error", "message": f"Clingo ground/load failed: {exc}"}
 
         models: list = []

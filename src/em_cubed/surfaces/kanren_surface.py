@@ -26,11 +26,8 @@ class KanrenSurface(SurfaceBase):
         return self._check_availability()
 
     def _check_availability(self) -> bool:
-        try:
-            import kanren  # noqa: F401
-            return True
-        except ImportError:
-            return False
+        import importlib.util
+        return importlib.util.find_spec("kanren") is not None
 
     @staticmethod
     def extract_tags(source: Optional[str]) -> list:
@@ -73,7 +70,6 @@ class KanrenSurface(SurfaceBase):
         }
 
         try:
-            import kanren
             from kanren import Var, run, Relation, fact, conde, eq, lany, lall, membero
 
             namespace.update(
