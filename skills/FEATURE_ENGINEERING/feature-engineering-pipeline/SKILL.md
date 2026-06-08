@@ -381,7 +381,6 @@ Domain: FEATURE_ENGINEERING
 surfaces:
   - python
 ---
-  - cangjie
 
 ## Purpose
 Test feature engineering
@@ -458,21 +457,5 @@ X_selected = selector.fit_transform(X, y)
 - pandas (DataFrames)
 - scikit-learn (preprocessing, decomposition)
 - em_cubed framework
-### Cangjie Orchestrator
 
-```cangjie
-struct FeaturePipelineInput {
-    dataframe: Map<String, Array<Any>>;   // columnar data
-    numeric_cols: Array<String>;
-    categorical_cols: Array<String>;
-    target_col: Option<String>;
-    quality_threshold: Float64;  // 0.0–1.0
-}
-
-struct FeaturePipelineOutput {
-    transformed: Map<String, Array<Any>>;
-    features_generated: Int64;
-    quality_score: Float64;
-    invalid_features: Array<String>;
-}
-```
+````

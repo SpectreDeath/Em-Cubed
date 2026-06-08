@@ -271,7 +271,6 @@ async def test_sdo_skill_integration():
         skills_dir = Path(tmpdir) / "skills" / "OPTIMIZATION" / "spiral-dynamics-optimization"
         skills_dir.mkdir(parents=True)
         (skills_dir / "SKILL.md").write_text('name: spiral-dynamics-optimization\nDomain: OPTIMIZATION')
-        (skills_dir / "SKILL_CANGJIE.md").write_text('# SDO\nfunc main() {}')
         registry_file = Path(tmpdir) / "registry.json"
         reindex(skills_dir.parent.parent, registry_file)
         results = search_registry("spiral", registry_file)

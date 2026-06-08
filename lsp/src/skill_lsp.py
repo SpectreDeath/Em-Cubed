@@ -83,7 +83,6 @@ COMMON_SURFACES = [
     "datalog",
     "sqlite",
     "quickjs",
-    "cangjie",
     "wasm",
 ]
 

@@ -6,7 +6,6 @@ surfaces:
   - python
   - prolog
   - hy
-  - cangjie
 triggers:
   - planning
   - task
@@ -557,38 +556,5 @@ Multi-surface execution requires careful security consideration:
 - **Real-time Adaptation**: Dynamic replanning capabilities
 - **Domain-Specific Languages**: Custom planning DSLs</content>
 <parameter name="filePath">D:\GitHub\projects\em-cubed\skills\intelligent_planner\SKILL.md
-### Cangjie Orchestrator
 
-```cangjie
-struct Task {
-    id: String;
-    name: String;
-    required_skills: Array<String>;
-    duration: Int64;
-    priority: Int64;
-}
-
-struct Developer {
-    id: String;
-    skills: Array<String>;
-    capacity: Int64;  // hours available
-}
-
-struct PlanningInput {
-    tasks: Array<Task>;
-    developers: Array<Developer>;
-    weights: Map<String, Float64>;  // {"skill_match": 0.5, "capacity": 0.3, "priority": 0.2}
-}
-
-struct Assignment {
-    task_id: String;
-    dev_id: String;
-    score: Float64;
-}
-
-struct PlanningOutput {
-    assignments: Array<Assignment>;
-    total_score: Float64;
-    method: String;  // "python" | "prolog" | "hy" | "synthesized"
-}
-```
+````

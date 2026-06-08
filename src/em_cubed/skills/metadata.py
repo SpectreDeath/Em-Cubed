@@ -283,12 +283,14 @@ class SkillMetadata:
                 surfaces.append("z3")
             elif lang in ("datalog", "pyDatalog"):
                 surfaces.append("datalog")
-            elif lang in ("cangjie", "cj"):
-                surfaces.append("cangjie")
             elif lang in ("sql", "sqlite"):
                 surfaces.append("sqlite")
             elif lang in ("js", "javascript", "quickjs"):
                 surfaces.append("quickjs")
+            elif lang in ("kanren", "kan"):
+                surfaces.append("kanren")
+            elif lang in ("clingo", "asp"):
+                surfaces.append("clingo")
         # Deduplicate preserving order
         return list(dict.fromkeys(surfaces))
 
@@ -308,9 +310,14 @@ class SkillMetadata:
         # Hy functions
         for match in re.finditer(r"\(defn\s+([a-zA-Z][a-zA-Z0-9_\-?!]*)", body):
             tags.append(match.group(1))
-        # Cangjie functions/effects
-        for match in re.finditer(r"(?:func|effect)\s+([a-zA-Z][a-zA-Z0-9_]*)", body):
+        # Kanren relations/goals
+        for match in re.finditer(r"(?:def|relational_fact|relation)\s+([a-zA-Z][a-zA-Z0-9_]*)", body):
             tags.append(match.group(1))
+        # Clingo atoms/predicates
+        for match in re.finditer(r"\b([a-z][a-zA-Z0-9_]*)\s*\(", body):
+            pred = match.group(1)
+            if pred not in {"not", "is", "true", "fail", "show"}:
+                tags.append(pred)
         return list(dict.fromkeys(tags))
 
     @property

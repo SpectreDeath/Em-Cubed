@@ -37,23 +37,6 @@ class TestUciCensusRandomForest:
         assert result is True
 
 
-class TestCangjieStatlib:
-    """E2: Benchmark Cangjie Logic Surface with StatLib numeric datasets."""
-    
-    @pytest.mark.asyncio
-    async def test_cangjie_surface_available(self):
-        """Verify CangjieSurface can be instantiated."""
-        from em_cubed.surfaces.cangjie_surface import CangjieSurface
-        from em_cubed.skills.telemetry import initialize_telemetry
-        
-        initialize_telemetry()
-        
-        surface = CangjieSurface()
-        assert surface is not None
-        assert surface.name == "cangjie"
-        assert surface.available or not surface.available  # Just verify accessible
-
-
 class TestSqliteDatalogWebDataCommons:
     """E3: Test SQLite/Datalog surfaces with Web Data Commons structured data."""
     

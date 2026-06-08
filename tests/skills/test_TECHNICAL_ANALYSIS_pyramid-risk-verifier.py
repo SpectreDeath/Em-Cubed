@@ -38,9 +38,6 @@ class Testpyramid_risk_verifierSkill:
     def test_skill_file_exists(self):
         assert SKILL_FILE.exists(), f"SKILL.md not found at {SKILL_FILE}"
 
-    def test_cangjie_file_exists(self):
-        cangjie = SKILL_FILE.parent / "SKILL_CANGJIE.md"
-        assert cangjie.exists(), f"SKILL_CANGJIE.md not found at {cangjie}"
 
     def test_surfaces_implemented(self, plugin_manager):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)

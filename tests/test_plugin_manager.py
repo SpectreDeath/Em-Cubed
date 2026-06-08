@@ -184,7 +184,7 @@ class TestPluginManager:
         surfaces = manager.list_plugins()
         lazy_surfaces = manager._lazy_classes.keys()
         all_surfaces = set(surfaces.keys()) | set(lazy_surfaces)
-        expected_surfaces = {"python", "prolog", "hy", "z3", "datalog", "sqlite", "cangjie", "quickjs"}
+        expected_surfaces = {"python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs"}
     
         # Should have all expected surface names
         assert expected_surfaces.issubset(all_surfaces)
@@ -244,7 +244,6 @@ class TestPluginManager:
         # Lazy surfaces should be present in get_available_surfaces (even if not yet instantiated)
         assert "z3" in available
         assert "datalog" in available
-        assert "cangjie" in available
         assert "quickjs" in available
 
     def test_get_available_surfaces_includes_lazy_names(self):
@@ -254,7 +253,7 @@ class TestPluginManager:
         # Should include both eager and lazy names
         assert "sqlite" in available
         assert "z3" in available
-        assert "cangjie" in available
+        assert "datalog" in available
         assert "quickjs" in available
 
     def test_get_surface_info_lazy_has_lazy_loaded_tag(self):
@@ -262,8 +261,8 @@ class TestPluginManager:
         manager = PluginManager()
         info = manager.get_surface_info()
         # Find lazy surfaces
-        lazy_info = [item for item in info if item["name"] in {"z3", "datalog", "cangjie", "quickjs"}]
-        assert len(lazy_info) == 4
+        lazy_info = [item for item in info if item["name"] in {"z3", "datalog", "quickjs"}]
+        assert len(lazy_info) == 3
         for item in lazy_info:
             desc = item.get("description", "")
             # All lazy surfaces should have "(lazy-loaded)" in description

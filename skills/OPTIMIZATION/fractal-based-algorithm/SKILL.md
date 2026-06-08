@@ -433,7 +433,6 @@ async def test_fba_skill_integration():
         skills_dir = Path(tmpdir) / "skills" / "OPTIMIZATION" / "fractal-based-algorithm"
         skills_dir.mkdir(parents=True)
         (skills_dir / "SKILL.md").write_text('name: fractal-based-algorithm\nDomain: OPTIMIZATION')
-        (skills_dir / "SKILL_CANGJIE.md").write_text('# FBA\nfunc main() {}')
         registry_file = Path(tmpdir) / "registry.json"
         reindex(skills_dir.parent.parent, registry_file)
         results = search_registry("fractal", registry_file)

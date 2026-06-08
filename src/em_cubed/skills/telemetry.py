@@ -361,7 +361,8 @@ class SkillTelemetry:
             "z3": 0.0001,
             "datalog": 0.0001,
             "janus": 0.0001,
-            "cangjie": 0.0001,
+            "kanren": 0.0001,
+            "clingo": 0.0001,
             "llm": 0.002,       # Example LLM cost (would vary by model)
         }
         

@@ -4,7 +4,6 @@ surfaces:
   - python
   - prolog
   - hy
-  - cangjie
 Version: 1.0.0
 Complexity: Medium
 Type: Utility
@@ -124,7 +123,6 @@ class AHPCalculator:
         # Sort by score descending
         return dict(sorted(scores.items(), key=lambda x: x[1], reverse=True))
 
-
 class TOPSISCalculator:
     """TOPSIS method for multi-criteria decision making."""
     
@@ -156,7 +154,6 @@ class TOPSISCalculator:
         
         return {alt: score for alt, score in zip(self.alternatives, topsis_scores)}
 
-
 def entropy_weights(decision_matrix: np.ndarray) -> np.ndarray:
     """Calculate weights using entropy method."""
     # Normalize each column
@@ -170,7 +167,6 @@ def entropy_weights(decision_matrix: np.ndarray) -> np.ndarray:
     weights = (1 - entropy) / (1 - entropy).sum()
     
     return weights
-
 
 def hybrid_weighting(ahp_weights: np.ndarray, entropy_weights: np.ndarray, 
                      ahp_importance: float = 0.6) -> np.ndarray:
@@ -304,21 +300,5 @@ assert all(w >= 0 for w in weights)
 ci, cr = ahp.calculate_consistency_ratio()
 assert cr < 0.1  # Should be consistent
 ```
-### Cangjie Orchestrator
 
-```cangjie
-struct MCDAInput {
-    criteria: Array<String>;
-    alternatives: Array<String>;
-    decision_matrix: Array<Array<Float64>>;  // [alt][crit] scores
-    ahp_pairwise: Option<Array<Array<Float64>>>;  // optional comparison matrix
-    consistency_threshold: Float64;  // CR < 0.1 required
-}
-
-struct MCDAOutput {
-    weights: Array<Float64>;
-    rankings: Array<(String, Float64)>;  // (alternative, score)
-    consistency_ratio: Float64;
-    method_used: String;  // "ahp" | "entropy" | "topsis"
-}
-```
+````

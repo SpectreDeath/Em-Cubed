@@ -80,12 +80,22 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
             except ImportError:
                 pass
         
-        # Add Cangjie support
-        cj_source = extract_fenced_block(body, "cangjie") or extract_fenced_block(body, "cj")
-        if cj_source:
+
+        # Kanren tag extraction
+        kanren_source = extract_fenced_block(body, "kanren") or extract_fenced_block(body, "kan")
+        if kanren_source:
             try:
-                from .surfaces.cangjie_surface import CangjieSurface
-                heuristic_tags.extend(CangjieSurface.extract_tags(cj_source))
+                from .surfaces.kanren_surface import KanrenSurface
+                heuristic_tags.extend(KanrenSurface.extract_tags(kanren_source))
+            except ImportError:
+                pass
+
+        # Clingo/ASP tag extraction
+        clingo_source = extract_fenced_block(body, "clingo") or extract_fenced_block(body, "asp")
+        if clingo_source:
+            try:
+                from .surfaces.clingo_surface import ClingoSurface
+                heuristic_tags.extend(ClingoSurface.extract_tags(clingo_source))
             except ImportError:
                 pass
 

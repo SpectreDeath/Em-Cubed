@@ -5,7 +5,6 @@ Version: 1.0.0
 surfaces:
   - python
   - prolog
-  - cangjie
 origin: manual
 triggers:
   - example
@@ -84,37 +83,7 @@ else:
 result
 ```
 
-### Cangjie Orchestrator
-
-```cangjie
-func main(input: GraphInput) -> GraphOutput {
-    // Dynamically generate edge facts from input
-    var facts = "";
-    for (src, dst) in input.edges {
-        facts += f"edge({src}, {dst}).\n";
-    }
-    _ = perform EmCubed.call_surface("prolog", facts + """
-path(X, X, [X]).
-path(X, Y, [X|Rest]) :-
-    edge(X, Z),
-    path(Z, Y, Rest).
-""");
-
-    // Query
-    let query = f"path({input.start}, {input.end}, Path)";
-    let result = perform EmCubed.call_surface("prolog", query);
-
-    let path = match result.get("Path") {
-        Some(p) => p,
-        None => []
-    };
-
-    return GraphOutput{
-        path: path,
-        found: len(path) > 0
-    };
-}
-```
+````
 
 ### Prolog Code
 

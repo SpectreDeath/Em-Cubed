@@ -4,7 +4,6 @@ surfaces:
   - python
   - prolog
   - hy
-  - cangjie
 Version: 1.0.0
 Complexity: High
 Type: Process
@@ -258,38 +257,5 @@ entities = kg.extract_entities("Apple Inc. was founded by Steve Jobs in Californ
 assert len(entities) >= 2
 assert "Apple Inc." in [e.text for e in entities]
 ```
-### Cangjie Orchestrator
 
-```cangjie
-struct Document {
-    id: String;
-    text: String;
-}
-
-struct KGInput {
-    documents: Array<Document>;
-    similarity_threshold: Float64;
-    enable_inference: Bool;
-}
-
-struct Entity {
-    id: String;
-    type: String;
-    text: String;
-    doc_id: String;
-}
-
-struct Relationship {
-    source: String;
-    target: String;
-    type: String;
-    confidence: Float64;
-}
-
-struct KGOutput {
-    entities: Array<Entity>;
-    relationships: Array<Relationship>;
-    metrics: Map<String, Float64>;   // {"nodes": n, "edges": m, "density": d}
-    inferred_facts: Int64;
-}
-```
+````

@@ -49,8 +49,9 @@ class PluginDiscovery:
             heavy_surface_mapping = [
                 ("z3", surfaces.Z3Surface),
                 ("datalog", surfaces.DatalogSurface),
-                ("cangjie", surfaces.CangjieSurface),
                 ("quickjs", surfaces.QuickJSSurface),  # optional dependency
+                ("kanren", surfaces.KanrenSurface),  # optional dependency
+                ("clingo", surfaces.ClingoSurface),  # optional dependency
             ]
             
             for name, surface_class in heavy_surface_mapping:

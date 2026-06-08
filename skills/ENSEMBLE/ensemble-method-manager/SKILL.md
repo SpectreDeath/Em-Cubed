@@ -365,7 +365,6 @@ Domain: ENSEMBLE
 surfaces:
   - python
 ---
-  - cangjie
 
 ## Purpose
 Test ensemble voting
@@ -442,20 +441,5 @@ final_pred = meta_model.predict(stacked_features)
 - scipy (optional, for weight optimization)
 - em_cubed framework
 ```
-### Cangjie Orchestrator
 
-```cangjie
-struct EnsembleInput {
-    predictions: Array<Array<Float64>>;  // [n_models][n_samples] prediction arrays
-    model_types: Array<String>;          // e.g., ["svm", "tree", "nn"]
-    method: String;                       // "soft_voting" | "stacking"
-    weights: Option<Array<Float64>>;       // optional per-model weights
-}
-
-struct EnsembleOutput {
-    final_prediction: Array<Float64>;
-    model_diversity: Float64;
-    weights_used: Array<Float64>;
-    valid_ensemble: Bool;
-}
-```
+````

@@ -5,6 +5,14 @@ All notable changes to Em-Cubed will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Logic surfaces**: `KanrenSurface` (MiniKanren relational logic) and `ClingoSurface` (Answer Set Programming via `clingo`)
+
+### Removed
+- **Cangjie surface**: removed due to missing compiler/runtime dependency and low usage; all `SKILL_CANGJIE.md` artifacts deleted from skills and tests
+
 ## [0.7.0] - 2026-05-15
 
 ### Added

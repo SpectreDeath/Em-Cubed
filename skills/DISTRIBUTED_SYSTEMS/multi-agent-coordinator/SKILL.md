@@ -4,7 +4,6 @@ surfaces:
   - python
   - prolog
   - hy
-  - cangjie
 Version: 1.0.0
 Complexity: High
 Type: Coordination
@@ -146,27 +145,5 @@ potential_deadlock(Agents, Resources) :-
   (let [complexity (measure-complexity situation)
         strategy (if (> complexity 0.7) "centralized" "distributed")]
     strategy))
-### Cangjie Orchestrator
 
-```cangjie
-struct AgentState {
-    id: String;
-    position: Array<Float64>;   // [x, y]
-    velocity: Array<Float64>;   // [vx, vy]
-    capabilities: Array<String>;
-}
-
-struct CoordinationInput {
-    agents: Array<AgentState>;
-    proposal: Map<String, Any>;
-    consensus_threshold: Float64;  // 0.0–1.0
-    max_comm_range: Float64;
-}
-
-struct CoordinationOutput {
-    consensus_reached: Bool;
-    vote_tally: Int64;
-    efficiency_score: Float64;
-    deadlock_detected: Bool;
-}
-```
+````

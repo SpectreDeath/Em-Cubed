@@ -4,7 +4,6 @@ surfaces:
   - python
   - prolog
   - hy
-  - cangjie
 Version: 1.0.0
 Complexity: High
 Type: Synthesis
@@ -339,26 +338,5 @@ assert order[1] == "t2"
 critical = synthesizer.critical_path(wf)
 assert len(critical) > 0
 ```
-### Cangjie Orchestrator
 
-```cangjie
-struct TaskDef {
-    id: String;
-    duration: Int64;
-    dependencies: Array<String>;
-    priority: Int64;
-}
-
-struct WorkflowInput {
-    tasks: Array<TaskDef>;
-    objectives: Map<String, Float64>;   // {"efficiency": 0.4, "reliability": 0.3, ...}
-    resource_limit: Int64;
-}
-
-struct WorkflowOutput {
-    optimal_order: Array<String>;
-    critical_path: Array<String>;
-    parallel_levels: Array<Array<String>>;
-    score: Float64;
-}
-```
+````

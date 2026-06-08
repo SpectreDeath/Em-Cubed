@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-Em-Cubed is a secure, multi-surface skill framework enabling execution across Python, Prolog, Hy Lisp, Z3 SMT solving, Datalog logic, Janus bridge, SQLite, QuickJS JavaScript, and Cangjie surfaces with unified indexing and search capabilities. It allows developers to create composable skills that leverage different programming paradigms for optimal problem-solving.
+Em-Cubed is a secure, multi-surface skill framework enabling execution across Python, Prolog, Hy Lisp, Z3 SMT solving, Datalog logic, Janus bridge, SQLite, QuickJS JavaScript, surfaces with unified indexing and search capabilities. It allows developers to create composable skills that leverage different programming paradigms for optimal problem-solving.
 
 ## ✨ Key Features
 
@@ -95,7 +95,6 @@ em-cubed/
 │       ├── janus_surface.py    # Python-Prolog bridge (experimental)
 │       ├── sqlite_surface.py   # In-memory SQLite execution
 │       ├── quickjs_surface.py  # JavaScript via QuickJS
-│       └── cangjie_surface.py  # High-performance logic orchestrator
 ├── api/main.py            # FastAPI REST API
 ├── examples/              # Multi-surface skill examples
 ├── tests/                 # Comprehensive test suite (219 tests)
@@ -397,20 +396,43 @@ if surface.available:
 
 **Requirements**: `quickjs` package (`pip install quickjs`).
 
-### Cangjie Surface
+### Kanren Surface
 
-**Capabilities**: High-performance logic orchestration via the Cangjie/LLVM compiler.
+**Capabilities**: Pure relational / logic-programming via MiniKanren (bidirectional relations).
 
 ```python
-from em_cubed.surfaces import CangjieSurface
+from em_cubed.surfaces import KanrenSurface
 
-surface = CangjieSurface()
+surface = KanrenSurface()
 if surface.available:
-    result = await surface.execute('main() { print(2 + 3) }')
-    print(result['value'])  # prints 5
+    await surface.execute('''
+from kanren import Relation, fact, run, Var
+parent = Relation()
+fact(parent, "john", "mary")
+q = Var()
+result = run(0, q, parent("john", q))
+''')
 ```
 
-**Requirements**: `cjc` compiler in PATH. Context is passed via stdin as JSON.
+**Requirements**: `kanren` package (`pip install kanren`).
+
+### Clingo Surface (ASP)
+
+**Capabilities**: Answer Set Programming for combinatorial search and declarative problem solving.
+
+```python
+from em_cubed.surfaces import ClingoSurface
+
+surface = ClingoSurface()
+if surface.available:
+    result = await surface.execute("""
+parent(john, mary).
+ancestor(X,Y) :- parent(X,Y).
+#show ancestor/2.
+""")
+```
+
+**Requirements**: `clingo` package (`pip install clingo`).
 
 ## 🎯 Skills Quality Framework
 
