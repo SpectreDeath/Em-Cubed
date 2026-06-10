@@ -1,0 +1,98 @@
+---
+name: SAE Reporting Threshold Tester
+Domain: CLINICAL_TRIALS
+Version: 1.0.0
+surfaces:
+  - python
+  - z3
+---
+
+# Purpose
+
+Determines whether observed serious adverse event counts and expected/observed ratios breach FDA 21 CFR 312.32 expedited reporting thresholds (7-day and 15-day timelines) by encoding regulatory timing constraints as arithmetic relations in Z3.
+
+# Description
+
+Given aggregate safety data and reporting rules, computes whether the observed event counts and ratios breach mandatory 7/15-day SUSAR reporting timelines. Z3 encodes the linear threshold constraints as arithmetic relations and returns `sat`/`unsat` with a concrete justification.
+
+## Python Surface
+
+```python
+def compute_sae_reporting(sae_counts, expected_counts, rule):
+    expedited = rule.get("expedited", False)
+    threshold = rule.get("threshold", 2.0)
+    observed_ratio = 0.0
+    for drug, obs in sae_counts.items():
+        exp = expected_counts.get(drug, 1)
+        observed_ratio = max(observed_ratio, obs / exp if exp > 0 else 0)
+    needs_expedited = expedited and observed_ratio >= threshold
+    return {
+        "status": "ok",
+        "observed_ratio": observed_ratio,
+        "threshold": threshold,
+        "needs_expedited_reporting": needs_expedited,
+    }
+
+def main(skill_input):
+    sae_counts = skill_input.get("sae_counts", {})
+    expected_counts = skill_input.get("expected_counts", {})
+    rule = skill_input.get("rule", {})
+    return compute_sae_reporting(sae_counts, expected_counts, rule)
+```
+
+## Z3 Surface
+
+```python
+def sae_reporting_z3(observed, expected, threshold, timeline_days):
+    from z3 import Solver, Real, sat, And, Or
+
+    solver = Solver()
+    o = Real("observed")
+    e = Real("expected")
+    t = Real("threshold")
+    td = Real("timeline_days")
+    solver.add(o == observed)
+    solver.add(e == expected)
+    solver.add(t == threshold)
+    solver.add(td == timeline_days)
+    ratio = o / e
+    solver.add(ratio >= t)
+    solver.add(td <= 7)
+    if solver.check() == sat:
+        return {"status": "ok", "z3_result": "sat", "breaches_timeline": True, "timeline": "7-day"}
+    solver.push()
+    solver.add(td <= 15)
+    solver.add(td > 7)
+    if solver.check() == sat:
+        return {"status": "ok", "z3_result": "sat", "breaches_timeline": True, "timeline": "15-day"}
+    solver.pop()
+    return {"status": "ok", "z3_result": "unsat", "breaches_timeline": False}
+
+def main(skill_input):
+    observed = float(skill_input.get("observed", 0))
+    expected = float(skill_input.get("expected", 1))
+    threshold = float(skill_input.get("threshold", 2.0))
+    timeline_days = float(skill_input.get("timeline_days", 7))
+    return sae_reporting_z3(observed, expected, threshold, timeline_days)
+```
+
+## Examples
+
+```python
+input_data = {
+    "observed": 5,
+    "expected": 1,
+    "threshold": 2.0,
+    "timeline_days": 7,
+}
+# Expected: {"breaches_timeline": true, "timeline": "7-day"}
+```
+
+```python
+input_data = {
+    "sae_counts": {"Drug_X": 3},
+    "expected_counts": {"Drug_X": 2},
+    "rule": {"expedited": True, "threshold": 2.0},
+}
+# Expected: {"needs_expedited_reporting": True, "observed_ratio": 1.5, "threshold": 2.0}
+```

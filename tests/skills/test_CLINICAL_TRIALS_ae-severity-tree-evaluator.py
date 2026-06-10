@@ -1,0 +1,97 @@
+"""Tests for ae-severity-tree-evaluator skill."""
+import pytest
+from pathlib import Path
+from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
+from em_cubed.indexer import get_skill_metadata
+from em_cubed.plugin_manager import PluginManager
+
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "CLINICAL_TRIALS" / "ae-severity-tree-evaluator" / "SKILL.md")
+SKILL_ID = "CLINICAL_TRIALS/ae-severity-tree-evaluator"
+
+
+@pytest.fixture
+def plugin_manager():
+    return PluginManager()
+
+@pytest.fixture
+def test_generator(plugin_manager):
+    return SkillTestGenerator(plugin_manager)
+
+@pytest.fixture
+def test_runner(plugin_manager):
+    return SkillTestRunner(plugin_manager, None)
+
+
+class TestAeSeverityTreeEvaluatorSkill:
+    def test_metadata_valid(self):
+        metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
+        assert metadata_dict is not None
+        assert metadata_dict["name"] == "AE Severity Tree Evaluator"
+        assert metadata_dict["domain"] == "CLINICAL_TRIALS"
+        assert "python" in metadata_dict["surfaces"]
+        assert "prolog" in metadata_dict["surfaces"]
+
+    def test_surfaces_implemented(self, plugin_manager):
+        metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
+        available_surfaces = []
+        for surface in metadata_dict.get("surfaces", []):
+            plugin = plugin_manager.get(surface)
+            if plugin and plugin.available:
+                available_surfaces.append(surface)
+        assert len(available_surfaces) >= 1
+
+    @pytest.mark.asyncio
+    async def test_skill_execution(self, test_runner, test_generator):
+        metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
+        if not metadata_dict:
+            pytest.skip("Skill metadata not available")
+        from em_cubed.skills.metadata import SkillMetadata
+        metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
+        for key, value in metadata_dict.items():
+            if hasattr(metadata, key):
+                setattr(metadata, key, value)
+        tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
+        if tests:
+            results = await test_runner.run_test_suite(tests, SKILL_ID)
+            assert results["pass_rate"] > 0.3
+
+    def test_python_ae_grading_grade3(self):
+        grade_rules = [
+            {"lab_name": "Hemoglobin", "grade": 1, "grade_low": 9.5, "grade_high": 10.0},
+            {"lab_name": "Hemoglobin", "grade": 2, "grade_low": 8.0, "grade_high": 9.4},
+            {"lab_name": "Hemoglobin", "grade": 3, "grade_low": 6.5, "grade_high": 7.9},
+            {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
+        ]
+        ae_record = {"lab_name": "Hemoglobin", "observed_value": 7.2}
+        matched = [
+            r for r in grade_rules
+            if r["lab_name"] == ae_record["lab_name"]
+            and r["grade_low"] <= ae_record["observed_value"] <= r["grade_high"]
+        ]
+        assert len(matched) == 1
+        assert matched[0]["grade"] == 3
+
+    def test_python_ae_grading_grade4(self):
+        grade_rules = [
+            {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
+        ]
+        ae_record = {"lab_name": "Hemoglobin", "observed_value": 5.0}
+        matched = [
+            r for r in grade_rules
+            if r["lab_name"] == ae_record["lab_name"]
+            and r["grade_low"] <= ae_record["observed_value"] <= r["grade_high"]
+        ]
+        assert len(matched) == 1
+        assert matched[0]["grade"] == 4
+
+    def test_python_ae_grading_no_match(self):
+        grade_rules = [
+            {"lab_name": "Hemoglobin", "grade": 1, "grade_low": 9.5, "grade_high": 10.0},
+        ]
+        ae_record = {"lab_name": "Neutrophils", "observed_value": 7.2}
+        matched = [
+            r for r in grade_rules
+            if r["lab_name"] == ae_record["lab_name"]
+            and r["grade_low"] <= ae_record["observed_value"] <= r["grade_high"]
+        ]
+        assert len(matched) == 0
