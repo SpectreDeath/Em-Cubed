@@ -109,7 +109,7 @@
 - Safety fallback for small sample sizes (<8 observations)
 
 ### Final Validation
-- All 77/77 skills passing (integration tests: 11/11)
+The codebase now has 79 skills properly indexed with Python, Prolog, Hy, Z3, SQLite, Datalog, QuickJS, and WASM surfaces only.
 
 ### Testing Strategy Document
 - Created comprehensive TESTING_STRATEGY.md outlining unit, integration, performance, surface-specific, error handling, and security tests

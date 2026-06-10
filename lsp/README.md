@@ -11,7 +11,7 @@ A Language Server Protocol implementation for SKILL.md files in Em-Cubed, provid
 
 ### Autocomplete
 - Suggests valid frontmatter fields (name, domain, version, surfaces, triggers, description)
-- Provides surface type suggestions (python, prolog, hy, z3, janus, sqlite, quickjs, cangjie, llm)
+- Provides surface type suggestions (python, prolog, hy, z3, sqlite, quickjs, kanren, clingo, llm)
 - Offers list item completion for arrays like `surfaces`
 
 ### Validation

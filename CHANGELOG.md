@@ -27,8 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **CLI**: `em3 create-skill` now uses Jinja2 for robust template rendering
 - **Surface registration**: `SQLiteSurface` registered as core (eager); `QuickJSSurface` registered as lazy
-- **Cangjie surface**: context is now piped to stdin instead of passing a JSON file path as an argument
-- **Validation**: `SkillValidator` now acknowledges `cangjie`, `sqlite`, and `quickjs` as valid surfaces
+- **Surface migration**: Removed janus surface; migrated skills to python/z3/sqlite surfaces
+- **Validation**: `SkillValidator` now acknowledges `sqlite`, `quickjs`, `kanren`, and `clingo` as valid surfaces
 
 ### Fixed
 - **Entry point discovery**: replaced deprecated `import entry_points` with `from importlib.metadata import entry_points`
@@ -260,7 +260,7 @@ For more information about contributing, see [CONTRIBUTING.md](CONTRIBUTING.md).
   - Central Force Optimization (CFO): Gravitational attraction between probes - 9/9 tests
   - Spiral Dynamics Optimization (SDO): Damped harmonic oscillations - 7/7 tests
 - **Multi-Surface Implementation**: All optimization skills include Python core, Prolog validation, and Hy helpers
-- **SKILL_CANGJIE.md**: Cangjie orchestrator files for all optimization algorithms
+- **Optimization Skills**: All P2 and P3 optimization algorithm skills completed
 
 ### Changed
 - **Test Suite**: Updated to 57 optimization skill tests (all passing)

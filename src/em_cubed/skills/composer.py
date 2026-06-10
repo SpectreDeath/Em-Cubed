@@ -354,7 +354,7 @@ _skill_result
 
             # Inject surface plugins for cross-surface interaction
             context["surfaces"] = {}
-            for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus"]:
+            for surface_name in ["python", "prolog", "hy", "z3", "datalog", "sqlite", "kanren", "clingo"]:
                 surf_plugin = self.plugin_manager.get(surface_name)
                 if surf_plugin and surf_plugin.available:
                     context["surfaces"][surface_name] = surf_plugin

@@ -360,7 +360,7 @@ class SkillTelemetry:
             "hy": 0.0001,
             "z3": 0.0001,
             "datalog": 0.0001,
-            "janus": 0.0001,
+            "sqlite": 0.0001,
             "kanren": 0.0001,
             "clingo": 0.0001,
             "llm": 0.002,       # Example LLM cost (would vary by model)
@@ -391,8 +391,8 @@ def initialize_telemetry(config: Optional[TelemetryConfig] = None) -> TelemetryC
 
 
 def record_skill_execution(skill_id: str, success: bool, execution_time_ms: float,
-                          token_usage: int = 0, surface: str = "python",
-                          **kwargs) -> None:
+                           token_usage: int = 0, surface: str = "python",
+                           **kwargs) -> None:
     """Convenience function to record a skill execution."""
     collector = get_telemetry_collector()
     record = ExecutionRecord(

@@ -19,7 +19,7 @@ The key to multi-surface orchestration is the automatic injection of available s
 # In skill_executor.py, lines 135-140:
 # Inject surface plugins for cross-surface interaction
 context["surfaces"] = {}
-for surface_name in ["python", "prolog", "hy", "z3", "datalog", "janus", "sqlite", "quickjs", "cangjie"]:
+for surface_name in ["python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs", "kanren", "clingo"]:
     surf_plugin = self.plugin_manager.get(surface_name)
     if surf_plugin and surf_plugin.available:
         context["surfaces"][surface_name] = surf_plugin
@@ -125,18 +125,27 @@ def transform_text(text):
     return {"status": "ok", "slug": result["value"]}
 ```
 
-### Pattern 6: Cangjie for Performance-Critical Logic
+### Pattern 6: Kanren/Clingo for Logic Programming
 
-When execution speed is paramount, offload compute-heavy kernels to Cangjie:
+For relational and constraint logic programming:
 
 ```python
-def heavy_compute(data):
-    cangjie_code = f"""
-        main() {{
-            // data injected as stdin JSON
-        }}
+def logic_solve(relations, constraints):
+    kanren_code = generate_kanren_code(relations, constraints)
+    result = context["surfaces"]["kanren"].execute(kanren_code, {})
+    return result
+```
+
+### Pattern 7: Clingo for Answer Set Programming
+
+For declarative problem solving with stable models:
+
+```python
+def solve_asp(problem_facts):
+    clingo_code = f"""
+        % Problem rules here
     """
-    result = context["surfaces"]["cangjie"].execute(cangjie_code)
+    result = context["surfaces"]["clingo"].execute(clingo_code, {})
     return result
 ```
 

@@ -59,7 +59,8 @@ Tests targeting each execution surface:
 - Z3: Constraint solving, satisfiability checking
 - Hy: Functional programming correctness
 - QuickJS: JavaScript execution, performance
-- Cangjie: Compilation, execution speed
+- Kanren: Relational logic, miniKanren patterns
+- Clingo: ASP solving, stable model generation
 
 ### 5. Error Handling Tests
 - Invalid input handling
@@ -133,7 +134,7 @@ tests/skills/test_{domain}_{skill-name}.py
 
 ### Surface Performance Comparison
 - Benchmark Python vs Prolog vs Hy vs QuickJS for equivalent logic
-- Measure Cangjie binary execution time vs interpreted surfaces
+- Measure Kanren/Clingo execution performance vs Prolog
 - Validate Z3 constraint solving performance vs brute-force search
 
 ## Data-Driven Testing
@@ -144,7 +145,7 @@ tests/skills/test_{domain}_{skill-name}.py
    - Test feature scaling, normalization skills
 
 2. **UCR Time Series Classification Archive**  
-   - Benchmark Cangjie Logic Surface with StatLib datasets
+   - Benchmark Kanren/Clingo logic surfaces with clean numeric datasets
    - Test time series forecasting, anomaly detection skills
 
 3. **Web Data Commons** (JSON-LD/RDFa from Common Crawl)
@@ -160,7 +161,7 @@ tests/skills/test_{domain}_{skill-name}.py
    - Test Z3 surface with genomic constraint satisfaction
 
 6. **StatLib Datasets Archive**
-   - Benchmark Cangjie surface with clean numeric datasets
+   - Test Kanren/Clingo surfaces with structured logic data
    - Test statistical skills with known distributions
 
 ## Test Execution Protocol

@@ -12,7 +12,7 @@ The framework must support a variety of surface plugins. Surfaces might be built
 
 Implement a three-tier discovery strategy in `PluginManager`:
 
-1. **Built-in surfaces** — registered directly from the `em_cubed.surfaces` package. Core surfaces (python, prolog, hy, sqlite) are instantiated immediately; heavy surfaces (z3, datalog, cangjie, quickjs) are stored as classes for lazy initialization.
+1. **Built-in surfaces** — registered directly from the `em_cubed.surfaces` package. Core surfaces (python, prolog, hy, sqlite) are instantiated immediately; heavy surfaces (z3, datalog, kanren, clingo, quickjs) are stored as classes for lazy initialization.
 2. **Entry points** — third-party plugins can declare `em_cubed.surfaces` entry points in their `pyproject.toml`/`setup.cfg`. These are discovered via `importlib.metadata.entry_points`.
 3. **Directory scan** — for local development, the manager can scan a `plugins/` directory for Python files defining `SurfacePlugin` subclasses and load them dynamically.
 
