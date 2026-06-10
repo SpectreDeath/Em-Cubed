@@ -39,24 +39,36 @@ def validate_icf_z3(icf_text):
     clauses = parse_icf_sections(icf_text)
     bools = {k: Bool(k) for k in clauses}
     solver = Solver()
-    for k, present in clauses.items():
-        solver.add(bools[k] == present)
+
+    mandatory_flag = Bool("mandatory_elements_must_be_present")
+    solver.add(mandatory_flag)
+
+    all_required = And([bools[k] for k in clauses.keys()])
+    solver.add(mandatory_flag == all_required)
+
     risks_empty = not clauses.get("risks", False)
     procedures_nonempty = clauses.get("procedures", False)
     if risks_empty and procedures_nonempty:
-        solver.add(Not(bools["risks"]))
-    missing = [k for k, v in clauses.items() if not v]
-    if solver.check() == unsat:
+        solver.add(Not(And(bools["procedures"], bools["risks"])))
+
+    assumptions = []
+    for k, present in clauses.items():
+        assumptions.append(bools[k] if present else Not(bools[k]))
+    checking_propositions = assumptions + [mandatory_flag]
+
+    if solver.check(*checking_propositions) == unsat:
+        core = [str(expr) for expr in solver.unsat_core()]
+        missing = [k for k, v in clauses.items() if not v]
         return {
             "status": "ok",
             "valid_icf": False,
             "missing_clauses": missing,
-            "unsat_core": missing,
+            "unsat_core": core,
         }
     return {
         "status": "ok",
         "valid_icf": True,
-        "missing_clauses": missing,
+        "missing_clauses": [],
         "unsat_core": [],
     }
 

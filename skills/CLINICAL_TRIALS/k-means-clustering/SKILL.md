@@ -57,6 +57,9 @@ def initialize_centroids(data, k):
     return centroids
 
 def kmeans(data, k, max_iters=100):
+    if not data or len(data) == 0:
+        return [], []
+    num_features = len(data[0])
     centroids = initialize_centroids(data, k)
     for _ in range(max_iters):
         clusters = [[] for _ in range(k)]
@@ -71,12 +74,14 @@ def kmeans(data, k, max_iters=100):
             clusters[min_idx].append(point)
         for i in range(k):
             if len(clusters[i]) > 0:
-                new_centroid = [0.0] * len(data[0])
+                new_centroid = [0.0] * num_features
                 for p in clusters[i]:
-                    for j in range(len(p)):
+                    for j in range(num_features):
                         new_centroid[j] = new_centroid[j] + p[j]
-                for j in range(len(new_centroid)):
+                for j in range(num_features):
                     new_centroid[j] = new_centroid[j] / len(clusters[i])
                 centroids[i] = new_centroid
+            else:
+                centroids[i] = random.choice(data)
     return centroids, clusters
 ```

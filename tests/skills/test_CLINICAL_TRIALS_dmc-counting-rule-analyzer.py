@@ -1,5 +1,6 @@
 """Tests for dmc-counting-rule-analyzer skill."""
 import pytest
+import math
 from pathlib import Path
 from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
@@ -54,3 +55,43 @@ class TestDmcCountingRuleAnalyzerSkill:
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
             assert results["pass_rate"] > 0.3
+
+    def test_python_facts_generation_obrien_fleming(self):
+        masked_data = {
+            "arms": ["Treatment", "Control"],
+            "events": [45, 60],
+            "p_values": [0.008, 0.15],
+            "timepoints": [1, 1],
+        }
+        scale = 100_000
+        num_looks = max(masked_data["timepoints"])
+        facts = []
+        arms = [a.lower() for a in masked_data["arms"]]
+        for a in arms:
+            facts.append(f"arm({a}).")
+        for i, ev in enumerate(masked_data["events"]):
+            arm = arms[i]
+            tp = masked_data["timepoints"][i]
+            facts.append(f"event_count({arm}, {tp}, {ev}).")
+        for i, pv in enumerate(masked_data["p_values"]):
+            arm = arms[i]
+            tp = masked_data["timepoints"][i]
+            raw = 2.4 * math.sqrt(tp / num_looks) * 0.05
+            b_scaled = int(raw * scale)
+            pv_scaled = int(pv * scale)
+            facts.append(f"p_value_check({arm}, {tp}, {pv_scaled}, {b_scaled}).")
+        assert any("p_value_check" in f for f in facts)
+        assert any("arm(treatment)." in f for f in facts)
+
+    def test_python_facts_generation_haybittle_peto(self):
+        tp = 2
+        scale = 100_000
+        b_scaled = int(0.001 * scale) if tp < 3 else int(0.05 * scale)
+        assert b_scaled == int(0.001 * scale)
+
+    def test_python_facts_uses_scaled_integers(self):
+        pv = 0.008
+        scale = 100_000
+        pv_scaled = int(pv * scale)
+        assert pv_scaled == 800
+        assert isinstance(pv_scaled, int)

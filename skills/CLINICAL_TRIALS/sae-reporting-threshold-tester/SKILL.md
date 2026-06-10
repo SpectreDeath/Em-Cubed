@@ -44,28 +44,25 @@ def main(skill_input):
 
 ```python
 def sae_reporting_z3(observed, expected, threshold, timeline_days):
-    from z3 import Solver, Real, sat, And, Or
+    from z3 import Solver, Real, sat
 
-    solver = Solver()
     o = Real("observed")
     e = Real("expected")
     t = Real("threshold")
     td = Real("timeline_days")
-    solver.add(o == observed)
-    solver.add(e == expected)
-    solver.add(t == threshold)
-    solver.add(td == timeline_days)
-    ratio = o / e
-    solver.add(ratio >= t)
-    solver.add(td <= 7)
-    if solver.check() == sat:
+
+    s7 = Solver()
+    s7.add(o == observed, e == expected, t == threshold, td == timeline_days)
+    s7.add(o / e >= t, td <= 7)
+    if s7.check() == sat:
         return {"status": "ok", "z3_result": "sat", "breaches_timeline": True, "timeline": "7-day"}
-    solver.push()
-    solver.add(td <= 15)
-    solver.add(td > 7)
-    if solver.check() == sat:
+
+    s15 = Solver()
+    s15.add(o == observed, e == expected, t == threshold, td == timeline_days)
+    s15.add(o / e >= t, td > 7, td <= 15)
+    if s15.check() == sat:
         return {"status": "ok", "z3_result": "sat", "breaches_timeline": True, "timeline": "15-day"}
-    solver.pop()
+
     return {"status": "ok", "z3_result": "unsat", "breaches_timeline": False}
 
 def main(skill_input):
@@ -88,11 +85,11 @@ input_data = {
 # Expected: {"breaches_timeline": true, "timeline": "7-day"}
 ```
 
-```python
+ ```python
 input_data = {
     "sae_counts": {"Drug_X": 3},
     "expected_counts": {"Drug_X": 2},
-    "rule": {"expedited": True, "threshold": 2.0},
+    "rule": {"expedited": True, "threshold": 1.5},
 }
-# Expected: {"needs_expedited_reporting": True, "observed_ratio": 1.5, "threshold": 2.0}
+# Expected: {"needs_expedited_reporting": True, "observed_ratio": 1.5, "threshold": 1.5}
 ```

@@ -18,33 +18,46 @@ Prolog defines relational consistency rules across endpoint strings, analysis me
 ## Python Surface
 
 ```python
-def load_sap_endpoints(sap):
-    return [(e.get("endpoint_id"), e.get("name"), e.get("analysis_method"), e.get("timepoint"))
-            for e in sap.get("endpoints", [])]
-
-def load_registry_endpoints(registry):
-    return [(e.get("endpoint_id"), e.get("name"), e.get("timepoint"))
-            for e in registry.get("endpoints", [])]
-
-def load_protocol_endpoints(protocol):
-    return [(e.get("endpoint_id"), e.get("name"), e.get("analysis_method"))
-            for e in protocol.get("endpoints", [])]
+def build_endpoint_maps(sap, registry, protocol):
+    sap_map = {e.get("endpoint_id"): e for e in sap.get("endpoints", []) if e.get("endpoint_id")}
+    reg_map = {e.get("endpoint_id"): e for e in registry.get("endpoints", []) if e.get("endpoint_id")}
+    proto_map = {e.get("endpoint_id"): e for e in protocol.get("endpoints", []) if e.get("endpoint_id")}
+    return sap_map, reg_map, proto_map
 
 def check_endpoint_consistency(sap, registry, protocol):
-    sap_eps = set(load_sap_endpoints(sap))
-    reg_eps = set(load_registry_endpoints(registry))
-    proto_eps = set(load_protocol_endpoints(protocol))
-    sap_ids = {e[0] for e in sap_eps}
-    reg_ids = {e[0] for e in reg_eps}
-    proto_ids = {e[0] for e in proto_eps}
-    missing_from_registry = list(sap_ids - reg_ids)
-    missing_from_protocol = list(sap_ids - proto_ids)
-    aligned = list(sap_ids & reg_ids & proto_ids)
+    sap_map, reg_map, proto_map = build_endpoint_maps(sap, registry, protocol)
+    aligned = []
+    missing_from_registry = []
+    missing_from_protocol = []
+    mismatched_metadata = []
+    for ep_id, sap_ep in sap_map.items():
+        in_reg = ep_id in reg_map
+        in_proto = ep_id in proto_map
+        if not in_reg:
+            missing_from_registry.append(ep_id)
+        if not in_proto:
+            missing_from_protocol.append(ep_id)
+        if in_reg and in_proto:
+            reg_ep = reg_map[ep_id]
+            proto_ep = proto_map[ep_id]
+            timepoint_match = sap_ep.get("timepoint") == reg_ep.get("timepoint")
+            method_match = sap_ep.get("analysis_method") == proto_ep.get("analysis_method")
+            if timepoint_match and method_match:
+                aligned.append(ep_id)
+            else:
+                mismatched_metadata.append({
+                    "endpoint_id": ep_id,
+                    "issues": {
+                        "timepoint_mismatch": not timepoint_match,
+                        "method_mismatch": not method_match,
+                    },
+                })
     return {
         "status": "ok",
         "aligned": aligned,
         "missing_from_registry": missing_from_registry,
         "missing_from_protocol": missing_from_protocol,
+        "mismatched_metadata": mismatched_metadata,
     }
 
 def main(skill_input):
@@ -91,27 +104,19 @@ protocol_endpoint(ep02, "Objective Response Rate", "Cochran-Mantel-Haenszel").
 
 ## Examples
 
-```python
+ ```python
 input_data = {
-    "sap": {
-        "endpoints": [
-            {"endpoint_id": "ep01", "name": "Progression-Free Survival", "analysis_method": "Kaplan-Meier", "timepoint": "Cycle 28"},
-            {"endpoint_id": "ep02", "name": "Objective Response Rate", "analysis_method": "CMH", "timepoint": "Cycle 18"},
-            {"endpoint_id": "ep03", "name": "Overall Survival", "analysis_method": "Kaplan-Meier", "timepoint": "Cycle 36"},
-        ]
-    },
-    "registry": {
-        "endpoints": [
-            {"endpoint_id": "ep01", "name": "Progression-Free Survival", "timepoint": "Cycle 28"},
-            {"endpoint_id": "ep02", "name": "Objective Response Rate", "timepoint": "Cycle 18"},
-        ]
-    },
-    "protocol": {
-        "endpoints": [
-            {"endpoint_id": "ep01", "name": "Progression-Free Survival", "analysis_method": "Kaplan-Meier"},
-            {"endpoint_id": "ep02", "name": "Objective Response Rate", "analysis_method": "CMH"},
-        ]
-    },
+    "ae_record": {"lab_name": "Hemoglobin", "observed_value": 7.2},
+    "ae_records": [
+        {"lab_name": "Hemoglobin", "observed_value": 7.2},
+        {"lab_name": "Hemoglobin", "observed_value": 5.0},
+    ],
+    "grade_rules": [
+        {"lab_name": "Hemoglobin", "grade": 1, "grade_low": 10.0, "grade_high": 9.5},
+        {"lab_name": "Hemoglobin", "grade": 2, "grade_low": 9.4, "grade_high": 8.0},
+        {"lab_name": "Hemoglobin", "grade": 3, "grade_low": 7.9, "grade_high": 6.5},
+        {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
+    ],
 }
-# Expected: {"aligned": ["ep01", "ep02"], "missing_from_registry": ["ep03"], "missing_from_protocol": []}
+# Expected: {"grade": 4, "pathway": [...], "contradictions": []}
 ```

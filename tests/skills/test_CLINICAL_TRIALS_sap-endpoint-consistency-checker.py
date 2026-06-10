@@ -74,8 +74,64 @@ class TestSapEndpointConsistencyCheckerSkill:
                 {"endpoint_id": "ep02", "name": "ORR", "analysis_method": "CMH"},
             ]
         }
-        sap_ids = {e["endpoint_id"] for e in sap["endpoints"]}
-        reg_ids = {e["endpoint_id"] for e in registry["endpoints"]}
-        proto_ids = {e["endpoint_id"] for e in protocol["endpoints"]}
-        aligned = sorted(sap_ids & reg_ids & proto_ids)
-        assert aligned == ["ep01", "ep02"]
+        sap_map = {e["endpoint_id"]: e for e in sap["endpoints"]}
+        reg_map = {e["endpoint_id"]: e for e in registry["endpoints"]}
+        proto_map = {e["endpoint_id"]: e for e in protocol["endpoints"]}
+        aligned = []
+        for ep_id, sap_ep in sap_map.items():
+            if ep_id in reg_map and ep_id in proto_map:
+                reg_ep = reg_map[ep_id]
+                proto_ep = proto_map[ep_id]
+                tp_match = sap_ep.get("timepoint") == reg_ep.get("timepoint")
+                m_match = sap_ep.get("analysis_method") == proto_ep.get("analysis_method")
+                if tp_match and m_match:
+                    aligned.append(ep_id)
+        assert sorted(aligned) == ["ep01", "ep02"]
+
+    def test_python_timepoint_mismatch_detected(self):
+        sap = {
+            "endpoints": [
+                {"endpoint_id": "ep01", "name": "PFS", "analysis_method": "KM", "timepoint": "Cycle 28"},
+            ]
+        }
+        registry = {
+            "endpoints": [
+                {"endpoint_id": "ep01", "name": "PFS", "timepoint": "Cycle 36"},
+            ]
+        }
+        protocol = {
+            "endpoints": [
+                {"endpoint_id": "ep01", "name": "PFS", "analysis_method": "KM"},
+            ]
+        }
+        sap_map = {e["endpoint_id"]: e for e in sap["endpoints"]}
+        reg_map = {e["endpoint_id"]: e for e in registry["endpoints"]}
+        proto_map = {e["endpoint_id"]: e for e in protocol["endpoints"]}
+        mismatched = []
+        for ep_id, sap_ep in sap_map.items():
+            if ep_id in reg_map and ep_id in proto_map:
+                tp_match = sap_ep.get("timepoint") == reg_map[ep_id].get("timepoint")
+                if not tp_match:
+                    mismatched.append(ep_id)
+        assert mismatched == ["ep01"]
+
+    def test_python_method_mismatch_detected(self):
+        sap = {
+            "endpoints": [
+                {"endpoint_id": "ep01", "name": "ORR", "analysis_method": "CMH", "timepoint": "C18"},
+            ]
+        }
+        protocol = {
+            "endpoints": [
+                {"endpoint_id": "ep01", "name": "ORR", "analysis_method": "LogisticRegression"},
+            ]
+        }
+        sap_map = {e["endpoint_id"]: e for e in sap["endpoints"]}
+        proto_map = {e["endpoint_id"]: e for e in protocol["endpoints"]}
+        mismatched = []
+        for ep_id, sap_ep in sap_map.items():
+            if ep_id in proto_map:
+                m_match = sap_ep.get("analysis_method") == proto_map[ep_id].get("analysis_method")
+                if not m_match:
+                    mismatched.append(ep_id)
+        assert mismatched == ["ep01"]

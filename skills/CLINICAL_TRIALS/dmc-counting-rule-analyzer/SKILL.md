@@ -18,26 +18,43 @@ Converts ICH E9 / FDA DMC guidance rules into ASP rules. Input is a masked inter
 ## Python Surface
 
 ```python
-def build_interim_facts(masked_data):
-    arms = masked_data.get("arms", [])
+import math
+
+def _obrien_fleming_scaled(look, num_looks, alpha=0.05, scale=100_000):
+    raw = 2.4 * math.sqrt(look / num_looks) * alpha
+    return int(raw * scale), int((2.4 * math.sqrt(look / num_looks) * alpha) * scale)
+
+def _haybittle_peto_scaled(look, alpha=0.05, scale=100_000):
+    raw = 0.001 if look < 3 else alpha
+    return int(raw * scale)
+
+def build_interim_facts(masked_data, boundary="obrien_fleming", alpha=0.05, scale=100_000):
+    arms = [a.lower() for a in masked_data.get("arms", [])]
     events = masked_data.get("events", [])
     p_values = masked_data.get("p_values", [])
     timepoints = masked_data.get("timepoints", [])
-    facts = []
-    for i, arm in enumerate(arms):
-        facts.append(f"arm({arm}).")
+    num_looks = max(timepoints) if timepoints else len(p_values)
+
+    facts = [f"arm({a})." for a in arms]
     for i, ev in enumerate(events):
         arm = arms[i] if i < len(arms) else "unknown"
-        tp = timepoints[i] if i < len(timepoints) else i
+        tp = timepoints[i] if i < len(timepoints) else i + 1
         facts.append(f"event_count({arm}, {tp}, {ev}).")
+
     for i, pv in enumerate(p_values):
         arm = arms[i] if i < len(arms) else "unknown"
-        tp = timepoints[i] if i < len(timepoints) else i
-        facts.append(f"p_value({arm}, {tp}, {pv}).")
+        tp = timepoints[i] if i < len(timepoints) else i + 1
+        pv_scaled = int(pv * scale)
+        if boundary == "obrien_fleming":
+            _, b_scaled = _obrien_fleming_scaled(tp, num_looks, alpha, scale)
+        else:
+            b_scaled = _haybittle_peto_scaled(tp, alpha, scale)
+        facts.append(f"p_value_check({arm}, {tp}, {pv_scaled}, {b_scaled}).")
+
     return facts
 
 def analyze_dmc(masked_data, boundary="obrien_fleming", alpha=0.05):
-    facts = build_interim_facts(masked_data)
+    facts = build_interim_facts(masked_data, boundary, alpha)
     return {
         "status": "ok",
         "facts": facts,
@@ -55,63 +72,35 @@ def main(skill_input):
 
 ## Clingo Surface
 
-```python
-% DMC stopping boundary rules (ASP / clingo)
+```prolog
+% DMC Safety and Efficacy Stopping Boundaries
+% Pre-calculated boundary thresholds are passed in as scaled-integer facts from Python.
 
-% O'Brien-Fleming spending function approximation (piecewise)
-% Boundary is lowered at each interim look to control overall Type I error
-boundary_obrien_fleming(K, NumLooks, B) :-
-    OverallAlpha = 0.05,
-    C = 2.4,
-    LookIndex = K,
-    B = C * sqrt(LookIndex / NumLooks) * OverallAlpha / 2,
-    compute_z_boundary(B, ZBound),
-    ZBound > 2.5.
-
-boundary_obrien_fleming(K, NumLooks, B) :-
-    OverallAlpha = 0.05,
-    C = 2.4,
-    LookIndex = K,
-    B = C * sqrt(LookIndex / NumLooks) * OverallAlpha / 2,
-    compute_z_boundary(B, ZBound),
-    ZBound =< 2.5.
-
-boundary_obrien_fleming(K, NumLooks, B) :-
-    OverallAlpha = 0.05,
-    C = 2.4,
-    B = C * OverallAlpha / 2,
-    compute_z_boundary(B, ZBound),
-    ZBound =< 2.5.
-
-boundary_haybittle_peto(K, _, 3.0) :- K < 3.
-boundary_haybittle_peto(_, _, 3.0).
-
-compute_z_boundary(B, Z) :- Z is 8.0 - B.
-compute_z_boundary(B, Z) :- Z is B * 2.0.
-
-% Stopping rule
+% Stop for efficacy if the scaled p-value is strictly less than the calculated boundary scale
 stop_for_efficacy(Arm, Look) :-
-    event_count(Arm, Look, EC),
-    p_value(Arm, Look, PV),
-    boundary_obrien_fleming(Look, 3, B),
-    PV < B.
+    p_value_check(Arm, Look, PVScaled, BScaled),
+    PVScaled < BScaled.
 
+% Stop for futility using a futility-boundary fact (populated by Python if provided)
 stop_for_futility(Arm, Look) :-
-    event_count(Arm, Look, EC),
-    observed_z(Arm, Look, Z),
-    futility_boundary(Look, FB),
-    Z < FB.
+    futility_check(Arm, Look, ZScaled, FBBoundary),
+    ZScaled < FBBoundary.
 
-continue_trial(Arm, Look) :-
-    arm(Arm),
-    \+ stop_for_efficacy(Arm, Look),
-    \+ stop_for_futility(Arm, Look).
+% A specific look continues if it doesn't trigger efficacy or futility stops
+continue_look(Arm, Look) :-
+    p_value_check(Arm, Look, _, _),
+    not stop_for_efficacy(Arm, Look),
+    not stop_for_futility(Arm, Look).
 
+% Dynamic trial continuity: the whole trial continues if ALL active looks pass safely
 continue_trial(Arm) :-
     arm(Arm),
-    continue_trial(Arm, 1),
-    continue_trial(Arm, 2),
-    continue_trial(Arm, 3).
+    #count { Look : p_value_check(Arm, Look, _, _) } = TotalLooks,
+    #count { Look : continue_look(Arm, Look) } = TotalLooks.
+
+#show stop_for_efficacy/2.
+#show stop_for_futility/2.
+#show continue_trial/1.
 ```
 
 ## Examples

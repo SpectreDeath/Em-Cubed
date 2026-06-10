@@ -68,8 +68,11 @@ class TestIcfClauseValidatorSkill:
             "contact_info": "PI: Dr. Smith, 555-1234.",
             "compensation": "No compensation.",
         }
-        missing = [k for k, v in icf_text.items() if not v]
-        assert "risks" in missing
+        present = {
+            k for k, v in icf_text.items() if v
+        }
+        assert "risks" not in present
+        assert "procedures" in present
 
     def test_python_icf_valid_complete(self):
         icf_text = {
@@ -84,5 +87,36 @@ class TestIcfClauseValidatorSkill:
             "contact_info": "PI: Dr. Smith, 555-1234.",
             "compensation": "No compensation.",
         }
-        missing = [k for k, v in icf_text.items() if not v]
+        required = {
+            "research_purpose", "study_duration", "procedures", "risks",
+            "benefits", "alternatives", "confidentiality", "voluntary_participation",
+            "contact_info", "compensation",
+        }
+        present = {k for k, v in icf_text.items() if v}
+        missing = required - present
         assert len(missing) == 0
+
+    def test_python_icf_fuzz_none_input(self):
+        icf_text = None
+        required = {
+            "research_purpose", "study_duration", "procedures", "risks",
+            "benefits", "alternatives", "confidentiality", "voluntary_participation",
+            "contact_info", "compensation",
+        }
+        if icf_text is None:
+            missing = list(required)
+        else:
+            present = {k for k, v in icf_text.items() if v}
+            missing = list(required - present)
+        assert len(missing) == len(required)
+
+    def test_python_icf_fuzz_empty_dict(self):
+        icf_text = {}
+        required = {
+            "research_purpose", "study_duration", "procedures", "risks",
+            "benefits", "alternatives", "confidentiality", "voluntary_participation",
+            "contact_info", "compensation",
+        }
+        present = {k for k, v in icf_text.items() if v}
+        missing = list(required - present)
+        assert len(missing) == len(required)

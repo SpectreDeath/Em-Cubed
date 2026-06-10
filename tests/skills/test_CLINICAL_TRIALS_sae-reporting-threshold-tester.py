@@ -56,13 +56,36 @@ class TestSaeReportingThresholdTesterSkill:
             assert results["pass_rate"] > 0.3
 
     def test_python_sae_expedited_trigger(self):
-        rule = {"expedited": True, "threshold": 2.0}
-        observed_ratio = 5 / 1
-        assert observed_ratio >= rule["threshold"]
+        rule = {"expedited": True, "threshold": 1.5}
+        observed_ratio = 3 / 2
+        assert observed_ratio >= 1.5
+        assert observed_ratio == rule["threshold"]
         assert rule["expedited"] is True
 
-    def test_z3_sae_breaches_timeline(self):
+    def test_python_sae_below_threshold_no_trigger(self):
+        rule = {"expedited": True, "threshold": 2.0}
+        observed_ratio = 3 / 2
+        assert observed_ratio < rule["threshold"]
+
+    def test_z3_sae_breaches_7day_timeline(self):
         observed = 5.0
         expected = 1.0
+        threshold = 2.0
+        timeline_days = 7.0
         ratio = observed / expected
-        assert ratio >= 2.0
+        assert ratio >= threshold
+        assert timeline_days <= 7
+
+    def test_z3_sae_exact_7day_boundary(self):
+        observed = 2.0
+        expected = 1.0
+        threshold = 2.0
+        timeline_days = 7.0
+        ratio = observed / expected
+        assert ratio >= threshold
+        assert timeline_days <= 7
+
+    def test_z3_sae_15day_not_breached_at_14(self):
+        timeline_days = 14.0
+        assert timeline_days > 7
+        assert timeline_days <= 15

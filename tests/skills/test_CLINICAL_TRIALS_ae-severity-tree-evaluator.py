@@ -57,41 +57,133 @@ class TestAeSeverityTreeEvaluatorSkill:
 
     def test_python_ae_grading_grade3(self):
         grade_rules = [
-            {"lab_name": "Hemoglobin", "grade": 1, "grade_low": 9.5, "grade_high": 10.0},
-            {"lab_name": "Hemoglobin", "grade": 2, "grade_low": 8.0, "grade_high": 9.4},
-            {"lab_name": "Hemoglobin", "grade": 3, "grade_low": 6.5, "grade_high": 7.9},
+            {"lab_name": "Hemoglobin", "grade": 1, "grade_low": 10.0, "grade_high": 9.5},
+            {"lab_name": "Hemoglobin", "grade": 2, "grade_low": 9.4, "grade_high": 8.0},
+            {"lab_name": "Hemoglobin", "grade": 3, "grade_low": 7.9, "grade_high": 6.5},
             {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
         ]
-        ae_record = {"lab_name": "Hemoglobin", "observed_value": 7.2}
-        matched = [
-            r for r in grade_rules
-            if r["lab_name"] == ae_record["lab_name"]
-            and r["grade_low"] <= ae_record["observed_value"] <= r["grade_high"]
-        ]
-        assert len(matched) == 1
-        assert matched[0]["grade"] == 3
+        ae_records = [{"lab_name": "Hemoglobin", "observed_value": 7.2}]
+        all_grades = []
+        for rec in ae_records:
+            matched = [
+                r for r in grade_rules
+                if r["lab_name"] == rec["lab_name"]
+                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+            ]
+            if matched:
+                all_grades.append(max(m["grade"] for m in matched))
+        assert all_grades == [3]
 
     def test_python_ae_grading_grade4(self):
         grade_rules = [
             {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
         ]
-        ae_record = {"lab_name": "Hemoglobin", "observed_value": 5.0}
-        matched = [
-            r for r in grade_rules
-            if r["lab_name"] == ae_record["lab_name"]
-            and r["grade_low"] <= ae_record["observed_value"] <= r["grade_high"]
-        ]
-        assert len(matched) == 1
-        assert matched[0]["grade"] == 4
+        ae_records = [{"lab_name": "Hemoglobin", "observed_value": 5.0}]
+        all_grades = []
+        for rec in ae_records:
+            matched = [
+                r for r in grade_rules
+                if r["lab_name"] == rec["lab_name"]
+                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+            ]
+            if matched:
+                all_grades.append(max(m["grade"] for m in matched))
+        assert all_grades == [4]
 
     def test_python_ae_grading_no_match(self):
         grade_rules = [
-            {"lab_name": "Hemoglobin", "grade": 1, "grade_low": 9.5, "grade_high": 10.0},
+            {"lab_name": "Hemoglobin", "grade": 1, "grade_low": 10.0, "grade_high": 9.5},
         ]
-        ae_record = {"lab_name": "Neutrophils", "observed_value": 7.2}
-        matched = [
-            r for r in grade_rules
-            if r["lab_name"] == ae_record["lab_name"]
-            and r["grade_low"] <= ae_record["observed_value"] <= r["grade_high"]
+        ae_records = [{"lab_name": "Neutrophils", "observed_value": 7.2}]
+        all_grades = []
+        for rec in ae_records:
+            matched = [
+                r for r in grade_rules
+                if r["lab_name"] == rec["lab_name"]
+                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+            ]
+            if matched:
+                all_grades.append(max(m["grade"] for m in matched))
+        assert all_grades == []
+
+    def test_python_ae_multi_record_max_grade(self):
+        grade_rules = [
+            {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
+            {"lab_name": "Hemoglobin", "grade": 2, "grade_low": 8.0, "grade_high": 9.4},
         ]
-        assert len(matched) == 0
+        ae_records = [
+            {"lab_name": "Hemoglobin", "observed_value": 5.0},
+            {"lab_name": "Hemoglobin", "observed_value": 9.0},
+        ]
+        all_grades = []
+        for rec in ae_records:
+            matched = [
+                r for r in grade_rules
+                if r["lab_name"] == rec["lab_name"]
+                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+            ]
+            if matched:
+                all_grades.append(max(m["grade"] for m in matched))
+        assert max(all_grades) == 4
+
+    def test_python_ae_fuzz_missing_observed_value(self):
+        ae_records = [{"lab_name": "Hemoglobin"}]
+        grade_rules = [
+            {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
+        ]
+        results = []
+        for rec in ae_records:
+            try:
+                observed = float(rec["observed_value"])
+            except (TypeError, KeyError, ValueError):
+                results.append("error")
+                continue
+            matched = [
+                r for r in grade_rules
+                if r["lab_name"] == rec["lab_name"]
+                and r["grade_low"] <= observed <= r["grade_high"]
+            ]
+            results.append("matched" if matched else "no_match")
+        assert results == ["error"]
+
+    def test_python_ae_fuzz_missing_lab_name(self):
+        ae_records = [{"observed_value": 7.2}]
+        grade_rules = [
+            {"lab_name": "Hemoglobin", "grade": 4, "grade_low": 0.0, "grade_high": 6.4},
+        ]
+        results = []
+        for rec in ae_records:
+            try:
+                observed = float(rec["observed_value"])
+            except (TypeError, KeyError, ValueError):
+                results.append("error")
+                continue
+            lab_name = rec.get("lab_name", "")
+            matched = [
+                r for r in grade_rules
+                if r["lab_name"] == lab_name
+                and r["grade_low"] <= observed <= r["grade_high"]
+            ]
+            results.append("matched" if matched else "no_match")
+        assert results == ["no_match"]
+
+    def test_python_ae_string_observed_value_coerced(self):
+        grade_rules = [
+            {"lab_name": "Hemoglobin", "grade": 3, "grade_low": 6.5, "grade_high": 7.9},
+        ]
+        ae_records = [{"lab_name": "Hemoglobin", "observed_value": "7.2"}]
+        all_grades = []
+        for rec in ae_records:
+            try:
+                observed = float(rec["observed_value"])
+            except (TypeError, ValueError):
+                all_grades.append("error")
+                continue
+            matched = [
+                r for r in grade_rules
+                if r["lab_name"] == rec["lab_name"]
+                and r["grade_low"] <= observed <= r["grade_high"]
+            ]
+            if matched:
+                all_grades.append(max(m["grade"] for m in matched))
+        assert all_grades == [3]
