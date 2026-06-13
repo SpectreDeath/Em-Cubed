@@ -8,6 +8,22 @@ Estimated Execution Time: 5-10 minutes
 name: recommendation-engine
 Source: community
 description: Multi-surface recommendation engine combining Python for collaborative/content filtering, Prolog for logical consistency rules, and Hy for fuzzy preference aggregation.
+description: Multi-surface recommendation engine combining Python for collaborative/content filtering, Prolog for logical consistency rules, and Hy for fuzzy preference aggregation.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

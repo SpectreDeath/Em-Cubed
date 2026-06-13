@@ -7,6 +7,22 @@ Category: Statistical Skills
 Estimated Execution Time: 5-10 minutes
 name: uncertainty-quantifier
 Source: community
+description: Uncertainty quantifier for confidence interval estimation, sensitivity analysis, and probabilistic risk assessment.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

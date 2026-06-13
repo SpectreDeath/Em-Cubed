@@ -259,6 +259,31 @@ class SkillMetadata:
 
     def __post_init__(self):
         """Compute derived fields after initialization."""
+        if isinstance(self.input_schema, dict):
+            self.input_schema = InputOutputSchema.from_dict(self.input_schema)
+        if isinstance(self.output_schema, dict):
+            self.output_schema = InputOutputSchema.from_dict(self.output_schema)
+        if isinstance(self.capabilities, dict):
+            self.capabilities = SkillCapability.from_dict(self.capabilities)
+        if isinstance(self.compatibility, dict):
+            self.compatibility = CompatibilityRange.from_dict(self.compatibility)
+        if isinstance(self.quality_thresholds, dict):
+            self.quality_thresholds = QualityThresholds(
+                min_test_coverage=self.quality_thresholds.get("min_test_coverage", 0.8),
+                min_success_rate=self.quality_thresholds.get("min_success_rate", 0.7),
+                max_execution_time=self.quality_thresholds.get("max_execution_time", 30.0),
+                max_memory_usage=self.quality_thresholds.get("max_memory_usage", 512*1024*1024),
+                required_surfaces=self.quality_thresholds.get("required_surfaces", 1),
+                min_documentation_ratio=self.quality_thresholds.get("min_documentation_ratio", 0.3),
+            )
+        if isinstance(self.metrics, dict):
+            self.metrics = RuntimeMetrics()
+            quality_data = self.metrics
+            if isinstance(quality_data, dict):
+                self.metrics.applied_count = quality_data.get("applied_count", 0)
+                self.metrics.success_count = quality_data.get("success_count", 0)
+                self.metrics.total_token_usage = quality_data.get("token_savings_avg", 0.0) * self.metrics.applied_count if self.metrics.applied_count > 0 else 0
+
         if self.skill_id is None:
             # Use slugified components for internal ID
             slug_domain = self._slugify(self.domain)
@@ -417,7 +442,10 @@ class SkillMetadata:
         capabilities = SkillCapability.from_dict(frontmatter.get("capabilities", {}))
 
         # Parse compatibility
-        compatibility = CompatibilityRange.from_dict(frontmatter.get("compatibility", {}))
+        compatibility_raw = frontmatter.get("compatibility", {})
+        if isinstance(compatibility_raw, str):
+            compatibility_raw = {"description": compatibility_raw}
+        compatibility = CompatibilityRange.from_dict(compatibility_raw)
 
         # Parse quality thresholds
         thresholds_data = frontmatter.get("quality_thresholds", {})

@@ -2,13 +2,46 @@
 
 import asyncio
 import importlib.util
-from concurrent.futures import ThreadPoolExecutor
+import os
+import pickle
+from concurrent.futures import ProcessPoolExecutor
 from typing import Dict, Any, Optional
 import structlog
 
 from .base import SurfaceBase, _make_daemon_executor
 
 logger = structlog.get_logger()
+
+
+def _run_asteval_code(code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    from asteval import Interpreter
+
+    aeval = Interpreter(excluded_symbols=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
+    for bad in ['open', '__import__', 'eval', 'exec', 'compile', '__builtins__']:
+        aeval.symtable.pop(bad, None)
+
+    if context:
+        for key, value in context.items():
+            aeval.symtable[key] = value
+        aeval.symtable["context"] = context
+
+    result = aeval(code)
+
+    if aeval.error:
+        error_msg = str(aeval.error[0].msg) if hasattr(aeval.error[0], "msg") else str(aeval.error[0])
+        logger.info("Python execution failed with error", error=error_msg)
+        return {"status": "error", "message": error_msg}
+
+    logger.info("Python execution successful")
+    return {"status": "ok", "value": result}
+
+
+def _is_picklable(value: Any) -> bool:
+    try:
+        pickle.dumps(value)
+        return True
+    except Exception:
+        return False
 
 
 class PythonSurface(SurfaceBase):
@@ -28,10 +61,19 @@ class PythonSurface(SurfaceBase):
 
     def __init__(self, timeout: Optional[float] = None):
         super().__init__(timeout)
-        # Use a dedicated executor so timeouts can be handled
-        # by replacing the executor (abandoning the stuck thread)
-        self._executor = _make_daemon_executor(max_workers=1)
-        logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout)
+        worker_count = self._worker_count()
+        self._executor = _make_daemon_executor(max_workers=worker_count)
+        self._process_executor = ProcessPoolExecutor(max_workers=worker_count)
+        self._concurrency_limit = int(os.getenv("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", str(worker_count)))
+        self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout, workers=worker_count)
+
+    @staticmethod
+    def _worker_count() -> int:
+        try:
+            return max(1, int(os.getenv("EM_CUBED_PYTHON_SURFACE_WORKERS", "4")))
+        except ValueError:
+            return 4
 
     def _check_availability(self) -> bool:
         """Check if asteval is available."""
@@ -51,21 +93,36 @@ class PythonSurface(SurfaceBase):
         return list(dict.fromkeys(fns))
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Python code and return results using asteval for safety."""
+        if not self.available:
+            return {
+                "status": "error",
+                "message": f"{self.name} surface not available"
+            }
+        if not await self._acquire_execution_slot():
+            return {
+                "status": "error",
+                "message": f"PythonSurface execution rejected: concurrency limit {self._concurrency_limit} reached"
+            }
         try:
             loop = asyncio.get_running_loop()
-            future = loop.run_in_executor(self._executor, self._run_code, code, context)
+            executor = self._process_executor if _is_picklable(context) else self._executor
+            future = loop.run_in_executor(executor, _run_asteval_code, code, context)
             return await asyncio.wait_for(asyncio.shield(future), timeout=self.timeout)
         except asyncio.TimeoutError:
             # Replace executor to release the stuck thread
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
-            self._executor = ThreadPoolExecutor(max_workers=1)
+            if self._process_executor is not None:
+                self._process_executor.shutdown(wait=False)
+            self._executor = _make_daemon_executor(max_workers=self._worker_count())
+            self._process_executor = ProcessPoolExecutor(max_workers=self._worker_count())
             logger.warning("Surface execution timed out", timeout=self.timeout)
             return {
                 "status": "error",
                 "message": f"Execution timed out after {self.timeout}s"
             }
+        finally:
+            self._release_execution_slot()
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Python code - required by abstract base class."""

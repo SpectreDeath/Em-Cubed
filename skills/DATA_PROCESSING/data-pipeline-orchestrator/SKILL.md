@@ -11,6 +11,22 @@ Category: Data Engineering Skills
 Estimated Execution Time: 5-15 minutes
 name: data-pipeline-orchestrator
 Source: community
+description: Data pipeline orchestrator for composing, validating, and executing multi-step data transformation workflows.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

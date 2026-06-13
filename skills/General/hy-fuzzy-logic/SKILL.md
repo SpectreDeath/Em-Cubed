@@ -1,5 +1,5 @@
 ---
-name: hy_fuzzy_logic
+name: hy-fuzzy-logic
 Domain: General
 Version: 1.0.0
 surfaces:
@@ -11,6 +11,22 @@ triggers:
   - lisp
   - heuristic
   - reasoning
+description: Fuzzy logic inference engine using Hy surface for membership definitions, Python for numerical defuzzification, and Prolog for rule validation.
+compatibility: HY
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

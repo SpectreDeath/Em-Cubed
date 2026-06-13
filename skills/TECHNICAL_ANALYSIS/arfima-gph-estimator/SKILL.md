@@ -1,10 +1,26 @@
 ---
-name: ARFIMA GPH Estimator
+name: arfima-gph-estimator
 domain: TECHNICAL_ANALYSIS
 version: 1.0.0
 surfaces:
   - sqlite
   - python
+description: ARFIMA GPH estimator for long-range dependence detection in time series using Geweke-Porter-Hudak semiparametric estimation.
+compatibility: SQLITE
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

@@ -11,6 +11,22 @@ Category: Analytical Skills
 Estimated Execution Time: 1-3 minutes
 name: multi-criteria-weight-calculator
 Source: community
+description: Multi-surface multi-criteria weight calculator for deriving criteria weights from pairwise comparisons and scoring matrices.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

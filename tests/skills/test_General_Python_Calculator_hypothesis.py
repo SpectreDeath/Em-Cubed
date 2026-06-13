@@ -15,7 +15,7 @@ def setup_module():
     _aeval = Interpreter()
 
     # Read the skill file and extract the Python code block
-    skill_path = str(Path(__file__).parent.parent.parent / "skills" / "General" / "python_calculator" / "SKILL.md")
+    skill_path = str(Path(__file__).parent.parent.parent / "skills" / "General" / "python-calculator" / "SKILL.md")
     with open(skill_path, "r", encoding="utf-8") as f:
         content = f.read()
 

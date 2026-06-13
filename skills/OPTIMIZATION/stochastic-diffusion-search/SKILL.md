@@ -1,3 +1,23 @@
+---
+name: stochastic-diffusion-search
+domain: "OPTIMIZATION"
+description: Skill for stochastic-diffusion-search.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: stochastic-diffusion-search
 Domain: OPTIMIZATION

@@ -3,6 +3,22 @@ name: markov-chain-sequence
 domain: ANALYTICS
 version: "1.0.0"
 surfaces: [prolog, python]
+description: Multi-surface Markov chain sequence generator with Python surface for state transition simulation and Prolog surface for transition probability verification.
+compatibility: PROLOG, PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

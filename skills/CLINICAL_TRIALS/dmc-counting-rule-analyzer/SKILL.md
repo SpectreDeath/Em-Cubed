@@ -1,10 +1,26 @@
 ---
-name: DMC Counting Rule Analyzer
+name: dmc-counting-rule-analyzer
 Domain: CLINICAL_TRIALS
 Version: 1.0.0
 surfaces:
   - python
   - clingo
+description: Multi-surface DMC counting rule analyzer with Python surface for interim analysis and Clingo surface for Answer Set Programming boundary verification.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Purpose

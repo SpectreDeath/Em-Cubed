@@ -5,6 +5,22 @@ version: "1.0.0"
 surfaces:
   - python
   - datalog
+description: Multi-surface WASM execution sandbox with Python surface for runtime compilation and Datalog surface for capability verification. Supports versioned execution and memory safety checks.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # WASM Execution Sandbox

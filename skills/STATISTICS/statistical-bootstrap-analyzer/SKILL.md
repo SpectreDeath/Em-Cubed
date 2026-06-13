@@ -1,3 +1,23 @@
+---
+name: statistical-bootstrap-analyzer
+domain: "STATISTICS"
+description: Skill for statistical-bootstrap-analyzer.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 Domain: STATISTICS
 Version: 1.0.0

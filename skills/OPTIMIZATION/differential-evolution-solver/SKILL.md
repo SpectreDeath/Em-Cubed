@@ -9,6 +9,22 @@ name: differential-evolution-solver
 Source: community
 surfaces:
   - python
+description: Differential evolution solver for global optimization using population-based mutation and crossover strategies.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

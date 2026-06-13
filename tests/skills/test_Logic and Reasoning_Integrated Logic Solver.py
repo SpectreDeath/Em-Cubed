@@ -35,7 +35,7 @@ class TestIntegrated_Logic_SolverSkill:
         """Test skill metadata is valid."""
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "Integrated Logic Solver"
+        assert metadata_dict["name"] == "integrated-logic-solver"
         assert metadata_dict["domain"] == "Logic and Reasoning"
         assert len(metadata_dict["surfaces"]) >= 1
 

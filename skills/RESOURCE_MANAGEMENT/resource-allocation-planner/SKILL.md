@@ -7,6 +7,22 @@ Category: Planning Skills
 Estimated Execution Time: 2-5 minutes
 name: resource-allocation-planner
 Source: community
+description: Resource allocation planner for budget distribution, scheduling, and load balancing across constrained resources.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

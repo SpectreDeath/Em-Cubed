@@ -6,8 +6,8 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "hy_fuzzy_logic" / "SKILL.md")
-SKILL_ID = "General/hy_fuzzy_logic"
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "hy-fuzzy-logic" / "SKILL.md")
+SKILL_ID = "General/hy-fuzzy-logic"
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ class Testhy_fuzzy_logicSkill:
         """Test skill metadata is valid."""
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "hy_fuzzy_logic"
+        assert metadata_dict["name"] == "hy-fuzzy-logic"
         assert metadata_dict["domain"] == "General"
         assert len(metadata_dict["surfaces"]) >= 1
 

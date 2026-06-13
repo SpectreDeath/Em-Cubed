@@ -1,15 +1,22 @@
-﻿---
-name: Python Calculator
-Domain: General
-Version: 1.0.0
-surfaces:
-  - python
-triggers:
-  - calculator
-  - math
-  - arithmetic
-  - computation
-  - calculate
+---
+name: python-calculator
+domain: "GENERAL"
+description: Skill for python_calculator.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

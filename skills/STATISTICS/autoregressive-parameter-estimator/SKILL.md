@@ -6,6 +6,22 @@ surfaces:
   - python
   - z3
   - sqlite
+description: Multi-surface autoregressive parameter estimator with Python surface for lag selection and SQLite surface for model parameter persistence. Supports configurable AR order and validation.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Autoregressive Parameter Estimator

@@ -186,7 +186,13 @@ def _execute_distributed_task(task_dict: Dict[str, Any], skills_dir_str: str) ->
         plugin_manager = PluginManager()
         
         # Load registry dynamically relative to skills_dir or current working dir
-        registry = SkillRegistry(skills_dir, skills_dir / "registry.json")
+        registry_candidates = [
+            Path.cwd() / "registry.json",
+            skills_dir / "registry.json",
+            skills_dir.parent / "registry.json",
+        ]
+        registry_file = next((path for path in registry_candidates if path.exists()), skills_dir / "registry.json")
+        registry = SkillRegistry(skills_dir, registry_file)
         executor = SkillExecutor(plugin_manager, registry, skills_dir)
         
         # Construct and dispatch execution request

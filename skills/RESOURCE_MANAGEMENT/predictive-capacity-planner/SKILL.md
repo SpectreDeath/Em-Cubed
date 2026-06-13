@@ -12,6 +12,22 @@ surfaces:
   - prolog
   - hy
 
+description: Predictive capacity planner for workload forecasting, resource scaling, and bottleneck prevention.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

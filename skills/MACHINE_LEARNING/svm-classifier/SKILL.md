@@ -3,6 +3,22 @@ name: svm-classifier
 domain: MACHINE_LEARNING
 version: "1.0.0"
 surfaces: [python, z3]
+description: Multi-surface SVM classifier with Python surface for kernel-based training and Z3 surface for margin verification. Supports linear and RBF kernels with configurable regularization.
+compatibility: PYTHON, Z3
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Purpose

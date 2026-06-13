@@ -7,6 +7,22 @@ Category: Mathematical Skills
 Estimated Execution Time: 5-10 minutes
 name: optimization-landscape-analyzer
 Source: community
+description: Optimization landscape analyzer for visualizing objective surfaces, identifying basins, and characterizing multimodality.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

@@ -26,7 +26,7 @@ class TestSaeReportingThresholdTesterSkill:
     def test_metadata_valid(self):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "SAE Reporting Threshold Tester"
+        assert metadata_dict["name"] == "sae-reporting-threshold-tester"
         assert metadata_dict["domain"] == "CLINICAL_TRIALS"
         assert "python" in metadata_dict["surfaces"]
         assert "z3" in metadata_dict["surfaces"]

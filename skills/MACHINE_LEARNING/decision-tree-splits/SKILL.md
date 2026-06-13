@@ -3,6 +3,22 @@ name: decision-tree-splits
 domain: MACHINE_LEARNING
 version: "1.0.0"
 surfaces: [python, prolog]
+description: Multi-surface decision tree with Python surface for recursive splitting and Prolog surface for logical rule extraction. Supports entropy/gini criteria and configurable depth.
+compatibility: PYTHON, PROLOG
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Purpose

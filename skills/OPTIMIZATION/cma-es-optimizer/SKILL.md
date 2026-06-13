@@ -12,6 +12,22 @@ surfaces:
   - prolog
   - z3
   - hy
+description: CMA-ES optimizer for derivative-free continuous optimization with adaptive covariance and step-size control.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

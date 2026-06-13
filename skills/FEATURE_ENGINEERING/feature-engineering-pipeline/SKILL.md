@@ -7,6 +7,22 @@ Category: ML Skills
 Estimated Execution Time: 5-10 minutes
 name: feature-engineering-pipeline
 Source: community
+description: Feature engineering pipeline with Python transformations, Prolog consistency checks, and Hy fuzzy feature scoring.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

@@ -3,6 +3,22 @@ name: random-forest-ensemble
 domain: MACHINE_LEARNING
 version: "1.0.0"
 surfaces: [python, sqlite]
+description: Multi-surface random forest ensemble with Python surface for bagged tree training and SQLite surface for member tracking and ensemble prediction aggregation. Supports configurable tree counts.
+compatibility: PYTHON, SQLITE
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Purpose

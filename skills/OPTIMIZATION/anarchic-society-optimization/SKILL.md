@@ -12,6 +12,22 @@ surfaces:
   - prolog
   - hy
   - z3
+description: Optimization algorithm inspired by anarchic society dynamics for multi-agent optimization, swarm intelligence, and decentralized search.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

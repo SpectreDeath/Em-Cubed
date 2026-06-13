@@ -7,6 +7,22 @@ Category: Mathematical Skills
 Estimated Execution Time: 2-10 minutes
 name: constraint-satisfaction-solver
 Source: community
+description: Constraint satisfaction solver for combinatorial problems with propagation, backtracking, and optimization support.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

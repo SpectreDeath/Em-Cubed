@@ -7,6 +7,22 @@ Category: Monitoring Skills
 Estimated Execution Time: 2-5 minutes
 name: anomaly-detection-system
 Source: community
+description: Anomaly detection system with statistical and ML-based surfaces for outlier identification in time-series and tabular data.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

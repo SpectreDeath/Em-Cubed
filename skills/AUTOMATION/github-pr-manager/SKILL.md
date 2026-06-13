@@ -23,6 +23,22 @@ quality:
   token_savings_avg: 0.0
 created_at: "2026-05-03T15:40:00Z"
 updated_at: "2026-05-03T15:40:00Z"
+description: GitHub PR manager for creating, reviewing, and merging pull requests using the GitHub CLI and API.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

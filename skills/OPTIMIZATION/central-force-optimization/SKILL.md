@@ -3,6 +3,22 @@ name: central-force-optimization
 domain: OPTIMIZATION
 version: "1.0.0"
 surfaces: [python, prolog, hy]
+description: Central force optimization algorithm for continuous search spaces using gravitational metaphor and population-based exploration.
+compatibility: PYTHON, PROLOG, HY
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

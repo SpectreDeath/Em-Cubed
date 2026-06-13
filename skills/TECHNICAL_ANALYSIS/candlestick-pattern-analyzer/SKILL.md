@@ -12,6 +12,22 @@ surfaces:
   - prolog
   - quickjs
 
+description: Candlestick pattern analyzer for financial time-series pattern recognition and technical signal detection.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

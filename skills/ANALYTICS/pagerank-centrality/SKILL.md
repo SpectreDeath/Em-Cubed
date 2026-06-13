@@ -3,6 +3,22 @@ name: pagerank-centrality
 domain: ANALYTICS
 version: "1.0.0"
 surfaces: [python, prolog]
+description: Multi-surface PageRank centrality with Python surface for power iteration and Prolog surface for graph validation before numerical computation.
+compatibility: PYTHON, PROLOG
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

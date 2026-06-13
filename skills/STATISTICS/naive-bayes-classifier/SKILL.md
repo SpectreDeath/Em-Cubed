@@ -1,3 +1,23 @@
+---
+name: naive-bayes-classifier
+domain: "STATISTICS"
+description: Skill for naive-bayes-classifier.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: naive-bayes-classifier
 domain: STATISTICS

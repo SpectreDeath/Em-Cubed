@@ -3,6 +3,22 @@ name: bayesian-evidence-updater
 domain: ANALYTICS
 version: "1.0.0"
 surfaces: [sqlite, python, prolog]
+description: Multi-surface Bayesian evidence updater with Python surface for causal graph inference, SQLite surface for observation persistence and posterior updates, and Prolog surface for topological causal ordering.
+compatibility: SQLITE, PYTHON, PROLOG
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Purpose

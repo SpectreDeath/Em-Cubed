@@ -7,6 +7,22 @@ Category: AI Skills
 Estimated Execution Time: 10-30 minutes
 name: reinforcement-learning-agent
 Source: community
+description: Skill for reinforcement-learning-agent.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

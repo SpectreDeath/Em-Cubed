@@ -11,6 +11,22 @@ surfaces:
   - python
   - prolog
   - hy
+description: Spiral dynamics optimization using evolutionary tier progression and population memetic adaptation.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

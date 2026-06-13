@@ -1,3 +1,23 @@
+---
+name: strategic-planner
+domain: "DECISION_MAKING"
+description: Skill for strategic-planner.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: strategic-planner
 Domain: DECISION_MAKING

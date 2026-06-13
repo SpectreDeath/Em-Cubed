@@ -1,10 +1,26 @@
 ---
-name: SQL Aggregator
+name: sql-aggregator
 Domain: DATA_PROCESSING
 Version: 1.0.0
 surfaces:
   - python
   - sqlite
+description: SQL aggregator for summarizing and querying tabular data with configurable grouping and filters.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

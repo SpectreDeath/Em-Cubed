@@ -1,5 +1,5 @@
 ---
-name: Intelligent Task Planner
+name: intelligent-task-planner
 Domain: General
 Version: 1.0.0
 surfaces:
@@ -13,6 +13,22 @@ triggers:
   - scheduling
   - multi_surface
   - coordination
+description: Intelligent task planner decomposing objectives into executable steps with dependency-aware scheduling.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

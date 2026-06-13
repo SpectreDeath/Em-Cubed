@@ -17,6 +17,22 @@ quality:
   token_savings_avg: 0.0
 created_at: "2026-05-07T21:00:00Z"
 updated_at: "2026-05-07T21:00:00Z"
+description: Multi-surface pipeline combining Python for execution or evaluation, Prolog for logical rule verification, and optional SQLite for persistent state storage.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

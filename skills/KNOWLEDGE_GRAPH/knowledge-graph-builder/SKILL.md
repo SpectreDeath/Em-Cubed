@@ -11,6 +11,22 @@ Category: Cognitive Skills
 Estimated Execution Time: 5-10 minutes
 name: knowledge-graph-builder
 Source: community
+description: Knowledge graph builder for entity extraction, relation modeling, and graph persistence with Python and SQLite.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

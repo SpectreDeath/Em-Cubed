@@ -1,10 +1,26 @@
 ---
-name: Z3 Schedule Solver
+name: z3-schedule-solver
 Domain: OPTIMIZATION
 Version: 1.0.0
 surfaces:
   - python
   - z3
+description: Z3 schedule solver for constraint-based timetabling, resource allocation, and shift planning with formal verification.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

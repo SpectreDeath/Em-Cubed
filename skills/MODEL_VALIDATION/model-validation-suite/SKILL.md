@@ -7,6 +7,22 @@ Category: ML Skills
 Estimated Execution Time: 5-10 minutes
 name: model-validation-suite
 Source: community
+description: Model validation suite for cross-validation, residual analysis, and diagnostic reporting across statistical and ML models.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

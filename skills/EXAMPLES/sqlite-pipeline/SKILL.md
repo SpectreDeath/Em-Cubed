@@ -1,10 +1,26 @@
 ---
-name: SQLite Pipeline
+name: sqlite-pipeline
 Domain: EXAMPLES
 Version: 1.0.0
 surfaces:
   - python
   - sqlite
+description: Data pipeline with SQLite storage, Python orchestration, and Datalog-based inspection for archived data flows.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

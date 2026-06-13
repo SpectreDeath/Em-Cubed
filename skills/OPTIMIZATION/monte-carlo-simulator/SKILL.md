@@ -3,6 +3,22 @@ name: monte-carlo-simulator
 domain: OPTIMIZATION
 version: "1.0.0"
 surfaces: [python, sqlite]
+description: Monte Carlo simulator for stochastic sampling, risk estimation, and probabilistic scenario analysis.
+compatibility: PYTHON, SQLITE
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

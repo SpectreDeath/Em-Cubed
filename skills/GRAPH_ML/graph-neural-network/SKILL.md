@@ -7,6 +7,22 @@ Category: Deep Learning Skills
 Estimated Execution Time: 10-20 minutes
 name: graph-neural-network
 Source: community
+description: Graph neural network implementation with Python surface for message passing and SQLite surface for graph storage.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

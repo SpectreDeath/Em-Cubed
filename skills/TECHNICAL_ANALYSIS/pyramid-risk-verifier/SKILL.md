@@ -1,10 +1,26 @@
 ---
-name: Pyramid Risk Verifier
+name: pyramid-risk-verifier
 domain: TECHNICAL_ANALYSIS
 version: 1.0.0
 surfaces:
   - z3
   - python
+description: Pyramid risk verifier for validating nested risk classifications against formal safety constraints and threshold logic.
+compatibility: Z3
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

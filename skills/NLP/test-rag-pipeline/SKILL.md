@@ -1,3 +1,23 @@
+---
+name: test-rag-pipeline
+domain: "NLP"
+description: Skill for test-rag-pipeline.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: test-rag-pipeline
 Domain: NLP

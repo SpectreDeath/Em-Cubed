@@ -6,8 +6,8 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "intelligent_planner" / "SKILL.md")
-SKILL_ID = "General/intelligent_planner"
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "intelligent-task-planner" / "SKILL.md")
+SKILL_ID = "General/intelligent-task-planner"
 
 
 @pytest.fixture
@@ -35,7 +35,7 @@ class TestIntelligent_Task_PlannerSkill:
         """Test skill metadata is valid."""
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "Intelligent Task Planner"
+        assert metadata_dict["name"] == "intelligent-task-planner"
         assert metadata_dict["domain"] == "General"
         assert len(metadata_dict["surfaces"]) >= 1
 

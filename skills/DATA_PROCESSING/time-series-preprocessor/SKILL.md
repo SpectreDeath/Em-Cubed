@@ -5,6 +5,22 @@ version: "1.0.0"
 surfaces:
   - python
   - sqlite
+description: Multi-surface time series preprocessor with Python surface for datetime parsing and SQLite surface for resampled data storage. Supports configurable interpolation and deduplication.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Time Series Preprocessor

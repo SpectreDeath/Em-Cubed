@@ -1,6 +1,7 @@
 """Concurrent execution tests for multiple surfaces."""
 
 import asyncio
+import os
 import pytest
 from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
 
@@ -12,6 +13,7 @@ class TestConcurrentExecution:
 
     async def test_concurrent_python_executions(self):
         """Multiple Python surface calls in parallel should all succeed."""
+        os.environ.setdefault("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", "10")
         surface = PythonSurface()
         tasks = [
             surface.execute("x * 2", {"x": i})

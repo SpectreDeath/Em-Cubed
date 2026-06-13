@@ -1,7 +1,9 @@
 """Datalog surface integration for fact-heavy relational queries."""
 
+import ast
 import asyncio
 import importlib.util
+import os
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any, Optional, List
 import structlog
@@ -31,6 +33,10 @@ class DatalogSurface(SurfaceBase):
         # Use a dedicated executor so timeouts can be handled
         # by replacing the executor (abandoning the stuck thread)
         self._executor = ThreadPoolExecutor(max_workers=1)
+        self.max_fact_lines = int(os.getenv("EM_CUBED_DATALOG_MAX_FACT_LINES", "5000"))
+        self._concurrency_limit = int(os.getenv("EM_CUBED_DATALOG_MAX_CONCURRENCY", "1"))
+        self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        self._rejected_executions = 0
         logger.info("DatalogSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
@@ -83,6 +89,11 @@ class DatalogSurface(SurfaceBase):
 
     async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Datalog code with timeout protection."""
+        if not await self._acquire_execution_slot():
+            return {
+                "status": "error",
+                "message": f"DatalogSurface execution rejected: concurrency limit {self._concurrency_limit} reached"
+            }
         try:
             loop = asyncio.get_running_loop()
             future = loop.run_in_executor(self._executor, self._run_code, code, context)
@@ -97,10 +108,27 @@ class DatalogSurface(SurfaceBase):
                 "status": "error",
                 "message": f"Execution timed out after {self.timeout}s"
             }
+        finally:
+            self._release_execution_slot()
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Datalog code - required by abstract base class."""
         return self._run_code(code, context)
+
+    def _validate_code(self, code: str) -> Optional[str]:
+        try:
+            tree = ast.parse(code)
+        except SyntaxError as exc:
+            return f"Invalid Datalog syntax: {exc}"
+
+        if len(code.splitlines()) > self.max_fact_lines:
+            return f"Datalog fact limit exceeded: {len(code.splitlines())} > {self.max_fact_lines}"
+
+        forbidden = (ast.Import, ast.ImportFrom, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        for node in ast.walk(tree):
+            if isinstance(node, forbidden):
+                return f"Statement not allowed in Datalog surface: {node.__class__.__name__}"
+        return None
 
     def _run_code(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Run code synchronously in the executor thread."""
@@ -110,29 +138,36 @@ class DatalogSurface(SurfaceBase):
             logger.error("Attempted Datalog execution but pyDatalog not available")
             return {"status": "error", "message": "pyDatalog not available"}
 
+        validation_error = self._validate_code(code)
+        if validation_error:
+            return {"status": "error", "message": validation_error}
+
         try:
-            from asteval import Interpreter
             from pyDatalog import pyDatalog as pd
 
-            # Create asteval interpreter
-            aeval = Interpreter()
+            namespace: Dict[str, Any] = {
+                "__builtins__": {
+                    "abs": abs,
+                    "float": float,
+                    "int": int,
+                    "len": len,
+                    "max": max,
+                    "min": min,
+                    "print": print,
+                    "range": range,
+                    "round": round,
+                    "str": str,
+                    "sum": sum,
+                },
+                "pyDatalog": pd,
+                "pd": pd,
+            }
 
-            # Inject pyDatalog module into interpreter's namespace
-            aeval.symtable['pyDatalog'] = pd
-
-            # Add context variables if provided
             if context:
-                for key, value in context.items():
-                    aeval.symtable[key] = value
+                namespace.update(context)
 
-            # Execute the code using asteval
-            result = aeval(code)
-
-            # Check for errors from asteval
-            if aeval.error:
-                error_msg = str(aeval.error[0])
-                logger.info("Datalog execution failed with error", error=error_msg)
-                return {"status": "error", "message": error_msg}
+            exec(code, namespace)  # noqa: S102
+            result = namespace.get("result")
 
             logger.info("Datalog execution successful")
             return {"status": "ok", "value": result, "message": "Execution completed"}

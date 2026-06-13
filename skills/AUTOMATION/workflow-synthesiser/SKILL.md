@@ -11,6 +11,22 @@ Category: Workflow Skills
 Estimated Execution Time: 5-15 minutes
 name: workflow-synthesiser
 Source: community
+description: Multi-surface workflow synthesiser with Python surface for process optimization, Prolog surface for logical workflow validation, and Hy surface for adaptive execution planning.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

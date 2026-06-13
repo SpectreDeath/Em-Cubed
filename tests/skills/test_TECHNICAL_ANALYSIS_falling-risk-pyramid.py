@@ -31,7 +31,7 @@ class Testfalling_risk_pyramidSkill:
     def test_metadata_valid(self):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "Falling-Risk Pyramid"
+        assert metadata_dict["name"] == "falling-risk-pyramid"
         assert metadata_dict["domain"] == "TECHNICAL_ANALYSIS"
         assert len(metadata_dict["surfaces"]) >= 1
 

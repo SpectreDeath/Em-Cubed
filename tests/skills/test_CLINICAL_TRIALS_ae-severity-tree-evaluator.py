@@ -26,7 +26,7 @@ class TestAeSeverityTreeEvaluatorSkill:
     def test_metadata_valid(self):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "AE Severity Tree Evaluator"
+        assert metadata_dict["name"] == "ae-severity-tree-evaluator"
         assert metadata_dict["domain"] == "CLINICAL_TRIALS"
         assert "python" in metadata_dict["surfaces"]
         assert "prolog" in metadata_dict["surfaces"]

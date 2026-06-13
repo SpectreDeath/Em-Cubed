@@ -11,6 +11,22 @@ surfaces:
   - python
   - prolog
   - hy
+description: Dialectic search optimizer using thesis-antithesis-synthesis framework for multi-objective optimization.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

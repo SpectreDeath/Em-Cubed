@@ -12,6 +12,7 @@ import structlog
 from datetime import datetime
 from collections import defaultdict
 import os
+import uuid
 
 from .metadata import SkillMetadata, RuntimeMetrics
 
@@ -423,8 +424,10 @@ class SkillRegistry:
                     data["test_coverage"] = qm.test_coverage
                 registry_data.append(data)
 
-            with open(self.registry_file, "w", encoding="utf-8") as f:
+            tmp_file = self.registry_file.with_name(f".{self.registry_file.name}.{uuid.uuid4().hex}.tmp")
+            with open(tmp_file, "w", encoding="utf-8") as f:
                 json.dump(registry_data, f, indent=2)
+            tmp_file.replace(self.registry_file)
 
             self.logger.debug("Saved registry", skills_count=len(registry_data))
         except Exception as e:

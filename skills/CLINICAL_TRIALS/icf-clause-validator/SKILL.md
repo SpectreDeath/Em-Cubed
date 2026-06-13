@@ -1,10 +1,26 @@
 ---
-name: Informed Consent Form Clause Validator
+name: informed-consent-form-clause-validator
 Domain: CLINICAL_TRIALS
 Version: 1.0.0
 surfaces:
   - python
   - z3
+description: Multi-surface ICF clause validator with Python surface for clause parsing and Z3 surface for regulatory compliance verification. Validates 21 CFR Part 50 mandatory clauses.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Purpose

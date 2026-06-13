@@ -466,9 +466,9 @@ class TestSkillValidator:
         validator._calculate_quality_score(result)
         
         # Score: 1.0 - min(1.0, 1*0.5) - min(1.0, 1*0.1) + 0.1 + 0.1 + 0.1
-        #       = 1.0 - 0.5 - 0.1 + 0.3 = 0.8
-        assert result.quality_score == 0.8
-        assert result.valid is True  # Because score >= 0.3
+        #       = 1.0 - 0.5 - 0.1 + 0.3 = 0.7
+        assert result.quality_score == 0.7
+        assert result.valid is False  # Still invalid due to the error issue
     
     def test_validate_composition_type_mismatch(self, validator):
         """Test composition validation with type mismatch."""

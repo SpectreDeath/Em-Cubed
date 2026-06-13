@@ -1,10 +1,26 @@
 ---
-name: Falling-Risk Pyramid
+name: falling-risk-pyramid
 domain: TECHNICAL_ANALYSIS
 version: 1.0.0
 surfaces:
   - python
   - sqlite
+description: Falling risk pyramid for stratified risk classification using nested threshold rules and decision boundaries.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

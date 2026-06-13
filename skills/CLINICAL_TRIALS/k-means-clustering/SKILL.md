@@ -1,3 +1,23 @@
+---
+name: k-means-clustering
+domain: "CLINICAL_TRIALS"
+description: Multi-surface K-means clustering with Python surface for iterative centroid optimization and SQLite surface for cluster persistence and member assignment tracking. Supports configurable K and convergence testing.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: k-means-clustering
 domain: CLINICAL_TRIALS

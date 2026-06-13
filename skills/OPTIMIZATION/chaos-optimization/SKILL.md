@@ -11,6 +11,22 @@ surfaces:
   - python
   - prolog
   - hy
+description: Chaos optimization algorithm leveraging chaotic maps for global search and parameter exploration.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

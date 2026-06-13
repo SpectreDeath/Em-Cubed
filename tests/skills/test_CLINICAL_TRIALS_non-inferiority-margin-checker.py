@@ -26,7 +26,7 @@ class TestNonInferiorityMarginCheckerSkill:
     def test_metadata_valid(self):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "Non-Inferiority Margin Checker"
+        assert metadata_dict["name"] == "non-inferiority-margin-checker"
         assert metadata_dict["domain"] == "CLINICAL_TRIALS"
         assert "python" in metadata_dict["surfaces"]
         assert "z3" in metadata_dict["surfaces"]

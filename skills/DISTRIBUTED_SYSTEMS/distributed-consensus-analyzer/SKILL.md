@@ -1,3 +1,23 @@
+---
+name: distributed-consensus-analyzer
+domain: "DISTRIBUTED_SYSTEMS"
+description: Skill for distributed-consensus-analyzer.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 Domain: DISTRIBUTED_SYSTEMS
 Version: 1.0.0

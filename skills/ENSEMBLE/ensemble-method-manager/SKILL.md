@@ -7,6 +7,22 @@ Category: ML Operations
 Estimated Execution Time: 5-15 minutes
 name: ensemble-method-manager
 Source: community
+description: Multi-surface ensemble manager with Python for model ensembling, Prolog for logical model compatibility, and Hy for fuzzy model weighting.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

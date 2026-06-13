@@ -1,3 +1,23 @@
+---
+name: advanced-llm-processor
+domain: "LLM_PROCESSING"
+description: Skill for advanced-llm-processor.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: advanced-llm-processor
 Domain: NLP

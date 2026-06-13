@@ -1,3 +1,23 @@
+---
+name: linear-regression
+domain: "FORENSIC_ECONOMICS"
+description: Multi-surface linear regression with Python surface for gradient descent fitting and SQLite surface for dataset storage and prediction tracking. Supports regularization and statistical diagnostics.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: linear-regression
 domain: FORENSIC_ECONOMICS

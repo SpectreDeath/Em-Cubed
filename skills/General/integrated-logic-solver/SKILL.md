@@ -1,10 +1,26 @@
 ---
-name: Integrated Logic Solver
+name: integrated-logic-solver
 Domain: Logic and Reasoning
 Version: 1.0.0
 surfaces:
   - python
   - prolog
+description: Integrated logic solver combining Prolog for constraint reasoning, Python for numeric solving, and Z3 for symbolic verification.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

@@ -54,6 +54,9 @@ class SurfaceBase(SurfacePlugin, ABC):
         """
         self.timeout = timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
         self._executor = _make_daemon_executor(max_workers=1)
+        self._concurrency_limit = int(os.getenv("EM_CUBED_SURFACE_MAX_CONCURRENCY", "0"))
+        self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        self._rejected_executions = 0
 
     def initialize(self) -> None:
         """Initialize the surface. Subclasses can override this."""
@@ -68,6 +71,24 @@ class SurfaceBase(SurfacePlugin, ABC):
         if hasattr(self, "_executor"):
             self._executor.shutdown(wait=False)
 
+    async def _acquire_execution_slot(self) -> bool:
+        if self._concurrency_semaphore is None:
+            return True
+        if self._concurrency_semaphore.locked():
+            self._rejected_executions += 1
+            logger.warning(
+                "Surface execution rejected by concurrency limiter",
+                surface=self.name,
+                limit=self._concurrency_limit,
+            )
+            return False
+        await self._concurrency_semaphore.acquire()
+        return True
+
+    def _release_execution_slot(self) -> None:
+        if self._concurrency_semaphore is not None:
+            self._concurrency_semaphore.release()
+
     async def execute_with_timeout(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute code with timeout protection.
 
@@ -78,6 +99,11 @@ class SurfaceBase(SurfacePlugin, ABC):
         Returns:
             Dict with status, value/error message
         """
+        if not await self._acquire_execution_slot():
+            return {
+                "status": "error",
+                "message": f"Surface execution rejected: concurrency limit {self._concurrency_limit} reached"
+            }
         try:
             result = await asyncio.wait_for(
                 self._execute_impl(code, context),
@@ -90,6 +116,8 @@ class SurfaceBase(SurfacePlugin, ABC):
                 "status": "error",
                 "message": f"Execution timed out after {self.timeout}s"
             }
+        finally:
+            self._release_execution_slot()
 
     def execute_sync(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Synchronous version of execute for use in non-async contexts."""

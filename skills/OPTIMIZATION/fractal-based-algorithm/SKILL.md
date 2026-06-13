@@ -11,6 +11,22 @@ surfaces:
   - python
   - prolog
   - hy
+description: Fractal-based optimization algorithm using self-similar search patterns and recursive space partitioning.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

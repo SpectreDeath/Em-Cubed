@@ -26,7 +26,7 @@ class TestIcfClauseValidatorSkill:
     def test_metadata_valid(self):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         assert metadata_dict is not None
-        assert metadata_dict["name"] == "Informed Consent Form Clause Validator"
+        assert metadata_dict["name"] == "informed-consent-form-clause-validator"
         assert metadata_dict["domain"] == "CLINICAL_TRIALS"
         assert "python" in metadata_dict["surfaces"]
         assert "z3" in metadata_dict["surfaces"]

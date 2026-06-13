@@ -1,10 +1,26 @@
 ---
-name: Z3 Test Skill
+name: z3-test-skill
 Domain: Testing
 Version: 1.0.0
 surfaces:
   - python
   - z3
+description: Z3 test skill for symbolic execution, constraint checking, and SMT-based verification examples.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 ## Purpose

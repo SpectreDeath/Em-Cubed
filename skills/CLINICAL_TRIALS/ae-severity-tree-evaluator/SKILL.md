@@ -1,10 +1,26 @@
 ---
-name: AE Severity Tree Evaluator
+name: ae-severity-tree-evaluator
 Domain: CLINICAL_TRIALS
 Version: 1.0.0
 surfaces:
   - python
   - prolog
+description: Multi-surface adverse event severity evaluator with Python surface for MedDRA/CTCAE grading and Prolog surface for decision pathway tree verification.
+compatibility: PYTHON
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 
 # Purpose

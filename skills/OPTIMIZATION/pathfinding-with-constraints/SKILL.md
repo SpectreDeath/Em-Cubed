@@ -7,6 +7,22 @@ Category: Graph Skills
 Estimated Execution Time: 2-5 minutes
 name: pathfinding-with-constraints
 Source: community
+description: Pathfinding with constraints for graph traversal under resource limits, time windows, and hard constraints.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
 ---
 origin: manual
 triggers:

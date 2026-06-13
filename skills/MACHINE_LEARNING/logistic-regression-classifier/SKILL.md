@@ -1,3 +1,23 @@
+---
+name: logistic-regression-classifier
+domain: "MACHINE_LEARNING"
+description: Multi-surface logistic regression classifier with Python surface for gradient descent training and Z3 surface for constraint verification. Supports binary/multiclass classification with configurable regularization.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: logistic-regression-classifier
 domain: MACHINE_LEARNING

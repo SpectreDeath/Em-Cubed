@@ -1,3 +1,23 @@
+---
+name: gradient-descent-optimizer
+domain: "EPIDEMIOLOGY"
+description: Multi-surface gradient descent optimizer with Python surface for iterative numerical optimization and Z3 surface for symbolic constraint verification. Supports step size tuning, convergence testing, and gradient computation.
+compatibility: UNIVERSAL
+allowed-tools: |
+  - read
+  - write
+  - edit
+  - bash
+  - glob
+  - grep
+  - codebase_search
+  - task
+  - sequentialthinking_sequentialthinking
+  - webfetch
+  - websearch
+  - question
+  - suggest
+---
 ﻿---
 name: gradient-descent-optimizer
 domain: EPIDEMIOLOGY
