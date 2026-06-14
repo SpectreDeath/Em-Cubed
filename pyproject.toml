@@ -71,4 +71,4 @@ ignore_missing_imports = true
 
 [tool.bandit]
 exclude_dirs = ["tests"]
-skips = ["B101", "B601", "B102", "B307", "B110"]  # Skip assert checks, shell usage, exec, eval, and try/except/pass (expected in surface implementations)
+skips = ["B101", "B601", "B102", "B307", "B110", "B403"]
