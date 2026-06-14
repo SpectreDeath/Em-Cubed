@@ -19,36 +19,45 @@ import pytest
 def _pagerank(edges, damping=0.85, max_iter=1000, tol=1e-10, personalization=None):
     if not (0.0 < damping < 1.0):
         raise ValueError("damping must be in (0,1)")
-    adj = {}; nodes = set()
+    adj = {}
+    nodes = set()
     for src, dst in edges:
-        s, d = str(src), str(dst)
-        nodes.add(s); nodes.add(d)
+        s = str(src)
+        d = str(dst)
+        nodes.add(s)
+        nodes.add(d)
         adj.setdefault(s, {})
         adj[s][d] = adj[s].get(d, 0.0) + 1.0
-    node_list = sorted(nodes); n = len(node_list)
+    node_list = sorted(nodes)
+    n = len(node_list)
     if n == 0:
         raise ValueError("no nodes")
     outdeg = {s: sum(adj.get(s, {}).values()) for s in node_list}
     dangling = {s: outdeg[s] == 0.0 for s in node_list}
-    G = []; idx = {s: i for i, s in enumerate(node_list)}
+    G = []
+    idx = {s: i for i, s in enumerate(node_list)}
     for src in node_list:
-        row = [0.0]*n; deg = outdeg[src]
+        row = [0.0] * n
+        deg = outdeg[src]
         if deg > 0:
             for dst, cnt in adj.get(src, {}).items():
                 row[idx[dst]] = cnt / deg
         G.append(row)
     if personalization is None:
-        e = [(1.0-damping)/n]*n
+        e = [(1.0 - damping) / n] * n
     else:
         raw = [float(personalization.get(s, 0.0)) for s in node_list]
         total = sum(raw)
-        e = [v/total for v in raw] if total > 0 else [1.0/n]*n
-    pi = [1.0/n]*n; iters = 0; delta = float("inf")
+        e = [v / total for v in raw] if total > 0 else [1.0 / n] * n
+    pi = [1.0 / n] * n
+    iters = 0
+    delta = float("inf")
     for it in range(max_iter):
         new_pi = e[:]
         for i, src in enumerate(node_list):
             p_i = pi[i]
-            if p_i == 0.0: continue
+            if p_i == 0.0:
+                continue
             contrib = p_i * damping
             row_i = G[i]
             for j in range(n):
@@ -58,9 +67,11 @@ def _pagerank(edges, damping=0.85, max_iter=1000, tol=1e-10, personalization=Non
         alloc = d_mass * damping / n
         for j in range(n):
             new_pi[j] += alloc
-        delta = max(abs(new_pi[j]-pi[j]) for j in range(n))
-        pi = new_pi; iters = it + 1
-        if delta < tol: break
+        delta = max(abs(new_pi[j] - pi[j]) for j in range(n))
+        pi = new_pi
+        iters = it + 1
+        if delta < tol:
+            break
     total = sum(pi)
     pi = [p/total for p in pi] if total > 0 else [1.0/n]*n
     ranks = {s: p for s, p in zip(node_list, pi)}
@@ -71,8 +82,10 @@ def _pagerank(edges, damping=0.85, max_iter=1000, tol=1e-10, personalization=Non
 
 
 def _sample_next(state, state_to_idx, matrix, rng):
-    idx = state_to_idx[state]; row = matrix[idx]
-    u = rng.random(); cumsum = 0.0
+    idx = state_to_idx[state]
+    row = matrix[idx]
+    u = rng.random()
+    cumsum = 0.0
     for j, p in enumerate(row):
         cumsum += p
         if u <= cumsum:
@@ -98,10 +111,13 @@ def execute_monte_carlo_walk(matrix, states, start_state, n_steps,
             raise ValueError(f"row {i} not row-stochastic")
     rng = random.Random(seed)
     state_to_idx = {s: i for i, s in enumerate(states)}
-    path = [start_state]; history = [start_state]
-    transition_log = []; visit_counts = {s: 0 for s in states}
+    path = [start_state]
+    history = [start_state]
+    transition_log = []
+    visit_counts = {s: 0 for s in states}
     visit_counts[start_state] = 1
-    absorbing_step = None; cur = start_state
+    absorbing_step = None
+    cur = start_state
     for step in range(n_steps):
         active_matrix = [row[:] for row in matrix]
         if context_callback is not None:
@@ -121,11 +137,13 @@ def execute_monte_carlo_walk(matrix, states, start_state, n_steps,
                         active_matrix[idx] = [p/row_sum for p in active_matrix[idx]]
         cur_idx = state_to_idx[cur]
         if active_matrix[cur_idx][cur_idx] >= absorbing_threshold:
-            absorbing_step = step; break
+            absorbing_step = step
+            break
         next_state = _sample_next(cur, state_to_idx, active_matrix, rng)
         trans_prob = active_matrix[cur_idx][state_to_idx[next_state]]
         transition_log.append((step, cur, next_state, trans_prob))
-        path.append(next_state); history.append(next_state)
+        path.append(next_state)
+        history.append(next_state)
         visit_counts[next_state] = visit_counts.get(next_state, 0) + 1
         cur = next_state
     return {"path": tuple(path), "final_state": cur,
@@ -149,9 +167,12 @@ def compile_simulation_histogram(paths, states=None, target_state=None):
         states.sort()
     idx = {s: i for i, s in enumerate(states)}
     n = len(states)
-    counts = [0]*n; path_lengths = []; first_passage = {s: None for s in states}
+    counts = [0] * n
+    path_lengths = []
+    first_passage = {s: None for s in states}
     for path in paths:
-        if not path: continue
+        if not path:
+            continue
         path_lengths.append(len(path))
         for t, s in enumerate(path):
             if s in idx:
@@ -165,7 +186,7 @@ def compile_simulation_histogram(paths, states=None, target_state=None):
     total = sum(counts)
     dist = [c/total if total > 0 else 0.0 for c in counts]
     mean_len = sum(path_lengths)/len(path_lengths) if path_lengths else 0.0
-    var_len = (sum((l-mean_len)**2 for l in path_lengths) / (len(path_lengths)-1)
+    var_len = (sum((path_len - mean_len) ** 2 for path_len in path_lengths) / (len(path_lengths) - 1)
                if len(path_lengths) > 1 else 0.0)
     std_len = math.sqrt(var_len) if var_len > 0 else 0.0
     uniform = [1.0/n]*n if n > 0 else []

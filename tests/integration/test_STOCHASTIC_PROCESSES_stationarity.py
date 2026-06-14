@@ -184,10 +184,10 @@ class TestGenerateTransitionMatrix:
 
     def test_vowel_consonant_from_video(self):
         """Markov's original: P(V→V)=0.13, P(V→C)=0.87, P(C→V)=0.66, P(C→C)=0.34."""
-        matrix = [[0.13, 0.87], [0.66, 0.34]]
+        counts = [[13, 87], [66, 34]]
         states = ["Vowel", "Consonant"]
         result = TransitionMatrixLogic.from_count_matrix(
-            [[13, 87], [66, 34]], states
+            counts, states
         )
         # After normalization: each row should sum to 1.0
         for row in result["matrix"]:

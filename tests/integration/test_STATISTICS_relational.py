@@ -93,7 +93,7 @@ def _normal_cdf(x, mu, sigma):
 
 def calculate_correlation_profile(x, y, method="pearson"):
     if method not in ("pearson", "spearman"):
-        raise ValueError(f"method must be pearson or spearman")
+        raise ValueError("method must be pearson or spearman")
     cx, cy, dropped = _clean_pairs(x, y)
     n_used = len(cx)
     if n_used < 3:
