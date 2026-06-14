@@ -1,7 +1,6 @@
 """Integration tests for distributed execution and stress testing."""
 
 import time
-from pathlib import Path
 
 import pytest
 

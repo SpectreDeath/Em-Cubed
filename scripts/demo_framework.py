@@ -11,12 +11,9 @@ from em_cubed.skills import (
     SkillValidator,
     SkillComposer,
     SkillRecommender,
-    SkillBenchmark,
     TelemetryCollector,
-    initialize_telemetry,
 )
 from em_cubed.plugin_manager import PluginManager
-from em_cubed.skills.composer import CompositionStep, CompositionPattern
 
 async def main():
     print("\n" + "="*60)
@@ -30,10 +27,9 @@ async def main():
     print("\n[1] Initializing components...")
     plugin_manager = PluginManager()
     registry = SkillRegistry(skills_dir, registry_file)
-    validator = SkillValidator()
-    composer = SkillComposer(plugin_manager, registry)
+    SkillValidator()
+    SkillComposer(plugin_manager, registry)
     recommender = SkillRecommender(registry)
-    telemetry = initialize_telemetry()
 
     print(f"   Loaded {len(registry._skills)} skills")
     print(f"   Available surfaces: {', '.join(plugin_manager.get_available_surfaces())}")
@@ -42,7 +38,6 @@ async def main():
     print("\n[2] Skill Validation Results:")
     sample_skills = list(registry._skills.keys())[:5]
     for skill_id in sample_skills:
-        skill = registry.get_skill(skill_id)
         qm = registry.get_quality(skill_id)
         status = "✓ PASS" if qm and qm.validation_score >= 0.7 else "✗ FAIL"
         print(f"   {status} {skill_id[:40]:40} score={qm.validation_score:.2f}" if qm else f"   ? NO DATA {skill_id}")
@@ -81,6 +76,7 @@ async def main():
     print(f"   Domain coverage: {len(stats['domains'])} domains")
     print(f"   Surface distribution: {stats['surfaces']}")
     print(f"   Composition edges: {stats['composition_edges']}")
+
 
     # Telemetry demo
     print("\n[6] Telemetry Demo:")

@@ -14,9 +14,6 @@ from pygls.lsp.server import LanguageServer
 from lsprotocol.types import (
     # Capabilities
     CompletionOptions,
-    InitializeParams,
-    ServerCapabilities,
-    TextDocumentSyncKind,
     # Completion
     TEXT_DOCUMENT_COMPLETION,
     CompletionItem,
@@ -26,7 +23,6 @@ from lsprotocol.types import (
     # Diagnostics
     Diagnostic,
     DiagnosticSeverity,
-    PublishDiagnosticsParams,
     # Document lifecycle
     TEXT_DOCUMENT_DID_CHANGE,
     TEXT_DOCUMENT_DID_OPEN,
