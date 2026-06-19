@@ -69,7 +69,7 @@ class ClingoSurface(SurfaceBase):
         try:
             control.add("base", [], code)
             control.ground([("base", [])])
-        except clingo.ClingoError as exc:  # type: ignore[attr-defined,union-attr]
+        except RuntimeError as exc:
             return {"status": "error", "message": f"Clingo ground/load failed: {exc}"}
 
         models: list = []
