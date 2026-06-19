@@ -114,3 +114,33 @@ The codebase now has 79 skills properly indexed with Python, Prolog, Hy, Z3, SQL
 ### Testing Strategy Document
 - Created comprehensive TESTING_STRATEGY.md outlining unit, integration, performance, surface-specific, error handling, and security tests
 - Includes specific recommendations by domain and suggested test datasets (UCI Census Income, UCR Time Series, Web Data Commons, Yelp, GEO, StatLib)
+
+---
+
+## 2026-06-19 - Statistics Video Skills (12 New Inferential Tests)
+
+### Created 12 Statistics Skills from "Statistics - A Full Lecture to learn Data Science (2025 Version)"
+All skills use Python + Prolog/Z3/SQLite hybrid surfaces following the existing pattern.
+
+**Inferential Skills Created:**
+- `STATISTICS/inferential/t-test-selector` (Python + Prolog) — Routes one-sample, independent Welch's, or paired t-test based on design
+- `STATISTICS/inferential/one-way-anova` (Python + Z3) — F-test for k≥3 independent groups with Tukey HSD post-hoc
+- `STATISTICS/inferential/two-way-anova` (Python + Prolog) — Factorial ANOVA with main effects and interaction detection
+- `STATISTICS/inferential/repeated-measures-anova` (Python + SQLite) — Within-subjects ANOVA with Greenhouse-Geisser correction
+- `STATISTICS/inferential/mixed-model-anova` (Python + SQLite) — Split-plot design combining between- and within-subjects factors
+- `STATISTICS/inferential/normality-tester` (Python + Prolog) — Shapiro-Wilk, D'Agostino-Pearson, Lilliefors tests with routing
+- `STATISTICS/inferential/variance-equality-tester` (Python + Prolog) — Levene's and Bartlett's tests for homogeneity
+- `STATISTICS/inferential/mann-whitney-u-test` (Python + Prolog) — Non-parametric test for two independent groups
+- `STATISTICS/inferential/wilcoxon-signed-rank-test` (Python + Prolog) — Non-parametric test for paired samples
+- `STATISTICS/inferential/kruskal-wallis-test` (Python + Z3) — Non-parametric ANOVA for k≥3 groups with Dunn's post-hoc
+- `STATISTICS/inferential/friedman-test` (Python + SQLite) — Non-parametric repeated measures with Kendall's W effect size
+- `STATISTICS/relational/multiple-regression-analyzer` (Python + SQLite) — Multivariate OLS with VIF collinearity detection
+
+### Registry Update
+- Updated `STATISTICS/registry.json` to version 2.0.0
+- Added all 12 skills to registry with source timestamps and logic types
+- Total statistics skills: 21 (12 new + 9 existing)
+
+### Verification
+- All 233 statistics tests pass
+- Registry properly indexed with 12 new inferential skills
