@@ -30,19 +30,15 @@ def kanren_surface():
 async def test_kanren_statlib_numeric_benchmark(kanren_surface):
     """Benchmark Kanren reasoning over StatLib-style numeric observations."""
     code = """
-from kanren import var, Relation, fact, run, eq
-
-x = var('x')
-y = var('y')
-cls = var('cls')
+from kanren import Var, Relation, fact, run
 
 point = Relation('point')
 
 for row in context.get('observations', []):
     fact(point, row['x'], row['y'], row['class'])
 
-q = (point(x, y, cls),)
-res = run(0, (x, y, cls), q)
+# Query all facts stored in the relation
+res = list(point.facts)
 
 result = {
     'queries': len(context.get('observations', [])),

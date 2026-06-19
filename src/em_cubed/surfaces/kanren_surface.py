@@ -74,7 +74,7 @@ class KanrenSurface(SurfaceBase):
 
             namespace.update(
                 {
-                    "var": lambda name="x": Var(name),
+                    "var": Var,
                     "Var": Var,
                     "run": run,
                     "Relation": Relation,
