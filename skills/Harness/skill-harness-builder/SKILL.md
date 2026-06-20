@@ -7,13 +7,13 @@ surfaces:
   - sqlite
 description: >
   Multi-surface skill harness builder that compiles SKILL.md definitions into
-  executable tool harnesses. Python surface handles sandboxed tool mapping
+  operational tool harnesses. Python surface handles sandboxed tool mapping
   and execution dispatch. SQLite surface persists workspace state and
   harness configuration.
 purpose: >
-  Transform declarative SKILL.md definitions into an operational sandboxed
-  harness that maps tools, enforces scoped operations, and tracks persistent
-  workspace state across sessions.
+  Transform declarative SKILL.md definitions into an executable sandboxed
+  harness that maps declared tools, enforces scoped operations, and tracks
+  persistent workspace state across sessions.
 dependencies:
   - durable-execution-engine
 inputs:
@@ -57,22 +57,20 @@ tags:
 
 # Skill Harness Builder
 
-Compiles SKILL.md definitions into executable sandboxed tool harnesses.
-Python surface dispatches builds. SQLite surface persists workspace state.
+Compiles SKILL.md definitions into executable, sandboxed tool harnesses.
+Python dispatches builds; SQLite persists workspace state.
 
 ## Tick Protocol
 
 | Id | Surface       | Action                                                |
 |----|---------------|-------------------------------------------------------|
 | 1  | Python        | Parse SKILL.md frontmatter and body                   |
-| 2  | Python        | Validate required fields: name, version, domain       |
+| 2  | Python        | Validate required fields (name, version, domain)      |
 | 3  | Python        | Map declared tools to sandbox schema                  |
 | 4  | SQLite        | INSERT workspace record if workspace_mode == shared   |
 | 5  | Python        | Apply sandbox_policy to tool_map                      |
 | 6  | Python        | Emit harness_manifest                                 |
 | 7  | Return        | readiness_status == ready if no violations            |
-
-If tick 2 fails validation, emit readiness_status build_failed and abort.
 
 ## Surfaces
 

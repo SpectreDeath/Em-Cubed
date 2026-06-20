@@ -6,10 +6,10 @@ surfaces:
   - clingo
   - z3
 description: >
-  Multi-surface world designer that simulates skill execution before deployment.
-  Clingo (ASP) surface handles predictive internal simulation and logical
-  invariant checks. Z3 surface performs formal budget verification and
-  constraint solving.
+  Multi-surface world simulator that evaluates proposed skill changes in a
+  logical sandbox before execution. Clingo surface performs predictive
+  simulation and logical invariant checks. Z3 surface verifies formal budget
+  constraints.
 purpose: >
   Run a skill definition through a logical sandbox to verify correctness,
   detect resource budget violations, and confirm invariant safety before the
@@ -28,7 +28,7 @@ inputs:
   resource_budgets:
     type: object
     required: false
-    description: "Resource constraints for formal verification"
+    description: "Budget constraints for formal verification"
   simulation_steps:
     type: integer
     required: false
@@ -42,7 +42,7 @@ outputs:
     description: "Logical invariant verification result"
   budget_proof:
     type: object
-    description: "Z3 formal proof of budget feasibility"
+    description: "Z3 proof of budget feasibility"
   readiness_verdict:
     type: string
     description: "verified | contradiction | budget_exceeded | inconclusive"
@@ -78,33 +78,31 @@ Clingo handles predictive simulation. Z3 handles formal budget verification.
 | 9  | Return        | Readiness verdict from combined surface outputs       |
 
 If tick 5 detects a contradiction, abort and emit readiness_verdict = contradiction.
-If tick 7 returns `unsat`, emit readiness_verdict = budget_exceeded.
+If tick 7 returns unsat, emit readiness_verdict = budget_exceeded.
 
 ## Surfaces
 
 ### Clingo (ASP) Surface
 
-Predictive simulation of skill execution. Encodes skill execution as an
-answer-set program and evaluates invariants.
+Predictive simulation of skill execution. Encodes skill execution as an answer-set program and evaluates invariants.
 
 ```prolog
 % Program injected per simulation step:
-% skill_loaded(world_simulator).
-% action(proposed_action).
-% invariant(safe_state) :- not conflict(X).
-% #show next_state/1.
-% #show invariant/1.
+%   skill_loaded(world_simulator).
+%   action(proposed_action).
+%   invariant(safe_state) :- not conflict(X).
+%   #show next_state/1.
+%   #show invariant/1.
 ```
 
 ### Z3 Surface
 
-Formal verification of resource budgets. Encodes budgets as SMT assertions
-and proves feasibility before deployment.
+Formal verification of resource budgets. Encodes `resource_budgets` as SMT assertions and proves feasibility before deployment.
 
 ```python
 from z3 import *
 
-def verify_skill_budgets(skill_definition, resource_budgets):
+def verify_budgets(skill_definition, resource_budgets):
     solver = Solver()
     token_budget = Int("token_budget")
     time_budget = Int("time_budget")
