@@ -25,6 +25,7 @@ skill_categories:
   - General
   - GRAPH_ML
   - KNOWLEDGE_GRAPH
+  - LOGIC
   - MACHINE_LEARNING
   - ML_OPERATIONS
   - MODEL_VALIDATION
