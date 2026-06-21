@@ -1,186 +1,196 @@
 ---
-Domain: COGNITIVE_SKILLS
+Domain: DECISION_MAKING
 Version: 1.0.0
-Complexity: Medium
-Type: Process
-Category: Thinking Skills
-Estimated Execution Time: 3-10 minutes
-name: multi-surface-problem-solver
-Source: community
+Complexity: High
+Type: Pipeline
+Category: Decision Making
+Estimated Execution Time: 5-15 minutes
+name: jaynesian-layered-decision-engine
+Source: manual
+description: >
+  Automated layered decision-making pipeline integrating belief-state
+  updating, expected utility maximization, and bounded rationality
+  constraints with iterated dominance elimination.
+purpose: >
+  Transition the framework from hard binary strategy pruning to continuous
+  belief-state weighting and optimal action selection under incomplete
+  information.
 ---
+
 origin: manual
 triggers:
-  - agent
-  - ai
-  - development
+  - game_theory
+  - bayesian_decision
+  - iterated_elimination
+  - belief_state
 quality:
   applied_count: 0
   success_count: 0
   completion_rate: 0.0
   token_savings_avg: 0.0
-created_at: "2026-04-28T10:00:00Z"
-updated_at: "2026-04-28T10:00:00Z"
+  min_structural_score: 0.90
+created_at: "2026-06-21T12:14:00Z"
+updated_at: "2026-06-21T12:14:00Z"
 
-## Purpose
+## Pipeline Architecture
 
-Demonstrate multi-surface problem solving using Python orchestration, Prolog constraints, and Hy heuristics.
+Sequential three-stage decision engine:
 
-## Description
+$$\text{Hard Elimination (Z3/Clingo)} \longrightarrow \text{Belief State Update (Hy)} \longrightarrow \text{EU Maximization (Python)}$$
 
-This skill showcases the integration of three programming surfaces to solve problems:
-- Python for main logic and orchestration
-- Prolog for logical constraints and verification
-- Hy for heuristic decision making and fuzzy logic
+With bounded-rationality constraint as active circuit-breaker.
 
-The skill solves optimization problems by combining logical constraints with heuristic search.
-
-## Examples
-
-### Resource Allocation Problem
-
-```
-Input: Allocate 100 units across 3 projects with constraints
-Output: Optimal allocation satisfying all constraints
-```
-
-## Implementation
-
-### Python Entry Point
+### Stage 1: Hard Elimination (iterated-dominance-solver)
 
 ```python
-def solve_allocation_problem(total_units=100, projects=3):
-    """Solve resource allocation using multi-surface approach"""
+from em_cubed.skills.decision_making.iterated_dominance_solver import RationalizabilitySolver
 
-    # Access injected surface plugins
-    prolog_surface = context["surfaces"]["prolog"]
-    hy_surface = context["surfaces"]["hy"]
+solver = RationalizabilitySolver()
+elimination_result = solver.solve(
+    game_definition={
+        "players": ["Player1", "Player2"],
+        "strategy_sets": {"Player1": [0, 1, 2], "Player2": [0, 1]},
+        "payoff_matrices": {
+            "Player1": [[3, 1], [0, 2], [1, 3]],
+            "Player2": [[3, 0], [1, 2]]
+        }
+    },
+    max_iterations=10
+)
 
-    # Initialize Prolog constraints using injected surface
-    prolog_result = prolog_surface.execute("""
-max_allocation(30).
-min_allocation(10).
-""")
-    if prolog_result["status"] != "ok":
-        return {"error": "Failed to initialize Prolog constraints"}
+active = elimination_result["rationalizable_strategies"]["Player1"]
+eliminated = elimination_result["elimination_history"][-1]["eliminated"] if elimination_result["elimination_history"] else []
+```
 
-    # Use Hy for heuristic scoring via injected surface
-    hy_code = """
-(defn score-allocation [alloc]
-  "Score allocation based on balance heuristic"
-  (let [avg (/ (sum alloc) (len alloc))
-        variance (sum (list (** (- x avg) 2) (for [x alloc])))]
-    (/ 1 (+ 1 variance))))  ; Lower variance = higher score
-"""
+### Stage 2: Belief State Update (skill-belief-state-updater)
 
-    # Execute Hy code to define the function
-    hy_result = hy_surface.execute(hy_code)
-    if hy_result["status"] != "ok":
-        return {"error": "Failed to initialize Hy heuristic"}
+```python
+from em_cubed.skills.decision_making.skill_belief_state_updater import BeliefStateUpdater
 
-    # Generate and evaluate allocations
-    best_allocation = None
-    best_score = 0
+belief_updater = BeliefStateUpdater()
+belief_result = belief_updater.update(
+    active_strategies=active,
+    eliminated_strategies=eliminated,
+    prior_weights={0: 0.33, 1: 0.33, 2: 0.34}
+)
 
-    # Try different allocations (simplified brute force)
-    for a in range(10, 31):
-        for b in range(10, min(31, 101-a)):
-            c = 100 - a - b
-            if 10 <= c <= 30:
-                allocation = [a, b, c]
+opponent_belief = belief_result["updated_belief_state"]
+```
 
-                # Check Prolog constraints using injected surface
-                constraint_ok = True
-                for units in allocation:
-                    query_result = prolog_surface.execute(f"max_allocation(M), min_allocation(N), {units} =< M, {units} >= N")
-                    if query_result["status"] != "ok" or not query_result.get("result", []):
-                        constraint_ok = False
-                        break
+### Stage 3: Expected Utility Maximization (skill-expected-utility-maximizer)
 
-                if constraint_ok:
-                    # Score with Hy heuristic using injected surface
-                    score_code = f"""
-(defn score-allocation [alloc]
-  "Score allocation based on balance heuristic"
-  (let [avg (/ (sum alloc) (len alloc))
-        variance (sum (list (** (- x avg) 2) (for [x alloc])))]
-    (/ 1 (+ 1 variance))))
+```python
+from em_cubed.skills.decision_making.skill_expected_utility_maximizer import ExpectedUtilityMaximizer
 
-(score-allocation {[a, b, c]})
-"""
-                    score_result = hy_surface.execute(score_code)
-                    if score_result["status"] == "ok":
-                        score = score_result["value"]
-                        if score > best_score:
-                            best_score = score
-                            best_allocation = allocation
+eu_maximizer = ExpectedUtilityMaximizer()
+eu_result = eu_maximizer.select(
+    my_strategies=active,
+    opponent_belief_state=opponent_belief,
+    payoff_matrix=[[3, 1], [0, 2], [1, 3]],
+    player_observable_history=[]
+)
+```
 
-    return {
-        "allocation": best_allocation,
-        "score": best_score,
-        "constraints_satisfied": True
+### Circuit Breaker: Bounded Rationality (skill-bounded-rationality-constraint)
+
+```python
+from em_cubed.skills.decision_making.skill_bounded_rationality_constraint import BoundedRationalityConstraint
+
+constraint = BoundedRationalityConstraint()
+control_result = constraint.check(
+    current_iteration_k=elimination_result.get("iterations", 0),
+    max_depth_threshold=10,
+    delta_convergence=0.001,
+    previous_weights={0: 0.33, 1: 0.33, 2: 0.34},
+    current_weights=opponent_belief
+)
+
+if control_result["should_terminate"]:
+    print(f"Terminating: {control_result['termination_reason']}")
+```
+
+## Full Pipeline Execution
+
+```python
+def run_jaynesian_pipeline(game_definition, max_iterations=10, delta_threshold=0.001):
+    constraint = BoundedRationalityConstraint()
+    solver = RationalizabilitySolver()
+    belief_updater = BeliefStateUpdater()
+    eu_maximizer = ExpectedUtilityMaximizer()
+
+    for k in range(max_iterations):
+        elimination = solver.solve(game_definition, max_iterations=1)
+        active = elimination["rationalizable_strategies"]["Player1"]
+        eliminated = elimination["elimination_history"][-1]["eliminated"] if elimination["elimination_history"] else []
+
+        belief = belief_updater.update(
+            active_strategies=active,
+            eliminated_strategies=eliminated,
+            prior_weights={i: 1.0/len(active) for i in range(3)}
+        )
+
+        eu = eu_maximizer.select(
+            my_strategies=active,
+            opponent_belief_state=belief["updated_belief_state"],
+            payoff_matrix=game_definition["payoff_matrices"]["Player1"]
+        )
+
+        ctrl = constraint.check(
+            current_iteration_k=k,
+            max_depth_threshold=max_iterations,
+            delta_convergence=delta_threshold,
+            previous_weights={} if k == 0 else belief["updated_belief_state"],
+            current_weights=belief["updated_belief_state"]
+        )
+
+        game_definition["strategy_sets"]["Player1"] = active
+
+        if ctrl["should_terminate"]:
+            return {
+                "pipeline": "jaynesian-layered-decision-engine",
+                "optimal_action": eu["optimal_action"],
+                "expected_utility": eu["expected_utility"],
+                "final_belief_state": belief["updated_belief_state"],
+                "termination_reason": ctrl["termination_reason"],
+                "iterations": k + 1
+            }
+```
+
+## Validation
+
+### Structural Quality Test
+
+Run `em3 validate` on all three skills:
+
+```bash
+em3 validate skills/DECISION_MAKING/skill-belief-state-updater
+em3 validate skills/DECISION_MAKING/skill-expected-utility-maximizer
+em3 validate skills/DECISION_MAKING/skill-bounded-rationality-constraint
+```
+
+Minimum structural quality score: **0.90**
+
+### Integration Test
+
+```python
+result = run_jaynesian_pipeline({
+    "players": ["Player1", "Player2"],
+    "strategy_sets": {"Player1": [0, 1, 2], "Player2": [0, 1]},
+    "payoff_matrices": {
+        "Player1": [[3, 1], [0, 2], [1, 3]],
+        "Player2": [[3, 0], [1, 2]]
     }
-
-# Example usage
-result = solve_allocation_problem()
-print(f"Optimal allocation: {result['allocation']}")
-print(f"Balance score: {result['score']:.3f}")
+})
+assert result["termination_reason"] in ["fixpoint_reached", "depth_exceeded"]
+assert result["iterations"] <= 10
+assert result["optimal_action"] in [0, 1, 2]
 ```
 
-### Prolog Constraints
+## Composition
 
-```prolog
-% Maximum allocation constraint
-max_allocation(30).
-
-% Minimum allocation constraint  
-min_allocation(10).
-
-% Verify allocation meets constraints
-valid_allocation(A, B, C) :-
-    max_allocation(Max),
-    min_allocation(Min),
-    A =< Max, A >= Min,
-    B =< Max, B >= Min, 
-    C =< Max, C >= Min,
-    Total is A + B + C,
-    Total =:= 100.
-```
-
-### Hy Heuristics
-
-```hy
-(defn score-allocation [alloc]
-  "Score allocation based on balance heuristic"
-  (let [avg (/ (sum alloc) (len alloc))
-        variance (sum (list (** (- x avg) 2) (for [x alloc)))]
-    (/ 1 (+ 1 variance))))
-
-(defn fuzzy-balance [alloc]
-  "Fuzzy logic assessment of balance"
-  (let [ratios (list (/ x (sum alloc)) (for [x alloc]))]
-    (if (> (apply max ratios) 0.5) 
-        "unbalanced"
-        "balanced")))
-```
-
-## Testing
-
-Test the multi-surface integration:
-
-```python
-# Test all three surfaces
-result = solve_allocation_problem(100, 3)
-assert result["constraints_satisfied"] == True
-assert len(result["allocation"]) == 3
-assert sum(result["allocation"]) == 100
-
-# Verify Prolog constraints work through injected surface
-prolog_result = context["surfaces"]["prolog"].execute("max_allocation(30)")
-assert prolog_result["status"] == "ok"
-
-# Verify Hy functions work through injected surface
-hy_result = context["surfaces"]["hy"].execute("(defn test-fn [] 42)")
-assert hy_result["status"] == "ok"
-hy_result2 = context["surfaces"]["hy"].execute("(test-fn)")
-assert hy_result2["value"] == 42
-```
+- `iterated-dominance-solver` — Primary entry point for hard elimination.
+- `skill-belief-state-updater` — Re-allocates probability mass after elimination.
+- `skill-expected-utility-maximizer` — Selects optimal action from belief state.
+- `skill-bounded-rationality-constraint` — Circuit breaker for recursive loop.
+- `epistemological-independence-filter` — Validates independence for joint matrix injection.
+- `lattice-inclusion-exclusion-sum` — Provides probability distribution foundation.
