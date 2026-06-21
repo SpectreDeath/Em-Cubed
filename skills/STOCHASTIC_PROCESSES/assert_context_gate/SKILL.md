@@ -43,31 +43,24 @@ Pure symbolic skill. Rules encode:
 4. **Safety gate**: Is the target state known-safe (no infinite loops or dead-ends)?
 
 ### Being State-Dependent, Not Memoryless
-```prolog
 % The M³ agent's context is a belief store, not the chain state.
 % assert_context_gate reads from the agent's working memory:
-
+%
 % ?- agent_context(current_task, Task), safe_transition(From, To, Task)
-% This extends the Markov chain into a "semi-Markov" decision process.
-
-assert_valid_transition(From, To) :-
-    agent_context(current_capability, Cap),
-    capability_permits(Cap, To),
-    agent_context(resource_level, Res),
-    resource_sufficient(Res, To),
-    \+ recently_visited(From, To).
-```
+% This extends the Markov chain into a "controlled" Markov chain where the control signal is drawn from the agent's belief state.
+%
+% The executable predicate below keeps the same decision shape while returning
+% a structured Result value for downstream orchestration.
 
 ## Prolog Surface (prelude.pl)
 
 ```prolog
 :- module(context_gate, [
-    assert_valid_transition/2,
+    assert_valid_transition/3,
     capability_permits/2,
     resource_sufficient/2,
     recently_visited/2,
-    safe_target/1,
-    gate_result/3
+    safe_target/1
 ]).
 
 % ============================================================

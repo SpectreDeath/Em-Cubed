@@ -55,13 +55,15 @@ Uses Z3 to mathematically prove that for any sequence of position entries follow
   (let ((scale_factor (+ 1.0 (* 0.5 (to_real n)))))
     (* base_units scale_factor)))
 
-; Define cumulative risk calculation
+; Recursive sum: cumulative units from level 0 to levels-1
+(define-fun cum_risk_sum ((n Int) (levels Int)) Real
+  (ite (>= n levels)
+    0.0
+    (+ (position_size n) (cum_risk_sum (+ n 1) levels))))
+
+; Define cumulative risk calculation (sum of position_size * 0.01 * entry_price)
 (define-fun cumulative_risk ((levels Int)) Real
-  (let ((sum 0.0))
-    (forall ((n Int)) 
-      (=> (and (<= 0 n) (< n levels))
-          (set! sum (+ sum (position_size n)))))
-    (* sum 0.01 entry_price))  ; Risk = position_size * 1% * entry_price
+  (* (cum_risk_sum 0 levels) 0.01 entry_price))
 
 ; Risk boundary assertions
 (assert (>= entry_price 0.01))

@@ -3,6 +3,7 @@
 import asyncio
 import importlib.util
 import os
+import re
 import tempfile
 from typing import List, Dict, Any, Optional
 import structlog
@@ -55,6 +56,7 @@ class PrologSurface(SurfaceBase):
         """Get or create the Prolog interpreter instance."""
         if self._prolog is None:
             from pyswip import Prolog
+
             self._prolog = Prolog()
         return self._prolog
 
@@ -108,10 +110,22 @@ class PrologSurface(SurfaceBase):
             # Built-ins that modify the dynamic database and should be
             # executed as goals, NOT asserted as facts/rules.
             _IMPURE_BUILTINS = {
-                "retractall", "retract", "asserta", "assertz",
-                "abolish", "flush_output", "flush", "close",
-                "op", "set_prolog_flag", "setof", "bagof",
-                "findall", "maplist", "call", "once",
+                "retractall",
+                "retract",
+                "asserta",
+                "assertz",
+                "abolish",
+                "flush_output",
+                "flush",
+                "close",
+                "op",
+                "set_prolog_flag",
+                "setof",
+                "bagof",
+                "findall",
+                "maplist",
+                "call",
+                "once",
             }
 
             # Improved mode detection:
@@ -122,33 +136,59 @@ class PrologSurface(SurfaceBase):
             is_query = False
             processed_code = stripped_code
 
-            if stripped_code.startswith('?-'):
+            if stripped_code.startswith("?-"):
                 is_query = True
                 processed_code = stripped_code[2:].strip()
-            elif '?-' in stripped_code:
-                parts = stripped_code.split('?-')
+            elif "?-" in stripped_code:
+                parts = stripped_code.split("?-")
                 rule_part = parts[0].strip()
-                query_part = parts[1].strip().rstrip('.').strip()
+                query_part = parts[1].strip().rstrip(".").strip()
                 if rule_part:
                     try:
-                        rule_flat = ' '.join(rule_part.split())
-                        rule_clean = rule_flat.rstrip('.')
+                        rule_flat = " ".join(rule_part.split())
+                        rule_clean = rule_flat.rstrip(".")
                         prolog.assertz(rule_clean)
                     except Exception as assert_err:
                         logger.warning("Prolog rule assertion warning", error=str(assert_err))
                 processed_code = query_part
                 is_query = True
-            elif '\n' in stripped_code:
-                lines = [l for l in stripped_code.split('\n') if l.strip() and not l.strip().startswith('%')]
-                program = '\n'.join(lines)
+            elif "\n" in stripped_code:
+                lines = [
+                    line for line in stripped_code.split("\n") if line.strip() and not line.strip().startswith("%")
+                ]
+                program = "\n".join(lines)
                 if not program.strip():
                     return {"status": "ok", "message": "No Prolog code to execute"}
                 try:
-                    fd, path = tempfile.mkstemp(suffix='.pl', prefix='em3_prolog_')
+                    fd, path = tempfile.mkstemp(suffix=".pl", prefix="em3_prolog_")
                     try:
-                        with os.fdopen(fd, 'w', encoding='utf-8') as f:
-                            f.write(program)
-                        prolog.consult(path)
+                        file_obj = os.fdopen(fd, "w", encoding="utf-8")
+                        try:
+                            file_obj.write(program)
+                            file_obj.flush()
+                            os.fsync(file_obj.fileno())
+                        finally:
+                            file_obj.close()
+                        module_match = re.search(r":-\s*module\(\s*([A-Za-z_][A-Za-z0-9_]*)", program)
+                        if module_match:
+                            module_name = module_match.group(1)
+                            try:
+                                if list(prolog.query(f"current_module({module_name})")):
+                                    logger.info("Prolog module already loaded, skipping consult", module=module_name)
+                                    return {"status": "ok", "message": f"Module {module_name} already loaded"}
+                            except Exception as module_check_err:
+                                logger.info(
+                                    "Prolog module check failed, proceeding with consult",
+                                    module=module_name,
+                                    error=str(module_check_err),
+                                )
+                        try:
+                            prolog.consult(path)
+                        except Exception as consult_err:
+                            if "redefine module" in str(consult_err) or "Already loaded" in str(consult_err):
+                                logger.info("Prolog module already loaded, skipping re-consult", error=str(consult_err))
+                            else:
+                                raise
                         return {"status": "ok", "message": "Multi-line Prolog code consulted successfully"}
                     finally:
                         try:
@@ -161,15 +201,17 @@ class PrologSurface(SurfaceBase):
                     while i < len(lines):
                         item = lines[i].strip()
                         j = i + 1
-                        while j < len(lines) and not item.endswith('.'):
-                            item = item + ' ' + lines[j].strip()
+                        while j < len(lines) and not item.endswith("."):
+                            item = item + " " + lines[j].strip()
                             j += 1
                         i = j
                         if not item:
                             continue
-                        directive = item.startswith(':-')
-                        query_prefix = item.startswith('?-')
-                        clean = item.rstrip('.').strip()
+                        if item.startswith(":-") and re.search(r":-\s*module\s*\(", item):
+                            continue
+                        directive = item.startswith(":-")
+                        query_prefix = item.startswith("?-")
+                        clean = item.rstrip(".").strip()
                         if directive:
                             try:
                                 prolog.query(clean[2:].strip())
@@ -186,20 +228,19 @@ class PrologSurface(SurfaceBase):
                             except Exception as assert_err:
                                 logger.warning("Prolog assert warning", error=str(assert_err))
                     return {"status": "ok", "message": "Multi-line Prolog code processed via fallback"}
-            elif stripped_code.endswith('.'):
-                head_word = stripped_code.split('(')[0].split(' ')[0].strip().rstrip('.')
+            elif stripped_code.endswith("."):
+                head_word = stripped_code.split("(")[0].split(" ")[0].strip().rstrip(".")
                 if head_word in _IMPURE_BUILTINS:
                     is_query = True
-                    processed_code = stripped_code.rstrip('.').strip()
-                elif ' is ' in stripped_code:
-                    import re
-                    if re.search(r'\d|\+|\-|\*|\/|//', stripped_code):
+                    processed_code = stripped_code.rstrip(".").strip()
+                elif " is " in stripped_code:
+                    if re.search(r"\d|\+|\-|\*|\/|//", stripped_code):
                         is_query = True
-                        processed_code = stripped_code.rstrip('.').strip()
+                        processed_code = stripped_code.rstrip(".").strip()
                     else:
-                        processed_code = stripped_code.rstrip('.').strip()
+                        processed_code = stripped_code.rstrip(".").strip()
                 else:
-                    processed_code = stripped_code.rstrip('.').strip()
+                    processed_code = stripped_code.rstrip(".").strip()
             else:
                 is_query = True
                 processed_code = stripped_code
@@ -213,9 +254,7 @@ class PrologSurface(SurfaceBase):
                     return list(prolog.query(processed_code))
 
                 try:
-                    result = await asyncio.get_event_loop().run_in_executor(
-                        self._executor, execute_query
-                    )
+                    result = await asyncio.get_event_loop().run_in_executor(self._executor, execute_query)
                 except asyncio.TimeoutError:
                     logger.warning("Prolog query timed out", query=processed_code, timeout=self.timeout)
                     return {"status": "error", "message": f"Query execution timed out after {self.timeout}s"}
