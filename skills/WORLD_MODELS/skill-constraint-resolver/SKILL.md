@@ -14,7 +14,7 @@ purpose: >
   establishing closed-world assumptions or strict background axioms and
   computing all valid states.
 dependencies:
-  - skill-sensor-transducer
+  - data-processing/skill-sensor-transducer
 inputs:
   observables:
     type: object
@@ -72,7 +72,10 @@ space under strict background axioms. Prunes impossible states.
 Computes all valid answer sets under background axioms.
 
 ```prolog
-% Background axioms (closed-world)
+:- dynamic architectural_component/4.
+:- discontiguous architectural_component/4.
+
+% Background axioms (closed-world):
 object(solid).
 light(source(above)).
 coherent(object_id).

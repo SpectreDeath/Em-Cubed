@@ -13,7 +13,7 @@ purpose: >
   product request conflicts with backend architectural constraints, preventing
   bloomed PRs and technical debt.
 dependencies:
-  - skill-world-designer
+  - world-models/skill-world-designer
 inputs:
   target_action:
     type: string
@@ -75,6 +75,9 @@ Maintains a historical graph of backend architecture complexity and
 data-access costs.
 
 ```prolog
+:- dynamic architectural_component/4.
+:- discontiguous architectural_component/4.
+
 % Architectural facts:
 architectural_component(export_button_service, db_table: user_exports, join_depth: 3, cost_weight: 0.8).
 architectural_component(main_screen_query, db_table: user_sessions, join_depth: 1, cost_weight: 0.2).
@@ -94,9 +97,9 @@ classify_cost(Cost, medium) :- Cost >= 30, Cost < 70.
 classify_cost(Cost, high) :- Cost >= 70, Cost < 100.
 classify_cost(Cost, critical) :- Cost >= 100.
 
-% Example action mapping:
-requires_service(move_export_button_to_main_screen, export_button_service).
-requires_service(move_export_button_to_main_screen, main_screen_query).
+% Fallback axiom block: ensures graceful failure if the component profile
+% table has not been instantiated yet.
+architectural_component(unknown, generic, 0.0, 0.0).
 ```
 
 ### Python Surface

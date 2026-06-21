@@ -2,6 +2,8 @@
 
 import asyncio
 import importlib.util
+import os
+import tempfile
 from typing import List, Dict, Any, Optional
 import structlog
 
@@ -121,39 +123,75 @@ class PrologSurface(SurfaceBase):
             processed_code = stripped_code
 
             if stripped_code.startswith('?-'):
-                # Explicit query mode
                 is_query = True
                 processed_code = stripped_code[2:].strip()
             elif '?-' in stripped_code:
-                # Mixed rule + query: split and assert rules first
                 parts = stripped_code.split('?-')
                 rule_part = parts[0].strip()
                 query_part = parts[1].strip().rstrip('.').strip()
-
-                # Assert the rule using direct Python call to SWI-Prolog
                 if rule_part:
                     try:
-                        # Flatten to single line and format properly for assertz
                         rule_flat = ' '.join(rule_part.split())
-                        # pyswip assertz expects the rule without trailing period
                         rule_clean = rule_flat.rstrip('.')
-                        # Use the internal call to handle multi-line rules
                         prolog.assertz(rule_clean)
-                        logger.info("Prolog rule asserted successfully")
                     except Exception as assert_err:
                         logger.warning("Prolog rule assertion warning", error=str(assert_err))
-
                 processed_code = query_part
                 is_query = True
-                logger.info("Mixed Prolog rule/query detected, asserting rules then querying", query=processed_code)
+            elif '\n' in stripped_code:
+                lines = [l for l in stripped_code.split('\n') if l.strip() and not l.strip().startswith('%')]
+                program = '\n'.join(lines)
+                if not program.strip():
+                    return {"status": "ok", "message": "No Prolog code to execute"}
+                try:
+                    fd, path = tempfile.mkstemp(suffix='.pl', prefix='em3_prolog_')
+                    try:
+                        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                            f.write(program)
+                        prolog.consult(path)
+                        return {"status": "ok", "message": "Multi-line Prolog code consulted successfully"}
+                    finally:
+                        try:
+                            os.unlink(path)
+                        except OSError:
+                            pass
+                except Exception as consult_err:
+                    logger.warning("Prolog file consultation failed, falling back to assertz", error=str(consult_err))
+                    i = 0
+                    while i < len(lines):
+                        item = lines[i].strip()
+                        j = i + 1
+                        while j < len(lines) and not item.endswith('.'):
+                            item = item + ' ' + lines[j].strip()
+                            j += 1
+                        i = j
+                        if not item:
+                            continue
+                        directive = item.startswith(':-')
+                        query_prefix = item.startswith('?-')
+                        clean = item.rstrip('.').strip()
+                        if directive:
+                            try:
+                                prolog.query(clean[2:].strip())
+                            except Exception:
+                                pass
+                        elif query_prefix:
+                            try:
+                                list(prolog.query(clean[2:].strip()))
+                            except Exception:
+                                pass
+                        elif clean:
+                            try:
+                                prolog.assertz(clean)
+                            except Exception as assert_err:
+                                logger.warning("Prolog assert warning", error=str(assert_err))
+                    return {"status": "ok", "message": "Multi-line Prolog code processed via fallback"}
             elif stripped_code.endswith('.'):
-                # Check if this is an impure built-in (database-modifying command)
                 head_word = stripped_code.split('(')[0].split(' ')[0].strip().rstrip('.')
                 if head_word in _IMPURE_BUILTINS:
                     is_query = True
                     processed_code = stripped_code.rstrip('.').strip()
                 elif ' is ' in stripped_code:
-                    # Arithmetic/evaluation expression - treat as query
                     import re
                     if re.search(r'\d|\+|\-|\*|\/|//', stripped_code):
                         is_query = True
@@ -161,10 +199,8 @@ class PrologSurface(SurfaceBase):
                     else:
                         processed_code = stripped_code.rstrip('.').strip()
                 else:
-                    # Treat as assertion (fact/rule)
                     processed_code = stripped_code.rstrip('.').strip()
             else:
-                # No trailing period, treat as query
                 is_query = True
                 processed_code = stripped_code
 
