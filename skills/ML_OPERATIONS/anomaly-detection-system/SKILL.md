@@ -1,28 +1,42 @@
 ---
-Domain: ML_OPERATIONS
-Version: 1.0.0
-Complexity: Medium
-Type: Analysis
-Category: Monitoring Skills
-Estimated Execution Time: 2-5 minutes
 name: anomaly-detection-system
-Source: community
-description: Anomaly detection system with statistical and ML-based surfaces for outlier identification in time-series and tabular data.
+domain: ML_OPERATIONS
+version: 1.0.0
+description: Anomaly detection system with statistical and ML-based surfaces for outlier identification in time-series and
+  tabular data.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: Medium
+type: Analysis
+category: Monitoring Skills
+estimated execution time: 2-5 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

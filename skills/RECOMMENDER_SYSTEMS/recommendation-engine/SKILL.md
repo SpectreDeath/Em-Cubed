@@ -1,29 +1,42 @@
 ---
-Domain: RECOMMENDER_SYSTEMS
-Version: 1.0.0
-Complexity: High
-Type: Prediction
-Category: ML Skills
-Estimated Execution Time: 5-10 minutes
 name: recommendation-engine
-Source: community
-description: Multi-surface recommendation engine combining Python for collaborative/content filtering, Prolog for logical consistency rules, and Hy for fuzzy preference aggregation.
-description: Multi-surface recommendation engine combining Python for collaborative/content filtering, Prolog for logical consistency rules, and Hy for fuzzy preference aggregation.
+domain: RECOMMENDER_SYSTEMS
+version: 1.0.0
+description: Multi-surface recommendation engine combining Python for collaborative/content filtering, Prolog for logical
+  consistency rules, and Hy for fuzzy preference aggregation.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Prediction
+category: ML Skills
+estimated execution time: 5-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -158,6 +171,7 @@ recommendations_diverse(Recommendations, MinDiversity) :-
   (let [unexpected (filter (fn [r] (not (in r expected-items))) recommended-items)
         relevant-unexpected (filter (fn [r] (> (similarity r user-profile) 0.7)) unexpected)]
     (/ (len relevant-unexpected) (max 1 (len recommended-items)))))
+```
 
 ## Testing
 

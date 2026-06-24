@@ -1,34 +1,47 @@
 ---
 name: intelligent-task-planner
-Domain: General
-Version: 1.0.0
+domain: General
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - hy
-triggers:
-  - planning
-  - task
-  - orchestration
-  - scheduling
-  - multi_surface
-  - coordination
+- python
+- prolog
+- hy
 description: Intelligent task planner decomposing objectives into executable steps with dependency-aware scheduling.
+triggers:
+- planning
+- task
+- orchestration
+- scheduling
+- multi_surface
+- coordination
 compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 ## Purpose

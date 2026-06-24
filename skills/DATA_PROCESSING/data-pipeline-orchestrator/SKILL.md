@@ -1,32 +1,45 @@
 ---
-Domain: DATA_PROCESSING
-surfaces:
-  - python
-  - prolog
-  - hy
-Version: 1.0.0
-Complexity: High
-Type: Process
-Category: Data Engineering Skills
-Estimated Execution Time: 5-15 minutes
 name: data-pipeline-orchestrator
-Source: community
+domain: DATA_PROCESSING
+version: 1.0.0
+surfaces:
+- python
+- prolog
+- hy
 description: Data pipeline orchestrator for composing, validating, and executing multi-step data transformation workflows.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: High
+type: Process
+category: Data Engineering Skills
+estimated execution time: 5-15 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

@@ -1,56 +1,56 @@
 ---
 name: skill-belief-state-updater
-version: 1.0.0
 domain: DECISION_MAKING
+version: 1.0.0
 surfaces:
-  - hy
-  - python
-description: >
-  Continuous probability mass redistribution skill that consumes structural
-  outputs from lattice-inclusion-exclusion-sum and re-allocates probability
-  mass across surviving lattice configurations when hard solvers prune
-  opponent strategies. Produces a normalized Bayesian belief-state density.
-purpose: >
-  Transition from hard binary strategy pruning to continuous belief-state
-  weighting by re-allocating eliminated probability mass to surviving
-  strategies using normalized Bayesian updates.
+- hy
+- python
+description: 'Continuous probability mass redistribution skill that consumes structural outputs from lattice-inclusion-exclusion-sum
+  and re-allocates probability mass across surviving lattice configurations when hard solvers prune opponent strategies. Produces
+  a normalized Bayesian belief-state density.
+
+  '
+purpose: 'Transition from hard binary strategy pruning to continuous belief-state weighting by re-allocating eliminated probability
+  mass to surviving strategies using normalized Bayesian updates.
+
+  '
 dependencies:
-  - decision-making/lattice-inclusion-exclusion-sum
+- decision-making/lattice-inclusion-exclusion-sum
+tags:
+- belief-state
+- bayesian-update
+- probability-mass
+- lattice
+- jaynes
+- hy
+- python
+- decision-making
 inputs:
   active_strategies:
     type: array
     required: true
-    description: "List of strategy indices that survived elimination"
+    description: List of strategy indices that survived elimination
   eliminated_strategies:
     type: array
     required: true
-    description: "List of strategy indices that were pruned by hard solver"
+    description: List of strategy indices that were pruned by hard solver
   prior_weights:
     type: object
     required: true
-    description: "Prior probability weights dict[int, float] before elimination"
+    description: Prior probability weights dict[int, float] before elimination
 outputs:
   updated_belief_state:
     type: object
-    description: "Updated density mapping dict[int, float] over surviving strategies"
+    description: Updated density mapping dict[int, float] over surviving strategies
   normalization_factor:
     type: float
-    description: "Factor used to normalize remaining probability mass to 1.0"
+    description: Factor used to normalize remaining probability mass to 1.0
   eliminated_mass:
     type: float
-    description: "Total probability mass redistributed from eliminated strategies"
+    description: Total probability mass redistributed from eliminated strategies
   update_log:
     type: array
-    description: "Per-strategy record of weight transitions"
-tags:
-  - belief-state
-  - bayesian-update
-  - probability-mass
-  - lattice
-  - jaynes
-  - hy
-  - python
-  - decision-making
+    description: Per-strategy record of weight transitions
 ---
 
 # Skill Belief State Updater

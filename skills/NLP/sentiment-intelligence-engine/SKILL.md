@@ -1,28 +1,41 @@
 ---
-Domain: NLP
-Version: 1.0.0
-Complexity: Medium
-Type: Analysis
-Category: Language Skills
-Estimated Execution Time: 2-5 minutes
 name: sentiment-intelligence-engine
-Source: community
+domain: NLP
+version: 1.0.0
 description: Sentiment intelligence engine for polarity classification, emotion detection, and opinion aggregation.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: Medium
+type: Analysis
+category: Language Skills
+estimated execution time: 2-5 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -207,49 +220,60 @@ contradictory_sentiments(Results) :-
 ### Hy Fuzzy Aggregation
 
 ```hy
+; Sentiment Intelligence Engine - Hy surface
+; Fuzzy sentiment composition, trend detection, and forecasting
+
 (defn fuzzy-sentiment-composition [scores weights]
   "Apply fuzzy logic to compose multiple sentiment scores"
-  (let [weighted-sum (sum (zip scores weights))
-        total-weight (sum weights)
-        normalized-score (/ weighted-sum total-weight)]
-    normalized-score))
+  (let [weighted-sum (sum (map (fn [pair] (* (first pair) (second pair)))
+                               (zip scores weights)))
+        total-weight (sum weights)]
+    (/ weighted-sum total-weight)))
 
 (defn sentiment-trend [historical-scores window-size]
   "Detect sentiment trends using moving averages"
   (let [recent (take window-size (reverse historical-scores))
-        moving-avg (mean recent)
+        moving-avg (/ (sum recent) (len recent))
         previous (take window-size (drop 1 (reverse historical-scores)))
-        prev-avg (if previous (mean previous) moving-avg)]
-    {:current moving-avg :trend (- moving-avg prev-avg) :acceleration (if previous (- moving-avg (* 2 prev-avg)) 0)}))
+        prev-avg (/ (sum previous) (len previous))]
+    {:current moving-avg
+     :trend (- moving-avg prev-avg)
+     :acceleration (- moving-avg (* 2 prev-avg))}))
 
 (defn confidence-interval [scores confidence-level]
   "Calculate confidence interval for sentiment scores"
-  (let [mean (mean scores)
-        std-dev (sqrt (/ (sum (map (fn [x] ** (- x mean) 2)) scores)) (max 1 (dec (len scores))))
-        z-score (get {"0.9" 1.645 "0.95" 1.96 "0.99" 2.576} (str confidence-level))]
-    {:lower (- mean (* z-score (/ std-dev (sqrt (len scores)))))
-     :upper (+ mean (* z-score (/ std-dev (sqrt (len scores)))))
-     :mean mean}))
+  (let [mean-val (/ (sum scores) (len scores))
+        n (len scores)
+        std-dev (sqrt (/ (sum (map (fn [x] (** (- x mean-val) 2)) scores))
+                         (max 1 (- n 1))))
+        z-score (if (= confidence-level 0.9) 1.645
+                  (if (= confidence-level 0.95) 1.96
+                    (if (= confidence-level 0.99) 2.576 1.96)))]
+    {:lower (- mean-val (* z-score (/ std-dev (sqrt n))))
+     :upper (+ mean-val (* z-score (/ std-dev (sqrt n))))
+     :mean mean-val}))
 
 (defn emotional-variance [emotion-scores]
   "Calculate emotional variance across dimensions"
   (let [values (vals emotion-scores)
-        mean (mean values)]
-    (/ (sum (map (fn [v] (** (- v mean) 2)) values)) (len values))))
+        mean-val (/ (sum values) (len values))]
+    (/ (sum (map (fn [v] (** (- v mean-val) 2)) values))
+       (len values))))
 
 (defn sentiment-forecast [historical-trends periods-ahead]
   "Forecast future sentiment using exponential smoothing"
-  (let [alpha 0.3  ; Smoothing factor
-        last-forecast (first historical-trends)
-        forecasts (for [i (range periods-ahead)]
-                   (let [prediction (* alpha (get historical-trends (max 0 (- (len historical-trends) i 1))))
-                         (inc (* (- 1 alpha) last-forecast)))]
-                     prediction))]
-    forecasts))
+  (let [alpha 0.3
+        last-val (last historical-trends)]
+    (map (fn [i]
+           (* alpha (get historical-trends (- (len historical-trends) i 1))))
+         (range 1 (+ periods-ahead 1)))))
 
 (defn aspect-sentiment-fusion [aspect-scores weights]
   "Fuse sentiment scores across different aspects"
-  (apply + (map * (map (fn [s] (get s "score" 0)) aspect-scores) weights)))
+  (apply + (map (fn [pair] (* (get pair 0) (get pair 1)))
+                (zip aspect-scores weights))))
+```
+
 
 ## Testing
 

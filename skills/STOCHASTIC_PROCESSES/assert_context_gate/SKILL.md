@@ -132,11 +132,11 @@ assert_valid_transition(From, To, Result) :-
     -> ResResult = ok
     ;   ResResult = blocked(insufficient_resource)
     ),
-    \+ recently_visited(From, To)
+    ( \+ recently_visited(From, To)
     -> RecResult = ok
     ;   RecResult = blocked(recent_loop)
     ),
-    safe_target(To)
+    ( safe_target(To)
     -> SafeResult = ok
     ;   SafeResult = blocked(unsafe_target)
     ),

@@ -56,6 +56,39 @@ class HySurface(SurfaceBase):
 
         try:
             import hy
+            import re as _re
+
+            def _fix_hy_cond(code: str) -> str:
+                """Rewrite bracket-style (cond [... ] [...]) to flat cond form.
+                This handles [test body] bracket clauses inside a (cond ...) form
+                by converting them to flat cond syntax: test1 body1 test2 body2 ...
+                Only applies to bracketed pairs where both elements are present."""
+                try:
+                    return _re.sub(
+                        r'\(cond\b((?:\s*\[[^\]]+\])+)\s*\)',
+                        lambda m: _rewrite_cond(m.group(1)),
+                        code,
+                        flags=_re.DOTALL,
+                    )
+                except Exception:
+                    return code
+
+            def _rewrite_cond(bracket_block: str) -> str:
+                """Convert a sequence of [test result] bracket pairs to flat cond."""
+                pairs = _re.findall(r'\[(.*?)\]', bracket_block, _re.DOTALL)
+                flat_parts = []
+                for pair in pairs:
+                    # Each bracket should have exactly 2 elements
+                    parts = pair.strip().split(None, 1)
+                    if len(parts) == 2:
+                        flat_parts.append(parts[0].strip())
+                        flat_parts.append(parts[1].strip())
+                    elif len(parts) == 1:
+                        flat_parts.append(parts[0].strip())
+                        flat_parts.append("None")
+                return "(cond " + " ".join(flat_parts) + ")"
+
+            code = _fix_hy_cond(code)
 
             # Read and evaluate all forms in the code
             forms = hy.read_many(code)

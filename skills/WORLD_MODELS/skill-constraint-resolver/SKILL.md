@@ -1,52 +1,52 @@
 ---
 name: skill-constraint-resolver
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - clingo
-  - z3
-description: >
-  Solves ill-posed inversion problems by computing the entire valid solution
-  space under strict background axioms. Uses Clingo (ASP) or Z3 SMT to prune
-  impossible states before a generative agent can loop.
-purpose: >
-  Address the math problem of solving one equation with multiple unknowns by
-  establishing closed-world assumptions or strict background axioms and
-  computing all valid states.
+- clingo
+- z3
+description: 'Solves ill-posed inversion problems by computing the entire valid solution space under strict background axioms.
+  Uses Clingo (ASP) or Z3 SMT to prune impossible states before a generative agent can loop.
+
+  '
+purpose: 'Address the math problem of solving one equation with multiple unknowns by establishing closed-world assumptions
+  or strict background axioms and computing all valid states.
+
+  '
 dependencies:
-  - data-processing/skill-sensor-transducer
+- data-processing/skill-sensor-transducer
+tags:
+- constraint-solving
+- ill-posed
+- clingo
+- z3
+- asp
+- smt
+- pruning
+- cocktail-party
 inputs:
   observables:
     type: object
     required: true
-    description: "Observed data points defining the ill-posed problem"
+    description: Observed data points defining the ill-posed problem
   background_axioms:
     type: object
     required: true
-    description: "Strict rules that constrain the solution space"
+    description: Strict rules that constrain the solution space
   solver_mode:
     type: string
     required: false
-    description: "clingo (ASP) | z3 (SMT) (default: clingo)"
+    description: 'clingo (ASP) | z3 (SMT) (default: clingo)'
 outputs:
   solution_space:
     type: array
-    description: "Complete set of valid solutions under axioms"
+    description: Complete set of valid solutions under axioms
   pruned_states:
     type: array
-    description: "States eliminated by constraint propagation"
+    description: States eliminated by constraint propagation
   derivation_trace:
     type: object
-    description: "Step-by-step constraint application trace"
-tags:
-  - constraint-solving
-  - ill-posed
-  - clingo
-  - z3
-  - asp
-  - smt
-  - pruning
-  - cocktail-party
+    description: Step-by-step constraint application trace
 ---
 
 # Skill Constraint Resolver

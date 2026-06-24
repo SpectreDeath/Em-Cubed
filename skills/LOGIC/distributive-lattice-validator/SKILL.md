@@ -1,48 +1,49 @@
 ---
 name: distributive-lattice-validator
-version: 1.0.0
 domain: LOGIC
+version: 1.0.0
 surfaces:
-  - prolog
-  - z3
-description: >
-  Verifies that a poset satisfies the distributive lattice axioms
-  (unique joins and meets for all element pairs, distributivity of
-  meet over join and vice versa).
-purpose: >
-  Confirm that the implication poset can support probability values
-  as a continuous generalization of the inverse zeta function.
+- prolog
+- z3
+description: 'Verifies that a poset satisfies the distributive lattice axioms (unique joins and meets for all element pairs,
+  distributivity of meet over join and vice versa).
+
+  '
+purpose: 'Confirm that the implication poset can support probability values as a continuous generalization of the inverse
+  zeta function.
+
+  '
 dependencies:
-  - poset-implication-builder
+- poset-implication-builder
+tags:
+- lattice
+- poset
+- prolog
+- z3
+- distributive
+- verification
 inputs:
   poset_facts:
     type: object
     required: true
-    description: "Prolog facts from poset-implication-builder"
+    description: Prolog facts from poset-implication-builder
   element_pairs:
     type: array
     required: false
-    description: "Optional explicit pairs to test for join/meet"
+    description: Optional explicit pairs to test for join/meet
 outputs:
   is_distributive_lattice:
     type: boolean
-    description: "True if all lattice axioms hold"
+    description: True if all lattice axioms hold
   join_table:
     type: object
-    description: "Join (least upper bound) for tested pairs"
+    description: Join (least upper bound) for tested pairs
   meet_table:
     type: object
-    description: "Meet (greatest lower bound) for tested pairs"
+    description: Meet (greatest lower bound) for tested pairs
   violations:
     type: array
-    description: "List of pairs violating distributivity"
-tags:
-  - lattice
-  - poset
-  - prolog
-  - z3
-  - distributive
-  - verification
+    description: List of pairs violating distributivity
 ---
 
 # Distributive Lattice Validator

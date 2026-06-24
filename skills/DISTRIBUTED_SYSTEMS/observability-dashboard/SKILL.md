@@ -1,26 +1,40 @@
 ---
 name: observability-dashboard
-Domain: DISTRIBUTED_SYSTEMS
-version: "1.0.0"
+domain: DISTRIBUTED_SYSTEMS
+version: 1.0.0
 surfaces:
-  - python
-  - sqlite
-description: Multi-surface observability dashboard with Python surface for metric collection and SQLite surface for time-series storage and alerting. Supports configurable thresholds and stat inspection.
+- python
+- sqlite
+description: Multi-surface observability dashboard with Python surface for metric collection and SQLite surface for time-series
+  storage and alerting. Supports configurable thresholds and stat inspection.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 # Observability Dashboard

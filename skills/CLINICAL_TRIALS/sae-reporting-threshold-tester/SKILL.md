@@ -1,26 +1,40 @@
 ---
 name: sae-reporting-threshold-tester
-Domain: CLINICAL_TRIALS
-Version: 1.0.0
+domain: CLINICAL_TRIALS
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-description: Multi-surface SAE reporting threshold tester with Python surface for adverse event count analysis and Z3 surface for FDA 21 CFR 312.32 timing constraint verification.
+- python
+- z3
+description: Multi-surface SAE reporting threshold tester with Python surface for adverse event count analysis and Z3 surface
+  for FDA 21 CFR 312.32 timing constraint verification.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 # Purpose

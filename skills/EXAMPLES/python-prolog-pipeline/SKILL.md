@@ -1,38 +1,52 @@
 ---
-Domain: EXAMPLES
 name: python-prolog-pipeline
-Version: 1.0.0
+domain: EXAMPLES
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-origin: manual
+- python
+- prolog
+description: Multi-surface pipeline combining Python for execution or evaluation, Prolog for logical rule verification, and
+  optional SQLite for persistent state storage.
 triggers:
-  - example
-  - pipeline
-  - graph
+- example
+- pipeline
+- graph
+compatibility: PYTHON
+created_at: '2026-05-07T21:00:00Z'
+updated_at: '2026-05-07T21:00:00Z'
+origin: manual
 quality:
   applied_count: 0
   success_count: 0
   completion_rate: 0.0
   token_savings_avg: 0.0
-created_at: "2026-05-07T21:00:00Z"
-updated_at: "2026-05-07T21:00:00Z"
-description: Multi-surface pipeline combining Python for execution or evaluation, Prolog for logical rule verification, and optional SQLite for persistent state storage.
-compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 ## Purpose

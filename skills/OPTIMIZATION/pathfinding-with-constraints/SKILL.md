@@ -1,28 +1,41 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: High
-Type: Process
-Category: Graph Skills
-Estimated Execution Time: 2-5 minutes
 name: pathfinding-with-constraints
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 description: Pathfinding with constraints for graph traversal under resource limits, time windows, and hard constraints.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Process
+category: Graph Skills
+estimated execution time: 2-5 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

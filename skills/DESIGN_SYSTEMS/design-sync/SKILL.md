@@ -1,55 +1,54 @@
 ---
 name: design-sync
-version: 1.0.0
 domain: DESIGN_SYSTEMS
+version: 1.0.0
 surfaces:
-  - datalog
-  - prolog
-description: >
-  Bi-directional design-system bridge. Datalog surface stores declarative
-  component equivalencies and token mappings. Prolog surface derives
-  equivalency rules and compliance verdicts before the harness builder
-  touches the codebase.
-purpose: >
-  Prevent agents from introducing generic UI elements or design-token drift
-  by checking proposed work against the canonical design system. This is the
-  Sloan bridge: codebase logic to external product/design invariants.
+- datalog
+- prolog
+description: 'Bi-directional design-system bridge. Datalog surface stores declarative component equivalencies and token mappings.
+  Prolog surface derives equivalency rules and compliance verdicts before the harness builder touches the codebase.
+
+  '
+purpose: 'Prevent agents from introducing generic UI elements or design-token drift by checking proposed work against the
+  canonical design system. This is the Sloan bridge: codebase logic to external product/design invariants.
+
+  '
 dependencies:
-  - skill-harness-builder
+- skill-harness-builder
+tags:
+- design-system
+- component-mapping
+- equivalency
+- datalog
+- prolog
+- invariant
+- Sloan-harness-engineering
 inputs:
   design_tokens:
     type: object
     required: true
-    description: "Extracted design tokens from Figma, tokens.json, or a design system"
+    description: Extracted design tokens from Figma, tokens.json, or a design system
   target_component:
     type: string
     required: true
-    description: "UI component or element under evaluation"
+    description: UI component or element under evaluation
   codebase_context:
     type: object
     required: false
-    description: "Inventory of existing code components to cross-check"
+    description: Inventory of existing code components to cross-check
 outputs:
   component_mapping:
     type: object
-    description: "Mapped equivalent component in the design system"
+    description: Mapped equivalent component in the design system
   compliance_status:
     type: string
-    description: "compliant | mismatch | missing"
+    description: compliant | mismatch | missing
   constraint_violations:
     type: array
-    description: "List of design-system violations detected"
+    description: List of design-system violations detected
   recommended_component:
     type: string
-    description: "Canonical component name the harness should use"
-tags:
-  - design-system
-  - component-mapping
-  - equivalency
-  - datalog
-  - prolog
-  - invariant
-  - Sloan-harness-engineering
+    description: Canonical component name the harness should use
 ---
 
 # Design System Sync

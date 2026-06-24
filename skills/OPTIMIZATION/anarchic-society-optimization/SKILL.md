@@ -1,33 +1,47 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: Medium
-Type: Optimization
-Category: Swarm Intelligence
-Estimated Execution Time: 5-30 minutes
 name: anarchic-society-optimization
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - hy
-  - z3
-description: Optimization algorithm inspired by anarchic society dynamics for multi-agent optimization, swarm intelligence, and decentralized search.
+- python
+- prolog
+- hy
+- z3
+description: Optimization algorithm inspired by anarchic society dynamics for multi-agent optimization, swarm intelligence,
+  and decentralized search.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Optimization
+category: Swarm Intelligence
+estimated execution time: 5-30 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

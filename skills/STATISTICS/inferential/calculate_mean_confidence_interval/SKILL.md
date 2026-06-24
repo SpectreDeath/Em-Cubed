@@ -51,7 +51,7 @@ Hybrid skill:
 :- module(confidence_interval, [
     ci_z/2,
     ci_preconditions/2,
-    ci_result/7
+    ci_result/9
 ]).
 
 % ============================================================

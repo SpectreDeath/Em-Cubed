@@ -47,7 +47,6 @@ After counting, a Laplace smoothing parameter α is applied. The Prolog layer th
 :- module(transition_matrix, [
     row_stochastic/2,
     absorbing_state/2,
-    all_states/2,
     valid_matrix/1
 ]).
 

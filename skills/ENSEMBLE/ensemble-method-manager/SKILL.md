@@ -1,28 +1,42 @@
 ---
-Domain: ENSEMBLE
-Version: 1.0.0
-Complexity: Medium
-Type: Management
-Category: ML Operations
-Estimated Execution Time: 5-15 minutes
 name: ensemble-method-manager
-Source: community
-description: Multi-surface ensemble manager with Python for model ensembling, Prolog for logical model compatibility, and Hy for fuzzy model weighting.
+domain: ENSEMBLE
+version: 1.0.0
+description: Multi-surface ensemble manager with Python for model ensembling, Prolog for logical model compatibility, and
+  Hy for fuzzy model weighting.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: Medium
+type: Management
+category: ML Operations
+estimated execution time: 5-15 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -126,6 +140,7 @@ voting_strategy(Classification, VotingType) :-
   "Compute fuzzy model weight"
   (let [weighted (+ (* accuracy 0.4) (* diversity 0.3) (* performance-weight 0.3))]
     (/ weighted (sum (map (fn [m] (get m :weighted 1)) models)))))
+```
 
 ## Testing
 

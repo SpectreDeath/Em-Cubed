@@ -1,33 +1,45 @@
 ---
-Domain: RESOURCE_MANAGEMENT
-Version: 1.0.0
-Complexity: Medium
-Type: Allocation
-Category: Capacity Planning
-Estimated Execution Time: 5-10 minutes
 name: predictive-capacity-planner
-Source: community
+domain: RESOURCE_MANAGEMENT
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - hy
-
+- python
+- prolog
+- hy
 description: Predictive capacity planner for workload forecasting, resource scaling, and bottleneck prevention.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Allocation
+category: Capacity Planning
+estimated execution time: 5-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -107,13 +119,22 @@ under_provisioned(Capacity, Demand, Threshold) :-
 ### Hy Fuzzy Scoring
 
 ```hy
+(defn generate-future-scenarios [base-scenario n-scenarios variance]
+  (list (map (fn [s]
+               (list (map (fn [i]
+                            (+ (get base-scenario i) (* (get variance i) (randn))))
+                          (range (len base-scenario)))))
+             (range n-scenarios))))
+
 (defn capacity-utilization-score [current capacity]
   (let [util (/ current (max 1e-10 capacity))]
-    (cond
-      [(< util 0.6) 1.0]  ; under-utilized
-      [(> util 0.9) 0.5]  ; over capacity
-      [True (- 1.0 util)])))  ; normal range
+    (if (< util 0.6)
+      1.0
+      (if (> util 0.9)
+        0.5
+        (- 1.0 util)))))
 ```
+
 
 ## Testing
 

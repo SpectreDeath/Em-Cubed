@@ -1,49 +1,50 @@
 ---
 name: inverse-zeta-generalizer
-version: 1.0.0
 domain: LOGIC
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-description: >
-  Generalizes the binary inverse zeta function to a continuous [0, 1] range
-  over a distributive lattice, mapping truth values to probability densities
-  for incomplete information.
-purpose: >
-  Provide the probability foundation for Jaynesian reasoning: map lattice
-  implication strengths to continuous degrees of belief.
+- python
+- z3
+description: 'Generalizes the binary inverse zeta function to a continuous [0, 1] range over a distributive lattice, mapping
+  truth values to probability densities for incomplete information.
+
+  '
+purpose: 'Provide the probability foundation for Jaynesian reasoning: map lattice implication strengths to continuous degrees
+  of belief.
+
+  '
 dependencies:
-  - distributive-lattice-validator
+- distributive-lattice-validator
+tags:
+- zeta
+- probability
+- lattice
+- jaynes
+- python
+- z3
 inputs:
   lattice_structure:
     type: object
     required: true
-    description: "Verified distributive lattice from distributive-lattice-validator"
+    description: Verified distributive lattice from distributive-lattice-validator
   observation:
     type: object
     required: true
-    description: "Observed evidence with lattice element weights"
+    description: Observed evidence with lattice element weights
   smoothing:
     type: number
     required: false
-    description: "Pseudocount smoothing factor (default: 1.0)"
+    description: 'Pseudocount smoothing factor (default: 1.0)'
 outputs:
   probability_distribution:
     type: object
-    description: "Continuous probability distribution over lattice elements"
+    description: Continuous probability distribution over lattice elements
   information_gain:
     type: number
-    description: "KL divergence from prior to posterior"
+    description: KL divergence from prior to posterior
   consistency_check:
     type: boolean
-    description: "True if distribution satisfies Jaynes consistency axioms"
-tags:
-  - zeta
-  - probability
-  - lattice
-  - jaynes
-  - python
-  - z3
+    description: True if distribution satisfies Jaynes consistency axioms
 ---
 
 # Inverse Zeta Generalizer

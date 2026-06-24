@@ -1,26 +1,39 @@
 ---
 name: js-text-transformer
-Domain: NLP
-Version: 1.0.0
+domain: NLP
+version: 1.0.0
 surfaces:
-  - python
-  - quickjs
+- python
+- quickjs
 description: JavaScript text transformer for normalization, tokenization, and feature extraction in NLP pipelines.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 ## Purpose

@@ -1,32 +1,45 @@
 ---
-Domain: DISTRIBUTED_SYSTEMS
-surfaces:
-  - python
-  - prolog
-  - hy
-Version: 1.0.0
-Complexity: High
-Type: Coordination
-Category: Multi-Agent Skills
-Estimated Execution Time: 10-20 minutes
 name: multi-agent-coordinator
-Source: community
+domain: DISTRIBUTED_SYSTEMS
+version: 1.0.0
+surfaces:
+- python
+- prolog
+- hy
 description: Skill for multi-agent-coordinator.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: High
+type: Coordination
+category: Multi-Agent Skills
+estimated execution time: 10-20 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

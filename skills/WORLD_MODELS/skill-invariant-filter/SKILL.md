@@ -1,51 +1,51 @@
 ---
 name: skill-invariant-filter
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - datalog
-  - prolog
-description: >
-  Relational invariant extraction and topological equivalence filter.
-  Decouples structural identity from superficial data modifications, matching
-  on connectivity and architectural signatures while masking noise.
-purpose: >
-  Maintain perceptual constancy across transformed data. Maps disparate
-  structural representations into a single normalized logic identity using
-  relational rules.
+- datalog
+- prolog
+description: 'Relational invariant extraction and topological equivalence filter. Decouples structural identity from superficial
+  data modifications, matching on connectivity and architectural signatures while masking noise.
+
+  '
+purpose: 'Maintain perceptual constancy across transformed data. Maps disparate structural representations into a single normalized
+  logic identity using relational rules.
+
+  '
 dependencies:
-  - skill-sensor-transducer
+- skill-sensor-transducer
+tags:
+- invariant
+- constancy
+- datalog
+- prolog
+- equivalence
+- noise-filter
+- car-vision
 inputs:
   normalized_data:
     type: object
     required: true
-    description: "Normalized data from skill-sensor-transducer"
+    description: Normalized data from skill-sensor-transducer
   invariant_schema:
     type: object
     required: true
-    description: "Rules defining topological invariants to match on"
+    description: Rules defining topological invariants to match on
   noise_threshold:
     type: number
     required: false
-    description: "Maximum acceptable noise level (default: 0.1)"
+    description: 'Maximum acceptable noise level (default: 0.1)'
 outputs:
   normalized_identity:
     type: object
-    description: "Topological invariant representation"
+    description: Topological invariant representation
   noise_masked_fields:
     type: array
-    description: "Fields where noise exceeded threshold"
+    description: Fields where noise exceeded threshold
   equivalence_score:
     type: number
-    description: "Similarity score against invariant schema"
-tags:
-  - invariant
-  - constancy
-  - datalog
-  - prolog
-  - equivalence
-  - noise-filter
-  - car-vision
+    description: Similarity score against invariant schema
 ---
 
 # Skill Invariant Filter

@@ -1,24 +1,34 @@
 ---
 name: smt-harness-optimizer
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-description: >
-  SMT-bounded harness optimizer that formally verifies which agent harness pattern
-  (chaining, routing, or delegation) is safest and most token-efficient for a given objective.
-  Encodes resource budgets as SMT assertions and proves correctness before deployment.
-purpose: >
-  Automatically decide the optimal harness topology for an agent task, formally
-  proving that the chosen design satisfies token, time, and security constraints.
+- python
+- z3
+description: 'SMT-bounded harness optimizer that formally verifies which agent harness pattern (chaining, routing, or delegation)
+  is safest and most token-efficient for a given objective. Encodes resource budgets as SMT assertions and proves correctness
+  before deployment.
+
+  '
+purpose: 'Automatically decide the optimal harness topology for an agent task, formally proving that the chosen design satisfies
+  token, time, and security constraints.
+
+  '
 dependencies:
-  - dag-task-scheduler
+- dag-task-scheduler
+tags:
+- z3
+- smt
+- harness
+- optimizer
+- proof
+- formal-verification
+- token-efficiency
 inputs:
   resource_budgets:
     type: object
     required: true
-    description: "Budget constraints: {max_tokens, max_time_ms, max_sub_agents, security_level}"
+    description: 'Budget constraints: {max_tokens, max_time_ms, max_sub_agents, security_level}'
   candidate_topologies:
     type: array
     required: true
@@ -40,14 +50,6 @@ outputs:
   infeasible:
     type: array
     description: Candidates that violate hard constraints
-tags:
-  - z3
-  - smt
-  - harness
-  - optimizer
-  - proof
-  - formal-verification
-  - token-efficiency
 ---
 
 # SMT-Bounded Harness Optimizer

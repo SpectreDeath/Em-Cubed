@@ -1,55 +1,55 @@
 ---
 name: skill-anomaly-diagnostic
-version: 1.0.0
 domain: MODEL_VALIDATION
+version: 1.0.0
 surfaces:
-  - z3
-  - python
-description: >
-  Edge-case diagnostic tester that injects adversarial or boundary telemetry
-  variations to verify system assumptions hold. Uses Z3 assertions to
-  validate constraint resilience and expose logical deadlocks.
-purpose: >
-  Map out an automated testing boundary that asserts compliance gates
-  against the skill system itself, ensuring background constraints do not
-  create deadlocks when unexpected real-world data patterns appear.
+- z3
+- python
+description: 'Edge-case diagnostic tester that injects adversarial or boundary telemetry variations to verify system assumptions
+  hold. Uses Z3 assertions to validate constraint resilience and expose logical deadlocks.
+
+  '
+purpose: 'Map out an automated testing boundary that asserts compliance gates against the skill system itself, ensuring background
+  constraints do not create deadlocks when unexpected real-world data patterns appear.
+
+  '
 dependencies:
-  - skill-unconscious-inference
+- skill-unconscious-inference
+tags:
+- anomaly
+- diagnostic
+- z3
+- smt
+- testing
+- edge-case
+- illusion
+- resilience
 inputs:
   baseline_model:
     type: object
     required: true
-    description: "Baseline model or constraint set to test"
+    description: Baseline model or constraint set to test
   adversarial_variations:
     type: array
     required: true
-    description: "Edge-case input variations to inject"
+    description: Edge-case input variations to inject
   resilience_threshold:
     type: number
     required: false
-    description: "Minimum acceptable resilience score (default: 0.8)"
+    description: 'Minimum acceptable resilience score (default: 0.8)'
 outputs:
   diagnosis_report:
     type: object
-    description: "Full diagnostic report with assumption violations"
+    description: Full diagnostic report with assumption violations
   resilience_score:
     type: number
-    description: "Overall system resilience to adversarial inputs"
+    description: Overall system resilience to adversarial inputs
   deadlock_detected:
     type: boolean
-    description: "True if constraint deadlock was detected"
+    description: True if constraint deadlock was detected
   failure_cases:
     type: array
-    description: "List of inputs that caused assumption violations"
-tags:
-  - anomaly
-  - diagnostic
-  - z3
-  - smt
-  - testing
-  - edge-case
-  - illusion
-  - resilience
+    description: List of inputs that caused assumption violations
 ---
 
 # Skill Anomaly Diagnostic

@@ -1,28 +1,42 @@
 ---
-Domain: DECISION_MAKING
-Version: 1.0.0
-Complexity: High
-Type: Process
-Category: Cognitive Skills
-Estimated Execution Time: 2-5 minutes
 name: multi-surface-decision-tree
-Source: community
-description: Multi-surface decision tree supporting ensemble-based classification and rule extraction across Python, Prolog, and Hy surfaces.
+domain: DECISION_MAKING
+version: 1.0.0
+description: Multi-surface decision tree supporting ensemble-based classification and rule extraction across Python, Prolog,
+  and Hy surfaces.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Process
+category: Cognitive Skills
+estimated execution time: 2-5 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

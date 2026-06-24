@@ -1,61 +1,60 @@
 ---
 name: skill-world-designer
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - clingo
-  - z3
-description: >
-  Multi-surface world simulator that evaluates proposed skill changes in a
-  logical sandbox before execution. Clingo surface performs predictive
-  simulation and logical invariant checks. Z3 surface verifies formal budget
-  constraints.
-purpose: >
-  Run a skill definition through a logical sandbox to verify correctness,
-  detect resource budget violations, and confirm invariant safety before the
-  harness builder compiles it into an executable artifact.
+- clingo
+- z3
+description: 'Multi-surface world simulator that evaluates proposed skill changes in a logical sandbox before execution. Clingo
+  surface performs predictive simulation and logical invariant checks. Z3 surface verifies formal budget constraints.
+
+  '
+purpose: 'Run a skill definition through a logical sandbox to verify correctness, detect resource budget violations, and confirm
+  invariant safety before the harness builder compiles it into an executable artifact.
+
+  '
 dependencies:
-  - skill-harness-builder
+- skill-harness-builder
+tags:
+- world-model
+- simulation
+- clingo
+- asp
+- z3
+- smt
+- invariant-check
+- budget-verification
+- sandbox
 inputs:
   skill_definition:
     type: object
     required: true
-    description: "Parsed SKILL.md frontmatter and body"
+    description: Parsed SKILL.md frontmatter and body
   world_rules:
     type: string
     required: false
-    description: "Datalog/Clingo rules defining the simulated environment"
+    description: Datalog/Clingo rules defining the simulated environment
   resource_budgets:
     type: object
     required: false
-    description: "Budget constraints for formal verification"
+    description: Budget constraints for formal verification
   simulation_steps:
     type: integer
     required: false
-    description: "Max simulation depth (default: 1)"
+    description: 'Max simulation depth (default: 1)'
 outputs:
   simulation_result:
     type: object
-    description: "Result of predictive simulation"
+    description: Result of predictive simulation
   invariant_check:
     type: object
-    description: "Logical invariant verification result"
+    description: Logical invariant verification result
   budget_proof:
     type: object
-    description: "Z3 proof of budget feasibility"
+    description: Z3 proof of budget feasibility
   readiness_verdict:
     type: string
-    description: "verified | contradiction | budget_exceeded | inconclusive"
-tags:
-  - world-model
-  - simulation
-  - clingo
-  - asp
-  - z3
-  - smt
-  - invariant-check
-  - budget-verification
-  - sandbox
+    description: verified | contradiction | budget_exceeded | inconclusive
 ---
 
 # Skill World Designer

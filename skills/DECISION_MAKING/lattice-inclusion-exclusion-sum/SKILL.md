@@ -1,49 +1,49 @@
 ---
 name: lattice-inclusion-exclusion-sum
-version: 1.0.0
 domain: DECISION_MAKING
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-description: >
-  Implements the general sum rule across overlapping lattice elements using
-  structural meet/join intersections. Computes P(A or B | C) from lattice
-  topology rather than Venn diagrams.
-purpose: >
-  Provide the lattice-native inclusion-exclusion rule for combining
-  probabilities over overlapping logical propositions.
+- python
+- prolog
+description: 'Implements the general sum rule across overlapping lattice elements using structural meet/join intersections.
+  Computes P(A or B | C) from lattice topology rather than Venn diagrams.
+
+  '
+purpose: 'Provide the lattice-native inclusion-exclusion rule for combining probabilities over overlapping logical propositions.
+
+  '
 dependencies:
-  - inverse-zeta-generalizer
+- inverse-zeta-generalizer
+tags:
+- probability
+- lattice
+- inclusion-exclusion
+- sum-rule
+- python
+- prolog
 inputs:
   probability_distribution:
     type: object
     required: true
-    description: "Probability distribution over lattice elements"
+    description: Probability distribution over lattice elements
   target_elements:
     type: array
     required: true
-    description: "Elements to combine (A, B, etc.)"
+    description: Elements to combine (A, B, etc.)
   condition:
     type: string
     required: false
-    description: "Conditional element C (default: top/unconditional)"
+    description: 'Conditional element C (default: top/unconditional)'
 outputs:
   combined_probability:
     type: number
-    description: "P(A or B | C) computed via lattice inclusion-exclusion"
+    description: P(A or B | C) computed via lattice inclusion-exclusion
   decomposition:
     type: object
-    description: "Breakdown of individual and intersection terms"
+    description: Breakdown of individual and intersection terms
   intersection_element:
     type: string
-    description: "Lattice element representing A and B intersection"
-tags:
-  - probability
-  - lattice
-  - inclusion-exclusion
-  - sum-rule
-  - python
-  - prolog
+    description: Lattice element representing A and B intersection
 ---
 
 # Lattice Inclusion-Exclusion Sum

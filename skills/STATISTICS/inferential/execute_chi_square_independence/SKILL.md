@@ -1,5 +1,5 @@
 ---
-name: calculate_correlation_profile
+name: execute_chi_square_independence
 domain: STATISTICS
 version: "1.0.0"
 surfaces: [prolog, python]

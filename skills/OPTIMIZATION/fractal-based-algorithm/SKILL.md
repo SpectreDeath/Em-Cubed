@@ -1,32 +1,45 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: Medium
-Type: Optimization
-Category: Fractal-Based Search
-Estimated Execution Time: 5-20 minutes
 name: fractal-based-algorithm
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - hy
+- python
+- prolog
+- hy
 description: Fractal-based optimization algorithm using self-similar search patterns and recursive space partitioning.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Optimization
+category: Fractal-Based Search
+estimated execution time: 5-20 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -307,56 +320,26 @@ converged(History, Tolerance) :-
 ### Hy Space Partitioning
 
 ```hy
-; Fractal-Based Algorithm - Hy surface
-; Space partitioning and fractal structure functions
-
-(defn create-subspace [min-bounds max-bounds level parent-idx]
-  "Create a subspace with bounds and metadata."
-  {:min min-bounds :max max-bounds :level level :parent-index parent-idx :rank 0.0 :promising False})
-
-(defn divide-subspace [subspace m-value]
-  "Divide a subspace into m_value^dim smaller subspaces."
-  (setv dim (len subspace.min))
-  (setv total (pow m-value dim))
-  (setv result [])
-  (setv indices [0]
-  (for [i (range dim)]
-    (.append indices 0))
-  (for [idx (range total)]
-    (setv new-subspace (create-subspace
-      [subspace.min[i] + indices[i] * (/ (- subspace.max[i] subspace.min[i]) m-value)
-       for i (range dim)]
-      [subspace.min[i] + (+ indices[i] 1) * (/ (- subspace.max[i] subspace.min[i]) m-value)
-       for i (range dim)]
-      (+ subspace.level 1)
-      idx))
-    (.append result new-subspace)
-    ; increment indices
-    (setv c (- dim 1))
-    (while (>= c 0)
-      (setv indices[c] (+ indices[c] 1))
-      (if (< indices[c] m-value)
-        (break))
-      (setv indices[c] 0)
-      (setv c (- c 1)))
-    (if (< c 0)
-      (break)))
-  result)
+(defn create-subspace [min-b max-b level pidx]
+  {:min min-b :max max-b :level level :parent-index pidx :rank 0.0 :promising False})
 
 (defn point-in-subspace [point subspace]
-  "Check if point is within subspace bounds."
   (for [c (range (len point))]
-    (if (or (< point[c] subspace.min[c]) (>= point[c] subspace.max[c]))
-      (return False)))
+    (if (or (< (get point c) (get (get subspace :min) c))
+            (>= (get point c) (get (get subspace :max) c)))
+      (return False) None))
   True)
 
 (defn power-distribution [center out-min out-max p rnd]
-  "Generate power-law distributed random value for mutation."
   (setv r (** (abs rnd) p))
   (if (>= rnd 0.0)
     (max out-min (min out-max (+ center (* r (- out-max center)))))
     (max out-min (min out-max (- center (* r (- center out-min)))))))
+
+(defn fractal-rank [subspace]
+  (+ (get subspace :rank) 1))
 ```
+
 
 ## Testing
 

@@ -1,32 +1,46 @@
 ---
 name: hy-fuzzy-logic
-Domain: General
-Version: 1.0.0
+domain: General
+version: 1.0.0
 surfaces:
-  - hy
+- hy
+description: Fuzzy logic inference engine using Hy surface for membership definitions, Python for numerical defuzzification,
+  and Prolog for rule validation.
 triggers:
-  - fuzzy
-  - logic
-  - hy
-  - lisp
-  - heuristic
-  - reasoning
-description: Fuzzy logic inference engine using Hy surface for membership definitions, Python for numerical defuzzification, and Prolog for rule validation.
+- fuzzy
+- logic
+- hy
+- lisp
+- heuristic
+- reasoning
 compatibility: HY
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 ## Purpose
@@ -42,46 +56,25 @@ A comprehensive fuzzy logic engine that demonstrates Hy's strengths in symbolic 
 ### Fuzzy Set Operations
 
 ```hy
-; Define fuzzy sets for temperature
-(defn cold-membership [temp]
-  "Membership function for cold temperatures"
-  (cond [(<= temp 0) 1.0]
-        [(<= temp 20) (/ (- 20 temp) 20.0)]
-        [True 0.0]))
+; Temperature control system using fuzzy logic
 
-(defn warm-membership [temp]
-  "Membership function for warm temperatures"
-  (cond [(<= temp 15) 0.0]
-        [(<= temp 25) (/ (- temp 15) 25.0)]
-        [(<= temp 35) 1.0]
-        [(<= temp 45) (/ (- 45 temp) 10.0)]
-        [True 0.0]))
+(defn fuzzy-temperature-controller [current-temp desired-temp]
+  (let [error (- desired-temp current-temp)]
+    (if (< error -5)
+      1.0
+      (if (< error 0)
+        0.5
+        0.0))))
 
-(defn hot-membership [temp]
-  "Membership function for hot temperatures"
-  (cond [(<= temp 30) 0.0]
-        [(<= temp 50) (/ (- temp 30) 20.0)]
-        [True 1.0]))
-
-; Fuzzy operations
-(defn fuzzy-and [a b]
-  "Fuzzy AND operation (minimum)"
-  (min a b))
-
-(defn fuzzy-or [a b]
-  "Fuzzy OR operation (maximum)"
-  (max a b))
-
-(defn fuzzy-not [a]
-  "Fuzzy NOT operation"
-  (- 1.0 a))
-
-; Temperature classification
-(defn classify-temperature [temp]
-  {"cold" (cold-membership temp)
-   "warm" (warm-membership temp)
-   "hot" (hot-membership temp)})
+(defn fuzzy-cooling [current-temp desired-temp]
+  (let [error (- desired-temp current-temp)]
+    (if (< error -5)
+      1.0
+      (if (< error 0)
+        0.5
+        0.0))))
 ```
+
 
 ### Heuristic Search
 
@@ -283,7 +276,7 @@ A comprehensive fuzzy logic engine that demonstrates Hy's strengths in symbolic 
     (setv offspring [])
     (for [i (range 0 (len parents) 2)]
       (if (< i (- (len parents) 1))
-        (.extend offspring (crossover-fn (get parents i) (get parents (+ i 1))))))
+        (.extend offspring (crossover-fn (get parents i) (get parents (+ i 1)))) None))
 
     ; Mutation
     (setv offspring (lfor child offspring (mutate-fn child)))

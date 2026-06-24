@@ -101,8 +101,7 @@ contains_casual_words(Text) :-
   "Apply basic style transformation"
   (if (= target-style "formal")
     (.replace text " yeah " " indeed ")
-    (.replace text " cool " " impressive ")
-    text))
+    (.replace text " cool " " impressive "))
 ```
 
 ## Testing

@@ -1,56 +1,58 @@
 ---
 name: looped-state-compressor
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - python
-  - sqlite
-description: >
-  Multi-surface looped state compressor that recursively compresses execution history into
-  dense relational state files. Python intercepts raw terminal traces, extracts discrete
-  entities and state deltas, and writes to SQLite. Agent queries history via structured SQL.
-purpose: >
-  Prevent context bloat in long-running agent loops by compressing execution history
-  into queryable relational state instead of appending to prompt context.
+- python
+- sqlite
+description: 'Multi-surface looped state compressor that recursively compresses execution history into dense relational state
+  files. Python intercepts raw terminal traces, extracts discrete entities and state deltas, and writes to SQLite. Agent queries
+  history via structured SQL.
+
+  '
+purpose: 'Prevent context bloat in long-running agent loops by compressing execution history into queryable relational state
+  instead of appending to prompt context.
+
+  '
 dependencies:
-  - durable-execution-engine
+- durable-execution-engine
+tags:
+- world-model
+- state-compression
+- sqlite
+- context-management
+- looped-transformer
+- entity-extraction
 inputs:
   session_id:
     type: string
     required: true
-    description: "Unique session identifier"
+    description: Unique session identifier
   raw_trace:
     type: array
     required: true
-    description: "Raw execution trace entries"
+    description: Raw execution trace entries
   compression_mode:
     type: string
     required: false
-    description: "delta or full (delta by default)"
+    description: delta or full (delta by default)
   max_history:
     type: integer
     required: false
-    description: "Max steps to retain (1000 by default)"
+    description: Max steps to retain (1000 by default)
 outputs:
   compressed_state:
     type: object
-    description: "Latest compressed state snapshot"
+    description: Latest compressed state snapshot
   entity_count:
     type: integer
-    description: "Number of distinct entities tracked"
+    description: Number of distinct entities tracked
   delta_summary:
     type: object
-    description: "Aggregate state changes since last compression"
+    description: Aggregate state changes since last compression
   db_path:
     type: string
-    description: "Path to the SQLite state database"
-tags:
-  - world-model
-  - state-compression
-  - sqlite
-  - context-management
-  - looped-transformer
-  - entity-extraction
+    description: Path to the SQLite state database
 ---
 
 # Looped State Compressor

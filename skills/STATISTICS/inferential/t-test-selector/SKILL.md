@@ -44,7 +44,7 @@ Hybrid skill:
 
 ```prolog
 :- module(t_test_selector, [
-    select_t_test/3,
+    select_t_test/4,
     t_test_guard/3,
     effect_size_label/2
 ]).

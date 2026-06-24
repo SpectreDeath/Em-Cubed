@@ -41,12 +41,10 @@ Implements a two-layer guardrail:
 ```prolog
 :- module(test_router, [
     % Public predicates
-    permitted_test/3,
-    formal_conclusion/3,
-    select_test/3,
+    permitted_test/4,
+    select_test/4,
     valid_measurement_for/2,
-    dominates/2,
-    ci_z/2
+    dominates/2
 ]).
 
 % ============================================================

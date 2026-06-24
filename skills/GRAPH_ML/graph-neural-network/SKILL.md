@@ -1,28 +1,41 @@
 ---
-Domain: GRAPH_ML
-Version: 1.0.0
-Complexity: High
-Type: Analysis
-Category: Deep Learning Skills
-Estimated Execution Time: 10-20 minutes
 name: graph-neural-network
-Source: community
+domain: GRAPH_ML
+version: 1.0.0
 description: Graph neural network implementation with Python surface for message passing and SQLite surface for graph storage.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Analysis
+category: Deep Learning Skills
+estimated execution time: 10-20 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

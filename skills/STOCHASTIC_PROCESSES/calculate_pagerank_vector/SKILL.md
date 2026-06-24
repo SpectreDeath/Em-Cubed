@@ -61,9 +61,8 @@ Matrix form (power iteration):
 :- module(pagerank_gen, [
     outdegree/3,
     dangling_node/2,
-    normalize_graph/2,
     teleport_vector/2,
-    pagerank_permitted/2
+    pagerank_permitted/3
 ]).
 
 % ============================================================

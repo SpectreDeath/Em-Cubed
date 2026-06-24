@@ -1,28 +1,41 @@
 ---
-Domain: FEATURE_ENGINEERING
-Version: 1.0.0
-Complexity: Medium
-Type: Pipeline
-Category: ML Skills
-Estimated Execution Time: 5-10 minutes
 name: feature-engineering-pipeline
-Source: community
+domain: FEATURE_ENGINEERING
+version: 1.0.0
 description: Feature engineering pipeline with Python transformations, Prolog consistency checks, and Hy fuzzy feature scoring.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: Medium
+type: Pipeline
+category: ML Skills
+estimated execution time: 5-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -139,6 +152,7 @@ data_quality(Column, Score) :-
   (if (< current-score 0.5)
       ["remove_low_variance" "add_polynomial" "select_k_best"]
       ["pca" "scaling"]))
+```
 
 ## Testing
 

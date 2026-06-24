@@ -1,28 +1,41 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: High
-Type: Analysis
-Category: Mathematical Skills
-Estimated Execution Time: 5-10 minutes
 name: optimization-landscape-analyzer
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 description: Optimization landscape analyzer for visualizing objective surfaces, identifying basins, and characterizing multimodality.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Analysis
+category: Mathematical Skills
+estimated execution time: 5-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

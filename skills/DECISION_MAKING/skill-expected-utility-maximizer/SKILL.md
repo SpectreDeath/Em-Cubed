@@ -1,64 +1,64 @@
 ---
 name: skill-expected-utility-maximizer
-version: 1.0.0
 domain: DECISION_MAKING
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-description: >
-  Dual-surface expected utility maximizer that computes optimal action
-  selection under dependency constraints. Python orchestrates EU computation
-  and action ranking; Z3 verifies independence bounds and injects joint
-  conditional matrices when player models are dependent.
-purpose: >
-  Select the optimal pure action by computing weighted expected utility
-  against an opponent belief state, with formal verification of
-  independence assumptions via Z3 SMT solving.
+- python
+- z3
+description: 'Dual-surface expected utility maximizer that computes optimal action selection under dependency constraints.
+  Python orchestrates EU computation and action ranking; Z3 verifies independence bounds and injects joint conditional matrices
+  when player models are dependent.
+
+  '
+purpose: 'Select the optimal pure action by computing weighted expected utility against an opponent belief state, with formal
+  verification of independence assumptions via Z3 SMT solving.
+
+  '
 dependencies:
-  - decision-making/epistemological-independence-filter
-  - decision-making/iterated-dominance-solver
+- decision-making/epistemological-independence-filter
+- decision-making/iterated-dominance-solver
+tags:
+- expected-utility
+- bayesian-decision
+- z3
+- action-selection
+- independence
+- python
+- decision-making
+- jaynes
 inputs:
   my_strategies:
     type: array
     required: true
-    description: "Available pure actions for the deciding player"
+    description: Available pure actions for the deciding player
   opponent_belief_state:
     type: object
     required: true
-    description: "Belief state dict[int, float] over opponent strategies"
+    description: Belief state dict[int, float] over opponent strategies
   payoff_matrix:
     type: array
     required: true
-    description: "Payoff matrix list[list[float]] for the deciding player"
+    description: Payoff matrix list[list[float]] for the deciding player
   player_observable_history:
     type: array
     required: false
-    description: "Observable state history for dependency check (default: [])"
+    description: 'Observable state history for dependency check (default: [])'
 outputs:
   optimal_action:
     type: integer
-    description: "Index of the optimal pure action"
+    description: Index of the optimal pure action
   expected_utility:
     type: float
-    description: "Expected utility of the optimal action"
+    description: Expected utility of the optimal action
   action_ranking:
     type: array
-    description: "All actions ranked by descending EU"
+    description: All actions ranked by descending EU
   independence_status:
     type: string
-    description: "independent | dependent | inconclusive from Z3 check"
+    description: independent | dependent | inconclusive from Z3 check
   joint_matrix_used:
     type: boolean
-    description: "True if joint conditional matrix was injected"
-tags:
-  - expected-utility
-  - bayesian-decision
-  - z3
-  - action-selection
-  - independence
-  - python
-  - decision-making
-  - jaynes
+    description: True if joint conditional matrix was injected
 ---
 
 # Skill Expected Utility Maximizer

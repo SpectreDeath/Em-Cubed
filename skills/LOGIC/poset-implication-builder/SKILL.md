@@ -1,49 +1,49 @@
 ---
 name: poset-implication-builder
-version: 1.0.0
 domain: LOGIC
+version: 1.0.0
 surfaces:
-  - prolog
-  - z3
-description: >
-  Constructs a partially ordered set (poset) from a set of propositions
-  ordered by strict logical implication. Prolog derives implication rules;
-  Z3 verifies the poset structure.
-purpose: >
-  Take an arbitrary set of propositions and build the corresponding poset
-  so that probability values can emerge as a continuous generalization of
-  the inverse zeta function over the lattice.
+- prolog
+- z3
+description: 'Constructs a partially ordered set (poset) from a set of propositions ordered by strict logical implication.
+  Prolog derives implication rules; Z3 verifies the poset structure.
+
+  '
+purpose: 'Take an arbitrary set of propositions and build the corresponding poset so that probability values can emerge as
+  a continuous generalization of the inverse zeta function over the lattice.
+
+  '
 dependencies:
-  - distributive-lattice-validator
+- distributive-lattice-validator
+tags:
+- lattice
+- poset
+- implication
+- prolog
+- z3
+- logic
 inputs:
   propositions:
     type: array
     required: true
-    description: "List of proposition strings or identifiers"
+    description: List of proposition strings or identifiers
   implication_rules:
     type: array
     required: false
-    description: "Optional explicit implication rules"
+    description: Optional explicit implication rules
 outputs:
   poset_facts:
     type: object
-    description: "Prolog facts representing the implication order"
+    description: Prolog facts representing the implication order
   poset_verified:
     type: boolean
-    description: "True if Z3 confirms valid poset structure"
+    description: True if Z3 confirms valid poset structure
   top_element:
     type: string
-    description: "Proposition that implies all others (top)"
+    description: Proposition that implies all others (top)
   bottom_element:
     type: string
-    description: "Proposition implied by all others (bottom)"
-tags:
-  - lattice
-  - poset
-  - implication
-  - prolog
-  - z3
-  - logic
+    description: Proposition implied by all others (bottom)
 ---
 
 # Poset Implication Builder

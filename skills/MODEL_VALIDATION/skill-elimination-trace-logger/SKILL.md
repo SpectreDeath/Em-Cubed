@@ -1,62 +1,61 @@
 ---
 name: skill-elimination-trace-logger
-version: 1.0.0
 domain: MODEL_VALIDATION
+version: 1.0.0
 surfaces:
-  - python
-  - sqlite
-description: >
-  Recursive-loop interceptor that logs every strategy elimination event
-  inside iterated-dominance-solver. Tags each drop as HARD_LOGIC (Z3/Clingo
-  pruning) or PROBABILISTIC_DECAY / EARLY_TERMINATION (bounded-rationality
-  circuit-breaker). Persists structural lineage to a localized SQLite session
-  table for offline profiling.
-purpose: >
-  Provide granular observability into the IESDS elimination pipeline by
-  capturing the exact causal driver for every strategy drop, enabling
-  post-hoc bias analysis and solver personality profiling.
+- python
+- sqlite
+description: 'Recursive-loop interceptor that logs every strategy elimination event inside iterated-dominance-solver. Tags
+  each drop as HARD_LOGIC (Z3/Clingo pruning) or PROBABILISTIC_DECAY / EARLY_TERMINATION (bounded-rationality circuit-breaker).
+  Persists structural lineage to a localized SQLite session table for offline profiling.
+
+  '
+purpose: 'Provide granular observability into the IESDS elimination pipeline by capturing the exact causal driver for every
+  strategy drop, enabling post-hoc bias analysis and solver personality profiling.
+
+  '
 dependencies:
-  - decision-making/iterated-dominance-solver
-  - decision-making/skill-bounded-rationality-constraint
+- decision-making/iterated-dominance-solver
+- decision-making/skill-bounded-rationality-constraint
+tags:
+- trace-logging
+- elimination-observability
+- iterated-dominance
+- sqlite
+- python
+- diagnostics
+- profiling
 inputs:
   stage_k:
     type: integer
     required: true
-    description: "Current iteration count K of the IESDS loop"
+    description: Current iteration count K of the IESDS loop
   player_id:
     type: integer
     required: true
-    description: "Player index whose strategy was eliminated"
+    description: Player index whose strategy was eliminated
   strategy_id:
     type: integer
     required: true
-    description: "Strategy index that was dropped at this step"
+    description: Strategy index that was dropped at this step
   pruning_mechanism:
     type: string
     required: true
-    description: "Causal driver: z3 | clingo | probabilistic_decay | early_termination"
+    description: 'Causal driver: z3 | clingo | probabilistic_decay | early_termination'
   session_id:
     type: string
     required: false
-    description: "Unique session identifier for trace grouping (default: auto-generated UUID)"
+    description: 'Unique session identifier for trace grouping (default: auto-generated UUID)'
 outputs:
   trace_id:
     type: string
-    description: "Unique identifier for the logged trace entry"
+    description: Unique identifier for the logged trace entry
   logged:
     type: boolean
-    description: "True if the trace entry was successfully persisted"
+    description: True if the trace entry was successfully persisted
   total_traces_session:
     type: integer
-    description: "Total number of trace entries for the current session"
-tags:
-  - trace-logging
-  - elimination-observability
-  - iterated-dominance
-  - sqlite
-  - python
-  - diagnostics
-  - profiling
+    description: Total number of trace entries for the current session
 ---
 
 # Skill Elimination Trace Logger

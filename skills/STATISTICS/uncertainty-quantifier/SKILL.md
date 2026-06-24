@@ -1,28 +1,41 @@
 ---
-Domain: STATISTICS
-Version: 1.0.0
-Complexity: High
-Type: Analysis
-Category: Statistical Skills
-Estimated Execution Time: 5-10 minutes
 name: uncertainty-quantifier
-Source: community
+domain: STATISTICS
+version: 1.0.0
 description: Uncertainty quantifier for confidence interval estimation, sensitivity analysis, and probabilistic risk assessment.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Analysis
+category: Statistical Skills
+estimated execution time: 5-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -309,6 +322,8 @@ complementary_confidence([C1, C2 | Rest], Combined) :-
         centers (map (fn [pair] (/ (+ (first pair) (second pair)) 2)) 
                     (partition 2 1 (first hist)))]
     {:centers centers :frequencies (second hist) :intervals confidence-intervals}))
+
+```
 
 ## Testing
 

@@ -1,32 +1,45 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: Medium
-Type: Optimization
-Category: Chaos-Based Search
-Estimated Execution Time: 5-20 minutes
 name: chaos-optimization
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - hy
+- python
+- prolog
+- hy
 description: Chaos optimization algorithm leveraging chaotic maps for global search and parameter exploration.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Optimization
+category: Chaos-Based Search
+estimated execution time: 5-20 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -208,7 +221,7 @@ converged(History, Tolerance) :-
   (setv r (** (abs rnd) p))
   (if (>= rnd 0.0)
     (max out-min (min out-max (+ center (* r (- out-max center)))))
-    (max out-min (min out-max (- center (* r (- center out-min))))))
+    (max out-min (min out-max (- center (* r (- center out-min)))))))
 ```
 
 ## Testing

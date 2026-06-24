@@ -1,59 +1,59 @@
 ---
 name: iterated-dominance-solver
-version: 1.0.0
 domain: DECISION_MAKING
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-  - prolog
-description: >
-  Computes rationalizable strategy sets for finite strategic-form games
-  using the Iterated Elimination of Strictly Dominated Strategies (IESDS)
-  algorithm. Implements pure and mixed strategy dominance checks with
-  higher-order knowledge recursion.
-purpose: >
-  Determine which strategies survive iterated elimination of strictly
-  conditionally dominated strategies, producing the set of rationalizable
-  strategies for each player.
+- python
+- z3
+- prolog
+description: 'Computes rationalizable strategy sets for finite strategic-form games using the Iterated Elimination of Strictly
+  Dominated Strategies (IESDS) algorithm. Implements pure and mixed strategy dominance checks with higher-order knowledge
+  recursion.
+
+  '
+purpose: 'Determine which strategies survive iterated elimination of strictly conditionally dominated strategies, producing
+  the set of rationalizable strategies for each player.
+
+  '
 dependencies:
-  - skill-constraint-resolver
-  - skill-unconscious-inference
+- skill-constraint-resolver
+- skill-unconscious-inference
+tags:
+- game-theory
+- iesds
+- rationalizability
+- dominance
+- z3
+- prolog
+- python
+- decision-making
 inputs:
   game_definition:
     type: object
     required: true
-    description: "Strategic form game with players, strategy sets, and payoff matrices"
+    description: Strategic form game with players, strategy sets, and payoff matrices
   elimination_order:
     type: string
     required: false
-    description: "sequential | simultaneous (default: sequential)"
+    description: 'sequential | simultaneous (default: sequential)'
   max_iterations:
     type: integer
     required: false
-    description: "Maximum elimination rounds before forced stop (default: 100)"
+    description: 'Maximum elimination rounds before forced stop (default: 100)'
 outputs:
   rationalizable_strategies:
     type: object
-    description: "Surviving strategy sets for each player"
+    description: Surviving strategy sets for each player
   elimination_history:
     type: array
-    description: "Step-by-step record of eliminated strategies"
+    description: Step-by-step record of eliminated strategies
   dominance_solvable:
     type: boolean
-    description: "True if unique strategy profile remains"
+    description: True if unique strategy profile remains
   final_profile:
     type: object
     required: false
-    description: "Unique equilibrium profile if dominance solvable"
-tags:
-  - game-theory
-  - iesds
-  - rationalizability
-  - dominance
-  - z3
-  - prolog
-  - python
-  - decision-making
+    description: Unique equilibrium profile if dominance solvable
 ---
 
 # Iterated Dominance Solver

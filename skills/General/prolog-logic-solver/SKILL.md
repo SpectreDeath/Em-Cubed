@@ -1,32 +1,45 @@
 ---
 name: prolog-logic-solver
-Domain: General
-Version: 1.0.0
+domain: General
+version: 1.0.0
 surfaces:
-  - prolog
-triggers:
-  - logic
-  - prolog
-  - reasoning
-  - constraints
-  - puzzle
-  - inference
+- prolog
 description: Prolog logic solver for constraint satisfaction, rule-based inference, and knowledge graph querying.
+triggers:
+- logic
+- prolog
+- reasoning
+- constraints
+- puzzle
+- inference
 compatibility: PROLOG
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 ## Purpose
@@ -512,7 +525,7 @@ solve_puzzle([S,E,N,D,M,O,R,Y]) :-
 
 ### Knowledge Base Queries
 
-```prolog
+```text
 % Define knowledge base
 bird(tweety).
 bird(polly).

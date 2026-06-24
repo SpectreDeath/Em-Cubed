@@ -156,7 +156,8 @@ routing_permission(Test, blocked) :-
 - `belief_add(routing_permission(TestName, Status))`
 
 ## Example Prolog Queries
-```prolog
+
+```text
 % Assert a column as ratio
 ?- assert_level('sales_data', 'revenue', ratio).
 true.
@@ -176,10 +177,8 @@ Status = blocked.
 % Query: check dominance
 ?- dominates(ratio, X).
 X = interval.
-
 ?- dominates(interval, X).
 X = ordinal.
-
 ?- dominates(ordinal, X).
 X = nominal.
 ```

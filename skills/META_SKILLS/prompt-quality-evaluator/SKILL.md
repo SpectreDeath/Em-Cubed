@@ -1,26 +1,39 @@
 ---
 name: prompt-quality-evaluator
-Domain: META_SKILLS
-Version: 1.0.0
+domain: META_SKILLS
+version: 1.0.0
 surfaces:
-  - python
-  - hy
+- python
+- hy
 description: Skill for prompt-quality-evaluator.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 ## Purpose
 

@@ -1,61 +1,61 @@
 ---
 name: finite-limit-sequence-boundary
-version: 1.0.0
 domain: MODEL_VALIDATION
+version: 1.0.0
 surfaces:
-  - z3
-  - python
-description: >
-  Structural safety guardrail that enforces infinite sets be evaluated
-  as well-behaved limits of finite sequences. Blocks measure-theoretic
-  ambiguities such as the Bertrand or Borel-Kolmogorov paradoxes.
-purpose: >
-  Ensure that any limit taken in a probability or lattice computation
-  corresponds to a convergent finite sequence, not an ill-defined
-  measure-theoretic limit.
+- z3
+- python
+description: 'Structural safety guardrail that enforces infinite sets be evaluated as well-behaved limits of finite sequences.
+  Blocks measure-theoretic ambiguities such as the Bertrand or Borel-Kolmogorov paradoxes.
+
+  '
+purpose: 'Ensure that any limit taken in a probability or lattice computation corresponds to a convergent finite sequence,
+  not an ill-defined measure-theoretic limit.
+
+  '
 dependencies:
-  - builtin-occams-razor-evaluator
+- builtin-occams-razor-evaluator
+tags:
+- limit
+- convergence
+- paradox
+- measure-theory
+- z3
+- python
+- safety
 inputs:
   limit_specification:
     type: object
     required: true
-    description: "Definition of the limit: sequence, index, target value"
+    description: 'Definition of the limit: sequence, index, target value'
   finite_sequence:
     type: array
     required: true
-    description: "Finite sequence of approximations"
+    description: Finite sequence of approximations
   convergence_criterion:
     type: object
     required: true
-    description: "Epsilon and norm for convergence check"
+    description: Epsilon and norm for convergence check
   paradox_checks:
     type: array
     required: false
-    description: "Specific paradox patterns to detect (default: all)"
+    description: 'Specific paradox patterns to detect (default: all)'
 outputs:
   convergence_verified:
     type: boolean
-    description: "True if finite sequence converges within criterion"
+    description: True if finite sequence converges within criterion
   limit_value:
     type: number
-    description: "Extracted limit value from sequence"
+    description: Extracted limit value from sequence
   paradox_detected:
     type: boolean
-    description: "True if measure-theoretic ambiguity detected"
+    description: True if measure-theoretic ambiguity detected
   paradox_details:
     type: array
-    description: "List of detected paradox patterns"
+    description: List of detected paradox patterns
   z3_cex:
     type: object
-    description: "Z3 counterexample if convergence failed"
-tags:
-  - limit
-  - convergence
-  - paradox
-  - measure-theory
-  - z3
-  - python
-  - safety
+    description: Z3 counterexample if convergence failed
 ---
 
 # Finite Limit Sequence Boundary

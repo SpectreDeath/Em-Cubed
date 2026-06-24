@@ -1,52 +1,52 @@
 ---
 name: debt-predictor
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - prolog
-description: >
-  Architectural cost feedback loop that warns when a product request conflicts
-  with deeply embedded backend architectural constraints. Uses Prolog surface
-  to evaluate the historical complexity and data-access costs of proposed actions.
-purpose: >
-  Bridge the gap back to the design phase by warning the system when an outside
-  product request conflicts with backend architectural constraints, preventing
-  bloomed PRs and technical debt.
+- prolog
+description: 'Architectural cost feedback loop that warns when a product request conflicts with deeply embedded backend architectural
+  constraints. Uses Prolog surface to evaluate the historical complexity and data-access costs of proposed actions.
+
+  '
+purpose: 'Bridge the gap back to the design phase by warning the system when an outside product request conflicts with backend
+  architectural constraints, preventing bloomed PRs and technical debt.
+
+  '
 dependencies:
-  - world-models/skill-world-designer
+- world-models/skill-world-designer
+tags:
+- prolog
+- architecture
+- cost-prediction
+- debt
+- technical-debt
+- feedback-loop
 inputs:
   target_action:
     type: string
     required: true
-    description: "Proposed action to evaluate (e.g., move_export_button_to_main_screen)"
+    description: Proposed action to evaluate (e.g., move_export_button_to_main_screen)
   architectural_graph:
     type: object
     required: true
-    description: "Historical graph of backend architecture complexity and data-access costs"
+    description: Historical graph of backend architecture complexity and data-access costs
   context:
     type: object
     required: false
-    description: "Optional additional context"
+    description: Optional additional context
 outputs:
   impact_assessment:
     type: object
-    description: "Assessed architectural impact of the proposed action"
+    description: Assessed architectural impact of the proposed action
   cost_level:
     type: string
-    description: "low | medium | high | critical"
+    description: low | medium | high | critical
   recommendation:
     type: string
-    description: "proceed | restructure | block"
+    description: proceed | restructure | block
   reasoning:
     type: string
-    description: "Prolog-derived explanation for the recommendation"
-tags:
-  - prolog
-  - architecture
-  - cost-prediction
-  - debt
-  - technical-debt
-  - feedback-loop
+    description: Prolog-derived explanation for the recommendation
 ---
 
 # Debt Predictor

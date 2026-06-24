@@ -1,33 +1,45 @@
 ---
-Domain: TECHNICAL_ANALYSIS
-Version: 1.0.0
-Complexity: Medium
-Type: Analysis
-Category: Technical Analysis Skills
-Estimated Execution Time: 2-5 minutes
 name: candlestick-pattern-analyzer
-Source: community
+domain: TECHNICAL_ANALYSIS
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - quickjs
-
+- python
+- prolog
+- quickjs
 description: Candlestick pattern analyzer for financial time-series pattern recognition and technical signal detection.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Analysis
+category: Technical Analysis Skills
+estimated execution time: 2-5 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

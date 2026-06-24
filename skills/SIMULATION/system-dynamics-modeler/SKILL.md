@@ -1,28 +1,41 @@
 ---
-Domain: SIMULATION
-Version: 1.0.0
-Complexity: High
-Type: Modeling
-Category: Systems Skills
-Estimated Execution Time: 10-20 minutes
 name: system-dynamics-modeler
-Source: community
+domain: SIMULATION
+version: 1.0.0
 description: System dynamics modeler for stock-flow simulation, feedback loop analysis, and policy scenario testing.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Modeling
+category: Systems Skills
+estimated execution time: 10-20 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

@@ -1,25 +1,38 @@
 ---
 name: simple-text-generator
-Domain: NLP
-Version: 1.0.0
+domain: NLP
+version: 1.0.0
 surfaces:
-  - python
+- python
 description: Simple text generator for template-based and rule-driven natural language generation.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 ## Purpose

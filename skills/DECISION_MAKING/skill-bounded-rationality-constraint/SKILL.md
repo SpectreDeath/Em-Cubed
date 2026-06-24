@@ -1,62 +1,61 @@
 ---
 name: skill-bounded-rationality-constraint
-version: 1.0.0
 domain: DECISION_MAKING
+version: 1.0.0
 surfaces:
-  - python
-description: >
-  Active circuit-breaker middleware for the recursive IESDS loop in
-  iterated-dominance-solver. Enforces fixpoint termination by checking
-  iteration depth and convergence delta thresholds, preventing infinite
-  recursion and SMT solver hangs.
-purpose: >
-  Act as a bounded rationality guardrail that forces clean early exit from
-  the iterated dominance elimination loop when fixpoint is reached or
-  computational budget is exhausted.
+- python
+description: 'Active circuit-breaker middleware for the recursive IESDS loop in iterated-dominance-solver. Enforces fixpoint
+  termination by checking iteration depth and convergence delta thresholds, preventing infinite recursion and SMT solver hangs.
+
+  '
+purpose: 'Act as a bounded rationality guardrail that forces clean early exit from the iterated dominance elimination loop
+  when fixpoint is reached or computational budget is exhausted.
+
+  '
 dependencies:
-  - decision-making/iterated-dominance-solver
+- decision-making/iterated-dominance-solver
+tags:
+- bounded-rationality
+- circuit-breaker
+- fixpoint
+- convergence
+- recursion-guard
+- python
+- decision-making
 inputs:
   current_iteration_k:
     type: integer
     required: true
-    description: "Current iteration count of the IESDS loop"
+    description: Current iteration count of the IESDS loop
   max_depth_threshold:
     type: integer
     required: true
-    description: "Maximum allowed iterations before forced termination"
+    description: Maximum allowed iterations before forced termination
   delta_convergence:
     type: float
     required: true
-    description: "Minimum weight change threshold to consider converged"
+    description: Minimum weight change threshold to consider converged
   previous_weights:
     type: object
     required: false
-    description: "Strategy weights from previous iteration dict[int, float]"
+    description: Strategy weights from previous iteration dict[int, float]
   current_weights:
     type: object
     required: false
-    description: "Strategy weights from current iteration dict[int, float]"
+    description: Strategy weights from current iteration dict[int, float]
 outputs:
   should_terminate:
     type: boolean
-    description: "True if loop should terminate immediately"
+    description: True if loop should terminate immediately
   termination_reason:
     type: string
-    description: "fixpoint_reached | depth_exceeded | continue"
+    description: fixpoint_reached | depth_exceeded | continue
   current_weights:
     type: object
-    description: "Strategy weights at current iteration (for next pass)"
+    description: Strategy weights at current iteration (for next pass)
   iterations_performed:
     type: integer
-    description: "Total iterations executed so far"
-tags:
-  - bounded-rationality
-  - circuit-breaker
-  - fixpoint
-  - convergence
-  - recursion-guard
-  - python
-  - decision-making
+    description: Total iterations executed so far
 ---
 
 # Skill Bounded Rationality Constraint

@@ -1,33 +1,46 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: High
-Type: Optimization
-Category: Evolutionary Skills
-Estimated Execution Time: 15-60 minutes
 name: cma-es-optimizer
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - z3
-  - hy
+- python
+- prolog
+- z3
+- hy
 description: CMA-ES optimizer for derivative-free continuous optimization with adaptive covariance and step-size control.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: High
+type: Optimization
+category: Evolutionary Skills
+estimated execution time: 15-60 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

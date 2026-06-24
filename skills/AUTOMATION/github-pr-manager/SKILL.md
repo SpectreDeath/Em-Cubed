@@ -1,44 +1,57 @@
 ---
-Domain: AUTOMATION
-surfaces:
-  - python
-  - prolog
-  - hy
-Version: 1.0.0
-Complexity: Medium
-Type: Integration
-Category: Git Operations
-Estimated Execution Time: 1-3 minutes
 name: github-pr-manager
-Source: community
-origin: manual
+domain: AUTOMATION
+version: 1.0.0
+surfaces:
+- python
+- prolog
+- hy
+description: GitHub PR manager for creating, reviewing, and merging pull requests using the GitHub CLI and API.
 triggers:
-  - pull_request
-  - github_api
-  - git_ops
+- pull_request
+- github_api
+- git_ops
+compatibility: PYTHON
+created_at: '2026-05-03T15:40:00Z'
+updated_at: '2026-05-03T15:40:00Z'
+complexity: Medium
+type: Integration
+category: Git Operations
+estimated execution time: 1-3 minutes
+source: community
+origin: manual
 quality:
   applied_count: 1
   success_count: 1
   completion_rate: 1.0
   token_savings_avg: 0.0
-created_at: "2026-05-03T15:40:00Z"
-updated_at: "2026-05-03T15:40:00Z"
-description: GitHub PR manager for creating, reviewing, and merging pull requests using the GitHub CLI and API.
-compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 ## Purpose
@@ -149,7 +162,7 @@ potential_conflict(File) :-
 ```hy
 (defn generate-pr-body [commits stats]
   "Synthesize a PR body from commit messages and diff stats"
-  (let [header "## Automated PR Summary\n\n"
+  (let [header (str "## Automated PR Summary" "\n\n")
         commit-list (reduce (fn [acc c] (str acc "- " c "\n")) "" commits)
         stat-summary (str "\n### Statistics\n" 
                           "- Files changed: " (get stats "files") "\n"

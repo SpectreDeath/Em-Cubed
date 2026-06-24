@@ -1,32 +1,46 @@
 ---
-Domain: DECISION_MAKING
-surfaces:
-  - python
-  - prolog
-  - hy
-Version: 1.0.0
-Complexity: Medium
-Type: Utility
-Category: Analytical Skills
-Estimated Execution Time: 1-3 minutes
 name: multi-criteria-weight-calculator
-Source: community
-description: Multi-surface multi-criteria weight calculator for deriving criteria weights from pairwise comparisons and scoring matrices.
+domain: DECISION_MAKING
+version: 1.0.0
+surfaces:
+- python
+- prolog
+- hy
+description: Multi-surface multi-criteria weight calculator for deriving criteria weights from pairwise comparisons and scoring
+  matrices.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Utility
+category: Analytical Skills
+estimated execution time: 1-3 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

@@ -1,30 +1,43 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: High
-Type: Optimization
-Category: Evolutionary Skills
-Estimated Execution Time: 10-30 minutes
 name: differential-evolution-solver
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 surfaces:
-  - python
+- python
 description: Differential evolution solver for global optimization using population-based mutation and crossover strategies.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: High
+type: Optimization
+category: Evolutionary Skills
+estimated execution time: 10-30 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -140,6 +153,7 @@ valid_mutation(Vector, Bounds, ValidVector) :-
     (if (< c 0.1)
         (* current-cr 0.9)
         (+ current-cr (* 0.1 (- 1 c))))))
+```
 
 ## Testing
 

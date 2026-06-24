@@ -1,49 +1,50 @@
 ---
 name: epistemological-independence-filter
-version: 1.0.0
 domain: DECISION_MAKING
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-description: >
-  Validates whether two subsystems satisfy logical independence based on
-  knowledge states rather than physical randomness. Constructs a direct
-  cross-product space when independence holds.
-purpose: >
-  Prevent deep structural paradoxes by managing independence as a
-  constraint state over knowledge, not as a physical property.
+- python
+- prolog
+description: 'Validates whether two subsystems satisfy logical independence based on knowledge states rather than physical
+  randomness. Constructs a direct cross-product space when independence holds.
+
+  '
+purpose: 'Prevent deep structural paradoxes by managing independence as a constraint state over knowledge, not as a physical
+  property.
+
+  '
 dependencies:
-  - associative-chaining-product
+- associative-chaining-product
+tags:
+- independence
+- epistemology
+- cross-product
+- prolog
+- python
+- jaynes
 inputs:
   system_a:
     type: object
     required: true
-    description: "First subsystem with propositions and probabilities"
+    description: First subsystem with propositions and probabilities
   system_b:
     type: object
     required: true
-    description: "Second subsystem with propositions and probabilities"
+    description: Second subsystem with propositions and probabilities
   knowledge_state:
     type: object
     required: false
-    description: "Current knowledge constraints (default: empty)"
+    description: 'Current knowledge constraints (default: empty)'
 outputs:
   independence_status:
     type: string
-    description: "independent | dependent | inconclusive"
+    description: independent | dependent | inconclusive
   cross_product_space:
     type: object
-    description: "Direct product space S1 x S2 if independent"
+    description: Direct product space S1 x S2 if independent
   knowledge_constraints:
     type: array
-    description: "Constraints that limit independence"
-tags:
-  - independence
-  - epistemology
-  - cross-product
-  - prolog
-  - python
-  - jaynes
+    description: Constraints that limit independence
 ---
 
 # Epistemological Independence Filter

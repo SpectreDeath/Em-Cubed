@@ -1,64 +1,64 @@
 ---
 name: world-simulator
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - python
-  - datalog
-  - clingo
-description: >
-  Multi-surface world simulator with Datalog surface for state transition logic
-  and Clingo (ASP) surface for constraint-based forecasting. Agents simulate
-  proposed actions in a logical sandbox before real-world execution.
-purpose: >
-  Lets an agent test proposed actions in a logical sandbox before executing them.
-  Datalog defines environment state transition rules; Clingo performs
-  constraint-based forecasting and conflict detection.
+- python
+- datalog
+- clingo
+description: 'Multi-surface world simulator with Datalog surface for state transition logic and Clingo (ASP) surface for constraint-based
+  forecasting. Agents simulate proposed actions in a logical sandbox before real-world execution.
+
+  '
+purpose: 'Lets an agent test proposed actions in a logical sandbox before executing them. Datalog defines environment state
+  transition rules; Clingo performs constraint-based forecasting and conflict detection.
+
+  '
 dependencies:
-  - durable-execution-engine
-  - dag-task-scheduler
+- durable-execution-engine
+- dag-task-scheduler
+tags:
+- world-model
+- simulation
+- datalog
+- clingo
+- asp
+- sandbox
+- state-transition
+- constraint-verification
 inputs:
   world_rules:
     type: string
     required: true
-    description: "Datalog/Clingo rules defining the environment"
+    description: Datalog/Clingo rules defining the environment
   proposed_action:
     type: object
     required: true
-    description: "Action to simulate"
+    description: Action to simulate
   initial_state:
     type: object
     required: false
-    description: "Initial fact set (empty by default)"
+    description: Initial fact set (empty by default)
   simulation_steps:
     type: integer
     required: false
-    description: "Max simulation depth (1 by default)"
+    description: Max simulation depth (1 by default)
 outputs:
   next_state:
     type: object
-    description: "World state after action"
+    description: World state after action
   conflict:
     type: boolean
-    description: "True if logical contradiction detected"
+    description: True if logical contradiction detected
   conflict_reason:
     type: string
-    description: "ASP explanation of the conflict"
+    description: ASP explanation of the conflict
   trace:
     type: array
-    description: "Step-by-step simulation trace"
+    description: Step-by-step simulation trace
   surface_log:
     type: object
-    description: "Per-surface execution results and timing"
-tags:
-  - world-model
-  - simulation
-  - datalog
-  - clingo
-  - asp
-  - sandbox
-  - state-transition
-  - constraint-verification
+    description: Per-surface execution results and timing
 ---
 
 # World Model Simulator

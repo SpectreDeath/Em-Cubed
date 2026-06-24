@@ -1,28 +1,41 @@
 ---
-Domain: RESOURCE_MANAGEMENT
-Version: 1.0.0
-Complexity: Medium
-Type: Process
-Category: Planning Skills
-Estimated Execution Time: 2-5 minutes
 name: resource-allocation-planner
-Source: community
+domain: RESOURCE_MANAGEMENT
+version: 1.0.0
 description: Resource allocation planner for budget distribution, scheduling, and load balancing across constrained resources.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: Medium
+type: Process
+category: Planning Skills
+estimated execution time: 2-5 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -265,47 +278,35 @@ allocation_conflict(Entity1, Entity2, Resource, Allocations) :-
 
 ```hy
 (defn exponential-weighting [weights decay-factor]
-  "Apply exponential decay to weights for priority scoring"
-  (let [sorted (sorted weights :key (fn [pair] (get pair 1]) >)]
-    (for [i (range (len sorted))]
-      (let [item (get sorted i)
-            adjusted-priority (* (get item 1) (exp (* -decay-factor i)))]
-        [item adjusted-priority])))
+  (sorted weights :key (fn [pair] (get pair 1)) :reverse True))
 
 (defn penalty-score [allocations demands resources]
-  "Calculate penalty score for constraint violations"
-  (for [resource resources]
-    (let [total-alloc (sum (get allocations resource))
-          available (get resources resource)]
-      (if (> total-alloc available)
-          (* -100 (- total-alloc available))
-          0)))
+  (sum (map (fn [r] (* -100 (- (get allocations r 0) (get resources r 1))))
+            (filter (fn [r] (> (get allocations r 0) (get resources r 1))) resources))))
 
 (defn efficiency-score [allocations demands]
-  "Calculate efficiency based on demand fulfillment"
-  (sum (map (fn [entity]
-              (let [demand (get demands entity)
-                    allocation (get allocations entity)
-                    fulfilled (sum (filter (fn [r] (>= (get allocation r 0) (get demand r 0))) (keys demand)))]
-                (/ fulfilled (len demand))))
-            (keys demands))))
+  (let [k (keys demands)]
+    (/ (sum (map (fn [e] 1)
+                 (filter (fn [e] (>= (get allocations e 0) (get demands e 0))) k)))
+       (len k))))
 
 (defn fairness-index [allocations weights]
-  "Calculate fairness index (Gini coefficient approximation)"
-  (let [weighted (map (fn [pair] (* (get pair 0) (get weights (get pair 1)))) (items allocations))
-        sorted (sorted weighted)
-        cumsum (accumulate sorted)
-        total (sum weighted)]
-    (- 1 (/ (* 2 (sum (map (fn [i c] (* i c)) (range (len cumsum)) cumsum)))
-             (* (len cumsum) total)))))
+  (let [ii (keys allocations)
+        scores (map (fn [e] (* (get allocations e 0) (get weights e))) ii)]
+    (if (< (sum scores) 1e-10)
+      0.0
+      (let [ss (sorted scores)]
+        (* 2.0 (/ (sum (map (fn [i] (* (float i) (get ss i))) (range (len ss))))
+                  (* (float (len ss)) (sum scores))))))))
 
-(defn adaptive-rebalance [current-allocations demands resources utilization-target]
-  "Adaptively rebalance based on actual utilization"
-  (let [utilization (map (fn [r] (/ (get current-allocations r 0) (get resources r 1))) (keys resources))
-        over-allocated (filter (fn [r] (> (get utilization r) (* utilization-target 1.2))) (keys utilization))
-        under-allocated (filter (fn [r] (< (get utilization r) (* utilization-target 0.8))) (keys utilization))]
-    {:over-allocate over-allocated :under-allocate under-allocated}))
+(defn adaptive-rebalance [current-allocations demands resources util-target]
+  (let [rkeys (keys resources)
+        util (map (fn [r] (/ (float (get current-allocations r 0))
+                             (float (get resources r 1)))) rkeys)]
+    [(list (filter (fn [r] (> (get util r) (* util-target 1.2))) rkeys))
+     (list (filter (fn [r] (< (get util r) (* util-target 0.8))) rkeys))]))
 ```
+
 
 ## Testing
 

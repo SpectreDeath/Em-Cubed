@@ -1,29 +1,42 @@
 ---
-Domain: TIME_SERIES
-Version: 1.0.0
-Complexity: High
-Type: Forecasting
-Category: ML Skills
-Estimated Execution Time: 5-15 minutes
 name: time-series-forecaster
-Source: community
-description: Multi-surface time series forecaster with Python for statistical forecasting, Prolog for temporal logic, and Hy for fuzzy temporal patterns.
-description: Multi-surface time series forecaster with Python for statistical forecasting, Prolog for temporal logic, and Hy for fuzzy temporal patterns.
+domain: TIME_SERIES
+version: 1.0.0
+description: Multi-surface time series forecaster with Python for statistical forecasting, Prolog for temporal logic, and
+  Hy for fuzzy temporal patterns.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Forecasting
+category: ML Skills
+estimated execution time: 5-15 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

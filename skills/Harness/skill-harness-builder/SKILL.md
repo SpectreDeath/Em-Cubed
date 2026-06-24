@@ -1,58 +1,57 @@
 ---
 name: skill-harness-builder
-version: 1.0.0
 domain: Harness
+version: 1.0.0
 surfaces:
-  - python
-  - sqlite
-description: >
-  Multi-surface skill harness builder that compiles SKILL.md definitions into
-  operational tool harnesses. Python surface handles sandboxed tool mapping
-  and execution dispatch. SQLite surface persists workspace state and
-  harness configuration.
-purpose: >
-  Transform declarative SKILL.md definitions into an executable sandboxed
-  harness that maps declared tools, enforces scoped operations, and tracks
-  persistent workspace state across sessions.
+- python
+- sqlite
+description: 'Multi-surface skill harness builder that compiles SKILL.md definitions into operational tool harnesses. Python
+  surface handles sandboxed tool mapping and execution dispatch. SQLite surface persists workspace state and harness configuration.
+
+  '
+purpose: 'Transform declarative SKILL.md definitions into an executable sandboxed harness that maps declared tools, enforces
+  scoped operations, and tracks persistent workspace state across sessions.
+
+  '
 dependencies:
-  - durable-execution-engine
+- durable-execution-engine
+tags:
+- harness
+- sandbox
+- tool-mapping
+- workspace
+- sqlite
+- skill-compiler
 inputs:
   skill_definition:
     type: object
     required: true
-    description: "Parsed SKILL.md frontmatter and body"
+    description: Parsed SKILL.md frontmatter and body
   tool_schema:
     type: array
     required: true
-    description: "List of available tools for sandbox mapping"
+    description: List of available tools for sandbox mapping
   workspace_mode:
     type: string
     required: false
-    description: "isolated or shared (default: shared)"
+    description: 'isolated or shared (default: shared)'
   sandbox_policy:
     type: object
     required: false
-    description: "Policy rules for sandbox permissions"
+    description: Policy rules for sandbox permissions
 outputs:
   harness_manifest:
     type: object
-    description: "Compiled harness configuration"
+    description: Compiled harness configuration
   tool_map:
     type: object
-    description: "Tool interface mappings with permission scopes"
+    description: Tool interface mappings with permission scopes
   workspace_id:
     type: string
-    description: "ID of initialized workspace"
+    description: ID of initialized workspace
   readiness_status:
     type: string
-    description: "build_failed | sandbox_locked | ready"
-tags:
-  - harness
-  - sandbox
-  - tool-mapping
-  - workspace
-  - sqlite
-  - skill-compiler
+    description: build_failed | sandbox_locked | ready
 ---
 
 # Skill Harness Builder

@@ -1,32 +1,46 @@
 ---
-Domain: AUTOMATION
-surfaces:
-  - python
-  - prolog
-  - hy
-Version: 1.0.0
-Complexity: High
-Type: Synthesis
-Category: Workflow Skills
-Estimated Execution Time: 5-15 minutes
 name: workflow-synthesiser
-Source: community
-description: Multi-surface workflow synthesiser with Python surface for process optimization, Prolog surface for logical workflow validation, and Hy surface for adaptive execution planning.
+domain: AUTOMATION
+version: 1.0.0
+surfaces:
+- python
+- prolog
+- hy
+description: Multi-surface workflow synthesiser with Python surface for process optimization, Prolog surface for logical workflow
+  validation, and Hy surface for adaptive execution planning.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: High
+type: Synthesis
+category: Workflow Skills
+estimated execution time: 5-15 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -270,64 +284,38 @@ potential_deadlock(Tasks) :-
 ### Hy Adaptive Execution
 
 ```hy
-(defn workflow-score [workflow context factors]
+; Workflow Synthesiser - Hy surface
+
+(defn workflow-score [workflow factors]
   "Score workflow for specific context and requirements"
   (let [efficiency (get factors "efficiency" 1.0)
         reliability (get factors "reliability" 1.0)
         cost (get factors "cost" 1.0)
         adaptability (get factors "adaptability" 1.0)]
-    (/ (+ (* efficiency 0.4) (* reliability 0.3) (* (- 1 cost) 0.2) (* adaptability 0.1)) 1.0)))
+    (/ (+ (* efficiency 0.4) (* reliability 0.3) (* (- 1 cost) 0.2)
+          (* adaptability 0.1))
+       1.0)))
 
-(defn adapt-workflow [base-workflow context-changes]
+(defn adapt-workflow [base-workflow ctx-changes]
   "Adapt workflow based on context changes"
-  (let [adaptation-rules (get context-changes "rules" [])
-        modified-tasks (map (fn [rule]
-                             (let [task-id (get rule "task")
-                                   new-params (get rule "params" {})]
-                               [task-id new-params]))
-                           adaptation-rules)]
-    (for [task base-workflow.tasks]
-      (if (in (get task "id") (map first modified-tasks))
-          (let [new-params (second (find (fn [t] (= (first t) (get task "id"))) modified-tasks))]
-            (assoc task "params" (merge (get task "params" {}) new-params))
-          task))))
+  (let [changes (get ctx-changes "rules" [])]
+    (map (fn [task]
+           (let [task-id (get task "id")
+                 param-map (get task "params" {})]
+             (for [change changes]
+               (if (= (get change "task") task-id)
+                 (assoc param-map "params"
+                         (merge param-map (get change "params" {})))
+                 param-map))))
+         base-workflow)))
 
-(defn execution-risk [workflow historical-data]
-  "Assess execution risk based on historical data"
-  (let [failure-rates (map (fn [task] (get historical-data (get task "id") "failure_rate" 0)) workflow.tasks)
-        avg-risk (mean failure-rates)
-        max-risk (max failure-rates)
-        risk-variance (variance failure-rates)]
-    {:average_risk avg-risk :worst_case max-risk :stability (- 1 risk-variance)}))
-
-(defn dynamic-prioritization [tasks current-state context]
-  "Dynamically prioritize tasks based on state and context"
-  (let [urgency-scores (map (fn [task]
-                              (let [base-priority (get task "priority" 1)
-                                    deadline-factor (if (get task "deadline")
-                                                     (/ 1 (- (get task "deadline") (current-state "time")))
-                                                     1)
-                                    dependency-factor (if (get task "dependencies")
-                                                         (len (get task "dependencies"))
-                                                         0)]
-                                (* base-priority deadline-factor dependency-factor)))
-                            tasks)]
-    (zip tasks urgency-scores)))
-
-(defn workflow-optimization [base-workflow objectives constraints]
-  "Optimize workflow for given objectives and constraints"
-  (let [candidates (generate-variants base-workflow)
-        scored (map (fn [w] [w (workflow-score w objectives)]) candidates)
-        valid (filter (fn [pair] (satisfies-constraints (first pair) constraints)) scored)]
-    (apply max valid :key (fn [pair] (second pair)))))
-
-(defn execution-monitoring [workflow execution-log]
-  "Monitor execution and suggest adaptations"
-  (let [delays (filter (fn [entry] (> (get entry "actual" 0) (get entry "expected" 0))) execution-log)
-        error-rate (/ (len delays) (len execution-log))
-        bottlenecks (group-by (fn [e] (get e "task")) delays)]
-    {:error_rate error-rate :bottlenecks bottlenecks :suggested_adjustments (suggest-adaptations bottlenecks)}))
+(defn apply-style [text target-style]
+  "Apply basic style transformation"
+  (if (= target-style "formal")
+    (.replace text " yeah " " indeed ")
+    (.replace text " cool " " impressive ")))
 ```
+
 
 ## Testing
 

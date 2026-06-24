@@ -1,55 +1,55 @@
 ---
 name: invariant-gate
-version: 1.0.0
 domain: WORLD_MODELS
+version: 1.0.0
 surfaces:
-  - z3
-  - python
-description: >
-  External constraint verification using Z3 SMT solver and Python surface.
-  Evaluates whether a proposed change meets high-level non-code criteria
-  such as organizational accessibility audits, compliance standards, or
-  business roadmaps.
-purpose: >
-  Treat non-code constraints as strict logical assertions and reject code
-  patches that violate them before the harness builder compiles them.
+- z3
+- python
+description: 'External constraint verification using Z3 SMT solver and Python surface. Evaluates whether a proposed change
+  meets high-level non-code criteria such as organizational accessibility audits, compliance standards, or business roadmaps.
+
+  '
+purpose: 'Treat non-code constraints as strict logical assertions and reject code patches that violate them before the harness
+  builder compiles them.
+
+  '
 dependencies:
-  - skill-world-designer
+- skill-world-designer
+tags:
+- z3
+- smt
+- invariant
+- constraint-verification
+- accessibility
+- compliance
+- gate
 inputs:
   proposed_patch:
     type: object
     required: true
-    description: "Proposed code change to verify"
+    description: Proposed code change to verify
   accessibility_rules:
     type: object
     required: false
-    description: "Accessibility constraint rules (e.g., Section 508, WCAG)"
+    description: Accessibility constraint rules (e.g., Section 508, WCAG)
   compliance_rules:
     type: object
     required: false
-    description: "Compliance constraint rules (e.g., GDPR, HIPAA)"
+    description: Compliance constraint rules (e.g., GDPR, HIPAA)
   business_rules:
     type: object
     required: false
-    description: "Business roadmap constraints"
+    description: Business roadmap constraints
 outputs:
   gate_result:
     type: string
-    description: "passed | failed | inconclusive"
+    description: passed | failed | inconclusive
   violations:
     type: array
-    description: "List of constraint violations found"
+    description: List of constraint violations found
   proof:
     type: object
-    description: "Z3 proof and model if passed"
-tags:
-  - z3
-  - smt
-  - invariant
-  - constraint-verification
-  - accessibility
-  - compliance
-  - gate
+    description: Z3 proof and model if passed
 ---
 
 # Invariant Gate

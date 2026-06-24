@@ -1,32 +1,45 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: Medium
-Type: Optimization
-Category: Spiral-Based Search
-Estimated Execution Time: 5-15 minutes
 name: spiral-dynamics-optimization
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - hy
+- python
+- prolog
+- hy
 description: Spiral dynamics optimization using evolutionary tier progression and population memetic adaptation.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Optimization
+category: Spiral-Based Search
+estimated execution time: 5-15 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -190,7 +203,7 @@ is_better(Fitness1, Fitness2) :-
 
 (defn spiral-update [position amplitude damping freq t]
   "Update position along spiral trajectory."
-  (+ position (damped-oscillation amplitude damping freq t (random.uniform 0.0 (* 2.0 math.pi))))
+  (+ position     (damped-oscillation amplitude damping freq t (random.uniform 0.0 (* 2.0 math.pi)))))
 ```
 
 ## Testing

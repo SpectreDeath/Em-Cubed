@@ -1,28 +1,41 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: High
-Type: Process
-Category: Mathematical Skills
-Estimated Execution Time: 2-10 minutes
 name: constraint-satisfaction-solver
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 description: Constraint satisfaction solver for combinatorial problems with propagation, backtracking, and optimization support.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Process
+category: Mathematical Skills
+estimated execution time: 2-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

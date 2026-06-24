@@ -1,57 +1,56 @@
 ---
 name: skill-decision-profile-analyzer
-version: 1.0.0
 domain: ANALYTICS
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - sqlite
-description: >
-  Dual-surface decision-profile analyzer that ingests elimination trace
-  history from skill-elimination-trace-logger and computes a solver
-  personality profile. Python computes the logical-pruning versus
-  probabilistic-decay ratio; Prolog asserts static relational facts
-  (solver_profile/3) into the running knowledge base.
-purpose: >
-  Evaluate the active solver's behavioral bias by quantifying the ratio of
-  hard-logic pruning to probabilistic mass adjustment across an elimination
-  session, making the profile available as a queryable Prolog fact.
+- python
+- prolog
+- sqlite
+description: 'Dual-surface decision-profile analyzer that ingests elimination trace history from skill-elimination-trace-logger
+  and computes a solver personality profile. Python computes the logical-pruning versus probabilistic-decay ratio; Prolog
+  asserts static relational facts (solver_profile/3) into the running knowledge base.
+
+  '
+purpose: 'Evaluate the active solver''s behavioral bias by quantifying the ratio of hard-logic pruning to probabilistic mass
+  adjustment across an elimination session, making the profile available as a queryable Prolog fact.
+
+  '
 dependencies:
-  - decision-making/skill-elimination-trace-logger
+- decision-making/skill-elimination-trace-logger
+tags:
+- profile-analysis
+- elimination-trace
+- solver-personality
+- prolog
+- sqlite
+- python
+- analytics
+- diagnostics
 inputs:
   trace_history_session:
     type: string
     required: true
-    description: "Session ID whose elimination trace history to analyze"
+    description: Session ID whose elimination trace history to analyze
   game_type:
     type: string
     required: true
-    description: "Game classification label (e.g., 'pd', 'coordination', 'general_sum')"
+    description: Game classification label (e.g., 'pd', 'coordination', 'general_sum')
 outputs:
   solver_profile:
     type: object
-    description: "Profile with prune_ratio, bias_direction, and confidence"
+    description: Profile with prune_ratio, bias_direction, and confidence
   hard_logic_count:
     type: integer
-    description: "Total HARD_LOGIC tagged eliminations in session"
+    description: Total HARD_LOGIC tagged eliminations in session
   probabilistic_decay_count:
     type: integer
-    description: "Total PROBABILISTIC_DECAY + EARLY_TERMINATION tags"
+    description: Total PROBABILISTIC_DECAY + EARLY_TERMINATION tags
   total_steps:
     type: integer
-    description: "Total elimination steps analyzed"
+    description: Total elimination steps analyzed
   prolog_fact_asserted:
     type: boolean
-    description: "True if solver_profile fact was asserted into Prolog"
-tags:
-  - profile-analysis
-  - elimination-trace
-  - solver-personality
-  - prolog
-  - sqlite
-  - python
-  - analytics
-  - diagnostics
+    description: True if solver_profile fact was asserted into Prolog
 ---
 
 # Skill Decision Profile Analyzer

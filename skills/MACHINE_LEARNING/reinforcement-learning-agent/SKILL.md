@@ -1,28 +1,41 @@
 ---
-Domain: MACHINE_LEARNING
-Version: 1.0.0
-Complexity: High
-Type: Process
-Category: AI Skills
-Estimated Execution Time: 10-30 minutes
 name: reinforcement-learning-agent
-Source: community
+domain: MACHINE_LEARNING
+version: 1.0.0
 description: Skill for reinforcement-learning-agent.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: High
+type: Process
+category: AI Skills
+estimated execution time: 10-30 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

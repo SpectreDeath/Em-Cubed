@@ -1,32 +1,45 @@
 ---
-Domain: KNOWLEDGE_GRAPH
-surfaces:
-  - python
-  - prolog
-  - hy
-Version: 1.0.0
-Complexity: High
-Type: Process
-Category: Cognitive Skills
-Estimated Execution Time: 5-10 minutes
 name: knowledge-graph-builder
-Source: community
+domain: KNOWLEDGE_GRAPH
+version: 1.0.0
+surfaces:
+- python
+- prolog
+- hy
 description: Knowledge graph builder for entity extraction, relation modeling, and graph persistence with Python and SQLite.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: High
+type: Process
+category: Cognitive Skills
+estimated execution time: 5-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

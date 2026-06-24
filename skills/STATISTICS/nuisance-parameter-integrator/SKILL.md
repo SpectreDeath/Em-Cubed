@@ -1,53 +1,54 @@
 ---
 name: nuisance-parameter-integrator
-version: 1.0.0
 domain: STATISTICS
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-description: >
-  Marginalizes out nuisance parameters using the distributivity of logical
-  operations. Integrates background uncertainty when the model only cares
-  about a specific target metric.
-purpose: >
-  Execute Bayesian marginalization of nuisance parameters: average out
-  theta when the model only cares about a target metric omega.
+- python
+- z3
+description: 'Marginalizes out nuisance parameters using the distributivity of logical operations. Integrates background uncertainty
+  when the model only cares about a specific target metric.
+
+  '
+purpose: 'Execute Bayesian marginalization of nuisance parameters: average out theta when the model only cares about a target
+  metric omega.
+
+  '
 dependencies:
-  - inverse-zeta-generalizer
+- inverse-zeta-generalizer
+tags:
+- nuisance
+- marginalization
+- bayesian
+- integration
+- z3
+- python
 inputs:
   joint_distribution:
     type: object
     required: true
-    description: "Joint probability distribution P(omega, theta)"
+    description: Joint probability distribution P(omega, theta)
   target_metric:
     type: string
     required: true
-    description: "Target variable omega to retain"
+    description: Target variable omega to retain
   nuisance_parameters:
     type: array
     required: true
-    description: "Parameters theta to marginalize out"
+    description: Parameters theta to marginalize out
   integration_method:
     type: string
     required: false
-    description: "exact | numerical (default: exact)"
+    description: 'exact | numerical (default: exact)'
 outputs:
   marginal_distribution:
     type: object
-    description: "P(omega) after marginalizing out theta"
+    description: P(omega) after marginalizing out theta
   normalization_check:
     type: number
-    description: "Sum of marginalized probabilities (should be 1.0)"
+    description: Sum of marginalized probabilities (should be 1.0)
   z3_proof:
     type: object
-    description: "Z3 proof of distributivity for integration"
-tags:
-  - nuisance
-  - marginalization
-  - bayesian
-  - integration
-  - z3
-  - python
+    description: Z3 proof of distributivity for integration
 ---
 
 # Nuisance Parameter Integrator

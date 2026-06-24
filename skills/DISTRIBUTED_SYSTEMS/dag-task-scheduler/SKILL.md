@@ -1,27 +1,41 @@
 ---
 name: dag-task-scheduler
-Domain: DISTRIBUTED_SYSTEMS
-version: "1.0.0"
+domain: DISTRIBUTED_SYSTEMS
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-  - sqlite
-description: Distributed DAG execution orchestrator for task dependency resolution, scheduling, and constraint verification with Python, Z3, and SQLite surfaces.
+- python
+- z3
+- sqlite
+description: Distributed DAG execution orchestrator for task dependency resolution, scheduling, and constraint verification
+  with Python, Z3, and SQLite surfaces.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 
 # DAG Task Scheduler

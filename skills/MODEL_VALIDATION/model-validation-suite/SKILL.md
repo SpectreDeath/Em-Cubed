@@ -1,28 +1,42 @@
 ---
-Domain: MODEL_VALIDATION
-Version: 1.0.0
-Complexity: Medium
-Type: Validation
-Category: ML Skills
-Estimated Execution Time: 5-10 minutes
 name: model-validation-suite
-Source: community
-description: Model validation suite for cross-validation, residual analysis, and diagnostic reporting across statistical and ML models.
+domain: MODEL_VALIDATION
+version: 1.0.0
+description: Model validation suite for cross-validation, residual analysis, and diagnostic reporting across statistical and
+  ML models.
 compatibility: UNIVERSAL
-allowed-tools: |
-  - read
+complexity: Medium
+type: Validation
+category: ML Skills
+estimated execution time: 5-10 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:
@@ -142,6 +156,7 @@ no_data_leakage(TrainSet, TestSet, Features) :-
   (let [cv (numpy.std cv-scores)
         mean (numpy.mean cv-scores)]
     (- 1 (/ cv mean))))
+```
 
 ## Testing
 

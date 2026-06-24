@@ -1,32 +1,45 @@
 ---
-Domain: OPTIMIZATION
-Version: 1.0.0
-Complexity: Medium
-Type: Optimization
-Category: Philosophy-Based Search
-Estimated Execution Time: 5-20 minutes
 name: dialectic-search
-Source: community
+domain: OPTIMIZATION
+version: 1.0.0
 surfaces:
-  - python
-  - prolog
-  - hy
+- python
+- prolog
+- hy
 description: Dialectic search optimizer using thesis-antithesis-synthesis framework for multi-objective optimization.
 compatibility: PYTHON
-allowed-tools: |
-  - read
+complexity: Medium
+type: Optimization
+category: Philosophy-Based Search
+estimated execution time: 5-20 minutes
+source: community
+allowed-tools: '- read
+
   - write
+
   - edit
+
   - bash
+
   - glob
+
   - grep
+
   - codebase_search
+
   - task
+
   - sequentialthinking_sequentialthinking
+
   - webfetch
+
   - websearch
+
   - question
+
   - suggest
+
+  '
 ---
 origin: manual
 triggers:

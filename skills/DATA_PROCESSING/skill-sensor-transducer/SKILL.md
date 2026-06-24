@@ -1,51 +1,51 @@
 ---
 name: skill-sensor-transducer
-version: 1.0.0
 domain: DATA_PROCESSING
+version: 1.0.0
 surfaces:
-  - python
-  - sqlite
-description: >
-  Normalizes low-level unstructured input into bounded typed structures.
-  Maps raw byte streams into normalized key-value spaces or typed tables
-  so downstream declarative surfaces can consume deterministic data.
-purpose: >
-  Prepare the structural grid of numbers for downstream surfaces like Prolog
-  or Z3 without parsing raw strings. No inference, just deterministic
-  transduction.
+- python
+- sqlite
+description: 'Normalizes low-level unstructured input into bounded typed structures. Maps raw byte streams into normalized
+  key-value spaces or typed tables so downstream declarative surfaces can consume deterministic data.
+
+  '
+purpose: 'Prepare the structural grid of numbers for downstream surfaces like Prolog or Z3 without parsing raw strings. No
+  inference, just deterministic transduction.
+
+  '
 dependencies:
-  - durable-execution-engine
+- durable-execution-engine
+tags:
+- transduction
+- normalization
+- python
+- sqlite
+- sensor
+- ingestion
+- retinal-model
 inputs:
   raw_stream:
     type: object
     required: true
-    description: "Unstructured raw input (bytes, telemetry logs, binary blobs)"
+    description: Unstructured raw input (bytes, telemetry logs, binary blobs)
   schema:
     type: object
     required: true
-    description: "Target normalized schema with field definitions"
+    description: Target normalized schema with field definitions
   normalization_mode:
     type: string
     required: false
-    description: "minmax | zscore | quantile (default: minmax)"
+    description: 'minmax | zscore | quantile (default: minmax)'
 outputs:
   normalized_data:
     type: object
-    description: "Normalized and typed structured data"
+    description: Normalized and typed structured data
   schema_hash:
     type: string
-    description: "Hash of the applied schema for verification"
+    description: Hash of the applied schema for verification
   raw_stats:
     type: object
-    description: "Statistics of raw input before normalization"
-tags:
-  - transduction
-  - normalization
-  - python
-  - sqlite
-  - sensor
-  - ingestion
-  - retinal-model
+    description: Statistics of raw input before normalization
 ---
 
 # Skill Sensor Transducer

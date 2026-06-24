@@ -1,55 +1,56 @@
 ---
 name: skill-unconscious-inference
-version: 1.0.0
 domain: STATISTICS
+version: 1.0.0
 surfaces:
-  - python
-  - sqlite
-description: >
-  Probabilistic priority layer that selects the most likely interpretation
-  from multiple valid logical models. Uses historical weighted lookups to
-  compute heuristic scores and pick a single activation path.
-purpose: >
-  When multiple valid models pass constraint gates, apply weighted priors
-  based on historical data to select the best-guess execution branch.
+- python
+- sqlite
+description: 'Probabilistic priority layer that selects the most likely interpretation from multiple valid logical models.
+  Uses historical weighted lookups to compute heuristic scores and pick a single activation path.
+
+  '
+purpose: 'When multiple valid models pass constraint gates, apply weighted priors based on historical data to select the best-guess
+  execution branch.
+
+  '
 dependencies:
-  - skill-constraint-resolver
+- skill-constraint-resolver
+tags:
+- probabilistic
+- inference
+- priors
+- python
+- sqlite
+- heuristic
+- unconscious-inference
+- helmholtz
 inputs:
   valid_models:
     type: array
     required: true
-    description: "List of valid models from upstream constraint resolver"
+    description: List of valid models from upstream constraint resolver
   priors:
     type: object
     required: false
-    description: "Weighted prior probabilities for each model type"
+    description: Weighted prior probabilities for each model type
   historical_log:
     type: array
     required: false
-    description: "Historical execution log for frequency-based weighting"
+    description: Historical execution log for frequency-based weighting
   scoring_method:
     type: string
     required: false
-    description: "bayesian | frequency | hybrid (default: hybrid)"
+    description: 'bayesian | frequency | hybrid (default: hybrid)'
 outputs:
   selected_model:
     type: object
-    description: "Highest-scoring model selected for execution"
+    description: Highest-scoring model selected for execution
   selection_score:
     type: number
-    description: "Confidence score of selected model"
+    description: Confidence score of selected model
   alternative_models:
     type: array
-    description: "Remaining valid models ranked by score"
-tags:
-  - probabilistic
-  - inference
-  - priors
-  - python
-  - sqlite
-  - heuristic
-  - unconscious-inference
-  - helmholtz
+    description: Remaining valid models ranked by score
 ---
 
 # Skill Unconscious Inference

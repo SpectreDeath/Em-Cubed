@@ -1,57 +1,57 @@
 ---
 name: builtin-occams-razor-evaluator
-version: 1.0.0
 domain: STATISTICS
+version: 1.0.0
 surfaces:
-  - python
-  - z3
-description: >
-  Model-comparison skill that calculates the global likelihood ratio
-  (Bayes Factor) between competing architectures. Penalizes
-  overparameterized models via dilution of prior probability density.
-purpose: >
-  Mathematically penalize over-parameterized, highly flexible models
-  using Jaynesian Occam's razor: prior density dilution across extra
-  dimensions lowers global likelihood.
+- python
+- z3
+description: 'Model-comparison skill that calculates the global likelihood ratio (Bayes Factor) between competing architectures.
+  Penalizes overparameterized models via dilution of prior probability density.
+
+  '
+purpose: 'Mathematically penalize over-parameterized, highly flexible models using Jaynesian Occam''s razor: prior density
+  dilution across extra dimensions lowers global likelihood.
+
+  '
 dependencies:
-  - nuisance-parameter-integrator
+- nuisance-parameter-integrator
+tags:
+- occam
+- bayes-factor
+- model-comparison
+- prior-dilution
+- python
+- z3
 inputs:
   model_a:
     type: object
     required: true
-    description: "First model with parameters and likelihood"
+    description: First model with parameters and likelihood
   model_b:
     type: object
     required: true
-    description: "Second model with parameters and likelihood"
+    description: Second model with parameters and likelihood
   data_evidence:
     type: object
     required: true
-    description: "Observed data for likelihood computation"
+    description: Observed data for likelihood computation
   prior_weights:
     type: object
     required: false
-    description: "Prior probabilities for each model (default: uniform)"
+    description: 'Prior probabilities for each model (default: uniform)'
 outputs:
   bayes_factor:
     type: number
-    description: "P(data|model_a) / P(data|model_b)"
+    description: P(data|model_a) / P(data|model_b)
   occam_penalty:
     type: object
-    description: "Penalty breakdown by model complexity"
+    description: Penalty breakdown by model complexity
   preferred_model:
     type: string
-    description: "model_a or model_b"
+    description: model_a or model_b
   confidence:
     type: number
-    description: "Confidence in model selection"
-tags:
-  - occam
-  - bayes-factor
-  - model-comparison
-  - prior-dilution
-  - python
-  - z3
+    description: Confidence in model selection
 ---
 
 # Built-in Occam's Razor Evaluator
