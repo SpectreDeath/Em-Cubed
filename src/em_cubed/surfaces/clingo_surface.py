@@ -13,6 +13,8 @@ class ClingoSurface(SurfaceBase):
     of shown atoms.
     """
 
+    _execution_cache = {}
+
     @property
     def name(self) -> str:
         return "clingo"
@@ -60,6 +62,13 @@ class ClingoSurface(SurfaceBase):
         if not self.available:
             return {"status": "error", "message": "clingo package is not installed"}
 
+        import hashlib
+        import json
+        serialized_ctx = json.dumps(context, sort_keys=True) if context else ""
+        cache_key = hashlib.sha256(f"{code}:{serialized_ctx}".encode("utf-8")).hexdigest()
+        if cache_key in self._execution_cache:
+            return self._execution_cache[cache_key]
+
         import clingo
 
         control = clingo.Control()
@@ -91,7 +100,9 @@ class ClingoSurface(SurfaceBase):
         else:
             result_value = {"models": models}
 
-        return {"status": "ok", "value": result_value}
+        res = {"status": "ok", "value": result_value}
+        self._execution_cache[cache_key] = res
+        return res
 
     async def health(self) -> bool:
         return self._check_availability()

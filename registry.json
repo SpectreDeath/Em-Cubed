@@ -22,15 +22,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -82,21 +80,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "facts",
-      "architectural_component",
-      "db_table",
-      "join_depth",
-      "cost_weight",
-      "rules",
-      "evaluate_architectural_impact",
-      "requires_service",
-      "calculate_cost",
-      "classify_cost",
-      "block"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1782063938.705158
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "world-models/invariant-gate",
@@ -121,15 +106,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -176,11 +159,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "verify_accessibility"
-    ],
-    "last_modified": 1781977161.4694228
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "world-models/looped-state-compressor",
@@ -205,15 +185,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -258,9 +236,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781972299.6318746
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "world-models/skill-constraint-resolver",
@@ -287,15 +264,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -347,19 +322,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "axioms",
-      "object",
-      "light",
-      "source",
-      "coherent",
-      "problem",
-      "observation"
-    ],
-    "heuristic_tags": [
-      "solve_ill_posed"
-    ],
-    "last_modified": 1782063917.9785988
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "world-models/skill-invariant-filter",
@@ -385,15 +349,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -447,22 +409,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "noise",
-      "equivalent",
-      "observation",
-      "topological_invariant",
-      "noise_within_threshold",
-      "masking",
-      "findall",
-      "feature_diff",
-      "max_list",
-      "extract_connectivity",
-      "extract_dependencies",
-      "connectivity"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1781993934.0947626
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "world-models/skill-world-designer",
@@ -489,15 +437,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -546,17 +492,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "step",
-      "skill_loaded",
-      "action",
-      "invariant",
-      "conflict"
-    ],
-    "heuristic_tags": [
-      "verify_budgets"
-    ],
-    "last_modified": 1781977311.5971632
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "world-models/smt-harness-optimizer",
@@ -581,15 +518,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -634,11 +569,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "verify_harness_topology"
-    ],
-    "last_modified": 1781970728.7716541
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "world-models/world-simulator",
@@ -670,15 +602,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -724,9 +654,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781972289.9548738
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "time-series/arima-forecaster",
@@ -745,15 +674,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -823,12 +750,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "arima_forecast"
-    ],
-    "last_modified": 1782171071.6868198
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "time-series/time-series-forecaster",
@@ -847,15 +770,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -929,27 +850,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "holds_at",
-      "initially",
-      "happens",
-      "initiates",
-      "valid_forecast",
-      "consistent_trend",
-      "no_negative_values",
-      "seasonal_pattern",
-      "autocorrelation",
-      "forecast_anomaly",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "fit",
-      "forecast",
-      "cross_validate",
-      "exponential_smoothing",
-      "seasonal_decompose"
-    ],
-    "last_modified": 1781303339.436034
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "testing/z3-test-skill",
@@ -967,15 +869,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1021,11 +921,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "define_constraints"
-    ],
-    "last_modified": 1781303339.4350333
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "technical-analysis/arfima-gph-estimator",
@@ -1043,15 +940,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1101,11 +996,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "calculate_gph"
-    ],
-    "last_modified": 1781303339.4310303
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "technical-analysis/candlestick-pattern-analyzer",
@@ -1124,15 +1016,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1191,19 +1081,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "bullish_pattern",
-      "bearish_pattern",
-      "valid_pattern_sequence",
-      "length",
-      "pattern_permutation",
-      "match_candlestick_signal"
-    ],
-    "heuristic_tags": [
-      "encode_candle",
-      "encode_sequence"
-    ],
-    "last_modified": 1781303339.432028
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "technical-analysis/falling-risk-pyramid",
@@ -1221,15 +1100,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1277,11 +1154,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "compute_pyramid"
-    ],
-    "last_modified": 1781303339.4340346
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "technical-analysis/pyramid-risk-verifier",
@@ -1299,15 +1173,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1376,11 +1248,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "verify_pyramid_risk_bounds"
-    ],
-    "last_modified": 1782071587.4659858
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "stochastic-processes/assert-context-gate",
@@ -1398,15 +1267,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1480,33 +1347,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "assertz",
-      "capability_permits",
-      "table",
-      "resource_sufficient",
-      "transition_cost",
-      "penalty",
-      "recently_visited",
-      "last_transitions",
-      "length",
-      "member",
-      "transition",
-      "findall",
-      "recent_transition",
-      "append",
-      "safe_target",
-      "dead_end",
-      "assert_valid_transition",
-      "blocked",
-      "call_python"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "build_context_facts"
-    ],
-    "last_modified": 1782082591.6060503
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "stochastic-processes/calculate-pagerank-vector",
@@ -1524,15 +1366,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1633,33 +1473,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "outdegree",
-      "count",
-      "edge",
-      "incoming",
-      "dangling_node",
-      "forall",
-      "memberchk",
-      "node",
-      "transition_prob",
-      "member",
-      "vector",
-      "teleport_vector",
-      "pagerank_permitted",
-      "length",
-      "converged",
-      "maplist",
-      "max_list",
-      "diff_check",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "calculate_pagerank_vector"
-    ],
-    "last_modified": 1782082642.8096259
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "stochastic-processes/compile-simulation-histogram",
@@ -1677,15 +1492,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1755,22 +1568,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "non_negative_count",
-      "integer",
-      "histogram_valid",
-      "same_length",
-      "forall",
-      "member",
-      "distribution_sums_to",
-      "sum_list"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "compile_simulation_histogram"
-    ],
-    "last_modified": 1781388458.6965055
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "stochastic-processes/evaluate-stationarity",
@@ -1788,15 +1587,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -1888,34 +1685,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "has_absorbing_state",
-      "nth0",
-      "forall",
-      "member",
-      "connectivity",
-      "transpose",
-      "use_module",
-      "library",
-      "path",
-      "between",
-      "communicates",
-      "reachable_via_steps",
-      "is_reducible",
-      "length",
-      "is_ergodic",
-      "is_aperiodic",
-      "gcd_list",
-      "gcd",
-      "findall",
-      "list_to_set"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "evaluate_stationarity"
-    ],
-    "last_modified": 1781388458.6153567
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "stochastic-processes/execute-monte-carlo-walk",
@@ -1932,15 +1703,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2016,9 +1785,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781388458.6153567
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "stochastic-processes/generate-transition-matrix",
@@ -2036,15 +1804,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2126,26 +1892,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "row_stochastic",
-      "sum_list",
-      "abs",
-      "absorbing_state",
-      "nth0",
-      "forall",
-      "member",
-      "transient_state",
-      "validator",
-      "valid_matrix",
-      "valid_row"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "from_sequence",
-      "from_count_matrix"
-    ],
-    "last_modified": 1782082661.4444969
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "stochastic-processes/n-gram-token-predictor",
@@ -2163,15 +1911,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2254,23 +2000,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "valid_n",
-      "min_frequency_met",
-      "prefix_suffix_consistent",
-      "observed_ngram",
-      "vocabulary_consistent",
-      "forall",
-      "member",
-      "memberchk"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "build_ngram_model",
-      "predict_next"
-    ],
-    "last_modified": 1781388526.0476687
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/autoregressive-parameter-estimator",
@@ -2289,15 +2020,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2374,20 +2103,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "compute_mean",
-      "compute_variance",
-      "compute_autocorrelation",
-      "compute_acf",
-      "compute_pacf",
-      "adf_test",
-      "kpss_test",
-      "determine_arima_order",
-      "suggest_differencing",
-      "seasonal_strength"
-    ],
-    "last_modified": 1781303339.4280303
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/builtin-occams-razor-evaluator",
@@ -2412,15 +2129,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2465,9 +2180,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781998401.6813369
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/naive-bayes-classifier",
@@ -2485,15 +2199,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2549,15 +2261,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "gaussian_pdf",
-      "my_exp",
-      "naive_bayes_train",
-      "naive_bayes_predict",
-      "naive_bayes"
-    ],
-    "last_modified": 1781305736.6280658
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/nuisance-parameter-integrator",
@@ -2582,15 +2287,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2636,9 +2339,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781998385.1019967
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/skill-unconscious-inference",
@@ -2663,15 +2365,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2714,9 +2414,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781993946.8982437
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/statistical-bootstrap-analyzer",
@@ -2735,15 +2434,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -2805,16 +2502,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_bootstrap",
-      "confidence_interval_contains"
-    ],
-    "heuristic_tags": [
-      "bootstrap-quality",
-      "bootstrap_sample",
-      "confidence_interval"
-    ],
-    "last_modified": 1781305736.6280658
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/uncertainty-quantifier",
@@ -2833,15 +2522,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3005,48 +2692,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "uncertain",
-      "probability_distribution",
-      "uncertain_result",
-      "transformation",
-      "combined_confidence",
-      "sum_list",
-      "length",
-      "worst_case",
-      "findall",
-      "member",
-      "component",
-      "max_list",
-      "within_bounds",
-      "confidence_overlap",
-      "max",
-      "min",
-      "risk_level",
-      "high_risk",
-      "medium_risk",
-      "low_risk",
-      "combined_evidence",
-      "evidence",
-      "complementary_confidence"
-    ],
-    "heuristic_tags": [
-      "fuzzy-probability",
-      "uncertainty-aggregation",
-      "sensitivity-measure",
-      "confidence-growth",
-      "decision-under-uncertainty",
-      "uncertainty-visualization",
-      "sample",
-      "add_variable",
-      "add_correlation",
-      "monte_carlo_analysis",
-      "sensitivity_analysis",
-      "bayesian_inference",
-      "uncertainty_propagation",
-      "confidence_belt"
-    ],
-    "last_modified": 1782078053.205698
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/bootstrap-resampling",
@@ -3064,15 +2711,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3148,14 +2793,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "run_bootstrap",
-      "bootstrap_confidence_interval",
-      "bootstrap_mean"
-    ],
-    "last_modified": 1782168345.4542766
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/calculate-correlation-profile",
@@ -3173,15 +2812,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3275,21 +2912,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "hierarchy",
-      "dominates",
-      "method_allowed",
-      "lengths_equal",
-      "length",
-      "band",
-      "magnitude_band"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "calculate_correlation_profile"
-    ],
-    "last_modified": 1781387409.2394829
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/fit-linear-regression",
@@ -3307,15 +2931,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3394,23 +3016,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "ols_min_samples",
-      "same_length",
-      "length",
-      "gate",
-      "independent_groups",
-      "ols_preconditions",
-      "ols_permitted",
-      "blocked",
-      "call_python"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "fit_linear_regression"
-    ],
-    "last_modified": 1781387409.1566336
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/multiple-regression-analyzer",
@@ -3428,15 +3035,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3528,13 +3133,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "betai",
-      "run_multiple_regression"
-    ],
-    "last_modified": 1781894463.4030201
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/calculate-mean-confidence-interval",
@@ -3552,15 +3152,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3634,21 +3232,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "ci_z",
-      "levels",
-      "call_python",
-      "reconditions",
-      "ci_preconditions",
-      "length",
-      "ci_result"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "calculate_mean_confidence_interval"
-    ],
-    "last_modified": 1782077759.6341476
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/evaluate-p-value",
@@ -3666,15 +3251,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3730,22 +3313,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "valid_alpha",
-      "routing",
-      "hypothesis_state",
-      "transition",
-      "formal_conclusion",
-      "state",
-      "variants",
-      "hypothesis_state_onetail"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "evaluate_p_value"
-    ],
-    "last_modified": 1781387282.7659793
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/execute-chi-square-independence",
@@ -3763,15 +3332,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3857,20 +3424,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "dominates",
-      "method_allowed",
-      "lengths_equal",
-      "length",
-      "band",
-      "magnitude_band"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "calculate_correlation_profile"
-    ],
-    "last_modified": 1782335005.6513116
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/friedman-test",
@@ -3888,15 +3443,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -3983,13 +3536,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "gammainc",
-      "run_friedman_test"
-    ],
-    "last_modified": 1781894380.0545397
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/kruskal-wallis-test",
@@ -4007,15 +3555,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4091,11 +3637,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "verify_kw_design"
-    ],
-    "last_modified": 1781894326.439736
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/mann-whitney-u-test",
@@ -4113,15 +3656,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4194,20 +3735,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "mw_guard",
-      "member",
-      "oute",
-      "route_method",
-      "classification",
-      "effect_label"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "run_mann_whitney_u"
-    ],
-    "last_modified": 1781894234.2343233
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/mixed-model-anova",
@@ -4225,15 +3754,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4305,14 +3832,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "eff",
-      "run_mixed_anova",
-      "make_effect"
-    ],
-    "last_modified": 1781894072.9423883
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/normality-tester",
@@ -4330,15 +3851,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4427,17 +3946,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "route_primary_test",
-      "normality_verdict",
-      "interpret_verdict"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "test_normality"
-    ],
-    "last_modified": 1781894144.35648
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/one-way-anova",
@@ -4455,15 +3965,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4534,11 +4042,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "verify_anova_design"
-    ],
-    "last_modified": 1781893908.1445808
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/repeated-measures-anova",
@@ -4556,15 +4061,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4640,12 +4143,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "run_repeated_measures_anova"
-    ],
-    "last_modified": 1781894012.9704163
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/t-test-selector",
@@ -4663,15 +4162,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4754,19 +4251,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "select_t_test",
-      "t_test_guard",
-      "member",
-      "classification",
-      "effect_size_label"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "run_t_test"
-    ],
-    "last_modified": 1782077759.6341476
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/two-way-anova",
@@ -4784,15 +4270,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4861,18 +4345,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "route_query",
-      "interpret_interaction",
-      "anova2_guard"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "run_two_way_anova",
-      "make"
-    ],
-    "last_modified": 1781893958.114861
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/variance-equality-tester",
@@ -4890,15 +4364,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -4974,19 +4446,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "route_variance_test",
-      "homogeneity_verdict",
-      "recommend_correction"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "betai",
-      "gammainc",
-      "test_variance_equality"
-    ],
-    "last_modified": 1781894195.8250444
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/wilcoxon-signed-rank-test",
@@ -5004,15 +4465,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5089,19 +4548,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "wsr_guard",
-      "member",
-      "route_method",
-      "labels",
-      "wsr_effect_label"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "run_wilcoxon_signed_rank"
-    ],
-    "last_modified": 1781894277.042241
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/assert-test-constraints",
@@ -5119,15 +4567,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5238,42 +4684,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "dominates",
-      "parametric_test",
-      "non_parametric_test",
-      "nominal",
-      "chi_square_test",
-      "valid_measurement_for",
-      "min_n",
-      "sample_size_ok",
-      "requires_normality",
-      "call_python",
-      "permitted_test",
-      "forall",
-      "member",
-      "validate_level",
-      "hint",
-      "normality",
-      "blocked",
-      "transitions",
-      "formal_conclusion",
-      "state",
-      "select_test",
-      "ci_z",
-      "allback",
-      "level"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "sample_size",
-      "normal_flag",
-      "equal_variance_flag",
-      "interpolate_z",
-      "assert_test_constraints"
-    ],
-    "last_modified": 1782077782.849461
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/validate-measurement-level",
@@ -5290,15 +4702,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5357,26 +4767,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "module",
-      "hierarchy",
-      "dominates",
-      "validate_level",
-      "hint",
-      "allback",
-      "known_level",
-      "inference",
-      "assert_level",
-      "retractall",
-      "asserta",
-      "valid_measurement_for",
-      "parametric_test",
-      "non_parametric_test",
-      "membership",
-      "routing_permission"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1782078138.0699658
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/calculate-central-tendency",
@@ -5393,15 +4785,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5460,12 +4850,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "calculate_central_tendency"
-    ],
-    "last_modified": 1781387249.3565946
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "statistics/calculate-dispersion",
@@ -5482,15 +4868,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5553,12 +4937,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "calculate_dispersion"
-    ],
-    "last_modified": 1781387249.4126487
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "simulation/system-dynamics-modeler",
@@ -5577,15 +4957,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5698,40 +5076,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "causal_link",
-      "link",
-      "feedback_loop",
-      "path",
-      "length",
-      "equilibrium_reached",
-      "forall",
-      "member",
-      "abs",
-      "stable_system",
-      "findall",
-      "unstable_system",
-      "influences",
-      "compute_influence",
-      "valid_stock_flow",
-      "sum_list",
-      "delayed_effect",
-      "cause"
-    ],
-    "heuristic_tags": [
-      "add_stock",
-      "add_flow",
-      "set_variable",
-      "simulate",
-      "find_equilibrium",
-      "equilibrium_equations",
-      "lotka_volterra_prey",
-      "lotka_volterra_predator",
-      "add_link",
-      "find_feedback_loops",
-      "loop_polarity"
-    ],
-    "last_modified": 1781303339.4270337
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "resource-management/predictive-capacity-planner",
@@ -5750,15 +5096,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5829,19 +5173,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "resource_constraint",
-      "over_provisioned",
-      "under_provisioned"
-    ],
-    "heuristic_tags": [
-      "generate-future-scenarios",
-      "capacity-utilization-score",
-      "forecast_demand",
-      "calculate_required_capacity",
-      "detect_bottleneck"
-    ],
-    "last_modified": 1782079316.1313605
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "resource-management/resource-allocation-planner",
@@ -5860,15 +5193,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -5964,36 +5295,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_allocation",
-      "forall",
-      "member",
-      "lookup_dict",
-      "sum_allocation",
-      "valid_resource_type",
-      "number",
-      "min_priority",
-      "max_priority",
-      "allocation_satisfies_demand",
-      "get_allocation",
-      "allocation_conflict",
-      "vailable"
-    ],
-    "heuristic_tags": [
-      "exponential-weighting",
-      "penalty-score",
-      "efficiency-score",
-      "fairness-index",
-      "adaptive-rebalance",
-      "allocate_by_priority",
-      "genetic_algorithm",
-      "fitness",
-      "create_random_individual",
-      "crossover",
-      "mutate",
-      "calculate_fair_share"
-    ],
-    "last_modified": 1782079316.1183531
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "regression/regression-toolkit",
@@ -6012,15 +5315,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -6093,13 +5394,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "fit_linear_regression",
-      "fit_logistic_regression"
-    ],
-    "last_modified": 1782168515.1978097
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "recommender-systems/recommendation-engine",
@@ -6118,15 +5414,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -6237,32 +5531,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "consistent_preferences",
-      "contradictory_preferences",
-      "member",
-      "pref",
-      "similar_items",
-      "different_sentiments",
-      "valid_recommendation",
-      "compatible_with_history",
-      "no_conflict_with_preferences",
-      "meets_constraints",
-      "recommendations_diverse",
-      "findall",
-      "item_similarity",
-      "average"
-    ],
-    "heuristic_tags": [
-      "preference-weighting",
-      "novelty-score",
-      "serendipity-measure",
-      "fit",
-      "recommend",
-      "content_based_similarity",
-      "hybrid_scoring"
-    ],
-    "last_modified": 1782078087.7925415
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/anarchic-society-optimization",
@@ -6282,15 +5552,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -6423,28 +5691,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "atoms",
-      "select_policy",
-      "valid_aso_params",
-      "check",
-      "converged_aso",
-      "length",
-      "append",
-      "max_list",
-      "min_list",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "safe-div",
-      "calculate-fi",
-      "calculate-ei",
-      "calculate-ii",
-      "compute-indices",
-      "adapt-parameters",
-      "optimize"
-    ],
-    "last_modified": 1781303339.413021
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/central-force-optimization",
@@ -6463,15 +5711,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -6544,17 +5790,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_cfo_params",
-      "better_solution"
-    ],
-    "heuristic_tags": [
-      "calculate-distance-squared",
-      "gravitational-force",
-      "update-position",
-      "optimize"
-    ],
-    "last_modified": 1781303339.414021
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/chaos-optimization",
@@ -6573,15 +5810,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -6670,23 +5905,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_coa_params",
-      "converged",
-      "length",
-      "max_list",
-      "min_list",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "logistic-map",
-      "tent-map",
-      "sinusoidal-map",
-      "select-map",
-      "compute-power-distribution",
-      "optimize"
-    ],
-    "last_modified": 1782079990.965801
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/cma-es-optimizer",
@@ -6706,15 +5926,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -6826,26 +6044,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_cmaes_params",
-      "sigma_too_small",
-      "converged",
-      "length",
-      "append",
-      "max_list",
-      "min_list",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "compute-chi-n",
-      "adaptive-sigma",
-      "hsig?",
-      "compute-cc",
-      "compute-cs",
-      "compute-damps",
-      "optimize"
-    ],
-    "last_modified": 1781303339.4160202
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/constraint-satisfaction-solver",
@@ -6864,15 +6064,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -6968,34 +6166,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "sudoku",
-      "length",
-      "maplist",
-      "same_length",
-      "transpose",
-      "blocks",
-      "all_distinct",
-      "dif",
-      "nqueens",
-      "map_color",
-      "member",
-      "coloring_constraint",
-      "adjacent",
-      "memberchk"
-    ],
-    "heuristic_tags": [
-      "most-constrained-variable",
-      "least-constraining-value",
-      "count-constraints",
-      "ac-3-enforce",
-      "is_consistent",
-      "backtrack_search",
-      "forward_check",
-      "solve_sudoku",
-      "all_different"
-    ],
-    "last_modified": 1781303339.4160202
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/dialectic-search",
@@ -7014,15 +6186,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -7112,26 +6282,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_da_params",
-      "thinkers",
-      "select_speculative_antithesis",
-      "select_practical_antithesis",
-      "converged",
-      "length",
-      "append",
-      "max_list",
-      "min_list",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "generate-mu",
-      "apply-synthesis",
-      "clip-value",
-      "adapt-alpha",
-      "optimize"
-    ],
-    "last_modified": 1781303339.41702
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/differential-evolution-solver",
@@ -7150,15 +6302,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -7258,26 +6408,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_parameters",
-      "converged_best",
-      "findall",
-      "member",
-      "score",
-      "max_list",
-      "min_list",
-      "abs",
-      "valid_mutation",
-      "forall",
-      "between"
-    ],
-    "heuristic_tags": [
-      "adaptive-f",
-      "jade-strategy",
-      "optimize",
-      "de_adaptive"
-    ],
-    "last_modified": 1782078087.781934
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/fractal-based-algorithm",
@@ -7296,15 +6428,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -7402,22 +6532,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_fba_params",
-      "converged",
-      "length",
-      "max_list",
-      "min_list",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "create-subspace",
-      "point-in-subspace",
-      "power-distribution",
-      "fractal-rank",
-      "optimize"
-    ],
-    "last_modified": 1782080980.8734245
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/monte-carlo-simulator",
@@ -7435,15 +6551,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -7510,13 +6624,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "run_monte_carlo",
-      "run_monte_carlo_batched",
-      "merge_monte_carlo_results"
-    ],
-    "last_modified": 1781303339.4200215
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/optimization-landscape-analyzer",
@@ -7534,15 +6643,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -7644,38 +6751,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "constraint_boundary",
-      "constraint",
-      "intersection",
-      "boundary_equation",
-      "local_optimum",
-      "gradient_zero",
-      "satisfies_constraints",
-      "hessian_positive_definite",
-      "critical_region",
-      "nearby_points_satisfy",
-      "multimodal_landscape",
-      "findall",
-      "group_nearby_optima",
-      "constraint_interaction",
-      "shared_variables",
-      "length",
-      "optimality_certified",
-      "first_order_condition",
-      "second_order_condition"
-    ],
-    "heuristic_tags": [
-      "sample_landscape",
-      "find_local_optima",
-      "compute_modality",
-      "compute_ruggedness",
-      "compute_neutrality",
-      "build_surrogate",
-      "feature_importance",
-      "multi_objective_landscape"
-    ],
-    "last_modified": 1781303339.4200215
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/pathfinding-with-constraints",
@@ -7694,15 +6771,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -7814,39 +6889,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_path",
-      "valid_edge",
-      "satisfies_constraints",
-      "edge",
-      "findall",
-      "edge_constraint",
-      "member",
-      "time_allowed",
-      "forall",
-      "edge_time_constraint",
-      "avoid_tolls",
-      "edge_type",
-      "avoid_highways",
-      "vehicle_compatible",
-      "vehicle_type",
-      "vehicle_allowed",
-      "traffic_rule_violation",
-      "current_hour"
-    ],
-    "heuristic_tags": [
-      "path-score",
-      "pareto-front",
-      "dominates",
-      "fuzzy-time-estimate",
-      "multi-objective-normalize",
-      "dynamic-weight-adjustment",
-      "dijkstra",
-      "astar",
-      "multi_objective_search",
-      "detect_negative_cycles"
-    ],
-    "last_modified": 1781303339.4210217
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/spiral-dynamics-optimization",
@@ -7865,15 +6909,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -7954,17 +6996,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_sdo_params",
-      "is_better"
-    ],
-    "heuristic_tags": [
-      "damped-oscillation",
-      "update-amplitude",
-      "spiral-update",
-      "optimize"
-    ],
-    "last_modified": 1782081389.0823073
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/stochastic-diffusion-search",
@@ -7983,15 +7016,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8067,20 +7098,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_sds_params",
-      "check",
-      "converged",
-      "length",
-      "append",
-      "max_list",
-      "min_list",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "optimize"
-    ],
-    "last_modified": 1781305736.6260552
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "optimization/z3-schedule-solver",
@@ -8098,15 +7117,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8153,11 +7170,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "main"
-    ],
-    "last_modified": 1781303339.424032
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "nlp/js-text-transformer",
@@ -8175,15 +7189,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8232,12 +7244,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "main",
-      "get_js_for_transform"
-    ],
-    "last_modified": 1781303339.4090204
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "nlp/natural-language-generator",
@@ -8256,15 +7264,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8328,22 +7334,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_sentence_structure",
-      "length",
-      "matches_style",
-      "contains_no_contractions",
-      "contains_casual_words",
-      "sub_string"
-    ],
-    "heuristic_tags": [
-      "style-features",
-      "apply-style",
-      "template_fill",
-      "constrained_generate",
-      "generate_multiple_variants"
-    ],
-    "last_modified": 1782082019.900376
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "nlp/sentiment-intelligence-engine",
@@ -8362,15 +7354,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8522,45 +7512,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "sentiment_in_context",
-      "sentiment_words",
-      "length",
-      "negated_sentiment",
-      "member",
-      "next_token",
-      "sentiment_word",
-      "domain_sentiment_adjusted",
-      "domain_modifier",
-      "aspect_sentiment",
-      "extract_aspect",
-      "extract_opinion",
-      "aspect_target",
-      "sentiment_intensity",
-      "intensifier",
-      "precedes",
-      "comparative_sentiment",
-      "extract_comparison",
-      "sentiment",
-      "contradictory_sentiments",
-      "similar_context",
-      "abs"
-    ],
-    "heuristic_tags": [
-      "fuzzy-sentiment-composition",
-      "sentiment-trend",
-      "confidence-interval",
-      "emotional-variance",
-      "sentiment-forecast",
-      "aspect-sentiment-fusion",
-      "analyze",
-      "batch_analyze",
-      "get_embeddings",
-      "lexicon_score",
-      "preprocess_text",
-      "temporal_aggregation"
-    ],
-    "last_modified": 1782081769.7730086
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "nlp/simple-text-generator",
@@ -8577,15 +7530,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8625,11 +7576,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "main"
-    ],
-    "last_modified": 1781303339.4110224
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "nlp/test-rag-pipeline",
@@ -8646,15 +7594,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8706,12 +7652,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "retrieve_context",
-      "generate_response"
-    ],
-    "last_modified": 1781305736.6139736
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "model-validation/cross-validation",
@@ -8729,15 +7671,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8819,12 +7759,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "run_cross_validation"
-    ],
-    "last_modified": 1782168059.8670104
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "model-validation/finite-limit-sequence-boundary",
@@ -8849,15 +7785,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -8903,11 +7837,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "verify_limit_convergence"
-    ],
-    "last_modified": 1781998417.4517865
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "model-validation/model-validation-suite",
@@ -8926,15 +7857,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9047,32 +7976,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_model",
-      "performance_meets_threshold",
-      "no_overfitting",
-      "statistically_significant",
-      "t_test",
-      "consistent_cv_scores",
-      "std_deviation",
-      "sum",
-      "length",
-      "no_data_leakage",
-      "member",
-      "highly_predictive_in_both"
-    ],
-    "heuristic_tags": [
-      "validation-confidence",
-      "drift-detection",
-      "model-stability",
-      "cross_validate",
-      "statistical_test",
-      "overfitting_check",
-      "bias_variance_decomposition",
-      "permutation_test",
-      "statistical_significance"
-    ],
-    "last_modified": 1782078087.7809322
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "model-validation/skill-anomaly-diagnostic",
@@ -9097,15 +8002,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9154,11 +8057,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "diagnose_anomaly"
-    ],
-    "last_modified": 1781993960.2857282
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "model-validation/skill-elimination-trace-logger",
@@ -9189,15 +8089,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9242,9 +8140,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1782060033.2551925
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "ml-operations/anomaly-detection-system",
@@ -9263,15 +8160,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9366,39 +8261,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "anomaly",
-      "outside_normal_range",
-      "classify_anomaly",
-      "abs",
-      "pattern_anomaly",
-      "expected_pattern",
-      "deviation",
-      "business_anomaly",
-      "transaction",
-      "violates_rule",
-      "contextual_anomaly",
-      "normal_for_context",
-      "correlated_anomalies",
-      "feature_correlation",
-      "aggregation_anomaly",
-      "batch_statistics",
-      "deviation_from_expected"
-    ],
-    "heuristic_tags": [
-      "fuzzy-anomaly-score",
-      "temporal-anomaly-confidence",
-      "adaptive-threshold",
-      "anomaly-clustering",
-      "severity-composition",
-      "fit",
-      "detect",
-      "statistical_zscore",
-      "statistical_iqr",
-      "reconstruction_error_anomaly",
-      "temporal_anomaly_detection"
-    ],
-    "last_modified": 1781303339.408021
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "meta-skills/prompt-quality-evaluator",
@@ -9416,15 +8280,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9467,9 +8329,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781303339.4070237
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "meta-engineering/evaluate-skill-proposal",
@@ -9487,15 +8348,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9588,24 +8447,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "profession_domain",
-      "recommend_materials",
-      "resolve_skill_ancestry",
-      "ancestry",
-      "infer_professions_from_keywords",
-      "get_domain_skills"
-    ],
-    "heuristic_tags": [
-      "to_dict",
-      "to_json",
-      "consult_ontology",
-      "query",
-      "single",
-      "evaluate",
-      "evaluate_skill_proposal"
-    ],
-    "last_modified": 1781453812.4082506
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "meta-engineering/skill-telemetry",
@@ -9623,15 +8466,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9719,14 +8560,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "to_dict",
-      "to_json",
-      "from_dict",
-      "from_json"
-    ],
-    "last_modified": 1781453870.0334342
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "machine-learning/decision-tree-splits",
@@ -9744,15 +8579,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9841,43 +8674,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "leaf_node",
-      "get_dict",
-      "internal_node",
-      "tree_route",
-      "nth0",
-      "classify_all",
-      "findall",
-      "member",
-      "feature_importance",
-      "all_feature_importances",
-      "valid_split",
-      "length",
-      "min_list",
-      "max_list",
-      "entropy_consistent",
-      "within_max_depth",
-      "tree_depth",
-      "max",
-      "pure_leaf",
-      "mixed_leaf",
-      "decision_path",
-      "feature_less_equal",
-      "feature_greater"
-    ],
-    "heuristic_tags": [
-      "my_log2",
-      "compute_entropy",
-      "compute_gain",
-      "find_best_split",
-      "build_tree",
-      "predict_tree",
-      "decision_tree_classifier",
-      "compute_importances",
-      "classify_with_tree"
-    ],
-    "last_modified": 1781303339.4030218
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "machine-learning/logistic-regression-classifier",
@@ -9894,15 +8692,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -9958,13 +8754,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "my_exp",
-      "sigmoid",
-      "logistic_regression"
-    ],
-    "last_modified": 1781305736.6139736
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "machine-learning/random-forest-ensemble",
@@ -9982,15 +8773,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10067,19 +8856,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "my_log2",
-      "compute_entropy",
-      "compute_gain",
-      "find_best_split",
-      "build_tree",
-      "predict_tree",
-      "bootstrap_sample",
-      "random_forest_classifier",
-      "forest_predict"
-    ],
-    "last_modified": 1781303339.4050202
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "machine-learning/reinforcement-learning-agent",
@@ -10098,15 +8876,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10206,40 +8982,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_action",
-      "policy_rule",
-      "satisfies_conditions",
-      "safe_action",
-      "safety_constraint",
-      "check_constraints",
-      "coordinated_actions",
-      "findall",
-      "member",
-      "agent_action",
-      "valid_joint_action",
-      "exploration_allowed",
-      "visited",
-      "visit_count",
-      "shaped_reward",
-      "potential",
-      "gamma",
-      "converged",
-      "variance"
-    ],
-    "heuristic_tags": [
-      "adaptive-exploration",
-      "learning-rate-schedule",
-      "multi-armed-bandit",
-      "policy-entropy",
-      "curiosity-driven-action",
-      "act",
-      "learn",
-      "policy",
-      "multi_agent_rl",
-      "experience_replay"
-    ],
-    "last_modified": 1781303339.4060216
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "machine-learning/svm-classifier",
@@ -10257,15 +9001,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10332,19 +9074,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "compute_dot",
-      "my_exp_approx",
-      "rbf_kernel",
-      "gram_matrix",
-      "svm_train_approx",
-      "svm_predict",
-      "compute_margin",
-      "svm_classifier",
-      "svm_transform"
-    ],
-    "last_modified": 1781303339.4060216
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "logic/distributive-lattice-validator",
@@ -10370,15 +9101,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10426,16 +9155,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "bound",
-      "join",
-      "implies_transitive",
-      "meet"
-    ],
-    "heuristic_tags": [
-      "verify_distributivity"
-    ],
-    "last_modified": 1781998262.9143958
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "logic/inverse-zeta-generalizer",
@@ -10460,15 +9181,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10511,9 +9230,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781998292.3581598
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "logic/poset-implication-builder",
@@ -10539,15 +9257,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10600,19 +9316,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "proposition",
-      "implies",
-      "implies_transitive",
-      "poset_axiom",
-      "forall",
-      "top_element",
-      "bottom_element"
-    ],
-    "heuristic_tags": [
-      "verify_poset"
-    ],
-    "last_modified": 1781998146.5681407
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "llm-processing/advanced-llm-processor",
@@ -10629,15 +9334,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10684,12 +9387,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "process_with_features",
-      "get_tool_by_name"
-    ],
-    "last_modified": 1781305736.6139736
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "knowledge-graph/knowledge-graph-builder",
@@ -10709,15 +9408,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10810,31 +9507,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "related",
-      "triple",
-      "transitive_relationship",
-      "subtype",
-      "type_hierarchy",
-      "valid_entity",
-      "member",
-      "type_constraints",
-      "satisfies_constraints",
-      "contradiction_exists",
-      "conflicting_predicates",
-      "common_neighbors",
-      "findall",
-      "inferred_triple",
-      "atomic_list_concat"
-    ],
-    "heuristic_tags": [
-      "extract_entities",
-      "extract_relationships",
-      "compute_embeddings",
-      "cluster_entities",
-      "graph_metrics"
-    ],
-    "last_modified": 1781303339.4020178
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "harness/skill-harness-builder",
@@ -10859,15 +9533,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -10911,9 +9583,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781977295.5075366
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "graph-ml/graph-neural-network",
@@ -10931,15 +9602,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -11055,34 +9724,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "connected",
-      "path",
-      "edge",
-      "homogeneous_neighborhood",
-      "neighbors",
-      "forall",
-      "member",
-      "node_label",
-      "valid_graph",
-      "no_self_loops",
-      "symmetric_edges",
-      "connected_components",
-      "subgraph_isomorphic",
-      "find_mapping",
-      "preserves_edges",
-      "message_consistent",
-      "aggregate_messages",
-      "update_rule",
-      "consistent_update"
-    ],
-    "heuristic_tags": [
-      "reset_parameters",
-      "forward",
-      "message_passing",
-      "graph_attention"
-    ],
-    "last_modified": 1781303339.4010193
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "general/hy-fuzzy-logic",
@@ -11100,15 +9743,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -11251,19 +9892,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "fuzzy-temperature-controller",
-      "fuzzy-cooling",
-      "hy_surface",
-      "test_fuzzy_membership",
-      "test_fuzzy_operations",
-      "test_list_comprehensions",
-      "test_function_definitions",
-      "test_error_handling",
-      "test_symbolic_computation"
-    ],
-    "last_modified": 1782081734.1152773
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "logic-and-reasoning/integrated-logic-solver",
@@ -11281,15 +9911,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -11344,11 +9972,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "process_family_data"
-    ],
-    "last_modified": 1781303339.3980203
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "general/intelligent-task-planner",
@@ -11367,15 +9992,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -11485,29 +10108,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "developer",
-      "project",
-      "has_skill",
-      "member",
-      "meets_requirements",
-      "forall",
-      "developer_capacity",
-      "project_priority",
-      "valid_assignment",
-      "optimal_allocation",
-      "findall",
-      "select_optimal"
-    ],
-    "heuristic_tags": [
-      "fuzzy-membership",
-      "skill-match-score",
-      "workload-balance-score",
-      "priority-satisfaction",
-      "composite-fitness",
-      "optimize-assignment"
-    ],
-    "last_modified": 1781303339.399019
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "general/prolog-logic-solver",
@@ -11525,15 +10127,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -11648,29 +10248,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "parent",
-      "male",
-      "female",
-      "father",
-      "mother",
-      "grandparent",
-      "grandfather",
-      "grandmother",
-      "sibling",
-      "brother",
-      "sister",
-      "ancestor"
-    ],
-    "heuristic_tags": [
-      "prolog_surface",
-      "test_family_relationships",
-      "test_constraint_solving",
-      "test_list_operations",
-      "test_mathematical_functions",
-      "test_error_handling"
-    ],
-    "last_modified": 1782082711.4524252
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "general/python-calculator",
@@ -11687,15 +10266,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -11773,9 +10350,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781305736.6139736
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "forensic-economics/linear-regression",
@@ -11793,15 +10369,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -11849,12 +10423,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "linear_regression",
-      "solve_linear_system"
-    ],
-    "last_modified": 1781305736.6139736
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "feature-engineering/feature-engineering-pipeline",
@@ -11873,15 +10443,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12005,30 +10573,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_feature",
-      "no_missing_values",
-      "reasonable_range",
-      "feature_interaction",
-      "correlated",
-      "informative_feature",
-      "mutual_information",
-      "data_quality",
-      "missing_percentage",
-      "unique_ratio"
-    ],
-    "heuristic_tags": [
-      "feature-complexity",
-      "normalization-method",
-      "feature-pipeline-optimization",
-      "add_transformer",
-      "fit_transform",
-      "encode_categorical",
-      "polynomial_features",
-      "interaction_features",
-      "datetime_features"
-    ],
-    "last_modified": 1782078087.7799337
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "examples/python-prolog-pipeline",
@@ -12046,15 +10592,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12101,14 +10645,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "rolog",
-      "input",
-      "path",
-      "edge"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1781303339.395023
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "examples/sqlite-pipeline",
@@ -12126,15 +10664,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12177,11 +10713,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "main"
-    ],
-    "last_modified": 1781303339.395023
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "epidemiology/gradient-descent-optimizer",
@@ -12198,15 +10731,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12262,11 +10793,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "gradient_descent"
-    ],
-    "last_modified": 1781305736.611965
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "epidemiology/stochastic-transmission-network",
@@ -12285,15 +10813,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12360,19 +10886,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "exposed",
-      "infected",
-      "contact",
-      "transmission_chain",
-      "findall",
-      "valid_quarantine"
-    ],
-    "heuristic_tags": [
-      "simulate_transmission",
-      "compute_r0"
-    ],
-    "last_modified": 1781303339.394021
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "ensemble/ensemble-method-manager",
@@ -12391,15 +10906,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12506,27 +11019,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "compatible_models",
-      "model_type",
-      "ensemble_compatible",
-      "valid_ensemble",
-      "diverse_models",
-      "no_circular_dependencies",
-      "voting_strategy",
-      "member"
-    ],
-    "heuristic_tags": [
-      "diversity-score",
-      "fuzzy-weight",
-      "add_model",
-      "fit",
-      "predict",
-      "stacking_predict",
-      "optimize_weights",
-      "loss"
-    ],
-    "last_modified": 1782078087.7799337
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "distributed-systems/dag-task-scheduler",
@@ -12545,15 +11039,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12617,13 +11109,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "topological_sort",
-      "critical_path",
-      "get_ready_tasks"
-    ],
-    "last_modified": 1781303339.38702
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "distributed-systems/distributed-consensus-analyzer",
@@ -12643,15 +11130,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12720,20 +11205,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_quorum",
-      "length",
-      "byzantine_node",
-      "count_divergent",
-      "raft_transition"
-    ],
-    "heuristic_tags": [
-      "consensus-confidence",
-      "byzantine-score",
-      "check_quorum",
-      "detect_byzantine"
-    ],
-    "last_modified": 1781305736.609954
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "distributed-systems/durable-execution-engine",
@@ -12752,15 +11225,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12825,15 +11296,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "serialize",
-      "create_checkpoint",
-      "save_checkpoint",
-      "load_checkpoint",
-      "recover_workflow"
-    ],
-    "last_modified": 1781303339.3880196
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "distributed-systems/forecasting-monitor",
@@ -12851,15 +11315,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -12927,20 +11389,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "compute_mae",
-      "compute_mape",
-      "compute_rmse",
-      "rolling_accuracy_metrics",
-      "detect_concept_drift",
-      "should_retrain",
-      "model_version_check",
-      "trigger_retraining",
-      "compute_forecast_accuracy",
-      "aggregate_forecast_performance"
-    ],
-    "last_modified": 1781303339.3890202
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "distributed-systems/multi-agent-coordinator",
@@ -12959,15 +11409,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13049,35 +11497,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "coordinate_agents",
-      "findall",
-      "member",
-      "agent_capability",
-      "task_requirements",
-      "overlap",
-      "sort",
-      "select_top",
-      "message_exchange",
-      "valid_sender",
-      "valid_receiver",
-      "format_message",
-      "process_message",
-      "consensus_reached",
-      "sum_list",
-      "length",
-      "potential_deadlock",
-      "waiting_cycle"
-    ],
-    "heuristic_tags": [
-      "emergence-metric",
-      "coordination-efficiency",
-      "adaptive-coordination",
-      "register_agent",
-      "task_allocation",
-      "flocking_behavior"
-    ],
-    "last_modified": 1781303339.39002
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "distributed-systems/observability-dashboard",
@@ -13095,15 +11516,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13163,17 +11582,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "record_metric",
-      "get_metric",
-      "increment_counter",
-      "get_counter",
-      "calculate_average",
-      "detect_anomaly",
-      "aggregate_metrics"
-    ],
-    "last_modified": 1781303339.3910215
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "distributed-systems/wasm-execution-sandbox",
@@ -13191,15 +11601,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13263,16 +11671,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "parse_wat_module",
-      "extract_string_arg",
-      "extract_params",
-      "extract_results",
-      "validate_module_bounds",
-      "create_sandbox_config"
-    ],
-    "last_modified": 1781303339.3920226
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "design-systems/design-sync",
@@ -13298,15 +11698,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13359,20 +11757,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "quivalency",
-      "must_use_component",
-      "design_component",
-      "tier",
-      "code_component",
-      "name_alias",
-      "guard",
-      "generic_forbidden",
-      "requires_approved_component",
-      "tier_required_but_unmapped"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1781989276.4781394
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/associative-chaining-product",
@@ -13397,15 +11783,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13450,14 +11834,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "chain_valid",
-      "implies",
-      "chain_probability",
-      "prob"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1781998347.5346904
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/epistemological-independence-filter",
@@ -13482,15 +11860,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13537,16 +11913,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "independence",
-      "epistemologically_independent",
-      "knowledge_covers",
-      "knowledge_constrains",
-      "member",
-      "link"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1781998367.1803172
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/iterated-dominance-solver",
@@ -13578,15 +11946,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13646,23 +12012,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "player",
-      "strategy",
-      "payoff",
-      "dominance",
-      "u_i",
-      "strictly_dominated",
-      "findall",
-      "member",
-      "profile",
-      "mixed_strategy_beats",
-      "ationalizable",
-      "rationalizable",
-      "eliminated"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1781996739.8211038
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/lattice-inclusion-exclusion-sum",
@@ -13687,15 +12038,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13741,14 +12090,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "meet",
-      "join",
-      "condition",
-      "implies"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1781998332.6503916
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/multi-criteria-weight-calculator",
@@ -13767,15 +12110,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -13889,40 +12230,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "consistent_comparison",
-      "number",
-      "reciprocal",
-      "matrix_consistent",
-      "consistency_ratio",
-      "eigenvalue_max",
-      "size",
-      "random_index",
-      "transitive_preference",
-      "preference",
-      "abs",
-      "dominates",
-      "forall",
-      "member",
-      "score",
-      "pareto_optimal"
-    ],
-    "heuristic_tags": [
-      "fuzzy-pairwise",
-      "defuzzify",
-      "fuzzy-geometric-mean",
-      "fuzzy-consistency",
-      "dynamic-weight-update",
-      "sensitivity-analysis",
-      "set_comparison",
-      "calculate_weights",
-      "calculate_consistency_ratio",
-      "rank_alternatives",
-      "calculate",
-      "entropy_weights",
-      "hybrid_weighting"
-    ],
-    "last_modified": 1781303339.3840191
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/multi-surface-decision-tree",
@@ -13941,15 +12250,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14032,31 +12339,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_decision",
-      "option_risk",
-      "option_return",
-      "option_liquidity",
-      "constraint_violation",
-      "meets_all_criteria",
-      "dominated_by",
-      "pareto_optimal"
-    ],
-    "heuristic_tags": [
-      "fuzzy-and",
-      "fuzzy-or",
-      "fuzzy-not",
-      "triangular-membership",
-      "score-with-uncertainty",
-      "multi-criteria-aggregation",
-      "confidence-interval",
-      "build_decision_tree",
-      "calculate_weighted_score",
-      "normalize_value",
-      "traverse",
-      "normalize_criteria"
-    ],
-    "last_modified": 1781303339.38502
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/skill-belief-state-updater",
@@ -14081,15 +12365,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14140,12 +12422,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "redistribute-mass",
-      "lattice-closed?"
-    ],
-    "last_modified": 1782058959.3503141
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/skill-bounded-rationality-constraint",
@@ -14169,15 +12447,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14219,9 +12495,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1782058959.3913918
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/skill-expected-utility-maximizer",
@@ -14252,15 +12527,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14308,9 +12581,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1782058959.3913918
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/strategic-planner",
@@ -14327,15 +12599,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14385,12 +12655,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "evaluate_options",
-      "analyze_strategy"
-    ],
-    "last_modified": 1781305736.606285
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "decision-making/test-decision-maker",
@@ -14407,15 +12673,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14462,12 +12726,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "make_decision",
-      "rank_options"
-    ],
-    "last_modified": 1781305736.609954
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "data-processing/data-pipeline-orchestrator",
@@ -14487,15 +12747,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14578,30 +12836,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "ancestor_data",
-      "data_transformation",
-      "valid_schema",
-      "findall",
-      "member",
-      "length",
-      "pipeline_consistent",
-      "forall",
-      "stage_input_schema",
-      "schema_satisfied",
-      "quality_check_passed",
-      "call",
-      "stage_ready",
-      "stage_dependencies",
-      "subset",
-      "failure_propagates"
-    ],
-    "heuristic_tags": [
-      "add_stage",
-      "visit",
-      "validate_schema"
-    ],
-    "last_modified": 1781303339.3820214
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "data-processing/skill-sensor-transducer",
@@ -14626,15 +12862,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14678,9 +12912,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [],
-    "last_modified": 1781993905.8849144
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "data-processing/sql-aggregator",
@@ -14698,15 +12931,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14751,11 +12982,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "main"
-    ],
-    "last_modified": 1781303339.3830218
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "data-processing/time-series-preprocessor",
@@ -14773,15 +13001,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14858,20 +13084,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "parse_datetime",
-      "datetime_to_seconds",
-      "align_to_frequency",
-      "compute_rolling_zscores",
-      "detect_outliers_zscore",
-      "detect_outliers_iqr",
-      "forward_fill",
-      "interpolate_missing",
-      "resample_series",
-      "preprocess_time_series"
-    ],
-    "last_modified": 1781303339.3830218
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "clinical-trials/ae-severity-tree-evaluator",
@@ -14889,15 +13103,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -14958,25 +13170,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "severity_grade",
-      "grade_rule",
-      "contradictory",
-      "ae_record",
-      "evaluate_ae",
-      "setof",
-      "last",
-      "findall",
-      "rule",
-      "conflict",
-      "member"
-    ],
-    "heuristic_tags": [
-      "grade_ae_severity",
-      "evaluate_ae_tree",
-      "main"
-    ],
-    "last_modified": 1781303339.3770223
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "clinical-trials/dmc-counting-rule-analyzer",
@@ -14995,15 +13190,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15067,24 +13260,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "stop_for_efficacy",
-      "p_value_check",
-      "fact",
-      "stop_for_futility",
-      "futility_check",
-      "continue_look",
-      "continuity",
-      "continue_trial",
-      "arm",
-      "ook"
-    ],
-    "heuristic_tags": [
-      "build_interim_facts",
-      "analyze_dmc",
-      "main"
-    ],
-    "last_modified": 1781303339.3770223
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "clinical-trials/informed-consent-form-clause-validator",
@@ -15102,15 +13279,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15163,13 +13338,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "parse_icf_sections",
-      "validate_icf_z3",
-      "main"
-    ],
-    "last_modified": 1781303339.3780181
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "clinical-trials/k-means-clustering",
@@ -15186,15 +13356,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15247,14 +13415,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "my_sqrt",
-      "euclidean_distance",
-      "initialize_centroids",
-      "kmeans"
-    ],
-    "last_modified": 1781305736.606285
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "clinical-trials/non-inferiority-margin-checker",
@@ -15272,15 +13434,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15329,12 +13489,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "check_non_inferiority",
-      "main"
-    ],
-    "last_modified": 1781303339.380019
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "clinical-trials/sae-reporting-threshold-tester",
@@ -15352,15 +13508,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15409,12 +13563,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [],
-    "heuristic_tags": [
-      "compute_sae_reporting",
-      "main"
-    ],
-    "last_modified": 1781303339.380019
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "clinical-trials/sap-endpoint-consistency-checker",
@@ -15432,15 +13582,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15492,21 +13640,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "endpoint",
-      "sap_endpoint",
-      "registry_endpoint",
-      "protocol_endpoint",
-      "aligned_endpoint",
-      "missing_from_registry",
-      "missing_from_protocol"
-    ],
-    "heuristic_tags": [
-      "build_endpoint_maps",
-      "check_endpoint_consistency",
-      "main"
-    ],
-    "last_modified": 1781303339.3810184
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "automation/github-pr-manager",
@@ -15525,15 +13660,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15607,23 +13740,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "pr_ready",
-      "repo_exists",
-      "branch_exists",
-      "pr_exists",
-      "stubs",
-      "potential_conflict",
-      "modified_in",
-      "overlapping_changes"
-    ],
-    "heuristic_tags": [
-      "generate-pr-body",
-      "score-pr-title",
-      "create_pull_request",
-      "get_pull_requests"
-    ],
-    "last_modified": 1782077808.2716935
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "automation/workflow-synthesiser",
@@ -15642,15 +13760,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15752,45 +13868,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_workflow",
-      "workflow_tasks",
-      "acyclic",
-      "no_orphan_tasks",
-      "topological_sort",
-      "select",
-      "no_unresolved_dependencies",
-      "task_dependencies",
-      "member",
-      "requires_completion",
-      "consistent_workflow",
-      "forall",
-      "task_satisfies_constraints",
-      "task_can_retry",
-      "task_max_retries",
-      "task_retry_count",
-      "failure_propagation",
-      "depends_on",
-      "sufficient_resources",
-      "findall",
-      "task_resource_requirement",
-      "total_resources",
-      "potential_deadlock",
-      "requires"
-    ],
-    "heuristic_tags": [
-      "workflow-score",
-      "adapt-workflow",
-      "apply-style",
-      "add_task",
-      "create_workflow",
-      "optimize_order",
-      "critical_path",
-      "parallel_execution_plan",
-      "workflow_similarity",
-      "generate_conditional_tasks"
-    ],
-    "last_modified": 1782081699.304378
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "analytics/bayesian-evidence-updater",
@@ -15809,15 +13888,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15865,17 +13942,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "valid_category",
-      "verify_exhaustive",
-      "verify_exclusive",
-      "member",
-      "audit_hypothesis_space"
-    ],
-    "heuristic_tags": [
-      "calculate_posterior_update"
-    ],
-    "last_modified": 1781303339.3710208
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "analytics/markov-chain-sequence",
@@ -15893,15 +13961,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -15959,18 +14025,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "sum_list",
-      "validate_state_weights",
-      "abs",
-      "throw",
-      "error",
-      "sub_stochastic_row"
-    ],
-    "heuristic_tags": [
-      "step_chain"
-    ],
-    "last_modified": 1781303339.3720188
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "analytics/pagerank-centrality",
@@ -15988,15 +14044,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -16064,21 +14118,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "detect_dead_ends",
-      "edge",
-      "assertz",
-      "dead_end",
-      "detect_isolated_loops",
-      "isolated_loop",
-      "validate_page_graph",
-      "forall",
-      "member"
-    ],
-    "heuristic_tags": [
-      "compute_pagerank"
-    ],
-    "last_modified": 1781303339.3730178
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "analytics/skill-decision-profile-analyzer",
@@ -16104,15 +14145,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -16157,12 +14196,8 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "solver_profile",
-      "solver_bias"
-    ],
-    "heuristic_tags": [],
-    "last_modified": 1782060067.6462462
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   },
   {
     "skill_id": "analytics/statistical-test-advisor",
@@ -16180,15 +14215,13 @@
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "output_schema": {
       "type": "object",
       "properties": {},
       "required": [],
-      "additionalProperties": true,
-      "description": null
+      "additionalProperties": true
     },
     "capabilities": {
       "surfaces": [],
@@ -16234,14 +14267,7 @@
       "last_executed": null,
       "recent_performance": []
     },
-    "logic_tags": [
-      "route_test",
-      "roups",
-      "get_optimal_test"
-    ],
-    "heuristic_tags": [
-      "evaluate_and_advise"
-    ],
-    "last_modified": 1781303339.3740208
+    "validation_score": 0.0,
+    "test_coverage": 0.0
   }
 ]

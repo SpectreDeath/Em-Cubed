@@ -44,6 +44,25 @@ def _is_picklable(value: Any) -> bool:
         return False
 
 
+def _kill_executor_processes(executor) -> None:
+    """Terminate and kill all child processes in the ProcessPoolExecutor."""
+    if executor is None:
+        return
+    try:
+        processes = getattr(executor, "_processes", None)
+        if processes:
+            for p in list(processes):
+                try:
+                    if hasattr(p, "terminate"):
+                        p.terminate()
+                    if hasattr(p, "kill"):
+                        p.kill()
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+
 class PythonSurface(SurfaceBase):
     """Handle Python code execution and metadata extraction."""
 
@@ -109,10 +128,11 @@ class PythonSurface(SurfaceBase):
             future = loop.run_in_executor(executor, _run_asteval_code, code, context)
             return await asyncio.wait_for(asyncio.shield(future), timeout=self.timeout)
         except asyncio.TimeoutError:
-            # Replace executor to release the stuck thread
+            # Replace executor to release the stuck thread/process
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
             if self._process_executor is not None:
+                _kill_executor_processes(self._process_executor)
                 self._process_executor.shutdown(wait=False)
             self._executor = _make_daemon_executor(max_workers=self._worker_count())
             self._process_executor = ProcessPoolExecutor(max_workers=self._worker_count())

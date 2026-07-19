@@ -90,6 +90,64 @@ class TelemetryProxy:
             return res
 
 
+def coerce_data(data: Any, schema: Any) -> Any:
+    """Coerce input/output data to match target schema types where reasonable."""
+    if not schema:
+        return data
+
+    schema_dict = schema if isinstance(schema, dict) else schema.to_dict()
+    target_type = schema_dict.get("type")
+
+    if target_type == "object" and isinstance(data, dict):
+        properties = schema_dict.get("properties", {})
+        coerced = {}
+        for k, v in data.items():
+            if k in properties:
+                coerced[k] = coerce_data(v, properties[k])
+            else:
+                coerced[k] = v
+        return coerced
+
+    elif target_type == "array" and isinstance(data, (list, tuple)):
+        items_schema = schema_dict.get("items")
+        if items_schema:
+            return [coerce_data(item, items_schema) for item in data]
+        return list(data)
+
+    elif target_type == "integer":
+        try:
+            if isinstance(data, str):
+                return int(float(data))
+            elif isinstance(data, (float, int)):
+                return int(data)
+        except (ValueError, TypeError):
+            pass
+
+    elif target_type == "number":
+        try:
+            if isinstance(data, str):
+                return float(data)
+            elif isinstance(data, (float, int)):
+                return float(data)
+        except (ValueError, TypeError):
+            pass
+
+    elif target_type == "string":
+        if isinstance(data, (int, float, bool)):
+            return str(data)
+
+    elif target_type == "boolean":
+        if isinstance(data, str):
+            if data.lower() in ("true", "1", "yes", "on"):
+                return True
+            if data.lower() in ("false", "0", "no", "off"):
+                return False
+        elif isinstance(data, (int, float)):
+            return bool(data)
+
+    return data
+
+
 class SkillExecutor:
     """Loads and executes skills from SKILL.md files."""
 
@@ -168,6 +226,22 @@ class SkillExecutor:
                 output=None,
                 error=f"Skill '{skill_id}' not found in registry",
             )
+
+        # Coerce and validate input schema if defined
+        if skill.input_schema and (skill.input_schema.properties or skill.input_schema.required):
+            try:
+                import jsonschema
+                coerced_input = coerce_data(request.input_data, skill.input_schema)
+                jsonschema.validate(instance=coerced_input, schema=skill.input_schema.to_dict())
+                request.input_data = coerced_input
+            except Exception as e:
+                return SkillExecutionResult(
+                    skill_id=skill_id,
+                    success=False,
+                    output=None,
+                    error=f"Input validation failed: {str(e)}",
+                    surface_used=request.surface or (skill.surfaces[0] if skill.surfaces else "python"),
+                )
 
         # Determine which surface to use
         surface_name = request.surface or (skill.surfaces[0] if skill.surfaces else "python")
@@ -258,6 +332,18 @@ class SkillExecutor:
             success = result.get("status") == "ok"
             output = result.get("value")
             error_msg = result.get("message") if not success else None
+            
+            # Coerce and validate output schema if defined
+            if success and skill.output_schema and (skill.output_schema.properties or skill.output_schema.required):
+                try:
+                    import jsonschema
+                    coerced_output = coerce_data(output, skill.output_schema)
+                    jsonschema.validate(instance=coerced_output, schema=skill.output_schema.to_dict())
+                    output = coerced_output
+                except Exception as e:
+                    success = False
+                    error_msg = f"Output validation failed: {str(e)}"
+                    output = None
         except Exception as e:
             elapsed = (time.perf_counter() - start) * 1000
             success = False

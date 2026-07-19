@@ -13,6 +13,8 @@ from datetime import datetime
 from collections import defaultdict
 import os
 import uuid
+import sqlite3
+from abc import ABC, abstractmethod
 
 from .metadata import SkillMetadata, RuntimeMetrics
 
@@ -90,10 +92,11 @@ class CompositionEdge:
 class SkillRegistry:
     """Enhanced skill registry with quality tracking, telemetry, and remote federation."""
 
-    def __init__(self, skills_dir: Path, registry_file: Path):
+    def __init__(self, skills_dir: Path, registry_file: Path, storage: Optional[RegistryStorage] = None):
         self.skills_dir = skills_dir
         self.registry_file = registry_file
         self.logger = logger.bind(component="skill_registry")
+        self.storage = storage or JSONFileRegistryStorage(registry_file)
         self._skills: Dict[str, SkillMetadata] = {}
         self._quality_metrics: Dict[str, QualityMetrics] = {}
         self._composition_graph: Dict[str, List[CompositionEdge]] = defaultdict(list)
@@ -184,14 +187,9 @@ class SkillRegistry:
         self._initialize_remote_registry()
 
     def _load_registry(self) -> None:
-        """Load skills from registry file."""
-        if not self.registry_file.exists():
-            self.logger.warning("Registry file not found", path=str(self.registry_file))
-            return
-
+        """Load skills from registry storage."""
         try:
-            with open(self.registry_file, encoding="utf-8") as f:
-                registry_data = json.load(f)
+            registry_data = self.storage.load_skills()
 
             for skill_data in registry_data:
                 # Migrate older schema versions to current
@@ -360,7 +358,10 @@ class SkillRegistry:
                 qm.avg_token_savings = self._skills[skill_id].metrics.avg_token_savings
                 qm.usage_count = self._skills[skill_id].metrics.applied_count
                 qm.last_execution = self._skills[skill_id].metrics.last_executed
-            self._save_registry()
+            
+            self.storage.update_skill_metrics(skill_id, success, execution_time, token_usage)
+            if isinstance(self.storage, JSONFileRegistryStorage):
+                self._save_registry()
 
     def add_composition_edge(self, edge: CompositionEdge) -> None:
         """Add a composition relationship between skills."""
@@ -411,7 +412,7 @@ class SkillRegistry:
         return score
 
     def _save_registry(self) -> None:
-        """Persist registry to disk."""
+        """Persist registry to storage."""
         try:
             registry_data = []
             for skill in self._skills.values():
@@ -424,11 +425,7 @@ class SkillRegistry:
                     data["test_coverage"] = qm.test_coverage
                 registry_data.append(data)
 
-            tmp_file = self.registry_file.with_name(f".{self.registry_file.name}.{uuid.uuid4().hex}.tmp")
-            with open(tmp_file, "w", encoding="utf-8") as f:
-                json.dump(registry_data, f, indent=2)
-            tmp_file.replace(self.registry_file)
-
+            self.storage.save_skills(registry_data)
             self.logger.debug("Saved registry", skills_count=len(registry_data))
         except Exception as e:
             self.logger.error("Failed to save registry", error=str(e))
@@ -475,3 +472,203 @@ class SkillRegistry:
             "average_quality_score": avg_quality,
             "composition_edges": sum(len(edges) for edges in self._composition_graph.values()),
         }
+
+
+class RegistryStorage(ABC):
+    """Abstract base class for registry storage backends."""
+    
+    @abstractmethod
+    def load_skills(self) -> List[Dict[str, Any]]:
+        """Load all skills from the storage backend."""
+        pass
+        
+    @abstractmethod
+    def save_skills(self, skills: List[Dict[str, Any]]) -> None:
+        """Save all skills to the storage backend."""
+        pass
+        
+    @abstractmethod
+    def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
+        """Update runtime metrics for a specific skill atomically."""
+        pass
+
+
+class JSONFileRegistryStorage(RegistryStorage):
+    """JSON file-based registry storage backend (default)."""
+    
+    def __init__(self, registry_file: Path):
+        self.registry_file = registry_file
+        
+    def load_skills(self) -> List[Dict[str, Any]]:
+        if not self.registry_file.exists():
+            return []
+        try:
+            with open(self.registry_file, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return []
+            
+    def save_skills(self, skills: List[Dict[str, Any]]) -> None:
+        try:
+            tmp_file = self.registry_file.with_name(f".{self.registry_file.name}.{uuid.uuid4().hex}.tmp")
+            with open(tmp_file, "w", encoding="utf-8") as f:
+                json.dump(skills, f, indent=2)
+            tmp_file.replace(self.registry_file)
+        except Exception as e:
+            logger.error("Failed to save registry to JSON file", error=str(e))
+            
+    def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
+        # Atomic update not natively supported for single JSON file, caller uses save_skills
+        pass
+
+
+class SQLiteRegistryStorage(RegistryStorage):
+    """SQLite database-based registry storage backend for thread-safe concurrent access."""
+    
+    def __init__(self, db_path: Path):
+        self.db_path = db_path
+        self._init_db()
+        
+    def _init_db(self):
+        try:
+            self.db_path.parent.mkdir(parents=True, exist_ok=True)
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS skills (
+                        skill_id TEXT PRIMARY KEY,
+                        name TEXT,
+                        domain TEXT,
+                        version TEXT,
+                        surfaces TEXT,
+                        purpose TEXT,
+                        description TEXT,
+                        validation_score REAL DEFAULT 0.0,
+                        test_coverage REAL DEFAULT 0.0,
+                        applied_count INTEGER DEFAULT 0,
+                        success_count INTEGER DEFAULT 0,
+                        total_execution_time REAL DEFAULT 0.0,
+                        total_token_usage INTEGER DEFAULT 0,
+                        last_executed TEXT,
+                        data TEXT
+                    )
+                """)
+                conn.commit()
+        except Exception as e:
+            logger.error("Failed to initialize SQLite registry database", error=str(e))
+            
+    def load_skills(self) -> List[Dict[str, Any]]:
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.execute("SELECT data, validation_score, test_coverage, applied_count, success_count, total_execution_time, total_token_usage, last_executed FROM skills")
+                skills = []
+                for row in cursor.fetchall():
+                    try:
+                        skill_data = json.loads(row["data"])
+                        skill_data["validation_score"] = row["validation_score"]
+                        skill_data["test_coverage"] = row["test_coverage"]
+                        
+                        metrics = skill_data.setdefault("metrics", {})
+                        metrics["applied_count"] = row["applied_count"]
+                        metrics["success_count"] = row["success_count"]
+                        metrics["total_execution_time"] = row["total_execution_time"]
+                        metrics["total_token_usage"] = row["total_token_usage"]
+                        metrics["last_executed"] = row["last_executed"]
+                        
+                        metrics["completion_rate"] = row["success_count"] / row["applied_count"] if row["applied_count"] > 0 else 0.0
+                        metrics["avg_execution_time"] = row["total_execution_time"] / row["success_count"] if row["success_count"] > 0 else 0.0
+                        metrics["avg_token_savings"] = row["total_token_usage"] / row["applied_count"] if row["applied_count"] > 0 else 0.0
+                        
+                        skills.append(skill_data)
+                    except Exception:
+                        pass
+                return skills
+        except Exception as e:
+            logger.error("Failed to load skills from SQLite registry", error=str(e))
+            return []
+            
+    def save_skills(self, skills: List[Dict[str, Any]]) -> None:
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute("DELETE FROM skills")
+                for skill in skills:
+                    skill_id = skill["skill_id"]
+                    surfaces_str = ",".join(skill.get("surfaces", []))
+                    metrics = skill.get("metrics", {})
+                    conn.execute("""
+                        INSERT OR REPLACE INTO skills (
+                            skill_id, name, domain, version, surfaces, purpose, description,
+                            validation_score, test_coverage, applied_count, success_count,
+                            total_execution_time, total_token_usage, last_executed, data
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        skill_id,
+                        skill["name"],
+                        skill["domain"],
+                        skill.get("version", "0.1.0"),
+                        surfaces_str,
+                        skill.get("purpose", ""),
+                        skill.get("description", ""),
+                        skill.get("validation_score", 0.0),
+                        skill.get("test_coverage", 0.0),
+                        metrics.get("applied_count", 0),
+                        metrics.get("success_count", 0),
+                        metrics.get("total_execution_time", 0.0),
+                        metrics.get("total_token_usage", 0),
+                        metrics.get("last_executed"),
+                        json.dumps(skill)
+                    ))
+                conn.commit()
+        except Exception as e:
+            logger.error("Failed to save skills to SQLite registry", error=str(e))
+            
+    def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.execute("SELECT data, applied_count, success_count, total_execution_time, total_token_usage FROM skills WHERE skill_id = ?", (skill_id,))
+                row = cursor.fetchone()
+                if row:
+                    new_applied = row["applied_count"] + 1
+                    new_success = row["success_count"] + (1 if success else 0)
+                    new_time = row["total_execution_time"] + execution_time
+                    new_token = row["total_token_usage"] + token_usage
+                    last_exec = datetime.utcnow().isoformat()
+                    
+                    try:
+                        skill_data = json.loads(row["data"])
+                        metrics = skill_data.setdefault("metrics", {})
+                        metrics["applied_count"] = new_applied
+                        metrics["success_count"] = new_success
+                        metrics["total_execution_time"] = new_time
+                        metrics["total_token_usage"] = new_token
+                        metrics["last_executed"] = last_exec
+                        
+                        hist = metrics.setdefault("execution_history", [])
+                        hist.append({
+                            "timestamp": last_exec,
+                            "success": success,
+                            "execution_time": execution_time,
+                            "token_usage": token_usage
+                        })
+                        if len(hist) > 100:
+                            hist = hist[-100:]
+                        metrics["execution_history"] = hist
+                        
+                        updated_data = json.dumps(skill_data)
+                    except Exception:
+                        updated_data = row["data"]
+                        
+                    conn.execute("""
+                        UPDATE skills SET
+                            applied_count = ?,
+                            success_count = ?,
+                            total_execution_time = ?,
+                            total_token_usage = ?,
+                            last_executed = ?,
+                            data = ?
+                        WHERE skill_id = ?
+                    """, (new_applied, new_success, new_time, new_token, last_exec, updated_data, skill_id))
+                    conn.commit()
+        except Exception as e:
+            logger.error("Failed to update skill metrics in SQLite registry", skill_id=skill_id, error=str(e))

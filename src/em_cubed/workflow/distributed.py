@@ -16,6 +16,65 @@ import structlog
 logger = structlog.get_logger()
 
 
+def resolve_template_value(val: Any, task_results: Dict[str, Any]) -> Any:
+    """
+    Resolve template placeholders like '{{ tasks.task_id.result.field }}' from completed parent task results.
+    """
+    import re
+
+    if isinstance(val, str) and "{{" in val and "}}" in val:
+        pattern = r"\{\{\s*tasks\.([a-zA-Z0-9_-]+)(?:\.(?:result|output|\$\.))?\.?([a-zA-Z0-9_.-]+)?\s*\}\}"
+
+        full_match = re.fullmatch(pattern, val.strip())
+        if full_match:
+            dep_id, path_str = full_match.groups()
+            dep_res = task_results.get(dep_id)
+            if dep_res is None:
+                return val
+            if not path_str:
+                return dep_res
+            curr = dep_res
+            for part in path_str.split("."):
+                if isinstance(curr, dict):
+                    curr = curr.get(part)
+                elif isinstance(curr, list) and part.isdigit():
+                    idx = int(part)
+                    curr = curr[idx] if 0 <= idx < len(curr) else None
+                else:
+                    curr = None
+                if curr is None:
+                    break
+            return curr if curr is not None else val
+
+        def replace_match(match: re.Match) -> str:
+            dep_id, path_str = match.groups()
+            dep_res = task_results.get(dep_id)
+            if dep_res is None:
+                return match.group(0)
+            if not path_str:
+                return str(dep_res)
+            curr = dep_res
+            for part in path_str.split("."):
+                if isinstance(curr, dict):
+                    curr = curr.get(part)
+                elif isinstance(curr, list) and part.isdigit():
+                    idx = int(part)
+                    curr = curr[idx] if 0 <= idx < len(curr) else None
+                else:
+                    curr = None
+                if curr is None:
+                    break
+            return str(curr) if curr is not None else match.group(0)
+
+        return re.sub(pattern, replace_match, val)
+
+    elif isinstance(val, dict):
+        return {k: resolve_template_value(v, task_results) for k, v in val.items()}
+    elif isinstance(val, list):
+        return [resolve_template_value(item, task_results) for item in val]
+    return val
+
+
 class TaskStatus(Enum):
     """Status of a distributed task."""
     PENDING = "pending"
@@ -293,6 +352,15 @@ class ProcessDistributedExecutor(DistributedExecutor):
                         break
                         
                 if deps_satisfied:
+                    # Resolve dynamic template placeholders from parent task results
+                    completed_results = {
+                        dep_id: self._tasks[dep_id].result
+                        for dep_id in task.dependencies
+                        if dep_id in self._tasks and self._tasks[dep_id].result is not None
+                    }
+                    if completed_results and task.input_data:
+                        task.input_data = resolve_template_value(task.input_data, completed_results)
+
                     # Promote task to RUNNING status
                     task.status = TaskStatus.RUNNING
                     task.started_at = time.time()
@@ -352,6 +420,17 @@ class ProcessDistributedExecutor(DistributedExecutor):
             
     def shutdown(self) -> None:
         """Clean up worker process execution pools."""
+        try:
+            processes = getattr(self._process_executor, "_processes", None)
+            if processes:
+                for p in list(processes):
+                    try:
+                        p.terminate()
+                        p.kill()
+                    except Exception:
+                        pass
+        except Exception:
+            pass
         self._process_executor.shutdown(wait=False)
 
 

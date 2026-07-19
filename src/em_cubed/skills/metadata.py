@@ -22,13 +22,15 @@ class InputOutputSchema:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
-        return {
+        res = {
             "type": self.type,
             "properties": self.properties,
             "required": self.required,
             "additionalProperties": self.additional_properties,
-            "description": self.description,
         }
+        if self.description is not None:
+            res["description"] = self.description
+        return res
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "InputOutputSchema":

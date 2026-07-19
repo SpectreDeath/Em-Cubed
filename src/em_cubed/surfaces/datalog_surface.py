@@ -16,6 +16,8 @@ logger = structlog.get_logger()
 class DatalogSurface(SurfaceBase):
     """Handle Datalog code execution and predicate extraction."""
 
+    _execution_cache = {}
+
     @property
     def name(self) -> str:
         return "datalog"
@@ -134,6 +136,17 @@ class DatalogSurface(SurfaceBase):
         """Run code synchronously in the executor thread."""
         logger.info("Executing Datalog code", code_length=len(code), has_context=context is not None)
 
+        import hashlib
+        import json
+        try:
+            serialized_ctx = json.dumps(context, sort_keys=True) if context else ""
+        except TypeError:
+            serialized_ctx = str(context)
+        cache_key = hashlib.sha256(f"{code}:{serialized_ctx}".encode("utf-8")).hexdigest()
+        if cache_key in self._execution_cache:
+            logger.info("Datalog execution cache hit", hash=cache_key)
+            return self._execution_cache[cache_key]
+
         if not self.available:
             logger.error("Attempted Datalog execution but pyDatalog not available")
             return {"status": "error", "message": "pyDatalog not available"}
@@ -169,8 +182,9 @@ class DatalogSurface(SurfaceBase):
             exec(code, namespace)  # noqa: S102
             result = namespace.get("result")
 
-            logger.info("Datalog execution successful")
-            return {"status": "ok", "value": result, "message": "Execution completed"}
+            res = {"status": "ok", "value": result, "message": "Execution completed"}
+            self._execution_cache[cache_key] = res
+            return res
 
         except Exception as e:
             logger.exception("Datalog execution failed", error=str(e), code=code)

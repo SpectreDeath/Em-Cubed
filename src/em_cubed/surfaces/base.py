@@ -1,45 +1,47 @@
 """Base class for surface plugins with timeout support."""
 import asyncio
 import os
-from abc import ABC, abstractmethod
-from ..plugin import SurfacePlugin
-from concurrent.futures import ThreadPoolExecutor
 import threading
+from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Optional
 import structlog
+from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
 
-# Lock protecting the temporary threading.Thread monkey-patch in _make_daemon_executor.
-# Without this, two surfaces initialising concurrently race on the global symbol.
+# Lock protecting the temporary threading.Thread monkey-patch in DaemonThreadPoolExecutor.
 _executor_init_lock = threading.Lock()
+
+
+class DaemonThreadPoolExecutor(ThreadPoolExecutor):
+    """ThreadPoolExecutor that spawns daemon threads."""
+
+    def _adjust_thread_count(self) -> None:
+        original_thread = threading.Thread
+
+        def _daemon_thread(*args: Any, **kwargs: Any) -> threading.Thread:
+            kwargs.setdefault("daemon", True)
+            return original_thread(*args, **kwargs)
+
+        with _executor_init_lock:
+            threading.Thread = _daemon_thread  # type: ignore[assignment, misc]
+            try:
+                super()._adjust_thread_count()
+            finally:
+                threading.Thread = original_thread  # type: ignore[assignment, misc]
 
 
 def _make_daemon_executor(max_workers: int = 1) -> ThreadPoolExecutor:
     """Create a ThreadPoolExecutor whose worker threads are daemons.
     This prevents them from keeping the Python process alive after tests/CI complete.
     """
-    original_thread = threading.Thread
-
-    def _daemon_thread(*args, **kwargs):
-        kwargs.setdefault("daemon", True)
-        return original_thread(*args, **kwargs)
-
-    # Serialise the global monkey-patch so concurrent surface inits don't race.
-    with _executor_init_lock:
-        threading.Thread = _daemon_thread  # type: ignore[assignment, misc]
-        try:
-            return ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="SurfaceExec-")
-        finally:
-            threading.Thread = original_thread  # type: ignore[assignment, misc]
-
-
+    return DaemonThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="SurfaceExec-")
 
 
 class SurfaceTimeoutError(Exception):
     """Raised when a surface operation times out."""
     pass
-
 
 
 class SurfaceBase(SurfacePlugin, ABC):

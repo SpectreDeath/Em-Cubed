@@ -16,6 +16,8 @@ logger = structlog.get_logger()
 class PrologSurface(SurfaceBase):
     """Handle Prolog code execution and predicate extraction."""
 
+    _consulted_hashes = set()
+
     @property
     def name(self) -> str:
         return "prolog"
@@ -159,6 +161,13 @@ class PrologSurface(SurfaceBase):
                 program = "\n".join(lines)
                 if not program.strip():
                     return {"status": "ok", "message": "No Prolog code to execute"}
+                
+                import hashlib
+                code_hash = hashlib.sha256(program.encode("utf-8")).hexdigest()
+                if code_hash in self._consulted_hashes:
+                    logger.info("Prolog rules already consulted (cache hit)", hash=code_hash)
+                    return {"status": "ok", "message": "Multi-line Prolog code consulted successfully"}
+
                 try:
                     fd, path = tempfile.mkstemp(suffix=".pl", prefix="em3_prolog_")
                     try:
@@ -184,9 +193,11 @@ class PrologSurface(SurfaceBase):
                                 )
                         try:
                             prolog.consult(path)
+                            self._consulted_hashes.add(code_hash)
                         except Exception as consult_err:
                             if "redefine module" in str(consult_err) or "Already loaded" in str(consult_err):
                                 logger.info("Prolog module already loaded, skipping re-consult", error=str(consult_err))
+                                self._consulted_hashes.add(code_hash)
                             else:
                                 raise
                         return {"status": "ok", "message": "Multi-line Prolog code consulted successfully"}
@@ -227,6 +238,7 @@ class PrologSurface(SurfaceBase):
                                 prolog.assertz(clean)
                             except Exception as assert_err:
                                 logger.warning("Prolog assert warning", error=str(assert_err))
+                    self._consulted_hashes.add(code_hash)
                     return {"status": "ok", "message": "Multi-line Prolog code processed via fallback"}
             elif stripped_code.endswith("."):
                 head_word = stripped_code.split("(")[0].split(" ")[0].strip().rstrip(".")
