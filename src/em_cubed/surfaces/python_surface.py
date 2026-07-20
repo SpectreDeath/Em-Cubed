@@ -26,6 +26,8 @@ def _run_asteval_code(code: str, context: Optional[Dict[str, Any]] = None) -> Di
         aeval.symtable["context"] = context
 
     result = aeval(code)
+    if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
+        result = aeval.symtable["result"]
 
     if aeval.error:
         error_msg = str(aeval.error[0].msg) if hasattr(aeval.error[0], "msg") else str(aeval.error[0])
@@ -174,6 +176,8 @@ class PythonSurface(SurfaceBase):
 
             # Execute the code
             result = aeval(code)
+            if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
+                result = aeval.symtable["result"]
 
             # Check for errors
             if aeval.error:

@@ -231,3 +231,9 @@ class PluginManager:
     def get_plugin_names(self) -> Set[str]:
         """Get the set of registered plugin names."""
         return cast(Set[str], self.registry.get_plugin_names())
+
+    def get_hybrid_coprocessor(self, timeout: float = 30.0) -> Any:
+        """Get an instance of HybridCoprocessor for multi-surface co-execution."""
+        from .surfaces.hybrid_coprocessor import HybridCoprocessor
+
+        return HybridCoprocessor(timeout=timeout)
