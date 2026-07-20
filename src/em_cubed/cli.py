@@ -1,4 +1,4 @@
-﻿"""Command-line interface for Em-Cubed."""
+"""Command-line interface for Em-Cubed."""
 
 import argparse
 import sys
@@ -297,6 +297,12 @@ def main():
     workflow_parser.add_argument("--data", "-d", help="Initial input data (JSON string)")
     workflow_parser.add_argument("--registry", "-r", default="registry.json", help="Registry file path")
 
+    # Run-DAG command
+    run_dag_parser = subparsers.add_parser("run-dag", help="Parse and execute a declarative YAML/JSON DAG workflow")
+    run_dag_parser.add_argument("dag_file", help="Path to declarative DAG file (YAML/JSON)")
+    run_dag_parser.add_argument("--max-workers", "-w", type=int, default=4, help="Maximum worker processes (default: 4)")
+    run_dag_parser.add_argument("--skills-dir", "-s", default="skills", help="Skills directory (default: skills)")
+
     args = parser.parse_args()
 
     if not args.command:
@@ -332,6 +338,8 @@ def main():
             _handle_skill_info(args)
         elif args.command == "workflow":
             asyncio.run(_handle_workflow(args))
+        elif args.command == "run-dag":
+            asyncio.run(_handle_run_dag(args))
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
         print(f"Error: {e}", file=sys.stderr)
@@ -900,6 +908,45 @@ async def _handle_workflow(args):
     else:
         print(f"\nWorkflow failed: {result.error}")
         sys.exit(1)
+
+
+async def _handle_run_dag(args):
+    """Handle run-dag command to parse and execute a declarative YAML/JSON DAG."""
+    dag_path = Path(args.dag_file)
+    skills_dir = Path(args.skills_dir)
+
+    if not dag_path.exists():
+        print(f"Error: Declarative DAG file not found at {dag_path}")
+        sys.exit(1)
+
+    from em_cubed.workflow.parser import WorkflowDagParser
+    from em_cubed.workflow.distributed import ProcessDistributedExecutor
+
+    try:
+        workflow_id, tasks = WorkflowDagParser.parse_file(dag_path)
+    except Exception as e:
+        print(f"Error parsing DAG file: {e}")
+        sys.exit(1)
+
+    print(f"Executing Declarative DAG '{workflow_id}' ({len(tasks)} tasks)...")
+    executor = ProcessDistributedExecutor(skills_dir=skills_dir, max_workers=args.max_workers)
+
+    success = executor.submit_workflow(workflow_id, tasks)
+    if not success:
+        print("Failed to submit workflow to executor.")
+        sys.exit(1)
+
+    while True:
+        status = executor.get_workflow_status(workflow_id)
+        if status.get("status") in ("completed", "failed"):
+            break
+        await asyncio.sleep(0.1)
+
+    final_status = executor.get_workflow_status(workflow_id)
+    print(f"\nDAG Execution Status: {final_status.get('status', 'unknown').upper()}")
+    print(f"Tasks Completed     : {final_status.get('completed', 0)}/{final_status.get('total_tasks', 0)}")
+    if final_status.get("failed", 0) > 0:
+        print(f"Tasks Failed        : {final_status.get('failed')}")
 
 
 if __name__ == "__main__":
