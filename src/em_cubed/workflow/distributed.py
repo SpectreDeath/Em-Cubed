@@ -409,15 +409,47 @@ class ProcessDistributedExecutor(DistributedExecutor):
                             task_id=task_id,
                         )
                 else:
-                    task.status = TaskStatus.FAILED
-                    task.error = res["error"]
-                    self.logger.error("Distributed task failed", task_id=task_id, error=res["error"])
-            except Exception:
+                    if task.retry_count < task.max_retries:
+                        task.retry_count += 1
+                        task.status = TaskStatus.RETRYING
+                        self.logger.warning(
+                            f"Task failed, retrying (attempt {task.retry_count}/{task.max_retries})",
+                            task_id=task_id,
+                            error=res.get("error"),
+                        )
+                        backoff_sec = 0.1 * (2 ** (task.retry_count - 1))
+                        timer = threading.Timer(backoff_sec, self._reset_task_to_pending, args=[task_id])
+                        timer.daemon = True
+                        timer.start()
+                    else:
+                        task.status = TaskStatus.FAILED
+                        task.error = res["error"]
+                        self.logger.error("Distributed task failed after max retries", task_id=task_id, error=res["error"])
+            except Exception as e:
                 task = self._tasks[task_id]
-                task.status = TaskStatus.FAILED
-                task.error = str(future.exception())
-                self.logger.exception("Error retrieving distributed task result", task_id=task_id)
-            
+                if task.retry_count < task.max_retries:
+                    task.retry_count += 1
+                    task.status = TaskStatus.RETRYING
+                    self.logger.warning(
+                        f"Task exception, retrying (attempt {task.retry_count}/{task.max_retries})",
+                        task_id=task_id,
+                        error=str(e),
+                    )
+                    backoff_sec = 0.1 * (2 ** (task.retry_count - 1))
+                    timer = threading.Timer(backoff_sec, self._reset_task_to_pending, args=[task_id])
+                    timer.daemon = True
+                    timer.start()
+                else:
+                    task.status = TaskStatus.FAILED
+                    task.error = str(future.exception()) if hasattr(future, "exception") else str(e)
+                    self.logger.exception("Error retrieving distributed task result", task_id=task_id)
+
+    def _reset_task_to_pending(self, task_id: str) -> None:
+        """Reset retrying task status back to PENDING for re-scheduling."""
+        with self._callback_lock:
+            if task_id in self._tasks:
+                self._tasks[task_id].status = TaskStatus.PENDING
+
     def shutdown(self) -> None:
         """Clean up worker process execution pools."""
         try:
@@ -432,6 +464,33 @@ class ProcessDistributedExecutor(DistributedExecutor):
         except Exception:
             pass
         self._process_executor.shutdown(wait=False)
+
+
+class AdaptiveWorkerPool:
+    """
+    Monitors system CPU and Memory telemetry to dynamically scale worker process pool limits.
+    """
+
+    def __init__(self, min_workers: int = 2, max_workers: int = 8) -> None:
+        self.min_workers = min_workers
+        self.max_workers = max_workers
+
+    def calculate_optimal_workers(self) -> int:
+        """Calculate optimal worker process count based on CPU and RAM utilization."""
+        try:
+            import psutil
+
+            cpu_usage = psutil.cpu_percent(interval=None)
+            mem_usage = psutil.virtual_memory().percent
+
+            if cpu_usage > 85.0 or mem_usage > 90.0:
+                return self.min_workers
+            elif cpu_usage > 65.0 or mem_usage > 75.0:
+                return max(self.min_workers, self.max_workers // 2)
+            else:
+                return self.max_workers
+        except Exception:
+            return self.max_workers
 
 
 # Global distributor instance
