@@ -7,17 +7,19 @@ The **Em-Cubed Loopy Skill & Ontology Framework** bridges probabilistic AI model
 ## Key Architectural Concepts
 
 ### 1. "Pydantic at the Door, Ontology at the Ledger"
+
 - **Door Validation (Pydantic)**: Ensures incoming payloads match expected data types and structural formats before entering an operational loop.
 - **Ledger Validation (Ontology)**: Uses formal semantic constraints (functional uniqueness, class disjointness, domain/range inferences) to verify business logic rules before committing state transitions to the database or knowledge graph.
 
 ### 2. Loopy Skills (Iterative Sub-Routines)
+
 Traditional tools are linear (`tool(args) -> Result`). A **Loopy Skill** is a stateful, iterative sub-routine (`loopy_tool(goal, max_iter, criteria) -> LoopResult`) that manages its own retries, local memory, and verification sensors.
 
 ---
 
 ## Subsystem Overview
 
-```
+```text
 em_cubed/
 ├── loopy/
 │   ├── base.py       # BaseLoopySkill, LoopTrajectory, LoopySkillResult
