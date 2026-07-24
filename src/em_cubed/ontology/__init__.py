@@ -1,6 +1,7 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Subobject Classifier, and Ledger Validation Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Subobject Classifier, Ledger Validation, and Triple Induction Subsystem."""
 
 from em_cubed.ontology.graph_rag import GraphPathRAG, SubgraphPath
+from em_cubed.ontology.induction import TripleInductionEngine
 from em_cubed.ontology.schema import (
     DisjointClassConstraint,
     DomainRangeInference,
@@ -23,4 +24,5 @@ __all__ = [
     "TruthValue",
     "ModalType",
     "SubobjectClassifier",
+    "TripleInductionEngine",
 ]

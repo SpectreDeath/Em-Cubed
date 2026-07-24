@@ -72,15 +72,24 @@ __all__ = [
     "TruthValue",
     "SubobjectClassifier",
     "SurfaceMorphism",
+    "SkillEvolutionEngine",
+    "TripleInductionEngine",
 ]
 
-from em_cubed.loopy import BaseLoopySkill, LoopySkillRunner, TextLoopMiner, TrajectoryAuditor  # noqa: E402
+from em_cubed.loopy import (  # noqa: E402
+    BaseLoopySkill,
+    LoopySkillRunner,
+    SkillEvolutionEngine,
+    TextLoopMiner,
+    TrajectoryAuditor,
+)
 from em_cubed.ontology import (  # noqa: E402
     ConstraintSteeringCompiler,
     GraphPathRAG,
     OntologyLedgerValidator,
     OntologyTriple,
     SubobjectClassifier,
+    TripleInductionEngine,
     TruthValue,
 )
 from em_cubed.surfaces import SurfaceMorphism  # noqa: E402
