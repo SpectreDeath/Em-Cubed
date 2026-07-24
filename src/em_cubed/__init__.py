@@ -60,4 +60,13 @@ __all__ = [
     "SkillExecutor",
     "initialize_telemetry",
     "initialize_executor",
+    # Loopy & Ontology Framework
+    "BaseLoopySkill",
+    "LoopySkillRunner",
+    "TextLoopMiner",
+    "OntologyLedgerValidator",
+    "OntologyTriple",
 ]
+
+from em_cubed.loopy import BaseLoopySkill, LoopySkillRunner, TextLoopMiner  # noqa: E402
+from em_cubed.ontology import OntologyLedgerValidator, OntologyTriple  # noqa: E402
