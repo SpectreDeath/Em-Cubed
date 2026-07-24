@@ -93,4 +93,9 @@ try:
 except ImportError:
     pass
 
-__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "SQLiteSurface", "QuickJSSurface", "WASMSurface", "KanrenSurface", "ClingoSurface"]
+try:
+    from .morphism import SurfaceMorphism
+except ImportError:
+    SurfaceMorphism = None  # type: ignore[assignment]
+
+__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "SQLiteSurface", "QuickJSSurface", "WASMSurface", "KanrenSurface", "ClingoSurface", "SurfaceMorphism"]

@@ -1,4 +1,4 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, and Ledger Validation Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Subobject Classifier, and Ledger Validation Subsystem."""
 
 from em_cubed.ontology.graph_rag import GraphPathRAG, SubgraphPath
 from em_cubed.ontology.schema import (
@@ -8,6 +8,7 @@ from em_cubed.ontology.schema import (
     OntologyTriple,
 )
 from em_cubed.ontology.steering import ConstraintSteeringCompiler
+from em_cubed.ontology.topos import ModalType, SubobjectClassifier, TruthValue
 from em_cubed.ontology.validator import OntologyLedgerValidator
 
 __all__ = [
@@ -19,4 +20,7 @@ __all__ = [
     "GraphPathRAG",
     "SubgraphPath",
     "ConstraintSteeringCompiler",
+    "TruthValue",
+    "ModalType",
+    "SubobjectClassifier",
 ]

@@ -9,6 +9,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Generic, TypeVar
 
+from em_cubed.ontology.topos import SubobjectClassifier, TruthValue
+
 logger = logging.getLogger(__name__)
 
 T_State = TypeVar("T_State")
@@ -72,6 +74,17 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         """
         raise NotImplementedError
 
+    def verify_topos(self, state: T_State) -> TruthValue:
+        """The Topos Subobject Classifier Sensor: Evaluates state against Omega truth object.
+
+        Returns
+        -------
+        TruthValue
+            Topos TruthValue object.
+        """
+        passed, obs = self.verify(state)
+        return SubobjectClassifier.classify_boolean(passed, obs)
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError
@@ -85,7 +98,11 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
 
         for i in range(1, self.max_iterations + 1):
             state, action_desc = self.mutate(state, i)
-            passed, observation = self.verify(state)
+
+            # Evaluate against Topos Subobject Classifier
+            truth_val = self.verify_topos(state)
+            passed = truth_val.is_satisfied()
+            observation = "; ".join(truth_val.evidence) if truth_val.evidence else f"Confidence: {truth_val.confidence:.2f}"
 
             trajectory.append(
                 LoopTrajectory(
@@ -93,6 +110,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
                     action_taken=action_desc,
                     observation=observation,
                     passed_guard=passed,
+                    metrics={"confidence": truth_val.confidence, "modal_type": truth_val.modal_type.value},
                 )
             )
 

@@ -69,6 +69,9 @@ __all__ = [
     "GraphPathRAG",
     "ConstraintSteeringCompiler",
     "TrajectoryAuditor",
+    "TruthValue",
+    "SubobjectClassifier",
+    "SurfaceMorphism",
 ]
 
 from em_cubed.loopy import BaseLoopySkill, LoopySkillRunner, TextLoopMiner, TrajectoryAuditor  # noqa: E402
@@ -77,4 +80,7 @@ from em_cubed.ontology import (  # noqa: E402
     GraphPathRAG,
     OntologyLedgerValidator,
     OntologyTriple,
+    SubobjectClassifier,
+    TruthValue,
 )
+from em_cubed.surfaces import SurfaceMorphism  # noqa: E402
