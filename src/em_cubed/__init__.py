@@ -74,6 +74,8 @@ __all__ = [
     "SurfaceMorphism",
     "SkillEvolutionEngine",
     "TripleInductionEngine",
+    "MultiAgentToposConsensus",
+    "FederatedOntologyRegistry",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -85,7 +87,9 @@ from em_cubed.loopy import (  # noqa: E402
 )
 from em_cubed.ontology import (  # noqa: E402
     ConstraintSteeringCompiler,
+    FederatedOntologyRegistry,
     GraphPathRAG,
+    MultiAgentToposConsensus,
     OntologyLedgerValidator,
     OntologyTriple,
     SubobjectClassifier,

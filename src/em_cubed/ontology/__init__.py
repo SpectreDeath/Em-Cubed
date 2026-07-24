@@ -1,5 +1,7 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Subobject Classifier, Ledger Validation, and Triple Induction Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, and Federated Registry Subsystem."""
 
+from em_cubed.ontology.consensus import AgentEvaluation, MultiAgentToposConsensus
+from em_cubed.ontology.federated_registry import FederatedOntologyRegistry, SwarmNodeState
 from em_cubed.ontology.graph_rag import GraphPathRAG, SubgraphPath
 from em_cubed.ontology.induction import TripleInductionEngine
 from em_cubed.ontology.schema import (
@@ -25,4 +27,8 @@ __all__ = [
     "ModalType",
     "SubobjectClassifier",
     "TripleInductionEngine",
+    "AgentEvaluation",
+    "MultiAgentToposConsensus",
+    "SwarmNodeState",
+    "FederatedOntologyRegistry",
 ]
