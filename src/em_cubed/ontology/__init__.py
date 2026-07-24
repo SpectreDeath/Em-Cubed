@@ -1,6 +1,16 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, and Visualizer Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, and Knowledge Elicitation Subsystem."""
 
 from em_cubed.ontology.consensus import AgentEvaluation, MultiAgentToposConsensus
+from em_cubed.ontology.elicitation import (
+    CommonLogicEcho,
+    CompetencyQuestion,
+    DecisionSupportQuestion,
+    EntityType,
+    KnowledgeElicitationPipeline,
+    OntoCleanPartition,
+    PMESTCategory,
+    PMESTFacets,
+)
 from em_cubed.ontology.federated_registry import FederatedOntologyRegistry, SwarmNodeState
 from em_cubed.ontology.graph_rag import GraphPathRAG, SubgraphPath
 from em_cubed.ontology.induction import TripleInductionEngine
@@ -33,4 +43,12 @@ __all__ = [
     "SwarmNodeState",
     "FederatedOntologyRegistry",
     "KnowledgeGraphVisualizer",
+    "PMESTCategory",
+    "EntityType",
+    "DecisionSupportQuestion",
+    "CompetencyQuestion",
+    "PMESTFacets",
+    "OntoCleanPartition",
+    "CommonLogicEcho",
+    "KnowledgeElicitationPipeline",
 ]

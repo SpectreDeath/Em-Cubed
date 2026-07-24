@@ -77,6 +77,12 @@ __all__ = [
     "MultiAgentToposConsensus",
     "FederatedOntologyRegistry",
     "KnowledgeGraphVisualizer",
+    "KnowledgeElicitationPipeline",
+    "DecisionSupportQuestion",
+    "CompetencyQuestion",
+    "PMESTFacets",
+    "OntoCleanPartition",
+    "EntityType",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -87,13 +93,19 @@ from em_cubed.loopy import (  # noqa: E402
     TrajectoryAuditor,
 )
 from em_cubed.ontology import (  # noqa: E402
+    CompetencyQuestion,
     ConstraintSteeringCompiler,
+    DecisionSupportQuestion,
+    EntityType,
     FederatedOntologyRegistry,
     GraphPathRAG,
+    KnowledgeElicitationPipeline,
     KnowledgeGraphVisualizer,
     MultiAgentToposConsensus,
+    OntoCleanPartition,
     OntologyLedgerValidator,
     OntologyTriple,
+    PMESTFacets,
     SubobjectClassifier,
     TripleInductionEngine,
     TruthValue,

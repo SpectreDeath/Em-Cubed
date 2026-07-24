@@ -17,9 +17,11 @@ Em-Cubed is a secure, multi-surface skill framework enabling execution across Py
 - **📚 Multi-Paradigm**: Python, Prolog, Hy, Z3, Datalog, Janus, and SQLite surfaces
 - **🔄 Loopy Skills**: Stateful, self-correcting iterative sub-routines with trajectory logging
 - **🧠 Neuro-Symbolic Ontology**: "Pydantic at the door, Ontology at the ledger" invariant validation (see [Documentation](docs/LOOPY_SKILLS_AND_ONTOLOGY.md))
+- **📜 Knowledge Elicitation Framework**: 6-stage pipeline from natural language DSQs to PMEST Facets, OntoClean BFO Independent vs Role partitions, and Common Logic Echoes (see [Documentation](docs/KNOWLEDGE_ELICITATION_FRAMEWORK.md))
 
 ## 🎉 What's New in v0.8.0
 
+- **📜 Knowledge Elicitation Framework**: `KnowledgeElicitationPipeline` transforming expert text into BFO/OntoClean formal ontologies.
 - **🔄 Loopy Skill Framework**: `BaseLoopySkill` interface for self-correcting agent loops with scope isolation.
 - **🧠 Ontology Ledger Validator**: `OntologyLedgerValidator` enforcing OWL functional property, class disjointness, and domain/range inferences.
 - **📜 Text Loop Miner**: `TextLoopMiner` converting SOPs and runbooks into executable loop schemas.
