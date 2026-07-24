@@ -66,7 +66,15 @@ __all__ = [
     "TextLoopMiner",
     "OntologyLedgerValidator",
     "OntologyTriple",
+    "GraphPathRAG",
+    "ConstraintSteeringCompiler",
+    "TrajectoryAuditor",
 ]
 
-from em_cubed.loopy import BaseLoopySkill, LoopySkillRunner, TextLoopMiner  # noqa: E402
-from em_cubed.ontology import OntologyLedgerValidator, OntologyTriple  # noqa: E402
+from em_cubed.loopy import BaseLoopySkill, LoopySkillRunner, TextLoopMiner, TrajectoryAuditor  # noqa: E402
+from em_cubed.ontology import (  # noqa: E402
+    ConstraintSteeringCompiler,
+    GraphPathRAG,
+    OntologyLedgerValidator,
+    OntologyTriple,
+)

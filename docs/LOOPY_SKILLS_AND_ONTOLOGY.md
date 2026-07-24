@@ -24,10 +24,13 @@ em_cubed/
 ├── loopy/
 │   ├── base.py       # BaseLoopySkill, LoopTrajectory, LoopySkillResult
 │   ├── runner.py     # LoopySkillRunner scope controller
-│   └── miner.py      # TextLoopMiner (Procedural SOP text -> MinedLoopSchema)
+│   ├── miner.py      # TextLoopMiner (Procedural SOP text -> MinedLoopSchema)
+│   └── audit.py      # TrajectoryAuditor & AuditReport (JSON-LD proof logs)
 └── ontology/
     ├── schema.py     # OntologyTriple, FunctionalPropertyConstraint, DisjointClassConstraint
-    └── validator.py  # OntologyLedgerValidator
+    ├── validator.py  # OntologyLedgerValidator
+    ├── graph_rag.py  # GraphPathRAG & SubgraphPath (Multi-hop triple traversal)
+    └── steering.py   # ConstraintSteeringCompiler (Compiles OWL invariants into prompt masks)
 ```
 
 ---
