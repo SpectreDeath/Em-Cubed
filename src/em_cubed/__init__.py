@@ -76,6 +76,7 @@ __all__ = [
     "TripleInductionEngine",
     "MultiAgentToposConsensus",
     "FederatedOntologyRegistry",
+    "KnowledgeGraphVisualizer",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -89,6 +90,7 @@ from em_cubed.ontology import (  # noqa: E402
     ConstraintSteeringCompiler,
     FederatedOntologyRegistry,
     GraphPathRAG,
+    KnowledgeGraphVisualizer,
     MultiAgentToposConsensus,
     OntologyLedgerValidator,
     OntologyTriple,
