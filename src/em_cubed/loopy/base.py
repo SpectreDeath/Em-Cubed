@@ -181,6 +181,29 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
         return OntologicalHealthMonitor.audit_health(triples=getattr(state, "triples", []))
 
+    def query_temporal_snapshot(self, timeline: Any, timestamp: Any) -> list[Any]:
+        """Temporal Snapshot Reasoner: Filters state triples valid at timestamp t.
+
+        Returns
+        -------
+        list[OntologyTriple]
+            Valid base triples list at timestamp t.
+        """
+        from em_cubed.ontology.temporal_spatial import TemporalSnapshotQueryEngine
+        return TemporalSnapshotQueryEngine.snapshot_at(timeline=timeline, timestamp=timestamp)
+
+    def evaluate_spatial_proximity(self, timeline: Any, lat: float, lon: float, radius_km: float) -> list[tuple[str, float]]:
+        """Spatial Proximity Reasoner: Finds entities within radius_km of (lat, lon).
+
+        Returns
+        -------
+        list[tuple[str, float]]
+            Matching (subject, distance_km) list.
+        """
+        from em_cubed.ontology.temporal_spatial import GeoLocation, SpatialProximityReasoner
+        center = GeoLocation(latitude=lat, longitude=lon)
+        return SpatialProximityReasoner.find_entities_within_radius(timeline=timeline, center=center, radius_km=radius_km)
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError

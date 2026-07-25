@@ -1,4 +1,4 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, Concept Induction, Advanced Ontology, Schema Evolution, and Health Monitoring Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, Concept Induction, Advanced Ontology, Schema Evolution, Health Monitoring, and Temporal-Spatial Subsystem."""
 
 from em_cubed.ontology.advanced_ontology import (
     DerivedPropertyReducer,
@@ -45,6 +45,14 @@ from em_cubed.ontology.schema_evolution import (
     SchemaVersion,
 )
 from em_cubed.ontology.steering import ConstraintSteeringCompiler
+from em_cubed.ontology.temporal_spatial import (
+    GeoLocation,
+    SpatialProximityReasoner,
+    TemporalSnapshotQueryEngine,
+    TemporalSpatialTriple,
+    TimeInterval,
+    WorldStateTimeline,
+)
 from em_cubed.ontology.topos import ModalType, SubobjectClassifier, TruthValue
 from em_cubed.ontology.truthmaker import (
     ExactTruthmaker,
@@ -101,4 +109,10 @@ __all__ = [
     "OntologyHealthReport",
     "OntologicalHealthMonitor",
     "SelfHealingGuardrailEngine",
+    "TimeInterval",
+    "GeoLocation",
+    "TemporalSpatialTriple",
+    "WorldStateTimeline",
+    "TemporalSnapshotQueryEngine",
+    "SpatialProximityReasoner",
 ]

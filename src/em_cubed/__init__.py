@@ -112,6 +112,12 @@ __all__ = [
     "OntologyHealthReport",
     "OntologicalHealthMonitor",
     "SelfHealingGuardrailEngine",
+    "TimeInterval",
+    "GeoLocation",
+    "TemporalSpatialTriple",
+    "WorldStateTimeline",
+    "TemporalSnapshotQueryEngine",
+    "SpatialProximityReasoner",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -134,6 +140,7 @@ from em_cubed.ontology import (  # noqa: E402
     ExactTruthmakerClassifier,
     FederatedOntologyRegistry,
     ForwardBackwardCompatibilityChecker,
+    GeoLocation,
     GraphPathRAG,
     HyperintensionalEvaluator,
     InterfaceImplementation,
@@ -154,9 +161,14 @@ from em_cubed.ontology import (  # noqa: E402
     SchemaMigrationStep,
     SchemaVersion,
     SelfHealingGuardrailEngine,
+    SpatialProximityReasoner,
     StateFragment,
     SubobjectClassifier,
+    TemporalSnapshotQueryEngine,
+    TemporalSpatialTriple,
+    TimeInterval,
     TripleInductionEngine,
     TruthValue,
+    WorldStateTimeline,
 )
 from em_cubed.surfaces import SurfaceMorphism  # noqa: E402
