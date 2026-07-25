@@ -106,6 +106,18 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             relevant_predicates=relevant_predicates,
         )
 
+    def induce_concept_from_trajectory(self, subclass_name: str, state: T_State) -> Any:
+        """Pascal Hitzler's Concept Induction: Induces DL class expression from skill state.
+
+        Returns
+        -------
+        DescriptionLogicExpression
+            Synthesized DL class expression.
+        """
+        from em_cubed.ontology.concept_induction import ConceptInductionEngine
+        sample = {"type": "LoopyState", "property": "has_state", "target": str(type(state).__name__)}
+        return ConceptInductionEngine.induce_concept(subclass_name=subclass_name, positive_samples=[sample])
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError

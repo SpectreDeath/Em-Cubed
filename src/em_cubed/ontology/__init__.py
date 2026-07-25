@@ -1,5 +1,10 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, and Truthmaker Semantics Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, and Concept Induction Subsystem."""
 
+from em_cubed.ontology.concept_induction import (
+    ConceptInductionEngine,
+    DescriptionLogicExpression,
+    NeuronConceptAligner,
+)
 from em_cubed.ontology.consensus import AgentEvaluation, MultiAgentToposConsensus
 from em_cubed.ontology.elicitation import (
     CommonLogicEcho,
@@ -61,4 +66,7 @@ __all__ = [
     "ExactTruthmaker",
     "ExactTruthmakerClassifier",
     "HyperintensionalEvaluator",
+    "DescriptionLogicExpression",
+    "ConceptInductionEngine",
+    "NeuronConceptAligner",
 ]

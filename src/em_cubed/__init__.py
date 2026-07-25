@@ -4,31 +4,40 @@ Enforces formal semantic truth at the ledger level ("Pydantic at the door, Ontol
 and leverages multi-surface reasoning coprocessors (Python, Prolog, Z3, Datalog, Hy, SQLite).
 """
 
-from .indexer import reindex, get_skill_metadata  # noqa: E402
+from .indexer import get_skill_metadata, reindex  # noqa: E402
 from .search import search_registry  # noqa: E402
-from .surfaces import PrologSurface, HySurface, PythonSurface, Z3Surface, DatalogSurface, JanusSurface, SQLiteSurface, QuickJSSurface  # noqa: E402
-from .skills import (
-    SkillMetadata,
-    SkillValidator,
-    ValidationResult,
-    SkillRegistry,
-    QualityMetrics,
-    SkillComposer,
-    CompositionResult,
-    SkillBenchmark,
+from .skills import (  # noqa: E402
     BenchmarkResult,
-    SkillRecommender,
-    RecommendationResult,
-    SkillQualityPipeline,
-    TelemetryCollector,
+    CompositionResult,
     ExecutionRecord,
-    SkillTelemetry,
+    QualityMetrics,
+    RecommendationResult,
+    SkillBenchmark,
+    SkillComposer,
     SkillExecutor,
-    initialize_telemetry,
+    SkillMetadata,
+    SkillQualityPipeline,
+    SkillRecommender,
+    SkillRegistry,
+    SkillTelemetry,
+    SkillValidator,
+    TelemetryCollector,
+    ValidationResult,
     initialize_executor,
+    initialize_telemetry,
+)
+from .surfaces import (  # noqa: E402
+    DatalogSurface,
+    HySurface,
+    JanusSurface,
+    PrologSurface,
+    PythonSurface,
+    QuickJSSurface,
+    SQLiteSurface,
+    Z3Surface,
 )
 
-__version__ = "0.7.0"  # Added SQLite session persistence, QuickJS context fix, Cangjie stdin pipe, Jinja2 templates, new CLI commands, ADR 004/005
+__version__ = "0.8.0"
 __all__ = [
     "reindex",
     "get_skill_metadata",
@@ -87,6 +96,9 @@ __all__ = [
     "ExactTruthmakerClassifier",
     "HyperintensionalEvaluator",
     "StateFragment",
+    "DescriptionLogicExpression",
+    "ConceptInductionEngine",
+    "NeuronConceptAligner",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -98,8 +110,10 @@ from em_cubed.loopy import (  # noqa: E402
 )
 from em_cubed.ontology import (  # noqa: E402
     CompetencyQuestion,
+    ConceptInductionEngine,
     ConstraintSteeringCompiler,
     DecisionSupportQuestion,
+    DescriptionLogicExpression,
     EntityType,
     ExactTruthmaker,
     ExactTruthmakerClassifier,
@@ -109,6 +123,7 @@ from em_cubed.ontology import (  # noqa: E402
     KnowledgeElicitationPipeline,
     KnowledgeGraphVisualizer,
     MultiAgentToposConsensus,
+    NeuronConceptAligner,
     OntoCleanPartition,
     OntologyLedgerValidator,
     OntologyTriple,
