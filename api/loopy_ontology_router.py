@@ -106,3 +106,18 @@ def get_federated_status_endpoint() -> dict[str, Any]:
         "message": msg,
         "registered_node_count": len(shared_federated_registry.nodes),
     }
+
+
+@router.get("/ontology/health")
+def get_ontology_health_endpoint() -> dict[str, Any]:
+    """Return real-time ontological health metrics and coherence index."""
+    from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
+    report = OntologicalHealthMonitor.audit_health(shared_validator.triples)
+    return {
+        "total_triples": report.total_triples,
+        "coherence_index": report.coherence_index,
+        "disjoint_violations": report.disjoint_violations,
+        "dangling_iris": report.dangling_iris,
+        "topos_satisfaction_score": report.topos_satisfaction_score,
+        "health_status": report.health_status,
+    }

@@ -1,4 +1,4 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, Concept Induction, Advanced Ontology, and Schema Evolution Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, Concept Induction, Advanced Ontology, Schema Evolution, and Health Monitoring Subsystem."""
 
 from em_cubed.ontology.advanced_ontology import (
     DerivedPropertyReducer,
@@ -25,6 +25,11 @@ from em_cubed.ontology.elicitation import (
 )
 from em_cubed.ontology.federated_registry import FederatedOntologyRegistry, SwarmNodeState
 from em_cubed.ontology.graph_rag import GraphPathRAG, SubgraphPath
+from em_cubed.ontology.health_monitor import (
+    OntologicalHealthMonitor,
+    OntologyHealthReport,
+    SelfHealingGuardrailEngine,
+)
 from em_cubed.ontology.induction import TripleInductionEngine
 from em_cubed.ontology.schema import (
     DisjointClassConstraint,
@@ -93,4 +98,7 @@ __all__ = [
     "ForwardBackwardCompatibilityChecker",
     "AutomatedTripleMigrationEngine",
     "OntologySchemaMigrator",
+    "OntologyHealthReport",
+    "OntologicalHealthMonitor",
+    "SelfHealingGuardrailEngine",
 ]

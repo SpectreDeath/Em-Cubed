@@ -109,6 +109,9 @@ __all__ = [
     "ForwardBackwardCompatibilityChecker",
     "AutomatedTripleMigrationEngine",
     "OntologySchemaMigrator",
+    "OntologyHealthReport",
+    "OntologicalHealthMonitor",
+    "SelfHealingGuardrailEngine",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -140,6 +143,8 @@ from em_cubed.ontology import (  # noqa: E402
     NeuronConceptAligner,
     ObjectBacklinkRegistry,
     OntoCleanPartition,
+    OntologicalHealthMonitor,
+    OntologyHealthReport,
     OntologyInterface,
     OntologyLedgerValidator,
     OntologySchemaMigrator,
@@ -148,6 +153,7 @@ from em_cubed.ontology import (  # noqa: E402
     ReducerType,
     SchemaMigrationStep,
     SchemaVersion,
+    SelfHealingGuardrailEngine,
     StateFragment,
     SubobjectClassifier,
     TripleInductionEngine,

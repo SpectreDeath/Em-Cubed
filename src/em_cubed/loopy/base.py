@@ -170,6 +170,17 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             steps=steps,
         )
 
+    def audit_ontological_health(self, state: T_State) -> Any:
+        """Production Health Monitor: Calculates real-time coherence index and health metrics.
+
+        Returns
+        -------
+        OntologyHealthReport
+            Health metrics report.
+        """
+        from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
+        return OntologicalHealthMonitor.audit_health(triples=getattr(state, "triples", []))
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError
