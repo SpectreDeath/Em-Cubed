@@ -20,6 +20,10 @@ class OntologyTriple:
     object: str
     confidence: float = 1.0
 
+    def to_summary_string(self) -> str:
+        """Render a readable summary string representation."""
+        return f"({self.subject} --[{self.predicate}]--> {self.object} [conf={self.confidence:.2f}])"
+
 
 @dataclass
 class FunctionalPropertyConstraint:

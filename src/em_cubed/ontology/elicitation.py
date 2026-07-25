@@ -198,3 +198,37 @@ class KnowledgeElicitationPipeline:
                 )
             )
         return triples
+
+    def execute_pipeline(
+        self,
+        executive_prompt: str,
+        dsq_texts: list[str],
+        cq_texts: list[str],
+    ) -> ElicitationReport:
+        """Run full 6-stage pipeline from executive prompt to formal triples."""
+        for text in dsq_texts:
+            self.add_dsq(vague_concern=executive_prompt, granular_dsq=text)
+
+        for idx, text in enumerate(cq_texts, 1):
+            self.derive_cq(cq_id=f"CQ_{idx}", question=text, classes=["SupplyChainEntity"])
+
+        p1 = self.partition_entity(
+            name="FolicAcidSupplier",
+            entity_type=EntityType.INDEPENDENT_CONTINUANT,
+            definition="An independent chemical entity supplier",
+        )
+        echo = self.generate_echo_dialogue(p1)
+        triples = self.extract_formal_triples()
+
+        return ElicitationReport(
+            triples=triples,
+            common_logic_echoes=[echo],
+        )
+
+
+@dataclass
+class ElicitationReport:
+    """Report holding pipeline output triples and common logic echoes."""
+
+    triples: list[OntologyTriple] = field(default_factory=list)
+    common_logic_echoes: list[CommonLogicEcho] = field(default_factory=list)

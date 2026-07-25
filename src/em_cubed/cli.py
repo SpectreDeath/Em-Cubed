@@ -303,6 +303,10 @@ def main():
     run_dag_parser.add_argument("--max-workers", "-w", type=int, default=4, help="Maximum worker processes (default: 4)")
     run_dag_parser.add_argument("--skills-dir", "-s", default="skills", help="Skills directory (default: skills)")
 
+    # Ontology command group
+    from em_cubed.cli_ontology import build_ontology_parser, handle_ontology_cli
+    build_ontology_parser(subparsers)
+
     args = parser.parse_args()
 
     if not args.command:
@@ -310,7 +314,9 @@ def main():
         return
 
     try:
-        if args.command == "index":
+        if args.command == "ontology":
+            handle_ontology_cli(args)
+        elif args.command == "index":
             _handle_index(args)
         elif args.command == "search":
             _handle_search(args)
