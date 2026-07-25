@@ -204,6 +204,28 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         center = GeoLocation(latitude=lat, longitude=lon)
         return SpatialProximityReasoner.find_entities_within_radius(timeline=timeline, center=center, radius_km=radius_km)
 
+    def export_rdf_turtle(self, state: T_State) -> str:
+        """W3C RDF Export: Serializes skill state triples to RDF Turtle (.ttl) syntax.
+
+        Returns
+        -------
+        str
+            Serialized Turtle text.
+        """
+        from em_cubed.ontology.interoperability import RDFSerializer
+        return RDFSerializer.to_turtle(triples=getattr(state, "triples", []))
+
+    def export_shacl_shapes(self) -> str:
+        """W3C SHACL Export: Serializes functional property constraints to SHACL shapes.
+
+        Returns
+        -------
+        str
+            Serialized SHACL shapes Turtle text.
+        """
+        from em_cubed.ontology.interoperability import SHACLConstraintGenerator
+        return SHACLConstraintGenerator.generate_shacl_shapes(self.ledger_validator.functional_constraints)
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError

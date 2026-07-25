@@ -118,6 +118,9 @@ __all__ = [
     "WorldStateTimeline",
     "TemporalSnapshotQueryEngine",
     "SpatialProximityReasoner",
+    "RDFSerializer",
+    "SHACLConstraintGenerator",
+    "OWLImporter",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -156,11 +159,14 @@ from em_cubed.ontology import (  # noqa: E402
     OntologyLedgerValidator,
     OntologySchemaMigrator,
     OntologyTriple,
+    OWLImporter,
     PMESTFacets,
+    RDFSerializer,
     ReducerType,
     SchemaMigrationStep,
     SchemaVersion,
     SelfHealingGuardrailEngine,
+    SHACLConstraintGenerator,
     SpatialProximityReasoner,
     StateFragment,
     SubobjectClassifier,

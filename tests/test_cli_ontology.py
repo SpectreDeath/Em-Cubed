@@ -47,3 +47,13 @@ def test_cli_ontology_migrate(capsys):
     assert ret == 0
     captured = capsys.readouterr()
     assert "[Schema Evolution] Migrated predicate 'has_origin' -> 'has_country_of_origin'" in captured.out
+
+
+def test_cli_ontology_export(tmp_path, capsys):
+    target_ttl = str(tmp_path / "test_export.ttl")
+    ret = main(["ontology", "export", "--format", "turtle", "--output", target_ttl])
+    assert ret == 0
+    assert os.path.exists(target_ttl)
+    with open(target_ttl, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert "@prefix :" in content

@@ -68,6 +68,11 @@ def build_ontology_parser(subparsers: argparse._SubParsersAction[argparse.Argume
     migrate_p.add_argument("--from-pred", required=True, help="Old predicate IRI")
     migrate_p.add_argument("--to-pred", required=True, help="New predicate IRI")
 
+    # export
+    export_p = onto_subparsers.add_parser("export", help="Export triples to W3C RDF Turtle or SHACL shapes")
+    export_p.add_argument("--format", choices=["turtle", "shacl"], default="turtle", help="Export format")
+    export_p.add_argument("--output", default="ontology_export.ttl", help="Target output file path")
+
 
 def handle_ontology_cli(args: argparse.Namespace) -> int:
     """Handle execution of 'em-cubed ontology' subcommands."""
@@ -129,6 +134,21 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         ]
         migrated = AutomatedTripleMigrationEngine.migrate_triples(triples, steps)
         print(f"[Schema Evolution] Migrated predicate '{args.from_pred}' -> '{migrated[0].predicate}'")
+        return 0
+
+    elif subcommand == "export":
+        from em_cubed.ontology.interoperability import RDFSerializer, SHACLConstraintGenerator
+        from em_cubed.ontology.schema import FunctionalPropertyConstraint
+
+        if args.format == "turtle":
+            triples = [OntologyTriple(subject="SampleEntity", predicate="rdf:type", object="bfo:IndependentContinuant")]
+            content = RDFSerializer.to_turtle(triples)
+        else:
+            content = SHACLConstraintGenerator.generate_shacl_shapes([FunctionalPropertyConstraint(predicate="has_id")])
+
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"[Interoperability] Wrote W3C {args.format.upper()} export to '{args.output}'.")
         return 0
 
     else:
