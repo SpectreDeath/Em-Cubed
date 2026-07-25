@@ -121,6 +121,9 @@ __all__ = [
     "RDFSerializer",
     "SHACLConstraintGenerator",
     "OWLImporter",
+    "SwarmRunConfig",
+    "SwarmExecutionReport",
+    "DualEngineSwarmOrchestrator",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -176,5 +179,10 @@ from em_cubed.ontology import (  # noqa: E402
     TripleInductionEngine,
     TruthValue,
     WorldStateTimeline,
+)
+from em_cubed.orchestration.dual_engine_swarm import (  # noqa: E402
+    DualEngineSwarmOrchestrator,
+    SwarmExecutionReport,
+    SwarmRunConfig,
 )
 from em_cubed.surfaces import SurfaceMorphism  # noqa: E402

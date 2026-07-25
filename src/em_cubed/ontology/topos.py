@@ -83,6 +83,18 @@ class SubobjectClassifier:
         )
 
     @staticmethod
+    def evaluate_confidence(confidence: float) -> TruthValue:
+        """Classify confidence rating into modal truth value in Omega."""
+        is_true = confidence >= 0.50
+        modal_type = ModalType.NECESSARY if confidence >= 0.90 else (ModalType.POSSIBLE if confidence >= 0.50 else ModalType.ASSERTION)
+        return TruthValue(
+            is_boolean=is_true,
+            confidence=confidence,
+            modal_type=modal_type,
+            evidence=[f"Confidence: {confidence:.2f}"],
+        )
+
+    @staticmethod
     def classify_temporal(
         is_true: bool,
         step: int,
