@@ -91,6 +91,21 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         passed, obs = self.verify(state)
         return SubobjectClassifier.classify_boolean(passed, obs)
 
+    def verify_truthmaker(self, state: T_State, proposition: str, relevant_predicates: list[str]) -> ExactTruthmaker:
+        """Kit Fine's Truthmaker Sensor: Isolates exact truthmaker (s ⊩ A) and falsemaker.
+
+        Returns
+        -------
+        ExactTruthmaker
+            Exact truthmaker valuation.
+        """
+        from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier
+        return ExactTruthmakerClassifier.classify_exact_truthmaker(
+            proposition=proposition,
+            state_triples=getattr(state, "triples", []),
+            relevant_predicates=relevant_predicates,
+        )
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError

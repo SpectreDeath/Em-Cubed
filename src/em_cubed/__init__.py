@@ -83,6 +83,10 @@ __all__ = [
     "PMESTFacets",
     "OntoCleanPartition",
     "EntityType",
+    "ExactTruthmaker",
+    "ExactTruthmakerClassifier",
+    "HyperintensionalEvaluator",
+    "StateFragment",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -97,8 +101,11 @@ from em_cubed.ontology import (  # noqa: E402
     ConstraintSteeringCompiler,
     DecisionSupportQuestion,
     EntityType,
+    ExactTruthmaker,
+    ExactTruthmakerClassifier,
     FederatedOntologyRegistry,
     GraphPathRAG,
+    HyperintensionalEvaluator,
     KnowledgeElicitationPipeline,
     KnowledgeGraphVisualizer,
     MultiAgentToposConsensus,
@@ -106,6 +113,7 @@ from em_cubed.ontology import (  # noqa: E402
     OntologyLedgerValidator,
     OntologyTriple,
     PMESTFacets,
+    StateFragment,
     SubobjectClassifier,
     TripleInductionEngine,
     TruthValue,

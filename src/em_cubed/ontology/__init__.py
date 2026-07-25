@@ -1,4 +1,4 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, and Knowledge Elicitation Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, and Truthmaker Semantics Subsystem."""
 
 from em_cubed.ontology.consensus import AgentEvaluation, MultiAgentToposConsensus
 from em_cubed.ontology.elicitation import (
@@ -22,6 +22,12 @@ from em_cubed.ontology.schema import (
 )
 from em_cubed.ontology.steering import ConstraintSteeringCompiler
 from em_cubed.ontology.topos import ModalType, SubobjectClassifier, TruthValue
+from em_cubed.ontology.truthmaker import (
+    ExactTruthmaker,
+    ExactTruthmakerClassifier,
+    HyperintensionalEvaluator,
+    StateFragment,
+)
 from em_cubed.ontology.validator import OntologyLedgerValidator
 from em_cubed.ontology.visualizer import KnowledgeGraphVisualizer
 
@@ -51,4 +57,8 @@ __all__ = [
     "OntoCleanPartition",
     "CommonLogicEcho",
     "KnowledgeElicitationPipeline",
+    "StateFragment",
+    "ExactTruthmaker",
+    "ExactTruthmakerClassifier",
+    "HyperintensionalEvaluator",
 ]
