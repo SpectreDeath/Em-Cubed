@@ -22,15 +22,22 @@ Traditional tools are linear (`tool(args) -> Result`). A **Loopy Skill** is a st
 ```text
 em_cubed/
 ├── loopy/
-│   ├── base.py       # BaseLoopySkill, LoopTrajectory, LoopySkillResult
+│   ├── base.py       # BaseLoopySkill, LoopTrajectory, LoopySkillResult, verify_topos()
 │   ├── runner.py     # LoopySkillRunner scope controller
 │   ├── miner.py      # TextLoopMiner (Procedural SOP text -> MinedLoopSchema)
-│   └── audit.py      # TrajectoryAuditor & AuditReport (JSON-LD proof logs)
+│   ├── audit.py      # TrajectoryAuditor & AuditReport (JSON-LD proof logs)
+│   └── evolution.py  # SkillEvolutionEngine & EvolvedSkillDirective
 └── ontology/
-    ├── schema.py     # OntologyTriple, FunctionalPropertyConstraint, DisjointClassConstraint
-    ├── validator.py  # OntologyLedgerValidator
+    ├── schema.py     # OntologyTriple, FunctionalProperty, DisjointClass, DomainRange
+    ├── validator.py  # OntologyLedgerValidator ("Pydantic at door, Ontology at ledger")
     ├── graph_rag.py  # GraphPathRAG & SubgraphPath (Multi-hop triple traversal)
-    └── steering.py   # ConstraintSteeringCompiler (Compiles OWL invariants into prompt masks)
+    ├── steering.py   # ConstraintSteeringCompiler (Compiles OWL invariants into prompt masks)
+    ├── topos.py      # TruthValue & SubobjectClassifier (Omega Truth Valuation)
+    ├── induction.py  # TripleInductionEngine (Dynamic triple induction from verified outputs)
+    ├── consensus.py  # MultiAgentToposConsensus (Omega_consensus = Omega_A ^ Omega_B)
+    ├── federated_registry.py # FederatedOntologyRegistry & SwarmNodeState (SHA-256 alignment)
+    ├── elicitation.py # KnowledgeElicitationPipeline (DSQs, PMEST, OntoClean BFO partitions)
+    └── visualizer.py # KnowledgeGraphVisualizer (Interactive HTML graph explorer & audit logs)
 ```
 
 ---

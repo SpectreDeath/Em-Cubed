@@ -1,7 +1,10 @@
 # Multi-Surface Skill Pattern
 
 ## Overview
-Brief introduction to the concept: skills can declare capabilities across three programming surfaces (Python, Prolog, Hy) within a single SKILL.md file.
+
+In `Em-Cubed`'s **Neuro-Symbolic Ontological Architecture**, execution surfaces (Python, Prolog, Z3 SMT, Datalog, Hy, SQLite) operate as specialized **reasoning coprocessors** over a single formal ontology ledger (**"Pydantic at the door, Ontology at the ledger"**). 
+
+Skills can declare capabilities across multiple programming surfaces within a single `SKILL.md` file, using `SurfaceMorphism` category mappings to translate data schemas losslessly between surfaces.
 
 ## The Three Surfaces
 

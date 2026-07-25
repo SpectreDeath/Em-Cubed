@@ -153,6 +153,20 @@ List all surfaces with their availability status and descriptions.
 - Hy: Lisp syntax compiling to Python AST
 - Datalog: Logic programming with stratified negation
 
+## Neuro-Symbolic Ontology & Loopy Skill Endpoints
+
+### POST /api/v1/loopy/execute
+Executes a loopy skill sub-routine and returns trajectory logs and audit report.
+
+### POST /api/v1/ontology/validate
+Validates structural door schemas + OWL ontology ledger rules.
+
+### GET /api/v1/ontology/graph-rag
+Queries multi-hop Knowledge Graph paths for an entity.
+
+### GET /api/v1/ontology/federated-status
+Returns SHA-256 state alignment across federated swarm nodes.
+
 ## Error Handling
 
 All endpoints return standard HTTP status codes:
