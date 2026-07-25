@@ -118,6 +118,44 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         sample = {"type": "LoopyState", "property": "has_state", "target": str(type(state).__name__)}
         return ConceptInductionEngine.induce_concept(subclass_name=subclass_name, positive_samples=[sample])
 
+    def compute_derived_property(
+        self,
+        state: T_State,
+        subject: str,
+        predicate: str,
+        reducer_type: str = "SUM",
+    ) -> float | int:
+        """Landon Carter's Palantir Reducer: Computes dynamic derived property value over linked triples.
+
+        Returns
+        -------
+        float | int
+            Calculated dynamic derived property value.
+        """
+        from em_cubed.ontology.advanced_ontology import DerivedPropertyReducer, ReducerType
+        return DerivedPropertyReducer.compute_reducer(
+            triples=getattr(state, "triples", []),
+            subject=subject,
+            predicate=predicate,
+            reducer_type=ReducerType(reducer_type),
+        )
+
+    def verify_interface(self, state: T_State, subject: str, required_predicates: list[str]) -> bool:
+        """Palantir Interface Validation: Verifies if subject satisfies abstract OntologyInterface contract.
+
+        Returns
+        -------
+        bool
+            True if interface contract is valid.
+        """
+        from em_cubed.ontology.advanced_ontology import InterfaceImplementation, OntologyInterface
+        interface = OntologyInterface(name="SkillStateInterface", required_predicates=required_predicates)
+        return InterfaceImplementation.validates_interface(
+            triples=getattr(state, "triples", []),
+            subject=subject,
+            interface=interface,
+        )
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError

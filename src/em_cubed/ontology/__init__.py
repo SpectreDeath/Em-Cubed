@@ -1,5 +1,12 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, and Concept Induction Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, Concept Induction, and Advanced Ontology Subsystem."""
 
+from em_cubed.ontology.advanced_ontology import (
+    DerivedPropertyReducer,
+    InterfaceImplementation,
+    ObjectBacklinkRegistry,
+    OntologyInterface,
+    ReducerType,
+)
 from em_cubed.ontology.concept_induction import (
     ConceptInductionEngine,
     DescriptionLogicExpression,
@@ -69,4 +76,9 @@ __all__ = [
     "DescriptionLogicExpression",
     "ConceptInductionEngine",
     "NeuronConceptAligner",
+    "ReducerType",
+    "DerivedPropertyReducer",
+    "OntologyInterface",
+    "InterfaceImplementation",
+    "ObjectBacklinkRegistry",
 ]
