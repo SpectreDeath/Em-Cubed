@@ -230,6 +230,13 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         """Extract final output payload from completed state."""
         raise NotImplementedError
 
+    def process_event_stream(self, events: list[Any]) -> Any:
+        """Sensor method: Ingest streaming events and evaluate reactive rules."""
+        from em_cubed.ontology.event_stream import OntologyEventStreamProcessor
+
+        processor = OntologyEventStreamProcessor()
+        return processor.process_stream_batch(events)
+
     def run(self, *args: Any, **kwargs: Any) -> LoopySkillResult[T_Result]:
         """Execute the core loop engine until guard passes or max_iterations is reached."""
         state = self.initialize_state(*args, **kwargs)

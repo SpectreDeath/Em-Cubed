@@ -68,6 +68,14 @@ from em_cubed.ontology.truthmaker import (
 from em_cubed.ontology.validator import OntologyLedgerValidator
 from em_cubed.ontology.visualizer import KnowledgeGraphVisualizer
 
+from em_cubed.ontology.event_stream import (
+    EventType,
+    OntologyEventStreamProcessor,
+    ReactiveRule,
+    StreamEvent,
+    StreamProcessingResult,
+)
+
 __all__ = [
     "OntologyTriple",
     "FunctionalPropertyConstraint",
@@ -123,4 +131,9 @@ __all__ = [
     "RDFSerializer",
     "SHACLConstraintGenerator",
     "OWLImporter",
+    "EventType",
+    "StreamEvent",
+    "ReactiveRule",
+    "StreamProcessingResult",
+    "OntologyEventStreamProcessor",
 ]
