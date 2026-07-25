@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from typing import Any, Generic, TypeVar
 
 from em_cubed.ontology.topos import SubobjectClassifier, TruthValue
+from em_cubed.ontology.validator import OntologyLedgerValidator
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +46,15 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
     ----------
     max_iterations : int
         Maximum number of retry iterations allowed before hitting safety limit.
+    ledger_validator : OntologyLedgerValidator | None
+        Optional validator for ontology-backed state transitions.
     """
 
-    def __init__(self, max_iterations: int = 5) -> None:
+    def __init__(
+        self, max_iterations: int = 5, ledger_validator: OntologyLedgerValidator | None = None
+    ) -> None:
         self.max_iterations = max_iterations
+        self.ledger_validator = ledger_validator or OntologyLedgerValidator()
 
     def initialize_state(self, *args: Any, **kwargs: Any) -> T_State:
         """Set up initial skill state variables, code trees, or query environments."""

@@ -1,7 +1,7 @@
-"""Em-Cubed: Multi-Surface Skill Framework.
+"""Em-Cubed: Neuro-Symbolic Ontological Framework & Polyglot Skill Engine.
 
-Supports Python, Prolog, and Hy execution surfaces with unified indexing and search.
-Enhanced with quality assurance, validation, and composition capabilities.
+Enforces formal semantic truth at the ledger level ("Pydantic at the door, Ontology at the ledger")
+and leverages multi-surface reasoning coprocessors (Python, Prolog, Z3, Datalog, Hy, SQLite).
 """
 
 from .indexer import reindex, get_skill_metadata  # noqa: E402

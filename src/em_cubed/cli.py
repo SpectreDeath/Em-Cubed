@@ -60,7 +60,7 @@ def main():
     _bootstrap_services()
     
     parser = argparse.ArgumentParser(
-        description="Em-Cubed: Multi-Surface Skill Framework",
+        description="Em-Cubed: Neuro-Symbolic Ontological Framework & Polyglot Skill Engine",
         prog="em3"
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

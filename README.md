@@ -1,23 +1,24 @@
-# Em-Cubed: Multi-Surface Skill Framework
+# Em-Cubed: Neuro-Symbolic Ontological Framework & Polyglot Skill Engine
 
 [![Tests](https://img.shields.io/badge/tests-232%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Coverage](https://img.shields.io/badge/coverage-~33%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-Em-Cubed is a secure, multi-surface skill framework enabling execution across Python, Prolog, Hy Lisp, Z3 SMT solving, Datalog logic, Janus bridge, SQLite, QuickJS JavaScript, surfaces with unified indexing and search capabilities. It allows developers to create composable skills that leverage different programming paradigms for optimal problem-solving.
+**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Framework & Polyglot Skill Engine**. It stops AI agent drift, non-determinism, and hallucination by enforcing formal semantic truth at the ledger level (**"Pydantic at the door, Ontology at the ledger"**). 
+
+The platform leverages polyglot execution surfaces (Python, Prolog, Z3 SMT, Datalog, Hy, Janus, SQLite, QuickJS) as specialized reasoning coprocessors operating over a shared formal ontology.
 
 ## ✨ Key Features
 
-- **🔒 Secure Execution**: Safe code execution across multiple surfaces
-- **🔍 Intelligent Search**: Multi-surface scoring and skill discovery
-- **🌐 REST API**: Full HTTP API for skill execution and management
-- **📊 Structured Logging**: Comprehensive logging with context
-- **🧪 Comprehensive Testing**: 238 tests passing
-- **📚 Multi-Paradigm**: Python, Prolog, Hy, Z3, Datalog, Janus, and SQLite surfaces
-- **🔄 Loopy Skills**: Stateful, self-correcting iterative sub-routines with trajectory logging
-- **🧠 Neuro-Symbolic Ontology**: "Pydantic at the door, Ontology at the ledger" invariant validation (see [Documentation](docs/LOOPY_SKILLS_AND_ONTOLOGY.md))
-- **📜 Knowledge Elicitation Framework**: 6-stage pipeline from natural language DSQs to PMEST Facets, OntoClean BFO Independent vs Role partitions, and Common Logic Echoes (see [Documentation](docs/KNOWLEDGE_ELICITATION_FRAMEWORK.md))
+- **🧠 Formal Neuro-Symbolic Ontology**: Immutable ledger memory enforcing OWL functional property uniqueness, class disjointness, domain/range inference, and Topos Subobject Classifiers ($\Omega$) (see [Documentation](docs/LOOPY_SKILLS_AND_ONTOLOGY.md))
+- **📜 Knowledge Elicitation Pipeline**: 6-stage operational pipeline transforming natural language into BFO / CCO / IOF formal ontologies via Decision Support Questions (DSQs), PMEST Faceting, OntoClean Independent vs Role partitioning, and Common Logic Echoes (see [Documentation](docs/KNOWLEDGE_ELICITATION_FRAMEWORK.md))
+- **🔄 Stateful Loopy Skills**: Self-correcting iterative sub-routines with trajectory logging, context scope boundaries, and automatic `OntologyLedgerValidator` guards
+- **📐 Categorical Surface Morphisms**: Lossless category mappings translating schemas between Pydantic models, Prolog facts, Z3 SMT assertions, and Datalog rules
+- **🔌 Polyglot Coprocessors**: Multi-surface reasoning across Python, Prolog, Hy, Z3, Datalog, Janus, and SQLite
+- **🔒 Secure Execution**: Safe code execution with configurable timeout protection
+- **🔍 Intelligent Search**: Multi-surface scoring and skill registry discovery
+- **🌐 Production REST API & Visualizer**: Full HTTP REST router and interactive Knowledge Graph HTML/SVG visualizer
 
 ## 🎉 What's New in v0.8.0
 

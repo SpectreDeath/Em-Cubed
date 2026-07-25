@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "em-cubed"
 version = "0.8.0"
-description = "Multi-Surface Skill Framework for Python, Prolog, Hy, Z3, Datalog, Janus, SQLite, and QuickJS execution surfaces"
+description = "Neuro-Symbolic Ontological Framework & Polyglot Skill Engine for Python, Prolog, Hy, Z3, Datalog, Janus, SQLite, and QuickJS reasoning surfaces"
 authors = [
     {name = "SpectreDeath", email = "spectre@example.com"},
 ]
