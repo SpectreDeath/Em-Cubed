@@ -1,38 +1,35 @@
-# Em-Cubed: Neuro-Symbolic Ontological Framework & Polyglot Skill Engine
+# Em-Cubed: Neuro-Symbolic Ontological Operating System & Skill Framework
 
-[![Tests](https://img.shields.io/badge/tests-232%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
-[![Coverage](https://img.shields.io/badge/coverage-~33%25-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
-[![Python](https://img.shields.io/badge/python-3.11+-blue)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-56%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Python](https://img.shields.io/badge/python-3.10+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Framework & Polyglot Skill Engine**. It stops AI agent drift, non-determinism, and hallucination by enforcing formal semantic truth at the ledger level (**"Pydantic at the door, Ontology at the ledger"**). 
+**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Operating System & Skill Framework**. It grounds AI agent memory and execution in formal mathematical ontologies, description logic, category theory, and W3C open standards (**"Pydantic at the door, Formal Ontology at the ledger"**).
 
-The platform leverages polyglot execution surfaces (Python, Prolog, Z3 SMT, Datalog, Hy, Janus, SQLite, QuickJS) as specialized reasoning coprocessors operating over a shared formal ontology.
+---
 
-## ✨ Key Features
+## 🏛️ Comprehensive Subsystem Suite (14 Core Phases)
 
-- **🧠 Formal Neuro-Symbolic Ontology**: Immutable ledger memory enforcing OWL functional property uniqueness, class disjointness, domain/range inference, and Topos Subobject Classifiers ($\Omega$) (see [Documentation](docs/LOOPY_SKILLS_AND_ONTOLOGY.md))
-- **📜 Knowledge Elicitation Pipeline**: 6-stage operational pipeline transforming natural language into BFO / CCO / IOF formal ontologies via Decision Support Questions (DSQs), PMEST Faceting, OntoClean Independent vs Role partitioning, and Common Logic Echoes (see [Documentation](docs/KNOWLEDGE_ELICITATION_FRAMEWORK.md))
-- **🔄 Stateful Loopy Skills**: Self-correcting iterative sub-routines with trajectory logging, context scope boundaries, and automatic `OntologyLedgerValidator` guards
-- **📐 Categorical Surface Morphisms**: Lossless category mappings translating schemas between Pydantic models, Prolog facts, Z3 SMT assertions, and Datalog rules
-- **🔌 Polyglot Coprocessors**: Multi-surface reasoning across Python, Prolog, Hy, Z3, Datalog, Janus, and SQLite
-- **🔒 Secure Execution**: Safe code execution with configurable timeout protection
-- **🔍 Intelligent Search**: Multi-surface scoring and skill registry discovery
-- **🌐 Production REST API & Visualizer**: Full HTTP REST router and interactive Knowledge Graph HTML/SVG visualizer
+- **🧠 Formal Neuro-Symbolic Ledger (`src/em_cubed/ontology/validator.py`)**: Enforces OWL functional property uniqueness, class disjointness, domain/range inferences, and schema door validation.
+- **📜 Knowledge Elicitation Pipeline (`src/em_cubed/ontology/elicitation.py`)**: 6-stage pipeline transforming natural language into BFO/OntoClean formal ontologies (DSQs $\rightarrow$ CQs $\rightarrow$ PMEST $\rightarrow$ Common Logic Echoes).
+- **📐 Categorical Topos Engine ($\Omega$) (`src/em_cubed/ontology/topos.py`)**: Subobject classifier verifier evaluating modal truth states (`NECESSARY`, `POSSIBLE`, `CONTINGENT`, `IMPOSSIBLE`).
+- **🔍 Kit Fine's Truthmaker Semantics (`src/em_cubed/ontology/truthmaker.py`)**: Isolates exact state fragments $s$ that verify proposition $A$ ($s \Vdash A$) and hyperintensional topic grounding.
+- **🎓 Pascal Hitzler's Concept Induction (`src/em_cubed/ontology/concept_induction.py`)**: Fits Description Logic class expressions ($C \sqsubseteq D$) over neural execution trajectories.
+- **🏢 Palantir-Style Advanced Ontology (`src/em_cubed/ontology/advanced_ontology.py`)**: Derived property reducers (`SUM`, `AVG`, `COUNT`), polymorphic object interfaces, and backlinks.
+- **🔄 Dynamic Schema Evolution (`src/em_cubed/ontology/schema_evolution.py`)**: Lossless versioned schema migration chains (`v1.0` $\rightarrow$ `v1.1`).
+- **🩺 Health Monitoring & Self-Healing Guardrails (`src/em_cubed/ontology/health_monitor.py`)**: Real-time Coherence Index auditing and automated low-confidence triple purging.
+- **🌐 4D/5D Temporal-Spatial Timelines (`src/em_cubed/ontology/temporal_spatial.py`)**: Binds assertions to valid time intervals and evaluates Haversine geospatial proximity.
+- **⚡ W3C RDF & SHACL Interoperability (`src/em_cubed/ontology/interoperability.py`)**: Zero-dependency RDF Turtle/XML export and W3C SHACL shape generation (`.shacl.ttl`).
+- **💻 Interactive OS CLI Suite (`src/em_cubed/cli_ontology.py`)**: Full terminal suite (`em-cubed ontology` validate/elicit/truthmaker/induce/visualize/migrate/export).
+- **🌐 Production REST API Router (`api/loopy_ontology_router.py`)**: FastAPI endpoints (`/api/v1/ontology/validate`, `/graph-rag`, `/federated-status`, `/health`).
 
-## 🎉 What's New in v0.8.0
+---
 
-- **📜 Knowledge Elicitation Framework**: `KnowledgeElicitationPipeline` transforming expert text into BFO/OntoClean formal ontologies.
-- **🔄 Loopy Skill Framework**: `BaseLoopySkill` interface for self-correcting agent loops with scope isolation.
-- **🧠 Ontology Ledger Validator**: `OntologyLedgerValidator` enforcing OWL functional property, class disjointness, and domain/range inferences.
-- **📜 Text Loop Miner**: `TextLoopMiner` converting SOPs and runbooks into executable loop schemas.
-- **⚡ Async Timeouts**: Configurable execution timeouts across all surfaces (default 30s)
-- **🔄 Incremental Indexing**: Only re-index changed skill files (10x+ performance boost)
-- **🔌 Plugin System**: Extensible surface architecture with 3 discovery mechanisms
-- **🎯 SurfacePlugin Interface**: Abstract base class for custom surface implementations
-- **📊 PluginManager**: Manages surface plugins with automatic discovery
-- **⏱️ Timeout Protection**: Environment variable and CLI support for execution limits
-- **📈 Performance**: Lazy plugin loading and optimized resource management
+## 📜 Architectural Documentation & Catalog
+
+- 📚 [Master Architecture Handbook](docs/ONTOLOGICAL_OS_ARCHITECTURE.md)
+- 📜 [Knowledge Elicitation Guide](docs/KNOWLEDGE_ELICITATION_FRAMEWORK.md)
+- 📂 [Master Ontology Skill Manifest](skills/ONTOLOGY/SKILL_MANIFEST.md)
 
 ## 🚀 Quick Start
 
