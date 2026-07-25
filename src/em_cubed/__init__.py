@@ -104,6 +104,11 @@ __all__ = [
     "OntologyInterface",
     "InterfaceImplementation",
     "ObjectBacklinkRegistry",
+    "SchemaVersion",
+    "SchemaMigrationStep",
+    "ForwardBackwardCompatibilityChecker",
+    "AutomatedTripleMigrationEngine",
+    "OntologySchemaMigrator",
 ]
 
 from em_cubed.loopy import (  # noqa: E402
@@ -114,6 +119,7 @@ from em_cubed.loopy import (  # noqa: E402
     TrajectoryAuditor,
 )
 from em_cubed.ontology import (  # noqa: E402
+    AutomatedTripleMigrationEngine,
     CompetencyQuestion,
     ConceptInductionEngine,
     ConstraintSteeringCompiler,
@@ -124,6 +130,7 @@ from em_cubed.ontology import (  # noqa: E402
     ExactTruthmaker,
     ExactTruthmakerClassifier,
     FederatedOntologyRegistry,
+    ForwardBackwardCompatibilityChecker,
     GraphPathRAG,
     HyperintensionalEvaluator,
     InterfaceImplementation,
@@ -135,9 +142,12 @@ from em_cubed.ontology import (  # noqa: E402
     OntoCleanPartition,
     OntologyInterface,
     OntologyLedgerValidator,
+    OntologySchemaMigrator,
     OntologyTriple,
     PMESTFacets,
     ReducerType,
+    SchemaMigrationStep,
+    SchemaVersion,
     StateFragment,
     SubobjectClassifier,
     TripleInductionEngine,

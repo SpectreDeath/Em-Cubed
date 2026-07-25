@@ -156,6 +156,20 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             interface=interface,
         )
 
+    def migrate_state_schema(self, state: T_State, target_version_str: str, steps: list[Any]) -> list[Any]:
+        """Schema Evolution: Migrates skill state triples losslessly to target schema version.
+
+        Returns
+        -------
+        list[OntologyTriple]
+            Migrated triples list.
+        """
+        from em_cubed.ontology.schema_evolution import AutomatedTripleMigrationEngine
+        return AutomatedTripleMigrationEngine.migrate_triples(
+            triples=getattr(state, "triples", []),
+            steps=steps,
+        )
+
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
         raise NotImplementedError

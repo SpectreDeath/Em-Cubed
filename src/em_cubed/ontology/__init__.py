@@ -1,4 +1,4 @@
-"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, Concept Induction, and Advanced Ontology Subsystem."""
+"""Neuro-Symbolic Ontology, Graph-Path RAG, Topos Consensus, Federated Registry, Visualizer, Knowledge Elicitation, Truthmaker Semantics, Concept Induction, Advanced Ontology, and Schema Evolution Subsystem."""
 
 from em_cubed.ontology.advanced_ontology import (
     DerivedPropertyReducer,
@@ -31,6 +31,13 @@ from em_cubed.ontology.schema import (
     DomainRangeInference,
     FunctionalPropertyConstraint,
     OntologyTriple,
+)
+from em_cubed.ontology.schema_evolution import (
+    AutomatedTripleMigrationEngine,
+    ForwardBackwardCompatibilityChecker,
+    OntologySchemaMigrator,
+    SchemaMigrationStep,
+    SchemaVersion,
 )
 from em_cubed.ontology.steering import ConstraintSteeringCompiler
 from em_cubed.ontology.topos import ModalType, SubobjectClassifier, TruthValue
@@ -81,4 +88,9 @@ __all__ = [
     "OntologyInterface",
     "InterfaceImplementation",
     "ObjectBacklinkRegistry",
+    "SchemaVersion",
+    "SchemaMigrationStep",
+    "ForwardBackwardCompatibilityChecker",
+    "AutomatedTripleMigrationEngine",
+    "OntologySchemaMigrator",
 ]
