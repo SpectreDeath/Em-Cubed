@@ -1,14 +1,14 @@
-# Em-Cubed: Neuro-Symbolic Ontological Operating System & Skill Framework v2.7
+# Em-Cubed: Neuro-Symbolic Ontological Operating System & Skill Framework v3.0
 
 [![Tests](https://img.shields.io/badge/tests-74%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.10+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Operating System & Skill Framework v2.7**. It grounds AI agent memory and execution in formal mathematical ontologies, description logic, category theory, and W3C open standards (**"Pydantic at the door, Formal Ontology at the ledger"**).
+**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Operating System & Skill Framework v3.0**. It grounds AI agent memory and execution in formal mathematical ontologies, description logic, category theory, and W3C open standards (**"Pydantic at the door, Formal Ontology at the ledger"**).
 
 ---
 
-## 🏛️ Comprehensive Subsystem Suite (27 Core Phases)
+## 🏛️ Comprehensive Subsystem Suite (28 Core Phases)
 
 - **🧠 Formal Neuro-Symbolic Ledger (`src/em_cubed/ontology/validator.py`)**: Enforces OWL functional property uniqueness, class disjointness, domain/range inferences, and schema door validation.
 - **📜 Knowledge Elicitation Pipeline (`src/em_cubed/ontology/elicitation.py`)**: 6-stage pipeline transforming natural language into BFO/OntoClean formal ontologies (DSQs $\rightarrow$ CQs $\rightarrow$ PMEST $\rightarrow$ Common Logic Echoes).
@@ -35,6 +35,7 @@
 
 ## 📜 Architectural Documentation & Catalog
 
+- 🏆 [Tri-Engine OS Release v3.0 Grand Finale](docs/TRI_ENGINE_OS_RELEASE_v3.0_GRAND_FINALE.md)
 - 🌐 [Tri-Engine Master Integration Specification](docs/TRI_ENGINE_MASTER_SPECIFICATION.md)
 - 🏆 [Release v2.5 Grand Finale Specification](docs/ONTOLOGICAL_OS_RELEASE_v2.5_GRAND_FINALE.md)
 - 📚 [Grand Master Architecture Specification v2.0](docs/ONTOLOGICAL_OPERATING_SYSTEM_v2_MASTER.md)

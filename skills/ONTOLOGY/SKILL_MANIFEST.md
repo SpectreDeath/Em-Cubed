@@ -1,6 +1,6 @@
 # Master Ontology Skill Manifest (`em-cubed`)
 
-This manifest catalogs all 21 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
+This manifest catalogs all 22 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
 
 ---
 
