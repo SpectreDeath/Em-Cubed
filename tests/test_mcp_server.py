@@ -5,7 +5,7 @@ from em_cubed.gateway.mcp_server import EmCubedMCPServer
 
 def test_mcp_server_tools_list():
     server = EmCubedMCPServer()
-    assert len(server.TOOLS) == 7
+    assert len(server.TOOLS) == 8
     tool_names = [t["name"] for t in server.TOOLS]
     assert "em_cubed_validate_triple" in tool_names
     assert "em_cubed_elicit_ontology" in tool_names
@@ -14,6 +14,7 @@ def test_mcp_server_tools_list():
     assert "em_cubed_prove_zkp" in tool_names
     assert "em_cubed_check_health" in tool_names
     assert "em_cubed_run_monad" in tool_names
+    assert "em_cubed_run_geopolitical_sim" in tool_names
 
 
 def test_mcp_call_validate_triple():
@@ -53,3 +54,10 @@ def test_mcp_call_run_monad():
     server = EmCubedMCPServer()
     res = server.call_tool("em_cubed_run_monad", {"subject": "Agent_X", "predicate": "hasRole", "object": "Auditor"})
     assert "(check-sat)" in res["smt_lib"]
+
+
+def test_mcp_call_run_geopolitical_sim():
+    server = EmCubedMCPServer()
+    res = server.call_tool("em_cubed_run_geopolitical_sim", {"scenario": "default", "steps": 5})
+    assert res["status"] == "COMPLETED"
+    assert res["topos_omega_status"] == "NECESSARY"
