@@ -78,6 +78,9 @@ def build_ontology_parser(subparsers: argparse._SubParsersAction[argparse.Argume
     prove_p.add_argument("--proposition", required=True, help="Proposition to attest")
     prove_p.add_argument("--predicates", nargs="+", required=True, help="Wholly relevant predicates")
 
+    # tui
+    onto_subparsers.add_parser("tui", help="Launch live interactive Ontological OS terminal UI workspace")
+
 
 def handle_ontology_cli(args: argparse.Namespace) -> int:
     """Handle execution of 'em-cubed ontology' subcommands."""
@@ -172,8 +175,13 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         print(f"  PQC Signature: {commitment.signature[:16]}...")
         return 0
 
+    elif subcommand == "tui":
+        from em_cubed.cli_tui import run_cli_tui_mode
+
+        return run_cli_tui_mode(args)
+
     else:
-        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove).")
+        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove, tui).")
         return 1
 
 

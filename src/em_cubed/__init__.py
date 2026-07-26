@@ -129,7 +129,11 @@ __all__ = [
     "ReactiveRule",
     "StreamProcessingResult",
     "OntologyEventStreamProcessor",
+    "OntologyTUIDashboard",
+    "run_cli_tui_mode",
 ]
+
+from em_cubed.cli_tui import OntologyTUIDashboard, run_cli_tui_mode  # noqa: E402
 
 from em_cubed.loopy import (  # noqa: E402
     BaseLoopySkill,
