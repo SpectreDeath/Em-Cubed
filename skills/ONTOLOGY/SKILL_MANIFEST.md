@@ -1,6 +1,6 @@
 # Master Ontology Skill Manifest (`em-cubed`)
 
-This manifest catalogs all 23 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
+This manifest catalogs all 24 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
 
 ---
 
@@ -31,3 +31,4 @@ This manifest catalogs all 23 specialized demonstration skills developed for the
 | **`mcp-interagent-gateway`** | `skills/ONTOLOGY/mcp-interagent-gateway/` | GATEWAY | Model Context Protocol (MCP) JSON-RPC gateway server exposing 8 core tools. |
 | **`dual-engine-benchmark-agent`** | `skills/ONTOLOGY/dual-engine-benchmark-agent/` | BENCHMARK | Continuous integration performance scaling and latency benchmark runner. |
 | **`tri-engine-sim-agent`** | `skills/ONTOLOGY/tri-engine-sim-agent/` | TRI_ENGINE | Tri-engine geopolitical wargaming, SEIRH biodefense, and Topos Ω governance. |
+| **`tri-engine-swarm-scaler`** | `skills/ONTOLOGY/tri-engine-swarm-scaler/` | SWARM | Dynamic capacity scaling and load balancing across tri-engine swarm nodes. |
