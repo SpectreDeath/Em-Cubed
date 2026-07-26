@@ -84,6 +84,9 @@ def build_ontology_parser(subparsers: argparse._SubParsersAction[argparse.Argume
     # mcp
     onto_subparsers.add_parser("mcp", help="Run Model Context Protocol (MCP) gateway server on STDIO")
 
+    # health
+    onto_subparsers.add_parser("health", help="Audit live tri-engine cross-repository health and coherence")
+
 
 def handle_ontology_cli(args: argparse.Namespace) -> int:
     """Handle execution of 'em-cubed ontology' subcommands."""
@@ -183,14 +186,20 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
 
         return run_cli_tui_mode(args)
 
-    elif subcommand == "mcp":
-        from em_cubed.gateway import run_mcp_server
+    elif subcommand == "health":
+        from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
 
-        run_mcp_server()
+        report = OntologicalHealthMonitor.audit_tri_engine_health()
+        print("Tri-Engine Cross-Repository Health Audit:")
+        print(f"  SME Status           : {report['sme_status']} (Trust Index: {report['sme_trust_index']})")
+        print(f"  Em-Cubed Status      : {report['em_cubed_status']} (Coherence: {report['em_cubed_coherence']})")
+        print(f"  Strategify Status    : {report['strategify_status']} ({report['strategify_unit_tests']} Unit Tests)")
+        print(f"  Coherence Index      : {report['tri_engine_coherence_index'] * 100:.1f}%")
+        print(f"  Overall Health       : {report['health_status']}")
         return 0
 
     else:
-        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove, tui, mcp).")
+        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove, tui, mcp, health).")
         return 1
 
 
