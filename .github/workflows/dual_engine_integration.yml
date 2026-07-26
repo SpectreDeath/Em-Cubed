@@ -1,0 +1,40 @@
+name: Dual-Engine Integration CI/CD & Benchmarks
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest pytest-cov
+          pip install -e ".[dev]" || pip install -e .
+
+      - name: Run Ruff Lint Checks
+        run: |
+          ruff check .
+
+      - name: Run Pytest Test Suite
+        run: |
+          pytest tests/ -v --cov=src/em_cubed
+
+      - name: Execute Dual-Engine Performance Benchmark
+        run: |
+          python -c "from em_cubed.benchmarks import DualEngineBenchmarkRunner; rep = DualEngineBenchmarkRunner.run_benchmark(50); print('Benchmark Report:', rep.metrics_summary)"
