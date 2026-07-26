@@ -133,6 +133,8 @@ __all__ = [
     "run_cli_tui_mode",
     "SurfaceFunctor",
     "OntologyMonad",
+    "EmCubedMCPServer",
+    "run_mcp_server",
 ]
 
 from em_cubed.cli_tui import OntologyTUIDashboard, run_cli_tui_mode  # noqa: E402
@@ -201,4 +203,5 @@ from em_cubed.orchestration.dual_engine_swarm import (  # noqa: E402
     SwarmExecutionReport,
     SwarmRunConfig,
 )
+from em_cubed.gateway import EmCubedMCPServer, run_mcp_server  # noqa: E402
 from em_cubed.surfaces import OntologyMonad, SurfaceFunctor, SurfaceMorphism  # noqa: E402

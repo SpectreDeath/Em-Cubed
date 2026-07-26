@@ -81,6 +81,9 @@ def build_ontology_parser(subparsers: argparse._SubParsersAction[argparse.Argume
     # tui
     onto_subparsers.add_parser("tui", help="Launch live interactive Ontological OS terminal UI workspace")
 
+    # mcp
+    onto_subparsers.add_parser("mcp", help="Run Model Context Protocol (MCP) gateway server on STDIO")
+
 
 def handle_ontology_cli(args: argparse.Namespace) -> int:
     """Handle execution of 'em-cubed ontology' subcommands."""
@@ -180,8 +183,14 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
 
         return run_cli_tui_mode(args)
 
+    elif subcommand == "mcp":
+        from em_cubed.gateway import run_mcp_server
+
+        run_mcp_server()
+        return 0
+
     else:
-        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove, tui).")
+        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove, tui, mcp).")
         return 1
 
 
