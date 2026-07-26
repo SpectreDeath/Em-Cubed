@@ -98,4 +98,10 @@ try:
 except ImportError:
     SurfaceMorphism = None  # type: ignore[assignment]
 
-__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "SQLiteSurface", "QuickJSSurface", "WASMSurface", "KanrenSurface", "ClingoSurface", "SurfaceMorphism"]
+try:
+    from .functor import OntologyMonad, SurfaceFunctor
+except ImportError:
+    SurfaceFunctor = None  # type: ignore[assignment]
+    OntologyMonad = None  # type: ignore[assignment]
+
+__all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "SQLiteSurface", "QuickJSSurface", "WASMSurface", "KanrenSurface", "ClingoSurface", "SurfaceMorphism", "SurfaceFunctor", "OntologyMonad"]

@@ -255,6 +255,24 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
 
         return ZKPAuditor.verify_commitment(commitment)
 
+    def apply_surface_functor(self, triples: list[Any], target_surface: str = "prolog") -> str:
+        """Sensor method: Apply category-theoretic surface functor mapping."""
+        from em_cubed.surfaces.functor import SurfaceFunctor
+
+        if target_surface.lower() == "prolog":
+            return SurfaceFunctor.python_to_prolog(triples)
+        elif target_surface.lower() == "z3":
+            prolog_str = SurfaceFunctor.python_to_prolog(triples)
+            return SurfaceFunctor.prolog_to_z3(prolog_str)
+        return ""
+
+    def bind_monad(self, state: Any, fn: Any) -> Any:
+        """Sensor method: Execute monadic bind (>>=) on loopy skill state."""
+        from em_cubed.surfaces.functor import OntologyMonad
+
+        monad = OntologyMonad.unit(state)
+        return monad.bind(fn).extract()
+
     def run(self, *args: Any, **kwargs: Any) -> LoopySkillResult[T_Result]:
         """Execute the core loop engine until guard passes or max_iterations is reached."""
         state = self.initialize_state(*args, **kwargs)

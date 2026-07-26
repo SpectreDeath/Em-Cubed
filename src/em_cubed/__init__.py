@@ -131,6 +131,8 @@ __all__ = [
     "OntologyEventStreamProcessor",
     "OntologyTUIDashboard",
     "run_cli_tui_mode",
+    "SurfaceFunctor",
+    "OntologyMonad",
 ]
 
 from em_cubed.cli_tui import OntologyTUIDashboard, run_cli_tui_mode  # noqa: E402
@@ -199,4 +201,4 @@ from em_cubed.orchestration.dual_engine_swarm import (  # noqa: E402
     SwarmExecutionReport,
     SwarmRunConfig,
 )
-from em_cubed.surfaces import SurfaceMorphism  # noqa: E402
+from em_cubed.surfaces import OntologyMonad, SurfaceFunctor, SurfaceMorphism  # noqa: E402

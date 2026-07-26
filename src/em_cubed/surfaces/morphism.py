@@ -56,3 +56,9 @@ class SurfaceMorphism:
         pred = triple.predicate.lower().replace("-", "_")
         obj = triple.object.lower().replace("-", "_")
         return f"{pred}({subj}, {obj})."
+
+    @staticmethod
+    def triple_to_prolog(triple: OntologyTriple) -> str:
+        """Map OntologyTriple into Prolog fact: predicate('Subject', 'Object')."""
+        clean_pred = triple.predicate.replace(":", "_").replace("-", "_")
+        return f"{clean_pred}('{triple.subject}', '{triple.object}')."
