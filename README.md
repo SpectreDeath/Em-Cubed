@@ -1,14 +1,14 @@
-# Em-Cubed: Neuro-Symbolic Ontological Operating System & Skill Framework
+# Em-Cubed: Neuro-Symbolic Ontological Operating System & Skill Framework v2.0
 
-[![Tests](https://img.shields.io/badge/tests-56%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Tests](https://img.shields.io/badge/tests-65%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.10+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Operating System & Skill Framework**. It grounds AI agent memory and execution in formal mathematical ontologies, description logic, category theory, and W3C open standards (**"Pydantic at the door, Formal Ontology at the ledger"**).
+**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Operating System & Skill Framework v2.0**. It grounds AI agent memory and execution in formal mathematical ontologies, description logic, category theory, and W3C open standards (**"Pydantic at the door, Formal Ontology at the ledger"**).
 
 ---
 
-## 🏛️ Comprehensive Subsystem Suite (14 Core Phases)
+## 🏛️ Comprehensive Subsystem Suite (21 Core Phases)
 
 - **🧠 Formal Neuro-Symbolic Ledger (`src/em_cubed/ontology/validator.py`)**: Enforces OWL functional property uniqueness, class disjointness, domain/range inferences, and schema door validation.
 - **📜 Knowledge Elicitation Pipeline (`src/em_cubed/ontology/elicitation.py`)**: 6-stage pipeline transforming natural language into BFO/OntoClean formal ontologies (DSQs $\rightarrow$ CQs $\rightarrow$ PMEST $\rightarrow$ Common Logic Echoes).
@@ -20,13 +20,19 @@
 - **🩺 Health Monitoring & Self-Healing Guardrails (`src/em_cubed/ontology/health_monitor.py`)**: Real-time Coherence Index auditing and automated low-confidence triple purging.
 - **🌐 4D/5D Temporal-Spatial Timelines (`src/em_cubed/ontology/temporal_spatial.py`)**: Binds assertions to valid time intervals and evaluates Haversine geospatial proximity.
 - **⚡ W3C RDF & SHACL Interoperability (`src/em_cubed/ontology/interoperability.py`)**: Zero-dependency RDF Turtle/XML export and W3C SHACL shape generation (`.shacl.ttl`).
-- **💻 Interactive OS CLI Suite (`src/em_cubed/cli_ontology.py`)**: Full terminal suite (`em-cubed ontology` validate/elicit/truthmaker/induce/visualize/migrate/export).
+- **🤖 Dual-Engine Swarm Orchestrator (`src/em_cubed/orchestration/dual_engine_swarm.py`)**: Multi-agent swarm pipeline uniting SME sensory memory and Em-Cubed formal ontology.
+- **🌊 Real-Time Dynamic Event Stream Processor (`src/em_cubed/ontology/event_stream.py`)**: Processes continuous triple mutations (`ASSERT`, `RETRACT`, `MUTATE`) and reactive alert rules.
+- **🔐 Quantum-Resistant Zero-Knowledge Proof Ledger (`src/em_cubed/ontology/zk_attestation.py`)**: Generates Merkle state roots and post-quantum (PQC) signature commitments.
+- **💻 Live Interactive Terminal TUI Workspace (`src/em_cubed/cli_tui.py`)**: Terminal-native multi-panel ASCII workspace rendering live ontology telemetry.
+- **🌌 Category-Theoretic Surface Functors & Monads (`src/em_cubed/surfaces/functor.py`)**: Functors ($F: \mathcal{C} \to \mathcal{D}$) mapping across Python, Prolog, and Z3, with `OntologyMonad[T]`.
+- **💻 Interactive OS CLI Suite (`src/em_cubed/cli_ontology.py`)**: Full terminal suite (`em-cubed ontology` validate/elicit/truthmaker/induce/visualize/migrate/export/prove/tui).
 - **🌐 Production REST API Router (`api/loopy_ontology_router.py`)**: FastAPI endpoints (`/api/v1/ontology/validate`, `/graph-rag`, `/federated-status`, `/health`).
 
 ---
 
 ## 📜 Architectural Documentation & Catalog
 
+- 📚 [Grand Master Architecture Specification v2.0](docs/ONTOLOGICAL_OPERATING_SYSTEM_v2_MASTER.md)
 - 📚 [Master Architecture Handbook](docs/ONTOLOGICAL_OS_ARCHITECTURE.md)
 - 📜 [Knowledge Elicitation Guide](docs/KNOWLEDGE_ELICITATION_FRAMEWORK.md)
 - 📂 [Master Ontology Skill Manifest](skills/ONTOLOGY/SKILL_MANIFEST.md)
