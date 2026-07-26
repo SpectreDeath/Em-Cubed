@@ -73,6 +73,11 @@ def build_ontology_parser(subparsers: argparse._SubParsersAction[argparse.Argume
     export_p.add_argument("--format", choices=["turtle", "shacl"], default="turtle", help="Export format")
     export_p.add_argument("--output", default="ontology_export.ttl", help="Target output file path")
 
+    # prove
+    prove_p = onto_subparsers.add_parser("prove", help="Generate Zero-Knowledge cryptographic commitment over claim")
+    prove_p.add_argument("--proposition", required=True, help="Proposition to attest")
+    prove_p.add_argument("--predicates", nargs="+", required=True, help="Wholly relevant predicates")
+
 
 def handle_ontology_cli(args: argparse.Namespace) -> int:
     """Handle execution of 'em-cubed ontology' subcommands."""
@@ -151,8 +156,24 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         print(f"[Interoperability] Wrote W3C {args.format.upper()} export to '{args.output}'.")
         return 0
 
+    elif subcommand == "prove":
+        from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
+
+        sample_triple = OntologyTriple(subject="Agent_01", predicate=args.predicates[0], object="VerifiedValue")
+        commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(
+            proposition=args.proposition,
+            state_triples=[sample_triple],
+            relevant_predicates=args.predicates,
+        )
+        print(f"[ZKP Attestation] Proof ID: {commitment.proof_id}")
+        print(f"  Proposition Hash: {commitment.proposition_hash[:16]}...")
+        print(f"  Merkle State Root: {commitment.merkle_state_root[:16]}...")
+        print(f"  Satisfied: {commitment.is_satisfied}")
+        print(f"  PQC Signature: {commitment.signature[:16]}...")
+        return 0
+
     else:
-        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate).")
+        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove).")
         return 1
 
 

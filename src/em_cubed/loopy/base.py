@@ -237,6 +237,24 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         processor = OntologyEventStreamProcessor()
         return processor.process_stream_batch(events)
 
+    def generate_zk_attestation(
+        self, proposition: str, state_triples: list[Any], relevant_predicates: list[str]
+    ) -> Any:
+        """Sensor method: Generate zero-knowledge cryptographic commitment over state triples."""
+        from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
+
+        return ZeroKnowledgeOntologyAttestor.generate_attestation(
+            proposition=proposition,
+            state_triples=state_triples,
+            relevant_predicates=relevant_predicates,
+        )
+
+    def verify_zk_attestation(self, commitment: Any) -> Any:
+        """Sensor method: Verify zero-knowledge cryptographic proof payload."""
+        from em_cubed.ontology.zk_attestation import ZKPAuditor
+
+        return ZKPAuditor.verify_commitment(commitment)
+
     def run(self, *args: Any, **kwargs: Any) -> LoopySkillResult[T_Result]:
         """Execute the core loop engine until guard passes or max_iterations is reached."""
         state = self.initialize_state(*args, **kwargs)

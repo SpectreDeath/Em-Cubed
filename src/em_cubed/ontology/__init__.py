@@ -75,6 +75,11 @@ from em_cubed.ontology.event_stream import (
     StreamEvent,
     StreamProcessingResult,
 )
+from em_cubed.ontology.zk_attestation import (
+    ZeroKnowledgeOntologyAttestor,
+    ZKPAuditor,
+    ZKPCommitment,
+)
 
 __all__ = [
     "OntologyTriple",
@@ -136,4 +141,7 @@ __all__ = [
     "ReactiveRule",
     "StreamProcessingResult",
     "OntologyEventStreamProcessor",
+    "ZKPCommitment",
+    "ZeroKnowledgeOntologyAttestor",
+    "ZKPAuditor",
 ]
