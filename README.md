@@ -1,14 +1,14 @@
-# Em-Cubed: Neuro-Symbolic Ontological Operating System & Skill Framework v3.0
+# Em-Cubed: Neuro-Symbolic Ontological Operating System & Skill Framework v3.5
 
-[![Tests](https://img.shields.io/badge/tests-74%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
+[![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.10+-blue)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Operating System & Skill Framework v3.0**. It grounds AI agent memory and execution in formal mathematical ontologies, description logic, category theory, and W3C open standards (**"Pydantic at the door, Formal Ontology at the ledger"**).
+**Em-Cubed** is a production-grade **Neuro-Symbolic Ontological Operating System & Skill Framework v3.5**. It grounds AI agent memory and execution in formal mathematical ontologies, description logic, category theory, and W3C open standards (**"Pydantic at the door, Formal Ontology at the ledger"**).
 
 ---
 
-## 🏛️ Comprehensive Subsystem Suite (28 Core Phases)
+## 🏛️ Comprehensive Subsystem Suite (30 Core Phases)
 
 - **🧠 Formal Neuro-Symbolic Ledger (`src/em_cubed/ontology/validator.py`)**: Enforces OWL functional property uniqueness, class disjointness, domain/range inferences, and schema door validation.
 - **📜 Knowledge Elicitation Pipeline (`src/em_cubed/ontology/elicitation.py`)**: 6-stage pipeline transforming natural language into BFO/OntoClean formal ontologies (DSQs $\rightarrow$ CQs $\rightarrow$ PMEST $\rightarrow$ Common Logic Echoes).
@@ -28,13 +28,15 @@
 - **🔌 Model Context Protocol (MCP) Gateway Server (`src/em_cubed/gateway/mcp_server.py`)**: Standard JSON-RPC STDIO server exposing 8 core neuro-symbolic tools to external LLM agents.
 - **🚀 Dual-Engine CI/CD Matrix & Integration Benchmarks (`src/em_cubed/benchmarks/dual_engine_benchmark.py`)**: Continuous scaling benchmark runner evaluating TPS, ZKP latency, and functor speed.
 - **🗺️ Tri-Engine Synergy Bridges & Geopolitical ABM (`Strategify`)**: Bridges SME perception feeds, Em-Cubed Topos $\Omega$ guards, and Strategify Mesa Geo ABM simulation.
-- **💻 Interactive OS CLI Suite (`src/em_cubed/cli_ontology.py`)**: Full terminal suite (`em-cubed ontology` validate/elicit/truthmaker/induce/visualize/migrate/export/prove/tui/mcp).
+- **🩺 Cross-Repository Health Auditor (`src/em_cubed/ontology/health_monitor.py`)**: Real-time tri-engine sanity check and CLI command (`em-cubed ontology health`).
+- **💻 Interactive OS CLI Suite (`src/em_cubed/cli_ontology.py`)**: Full terminal suite (`em-cubed ontology` validate/elicit/truthmaker/induce/visualize/migrate/export/prove/tui/mcp/health).
 - **🌐 Production REST API Router (`api/loopy_ontology_router.py`)**: FastAPI endpoints (`/api/v1/ontology/validate`, `/graph-rag`, `/federated-status`, `/health`).
 
 ---
 
 ## 📜 Architectural Documentation & Catalog
 
+- 🏆 [Tri-Engine OS Release v3.5 Master Package](docs/TRI_ENGINE_OS_RELEASE_v3.5_FINAL_PACKAGE.md)
 - 🏆 [Tri-Engine OS Release v3.0 Grand Finale](docs/TRI_ENGINE_OS_RELEASE_v3.0_GRAND_FINALE.md)
 - 🌐 [Tri-Engine Master Integration Specification](docs/TRI_ENGINE_MASTER_SPECIFICATION.md)
 - 🏆 [Release v2.5 Grand Finale Specification](docs/ONTOLOGICAL_OS_RELEASE_v2.5_GRAND_FINALE.md)

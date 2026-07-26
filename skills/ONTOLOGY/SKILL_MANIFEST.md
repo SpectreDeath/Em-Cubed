@@ -1,6 +1,6 @@
 # Master Ontology Skill Manifest (`em-cubed`)
 
-This manifest catalogs all 22 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
+This manifest catalogs all 23 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
 
 ---
 
@@ -19,7 +19,7 @@ This manifest catalogs all 22 specialized demonstration skills developed for the
 | **`concept-induction-de-anonymizer`** | `skills/ONTOLOGY/concept-induction-de-anonymizer/` | NEURO_SYMBOLIC | Pascal Hitzler Description Logic concept induction ($C \sqsubseteq D$). |
 | **`palantir-advanced-ontology-agent`** | `skills/ONTOLOGY/palantir-advanced-ontology-agent/` | PALANTIR | Palantir-style derived property reducers, interfaces, and backlinks. |
 | **`schema-evolution-migrator`** | `skills/ONTOLOGY/schema-evolution-migrator/` | SCHEMA | Dynamic schema evolution, version compatibility, and lossless migration. |
-| **`ontological-os-cli-suite`** | `skills/ONTOLOGY/ontological-os-cli-suite/` | CLI | End-to-end terminal suite (`em-cubed ontology` validate/elicit/truthmaker/induce/visualize/migrate/export/prove/tui/mcp). |
+| **`ontological-os-cli-suite`** | `skills/ONTOLOGY/ontological-os-cli-suite/` | CLI | End-to-end terminal suite (`em-cubed ontology` validate/elicit/truthmaker/induce/visualize/migrate/export/prove/tui/mcp/health). |
 | **`self-healing-ontological-monitor`** | `skills/ONTOLOGY/self-healing-ontological-monitor/` | HEALTH | Real-time health monitoring, Coherence Index calculation, and self-healing guardrails. |
 | **`temporal-spatial-timeline-agent`** | `skills/ONTOLOGY/temporal-spatial-timeline-agent/` | TEMPORAL_SPATIAL | 4D/5D point-in-time snapshot queries and Haversine spatial proximity reasoning. |
 | **`w3c-rdf-shacl-interoperability-agent`** | `skills/ONTOLOGY/w3c-rdf-shacl-interoperability-agent/` | W3C | RDF Turtle/XML serialization, SHACL shape generation, and Turtle importing. |
