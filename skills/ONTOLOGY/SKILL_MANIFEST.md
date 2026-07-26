@@ -1,6 +1,6 @@
 # Master Ontology Skill Manifest (`em-cubed`)
 
-This manifest catalogs all 20 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
+This manifest catalogs all 21 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
 
 ---
 
@@ -28,5 +28,6 @@ This manifest catalogs all 20 specialized demonstration skills developed for the
 | **`zk-ontological-attestation`** | `skills/ONTOLOGY/zk-ontological-attestation/` | PRIVACY | Quantum-resistant Zero-Knowledge Proof commitments over sensitive state fragments. |
 | **`ontological-os-tui-dashboard`** | `skills/ONTOLOGY/ontological-os-tui-dashboard/` | TUI | Live interactive terminal workspace dashboard rendering active ontology telemetry. |
 | **`monadic-surface-functor`** | `skills/ONTOLOGY/monadic-surface-functor/` | CATEGORY_THEORY | Category-theoretic surface functors ($F: \mathcal{C} \to \mathcal{D}$) & monadic workflows. |
-| **`mcp-interagent-gateway`** | `skills/ONTOLOGY/mcp-interagent-gateway/` | GATEWAY | Model Context Protocol (MCP) JSON-RPC gateway server exposing 7 core tools. |
+| **`mcp-interagent-gateway`** | `skills/ONTOLOGY/mcp-interagent-gateway/` | GATEWAY | Model Context Protocol (MCP) JSON-RPC gateway server exposing 8 core tools. |
 | **`dual-engine-benchmark-agent`** | `skills/ONTOLOGY/dual-engine-benchmark-agent/` | BENCHMARK | Continuous integration performance scaling and latency benchmark runner. |
+| **`tri-engine-sim-agent`** | `skills/ONTOLOGY/tri-engine-sim-agent/` | TRI_ENGINE | Tri-engine geopolitical wargaming, SEIRH biodefense, and Topos Ω governance. |
