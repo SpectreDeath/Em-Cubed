@@ -1,6 +1,6 @@
 # Master Ontology Skill Manifest (`em-cubed`)
 
-This manifest catalogs all 26 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
+This manifest catalogs all 27 specialized demonstration skills developed for the **Neuro-Symbolic Ontological Operating System** in [`D:\GitHub\projects\em-cubed`](file:///D:/GitHub/projects/em-cubed).
 
 ---
 
@@ -34,3 +34,4 @@ This manifest catalogs all 26 specialized demonstration skills developed for the
 | **`tri-engine-swarm-scaler`** | `skills/ONTOLOGY/tri-engine-swarm-scaler/` | SWARM | Dynamic capacity scaling and load balancing across tri-engine swarm nodes. |
 | **`tri-engine-cross-domain-transfer`** | `skills/ONTOLOGY/tri-engine-cross-domain-transfer/` | CROSS_DOMAIN | Cross-domain concept mapping and triple transfer via BFO upper categories. |
 | **`tri-engine-policy-steering`** | `skills/ONTOLOGY/tri-engine-policy-steering/` | GATEWAY | Compiles and injects formal policy steering directives into LLM agent prompts. |
+| **`tri-engine-replay-engine`** | `skills/ONTOLOGY/tri-engine-replay-engine/` | AUDIT | Merkle-hashed state frame recording, integrity verification, and step replay. |
