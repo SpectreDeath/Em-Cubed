@@ -48,12 +48,8 @@ class SQLiteSurface(SurfaceBase):
             try:
                 self._sessions[session_id].close()
             except Exception:
-                pass
+                pass  # nosec B110 - intentional fallback; caller handles None/False return
             del self._sessions[session_id]
-
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute SQL code and return results."""
-        return await self.execute_with_timeout(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute SQL code on an in-memory database, with optional session persistence."""

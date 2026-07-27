@@ -8,6 +8,7 @@ Compatible with pygls >= 1.0  (uses lsprotocol.types + decorator registration).
 import logging
 from typing import Dict, List, Optional
 from dataclasses import dataclass
+from pathlib import Path
 import yaml
 
 from pygls.lsp.server import LanguageServer
@@ -42,7 +43,7 @@ logger = logging.getLogger(__name__)
 # Domain / surface registries — kept in sync with skills/manifest.yaml
 # ---------------------------------------------------------------------------
 
-VALID_DOMAINS = [
+VALID_DOMAINS_FALLBACK = [
     "ANALYTICS",
     "AUTOMATION",
     "CLINICAL_TRIALS",
@@ -79,6 +80,24 @@ VALID_DOMAINS = [
     "TIME_SERIES",
     "WORLD_MODELS",
 ]
+
+
+def load_valid_domains() -> List[str]:
+    """Load valid domains dynamically from skills/manifest.yaml if available."""
+    try:
+        manifest_path = Path(__file__).resolve().parents[2] / "skills" / "manifest.yaml"
+        if manifest_path.exists():
+            with open(manifest_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            cats = data.get("skill_categories", [])
+            if cats:
+                return sorted(list(set(cats + VALID_DOMAINS_FALLBACK)))
+    except Exception:
+        pass
+    return VALID_DOMAINS_FALLBACK
+
+
+VALID_DOMAINS = load_valid_domains()
 
 COMMON_SURFACES = [
     "python",
@@ -172,17 +191,7 @@ def _frontmatter_completions(before_cursor: str) -> List[CompletionItem]:
     items: List[CompletionItem] = []
     stripped = before_cursor.rstrip()
 
-    # Top-level field name suggestions
-    if not stripped or stripped.endswith(":") or stripped == "":
-        for field_name, field_info in SKILL_FIELDS.items():
-            items.append(CompletionItem(
-                label=field_name,
-                kind=CompletionItemKind.Property,
-                detail=field_info.description,
-                documentation=field_info.description,
-                insert_text=f"{field_name}: " if not stripped.endswith(":") else "",
-            ))
-    elif ":" in before_cursor and not before_cursor.strip().startswith("-"):
+    if ":" in before_cursor and not before_cursor.strip().startswith("-"):
         fname = _get_field_name_at_position(before_cursor)
         if fname == "surfaces":
             for surface in COMMON_SURFACES:
@@ -192,6 +201,7 @@ def _frontmatter_completions(before_cursor: str) -> List[CompletionItem]:
                     detail=f"Execution surface: {surface}",
                     insert_text=surface,
                 ))
+            return items
         elif fname == "domain":
             for domain in VALID_DOMAINS:
                 items.append(CompletionItem(
@@ -200,6 +210,7 @@ def _frontmatter_completions(before_cursor: str) -> List[CompletionItem]:
                     detail=f"Skill domain: {domain}",
                     insert_text=domain,
                 ))
+            return items
         elif fname and fname in SKILL_FIELDS and SKILL_FIELDS[fname].type == "list":
             items.append(CompletionItem(
                 label="- ",
@@ -207,6 +218,17 @@ def _frontmatter_completions(before_cursor: str) -> List[CompletionItem]:
                 detail="Add list item",
                 insert_text="- ",
             ))
+            return items
+
+    # Top-level field name suggestions
+    for field_name, field_info in SKILL_FIELDS.items():
+        items.append(CompletionItem(
+            label=field_name,
+            kind=CompletionItemKind.Property,
+            detail=field_info.description,
+            documentation=field_info.description,
+            insert_text=f"{field_name}: " if not stripped.endswith(":") else "",
+        ))
     return items
 
 

@@ -55,9 +55,6 @@ class ClingoSurface(SurfaceBase):
                 tags.add(candidate)
         return list(tags)
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        return await self.execute_with_timeout(code, context)
-
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if not self.available:
             return {"status": "error", "message": "clingo package is not installed"}

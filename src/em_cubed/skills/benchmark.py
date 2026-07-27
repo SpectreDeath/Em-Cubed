@@ -210,7 +210,7 @@ class SkillBenchmark:
             try:
                 await self._execute_skill_once(skill, plugin, test_input)
             except Exception:
-                pass
+                pass  # nosec B110 - intentional fallback; caller handles None/False return
 
         # Measurement phase
         times = []

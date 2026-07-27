@@ -16,7 +16,9 @@ logger = structlog.get_logger()
 class DatalogSurface(SurfaceBase):
     """Handle Datalog code execution and predicate extraction."""
 
-    _execution_cache = {}
+    # NOTE: _execution_cache is intentionally an *instance* variable (set in __init__).
+    # A class-level mutable dict would be shared across all instances, causing state
+    # leakage between tests and concurrent surface objects.
 
     @property
     def name(self) -> str:
@@ -39,7 +41,20 @@ class DatalogSurface(SurfaceBase):
         self._concurrency_limit = int(os.getenv("EM_CUBED_DATALOG_MAX_CONCURRENCY", "1"))
         self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
         self._rejected_executions = 0
+        # Per-instance cache: isolated between instances and test runs.
+        self._execution_cache: Dict[str, Any] = {}
+        self._cache_max_entries = int(os.getenv("EM_CUBED_DATALOG_CACHE_MAX_ENTRIES", "256"))
         logger.info("DatalogSurface initialized", available=self.available, timeout=self.timeout)
+
+    @property
+    def cache_size(self) -> int:
+        """Return the current number of entries in the execution cache."""
+        return len(self._execution_cache)
+
+    def clear_cache(self) -> None:
+        """Clear the execution cache. Useful for test isolation and memory management."""
+        self._execution_cache.clear()
+        logger.debug("DatalogSurface execution cache cleared")
 
     def _check_availability(self) -> bool:
         """Check if pyDatalog is available."""
@@ -89,33 +104,17 @@ class DatalogSurface(SurfaceBase):
         
         return list(predicates)
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Datalog code with timeout protection."""
-        if not await self._acquire_execution_slot():
-            return {
-                "status": "error",
-                "message": f"DatalogSurface execution rejected: concurrency limit {self._concurrency_limit} reached"
-            }
+    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute Datalog code safely on executor thread with timeout shield."""
+        loop = asyncio.get_running_loop()
+        future = loop.run_in_executor(self._executor, self._run_code, code, context)
         try:
-            loop = asyncio.get_running_loop()
-            future = loop.run_in_executor(self._executor, self._run_code, code, context)
-            return await asyncio.wait_for(asyncio.shield(future), timeout=self.timeout)
+            return await asyncio.shield(future)
         except asyncio.TimeoutError:
-            # Replace executor to release the stuck thread
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
             self._executor = ThreadPoolExecutor(max_workers=1)
-            logger.warning("Surface execution timed out", timeout=self.timeout)
-            return {
-                "status": "error",
-                "message": f"Execution timed out after {self.timeout}s"
-            }
-        finally:
-            self._release_execution_slot()
-
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Datalog code - required by abstract base class."""
-        return self._run_code(code, context)
+            raise
 
     def _validate_code(self, code: str) -> Optional[str]:
         try:
@@ -179,10 +178,15 @@ class DatalogSurface(SurfaceBase):
             if context:
                 namespace.update(context)
 
-            exec(code, namespace)  # noqa: S102
+            exec(code, namespace)  # noqa: S102  # nosec B102 - AST-validated allowlist; namespace restricts builtins
             result = namespace.get("result")
 
             res = {"status": "ok", "value": result, "message": "Execution completed"}
+            # Evict oldest entry if cache is at capacity (simple FIFO eviction).
+            if len(self._execution_cache) >= self._cache_max_entries:
+                oldest_key = next(iter(self._execution_cache))
+                del self._execution_cache[oldest_key]
+                logger.debug("Datalog cache evicted oldest entry", cache_size=len(self._execution_cache))
             self._execution_cache[cache_key] = res
             return res
 

@@ -42,10 +42,6 @@ class HySurface(SurfaceBase):
         fns = re.findall(r"\(defn\s+([a-zA-Z][a-zA-Z0-9_\-?!]*)", hy_source)
         return list(dict.fromkeys(fns))
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Hy code with timeout protection."""
-        return await self.execute_with_timeout(code, context)
-
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Hy code - implementation with timeout protection."""
         logger.info("Executing Hy code", code_length=len(code), has_context=context is not None)
@@ -59,10 +55,7 @@ class HySurface(SurfaceBase):
             import re as _re
 
             def _fix_hy_cond(code: str) -> str:
-                """Rewrite bracket-style (cond [... ] [...]) to flat cond form.
-                This handles [test body] bracket clauses inside a (cond ...) form
-                by converting them to flat cond syntax: test1 body1 test2 body2 ...
-                Only applies to bracketed pairs where both elements are present."""
+                """Rewrite bracket-style (cond [... ] [...]) to flat cond form."""
                 try:
                     return _re.sub(
                         r'\(cond\b((?:\s*\[[^\]]+\])+)\s*\)',
@@ -78,7 +71,6 @@ class HySurface(SurfaceBase):
                 pairs = _re.findall(r'\[(.*?)\]', bracket_block, _re.DOTALL)
                 flat_parts = []
                 for pair in pairs:
-                    # Each bracket should have exactly 2 elements
                     parts = pair.strip().split(None, 1)
                     if len(parts) == 2:
                         flat_parts.append(parts[0].strip())

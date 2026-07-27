@@ -182,21 +182,6 @@ class LLMSurface(SurfaceBase):
     # Execution entry-point
     # ------------------------------------------------------------------
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute LLM prompt with timeout protection."""
-        try:
-            result = await asyncio.wait_for(
-                self._execute_impl(code, context),
-                timeout=self.timeout,
-            )
-            return result
-        except asyncio.TimeoutError:
-            logger.warning("LLM surface execution timed out", timeout=self.timeout)
-            return {
-                "status":  "error",
-                "message": f"Execution timed out after {self.timeout}s",
-            }
-
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return await self._run_prompt(code, context)
 

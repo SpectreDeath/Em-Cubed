@@ -91,6 +91,14 @@ class SurfaceBase(SurfacePlugin, ABC):
         if self._concurrency_semaphore is not None:
             self._concurrency_semaphore.release()
 
+    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute code with timeout and concurrency slot protection.
+
+        Fulfills the SurfacePlugin abstract execute() interface by delegating
+        to execute_with_timeout(), which invokes subclass _execute_impl().
+        """
+        return await self.execute_with_timeout(code, context)
+
     async def execute_with_timeout(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute code with timeout protection.
 

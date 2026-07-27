@@ -27,6 +27,7 @@ dependencies = [
 
 [project.scripts]
 em3 = "em_cubed.cli:main"
+em3-mcp = "em_cubed.gateway.mcp_server:run_mcp_server"
 
 [project.optional-dependencies]
 surfaces = [
@@ -72,4 +73,6 @@ ignore_missing_imports = true
 
 [tool.bandit]
 exclude_dirs = ["tests"]
-skips = ["B101", "B601", "B102", "B307", "B110", "B403"]
+# B101 (assert usage) is acceptable in test fixtures that leak into src.
+# All other security rules are enforced globally; per-site exceptions use # nosec with rationale.
+skips = ["B101"]

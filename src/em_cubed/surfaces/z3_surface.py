@@ -89,10 +89,6 @@ class Z3Surface(SurfaceBase):
         
         return list(tags)
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Z3 code with timeout protection."""
-        return await self.execute_with_timeout(code, context)
-
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Z3 code - implementation with timeout protection."""
         logger.info("Executing Z3 code", code_length=len(code), has_context=context is not None)
@@ -169,7 +165,7 @@ class Z3Surface(SurfaceBase):
                                 result_info['upper'] = str(solver.upper())
                                 result_info['lower'] = str(solver.lower())
                             except Exception:
-                                pass
+                                pass  # nosec B110 - intentional fallback; caller handles None/False return
 
                 logger.info("Z3 execution successful")
                 return {"status": "ok", "value": result_info or "Execution completed"}

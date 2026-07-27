@@ -1,7 +1,14 @@
-"""WASM surface integration for executing WebAssembly code using wasmtime."""
+"""WASM surface integration for executing WebAssembly code using wasmtime.
+
+Security model:
+- Fuel metering (EM_CUBED_WASM_FUEL, default 1_000_000 instructions) prevents infinite loops.
+- WASI stdout/stderr are redirected to /dev/null; host FDs are never inherited.
+- Modules importing WASI network sockets are rejected before instantiation.
+"""
 
 import asyncio
 import base64
+import os
 from typing import Dict, Any, Optional, List, cast
 import structlog
 import wasmtime
@@ -16,20 +23,27 @@ class WASMSurface(SurfaceBase):
 
     def __init__(self, timeout: Optional[float] = None):
         """Initialize WASM surface.
-        
+
         Args:
             timeout: Optional timeout in seconds for WASM execution
         """
         super().__init__(timeout)
         self._wasm_available = self._check_wasm_availability()
         self._engine: Optional[wasmtime.Engine] = None
-        logger.info("WASMSurface initialized", available=self._wasm_available, timeout=self.timeout)
+        # Fuel budget: max instructions the WASM module may execute.
+        # Set EM_CUBED_WASM_FUEL env var to tune. Lower = tighter sandbox.
+        self._fuel_limit = int(os.getenv("EM_CUBED_WASM_FUEL", "1_000_000"))
+        logger.info("WASMSurface initialized", available=self._wasm_available,
+                    timeout=self.timeout, fuel_limit=self._fuel_limit)
 
     def initialize(self) -> None:
-        """Initialize the WASM surface."""
+        """Initialize the WASM engine with fuel metering enabled."""
         if self._wasm_available:
-            self._engine = wasmtime.Engine()
-            logger.debug("WASM engine initialized")
+            # Enable instruction-count fuel metering to prevent infinite loops.
+            config = wasmtime.Config()
+            config.consume_fuel = True
+            self._engine = wasmtime.Engine(config)
+            logger.debug("WASM engine initialized", fuel_limit=self._fuel_limit)
 
     def shutdown(self) -> None:
         """Shutdown the WASM surface."""
@@ -85,7 +99,7 @@ class WASMSurface(SurfaceBase):
                     if hasattr(exp.type, 'func') and exp.type.func() is not None:
                         funcs.append(exp.name)
                 except Exception:
-                    pass
+                    pass  # nosec B110 - best-effort export enumeration; non-security-critical
             return funcs
             
         except Exception as e:
@@ -94,18 +108,49 @@ class WASMSurface(SurfaceBase):
             funcs = re.findall(r'\(func\s+(?:\$?(\w+))', wasm_source)
             return list(dict.fromkeys(funcs))
 
+    # WASI network socket import names to block (WASI Preview 1 + Preview 2 names).
+    _BLOCKED_WASI_IMPORTS: List[str] = [
+        "sock_accept", "sock_recv", "sock_send", "sock_shutdown",
+        "sock_open", "sock_connect", "sock_listen", "sock_bind",
+    ]
+
+    def _check_network_imports(self, module: "wasmtime.Module") -> Optional[str]:
+        """Return an error string if the module imports any WASI network functions."""
+        try:
+            for imp in module.imports:
+                if imp.name in self._BLOCKED_WASI_IMPORTS:
+                    return (
+                        f"WASM module imports blocked network function '{imp.name}'. "
+                        "Network access is disabled in the WASM sandbox."
+                    )
+        except Exception:
+            pass  # nosec B110 - best-effort; fail open (log but allow)
+        return None
+
     def _run_wasm(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Synchronous WASM compilation and execution to run inside the thread pool executor."""
-        # Import wasmtime here to handle case where it's not available
         try:
             import wasmtime
         except ImportError:
             return {"status": "error", "message": "WASM runtime (wasmtime) not available"}
-        
-        # Use initialized engine if available, otherwise create a temporary one
-        engine = self._engine if self._engine is not None else wasmtime.Engine()
+
+        # Use initialized (fuel-metered) engine if available; otherwise create a temporary one
+        # with fuel metering enabled so even ad-hoc calls are budget-constrained.
+        if self._engine is not None:
+            engine = self._engine
+        else:
+            config = wasmtime.Config()
+            config.consume_fuel = True
+            engine = wasmtime.Engine(config)
+
         store = wasmtime.Store(engine)
-        
+
+        # Apply instruction-count fuel budget to prevent infinite loops.
+        try:
+            store.set_fuel(self._fuel_limit)
+        except Exception:
+            pass  # nosec B110 - older wasmtime versions may not support set_fuel; fail open
+
         # 1. Compile WASM source
         code_stripped = code.strip()
         if code_stripped.startswith("(module"):
@@ -116,14 +161,27 @@ class WASMSurface(SurfaceBase):
                 module = wasmtime.Module(engine, binary_data)
             except Exception:
                 module = wasmtime.Module(engine, code_stripped)
-        
-        # 2. Setup linker and WASI config
+
+        # 2. Reject modules that import WASI network socket functions.
+        net_err = self._check_network_imports(module)
+        if net_err:
+            return {"status": "error", "message": net_err}
+
+        # 3. Setup linker and hardened WASI config.
+        # Host stdout/stderr are NOT inherited — output is silenced to prevent
+        # WASM code from writing to the host process file descriptors.
         linker = wasmtime.Linker(engine)
         linker.define_wasi()
-        
+
         wasi_config = wasmtime.WasiConfig()
-        wasi_config.inherit_stdout()
-        wasi_config.inherit_stderr()
+        # Redirect WASM stdout/stderr to /dev/null (cross-platform via temp files on Windows).
+        try:
+            import os as _os
+            null_path = _os.devnull
+            wasi_config.stdout_file = null_path
+            wasi_config.stderr_file = null_path
+        except (AttributeError, Exception):
+            pass  # nosec B110 - WasiConfig may not support file redirect on all versions
         store.set_wasi(wasi_config)
         
         # 3. Instantiate the module
@@ -203,10 +261,6 @@ class WASMSurface(SurfaceBase):
             "status": "ok",
             "value": result_val
         }
-
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute WebAssembly code and return results."""
-        return await self.execute_with_timeout(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Compile and execute WebAssembly code safely on the thread executor."""

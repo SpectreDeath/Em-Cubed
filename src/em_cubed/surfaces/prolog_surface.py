@@ -87,10 +87,6 @@ class PrologSurface(SurfaceBase):
             escaped = str(value).replace("\\", "\\\\").replace("'", "\\'")
             return "'" + escaped + "'"
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Prolog code and return results."""
-        return await self.execute_with_timeout(code, context)
-
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Prolog code - implementation with timeout protection."""
         logger.info("Executing Prolog code", code_length=len(code), has_context=context is not None)
@@ -205,7 +201,7 @@ class PrologSurface(SurfaceBase):
                         try:
                             os.unlink(path)
                         except OSError:
-                            pass
+                            pass  # nosec B110 - intentional fallback; caller handles None/False return
                 except Exception as consult_err:
                     logger.warning("Prolog file consultation failed, falling back to assertz", error=str(consult_err))
                     i = 0
@@ -227,12 +223,12 @@ class PrologSurface(SurfaceBase):
                             try:
                                 prolog.query(clean[2:].strip())
                             except Exception:
-                                pass
+                                pass  # nosec B110 - intentional fallback; caller handles None/False return
                         elif query_prefix:
                             try:
                                 list(prolog.query(clean[2:].strip()))
                             except Exception:
-                                pass
+                                pass  # nosec B110 - intentional fallback; caller handles None/False return
                         elif clean:
                             try:
                                 prolog.assertz(clean)

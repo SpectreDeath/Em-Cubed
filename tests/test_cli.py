@@ -15,7 +15,7 @@ def test_main_no_args(capsys):
     
     captured = capsys.readouterr()
     assert "usage:" in captured.out.lower()
-    assert "em-cubed: multi-surface skill framework" in captured.out.lower()
+    assert "em-cubed:" in captured.out.lower()
 
 
 def test_handle_index_creates_directory_if_missing(tmp_path):

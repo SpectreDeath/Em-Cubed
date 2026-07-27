@@ -305,7 +305,7 @@ async def test_logic_surfaces_caching():
     # 3. Datalog Caching
     from src.em_cubed.surfaces.datalog_surface import DatalogSurface
     datalog_surface = DatalogSurface()
-    DatalogSurface._execution_cache.clear()
+    datalog_surface.clear_cache()
     
     datalog_code = "result = [1, 2, 3]"
     

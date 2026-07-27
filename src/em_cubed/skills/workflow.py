@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Set
 from datetime import datetime
 
+from asteval import Interpreter as _ASTInterpreter
+
 from .composer import ExecutionContext, CompositionStep, CompositionResult
 
 logger = structlog.get_logger()
@@ -100,8 +102,17 @@ class WorkflowExecutor:
             # Check condition if present
             if step.condition:
                 try:
-                    # Simple eval against context data (Caution: insecure, should be improved)
-                    if not eval(step.condition, {"context": context.data}):
+                    # Safe condition evaluation via asteval — blocks imports, exec,
+                    # open, __builtins__, and other dangerous constructs.
+                    _aeval = _ASTInterpreter(
+                        excluded_symbols=["open", "__import__", "eval", "exec",
+                                          "compile", "__builtins__"]
+                    )
+                    _aeval.symtable["context"] = context.data
+                    result = _aeval(step.condition)
+                    if _aeval.error:
+                        raise ValueError(_aeval.error[0].msg)
+                    if not result:
                         self.logger.info("Skipping step due to condition", step=step.id)
                         async with context_lock:
                             completed_steps.add(step.id)

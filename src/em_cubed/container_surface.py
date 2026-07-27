@@ -96,8 +96,10 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
             ]
             
             try:
-                # Execute container with timeout
-                process = await asyncio.create_subprocess_exec(
+                # Execute container with timeout.
+                # nosec B603,B601 — create_subprocess_exec uses a fixed arg list (no shell=True).
+                # `container_cmd` is built from hardcoded constants; the container is the security boundary.
+                process = await asyncio.create_subprocess_exec(  # nosec B603
                     *container_cmd,
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE
@@ -148,8 +150,8 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
             return False
             
         try:
-            # Check if container image exists
-            process = await asyncio.create_subprocess_exec(
+            # nosec B603 — fixed arg list, no shell=True; inspects a known image name only.
+            process = await asyncio.create_subprocess_exec(  # nosec B603
                 self._container_runtime, "image", "inspect", self._container_image,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE

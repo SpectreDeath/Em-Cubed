@@ -51,15 +51,11 @@ class QuickJSSurface(SurfaceBase):
                         # Use JS assignment via eval; more compatible than parse_json
                         ctx.eval(f"var {key} = {json.dumps(value)};")
                     except Exception:
-                        pass  # Skip if injection fails
+                        pass  # nosec B110 - skip unencodable context var; outer eval handles errors
 
         # Execute the code
         result = ctx.eval(code)
         return {"status": "ok", "value": result}
-
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute JavaScript code and return results."""
-        return await self.execute_with_timeout(code, context)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute JavaScript code in the executor thread."""

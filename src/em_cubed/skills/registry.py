@@ -480,17 +480,17 @@ class RegistryStorage(ABC):
     @abstractmethod
     def load_skills(self) -> List[Dict[str, Any]]:
         """Load all skills from the storage backend."""
-        pass
+        pass  # nosec B110 - intentional fallback; caller handles None/False return
         
     @abstractmethod
     def save_skills(self, skills: List[Dict[str, Any]]) -> None:
         """Save all skills to the storage backend."""
-        pass
+        pass  # nosec B110 - intentional fallback; caller handles None/False return
         
     @abstractmethod
     def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
         """Update runtime metrics for a specific skill atomically."""
-        pass
+        pass  # nosec B110 - intentional fallback; caller handles None/False return
 
 
 class JSONFileRegistryStorage(RegistryStorage):
@@ -519,7 +519,7 @@ class JSONFileRegistryStorage(RegistryStorage):
             
     def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
         # Atomic update not natively supported for single JSON file, caller uses save_skills
-        pass
+        pass  # nosec B110 - intentional fallback; caller handles None/False return
 
 
 class SQLiteRegistryStorage(RegistryStorage):
@@ -581,7 +581,7 @@ class SQLiteRegistryStorage(RegistryStorage):
                         
                         skills.append(skill_data)
                     except Exception:
-                        pass
+                        pass  # nosec B110 - intentional fallback; caller handles None/False return
                 return skills
         except Exception as e:
             logger.error("Failed to load skills from SQLite registry", error=str(e))

@@ -3,7 +3,7 @@
 import asyncio
 import importlib.util
 import os
-import pickle
+import pickle  # nosec B403 - used only for pickle.dumps() picklability probe; never deserializes untrusted data
 from concurrent.futures import ProcessPoolExecutor
 from typing import Dict, Any, Optional
 import structlog
@@ -60,9 +60,9 @@ def _kill_executor_processes(executor) -> None:
                     if hasattr(p, "kill"):
                         p.kill()
                 except Exception:
-                    pass
+                    pass  # nosec B110 - intentional fallback; caller handles None/False return
     except Exception:
-        pass
+        pass  # nosec B110 - intentional fallback; caller handles None/False return
 
 
 class PythonSurface(SurfaceBase):
@@ -113,24 +113,19 @@ class PythonSurface(SurfaceBase):
         fns = re.findall(r"^\s*def\s+([a-zA-Z][a-zA-Z0-9_]*)\s*\(", python_source, re.MULTILINE)
         return list(dict.fromkeys(fns))
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Execute Python code safely using asteval and executor processes."""
         if not self.available:
             return {
                 "status": "error",
                 "message": f"{self.name} surface not available"
             }
-        if not await self._acquire_execution_slot():
-            return {
-                "status": "error",
-                "message": f"PythonSurface execution rejected: concurrency limit {self._concurrency_limit} reached"
-            }
+        loop = asyncio.get_running_loop()
+        executor = self._process_executor if _is_picklable(context) else self._executor
+        future = loop.run_in_executor(executor, _run_asteval_code, code, context)
         try:
-            loop = asyncio.get_running_loop()
-            executor = self._process_executor if _is_picklable(context) else self._executor
-            future = loop.run_in_executor(executor, _run_asteval_code, code, context)
-            return await asyncio.wait_for(asyncio.shield(future), timeout=self.timeout)
+            return await asyncio.shield(future)
         except asyncio.TimeoutError:
-            # Replace executor to release the stuck thread/process
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
             if self._process_executor is not None:
@@ -138,17 +133,7 @@ class PythonSurface(SurfaceBase):
                 self._process_executor.shutdown(wait=False)
             self._executor = _make_daemon_executor(max_workers=self._worker_count())
             self._process_executor = ProcessPoolExecutor(max_workers=self._worker_count())
-            logger.warning("Surface execution timed out", timeout=self.timeout)
-            return {
-                "status": "error",
-                "message": f"Execution timed out after {self.timeout}s"
-            }
-        finally:
-            self._release_execution_slot()
-
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute Python code - required by abstract base class."""
-        return self._run_code(code, context)
+            raise
 
     def _run_code(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Run asteval code synchronously in the executor thread."""

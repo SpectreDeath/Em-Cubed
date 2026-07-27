@@ -41,6 +41,7 @@ env/
 # Testing
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 
 # Distribution / packaging
@@ -98,9 +99,12 @@ write_impl.py
 scratch/
 logs/
 logs.zip
+# Auto-generated skill registries — rebuilt by `em3 index skills/ -o registry.json`
+# Never commit these; they change on every index run and every benchmark run.
 registry_agents.json
 skills_registry.json
 registry.json
+src/em_cubed/registry.json
 scratch_*.py
 test_data.json
 test_workflow.json

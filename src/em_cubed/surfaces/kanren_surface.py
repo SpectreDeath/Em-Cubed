@@ -47,9 +47,6 @@ class KanrenSurface(SurfaceBase):
 
         return list(tags)
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        return await self.execute_with_timeout(code, context)
-
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if not self.available:
             return {"status": "error", "message": "kanren package is not installed"}
@@ -92,7 +89,7 @@ class KanrenSurface(SurfaceBase):
         exec_globals: Dict[str, Any] = dict(namespace)
 
         try:
-            exec(code, exec_globals)  # noqa: S102
+            exec(code, exec_globals)  # noqa: S102  # nosec B102 - kanren namespace pre-populated with allowlisted symbols only
         except Exception as exc:
             return {"status": "error", "message": f"Kanren execution failed: {exc}"}
 

@@ -1,210 +1,123 @@
-"""Em-Cubed: Neuro-Symbolic Ontological Framework & Polyglot Skill Engine.
+"""Em-Cubed: Polyglot AI Skill Engine & Neuro-Symbolic Ontological Framework.
 
-Enforces formal semantic truth at the ledger level ("Pydantic at the door, Ontology at the ledger")
-and leverages multi-surface reasoning coprocessors (Python, Prolog, Z3, Datalog, Hy, SQLite).
+Unified execution engine supporting Python, Prolog, Z3, Datalog, Hy, SQLite, QuickJS, WASM, Clingo, Kanren.
 """
 
-from .indexer import get_skill_metadata, reindex  # noqa: E402
-from .search import search_registry  # noqa: E402
-from .skills import (  # noqa: E402
-    BenchmarkResult,
-    CompositionResult,
-    ExecutionRecord,
-    QualityMetrics,
-    RecommendationResult,
-    SkillBenchmark,
-    SkillComposer,
-    SkillExecutor,
-    SkillMetadata,
-    SkillQualityPipeline,
-    SkillRecommender,
-    SkillRegistry,
-    SkillTelemetry,
-    SkillValidator,
-    TelemetryCollector,
-    ValidationResult,
-    initialize_executor,
-    initialize_telemetry,
-)
-from .surfaces import (  # noqa: E402
+import warnings
+from typing import Any
+
+from .indexer import get_skill_metadata, reindex
+from .search import search_registry
+from .skills import SkillExecutor, SkillRegistry, SkillValidator
+from .surfaces import (
+    ClingoSurface,
     DatalogSurface,
     HySurface,
     JanusSurface,
+    KanrenSurface,
     PrologSurface,
     PythonSurface,
     QuickJSSurface,
     SQLiteSurface,
+    WASMSurface,
     Z3Surface,
 )
 
 __version__ = "0.8.0"
+
+# Tiered Public API: Core Skill Engine & Primary Surfaces
 __all__ = [
     "reindex",
     "get_skill_metadata",
     "search_registry",
     "PythonSurface",
     "PrologSurface",
-    "HySurface",
     "Z3Surface",
     "DatalogSurface",
-    "JanusSurface",
     "SQLiteSurface",
+    "HySurface",
     "QuickJSSurface",
-    # Skills quality framework
-    "SkillMetadata",
-    "SkillValidator",
-    "ValidationResult",
+    "WASMSurface",
+    "ClingoSurface",
+    "KanrenSurface",
+    "JanusSurface",
     "SkillRegistry",
-    "QualityMetrics",
-    "SkillComposer",
-    "CompositionResult",
-    "SkillBenchmark",
-    "BenchmarkResult",
-    "SkillRecommender",
-    "RecommendationResult",
-    "SkillQualityPipeline",
-    "TelemetryCollector",
-    "ExecutionRecord",
-    "SkillTelemetry",
     "SkillExecutor",
-    "initialize_telemetry",
-    "initialize_executor",
-    # Loopy & Ontology Framework
-    "BaseLoopySkill",
-    "LoopySkillRunner",
-    "TextLoopMiner",
-    "OntologyLedgerValidator",
-    "OntologyTriple",
-    "GraphPathRAG",
-    "ConstraintSteeringCompiler",
-    "TrajectoryAuditor",
-    "TruthValue",
-    "SubobjectClassifier",
-    "SurfaceMorphism",
-    "SkillEvolutionEngine",
-    "TripleInductionEngine",
-    "MultiAgentToposConsensus",
-    "FederatedOntologyRegistry",
-    "KnowledgeGraphVisualizer",
-    "KnowledgeElicitationPipeline",
-    "DecisionSupportQuestion",
-    "CompetencyQuestion",
-    "PMESTFacets",
-    "OntoCleanPartition",
-    "EntityType",
-    "ExactTruthmaker",
-    "ExactTruthmakerClassifier",
-    "HyperintensionalEvaluator",
-    "StateFragment",
-    "DescriptionLogicExpression",
-    "ConceptInductionEngine",
-    "NeuronConceptAligner",
-    "ReducerType",
-    "DerivedPropertyReducer",
-    "OntologyInterface",
-    "InterfaceImplementation",
-    "ObjectBacklinkRegistry",
-    "SchemaVersion",
-    "SchemaMigrationStep",
-    "ForwardBackwardCompatibilityChecker",
-    "AutomatedTripleMigrationEngine",
-    "OntologySchemaMigrator",
-    "OntologyHealthReport",
-    "OntologicalHealthMonitor",
-    "SelfHealingGuardrailEngine",
-    "TimeInterval",
-    "GeoLocation",
-    "TemporalSpatialTriple",
-    "WorldStateTimeline",
-    "TemporalSnapshotQueryEngine",
-    "SpatialProximityReasoner",
-    "RDFSerializer",
-    "SHACLConstraintGenerator",
-    "OWLImporter",
-    "SwarmRunConfig",
-    "SwarmExecutionReport",
-    "DualEngineSwarmOrchestrator",
-    "EventType",
-    "StreamEvent",
-    "ReactiveRule",
-    "StreamProcessingResult",
-    "OntologyEventStreamProcessor",
-    "OntologyTUIDashboard",
-    "run_cli_tui_mode",
-    "SurfaceFunctor",
-    "OntologyMonad",
-    "EmCubedMCPServer",
-    "run_mcp_server",
-    "BenchmarkReport",
-    "DualEngineBenchmarkRunner",
+    "SkillValidator",
+    "__version__",
 ]
 
-from em_cubed.cli_tui import OntologyTUIDashboard, run_cli_tui_mode  # noqa: E402
+# Legacy sub-package mapping for backward-compatible attribute access with DeprecationWarning (PEP 562)
+_DEPRECATED_LEGACY_EXPORTS = {
+    # Skills / Quality framework
+    "SkillMetadata": ("em_cubed.skills", "SkillMetadata"),
+    "QualityMetrics": ("em_cubed.skills", "QualityMetrics"),
+    "SkillComposer": ("em_cubed.skills", "SkillComposer"),
+    "CompositionResult": ("em_cubed.skills", "CompositionResult"),
+    "SkillBenchmark": ("em_cubed.skills", "SkillBenchmark"),
+    "BenchmarkResult": ("em_cubed.skills", "BenchmarkResult"),
+    "SkillRecommender": ("em_cubed.skills", "SkillRecommender"),
+    "RecommendationResult": ("em_cubed.skills", "RecommendationResult"),
+    "SkillQualityPipeline": ("em_cubed.skills", "SkillQualityPipeline"),
+    "TelemetryCollector": ("em_cubed.skills", "TelemetryCollector"),
+    "ExecutionRecord": ("em_cubed.skills", "ExecutionRecord"),
+    "SkillTelemetry": ("em_cubed.skills", "SkillTelemetry"),
+    "ValidationResult": ("em_cubed.skills", "ValidationResult"),
+    "initialize_telemetry": ("em_cubed.skills", "initialize_telemetry"),
+    "initialize_executor": ("em_cubed.skills", "initialize_executor"),
+    # Gateway / MCP
+    "EmCubedMCPServer": ("em_cubed.gateway", "EmCubedMCPServer"),
+    "run_mcp_server": ("em_cubed.gateway", "run_mcp_server"),
+    # Loopy
+    "BaseLoopySkill": ("em_cubed.loopy", "BaseLoopySkill"),
+    "LoopySkillRunner": ("em_cubed.loopy", "LoopySkillRunner"),
+    "TextLoopMiner": ("em_cubed.loopy", "TextLoopMiner"),
+    "TrajectoryAuditor": ("em_cubed.loopy", "TrajectoryAuditor"),
+    "SkillEvolutionEngine": ("em_cubed.loopy", "SkillEvolutionEngine"),
+    # Surfaces extra
+    "SurfaceFunctor": ("em_cubed.surfaces", "SurfaceFunctor"),
+    "OntologyMonad": ("em_cubed.surfaces", "OntologyMonad"),
+    "SurfaceMorphism": ("em_cubed.surfaces", "SurfaceMorphism"),
+    # CLI / TUI
+    "OntologyTUIDashboard": ("em_cubed.cli_tui", "OntologyTUIDashboard"),
+    "run_cli_tui_mode": ("em_cubed.cli_tui", "run_cli_tui_mode"),
+    # Benchmarks
+    "BenchmarkReport": ("em_cubed.benchmarks", "BenchmarkReport"),
+    "DualEngineBenchmarkRunner": ("em_cubed.benchmarks", "DualEngineBenchmarkRunner"),
+    # Swarm
+    "DualEngineSwarmOrchestrator": ("em_cubed.orchestration.dual_engine_swarm", "DualEngineSwarmOrchestrator"),
+    "SwarmExecutionReport": ("em_cubed.orchestration.dual_engine_swarm", "SwarmExecutionReport"),
+    "SwarmRunConfig": ("em_cubed.orchestration.dual_engine_swarm", "SwarmRunConfig"),
+}
 
-from em_cubed.loopy import (  # noqa: E402
-    BaseLoopySkill,
-    LoopySkillRunner,
-    SkillEvolutionEngine,
-    TextLoopMiner,
-    TrajectoryAuditor,
-)
-from em_cubed.ontology import (  # noqa: E402
-    AutomatedTripleMigrationEngine,
-    CompetencyQuestion,
-    ConceptInductionEngine,
-    ConstraintSteeringCompiler,
-    DecisionSupportQuestion,
-    DerivedPropertyReducer,
-    DescriptionLogicExpression,
-    EntityType,
-    EventType,
-    ExactTruthmaker,
-    ExactTruthmakerClassifier,
-    FederatedOntologyRegistry,
-    ForwardBackwardCompatibilityChecker,
-    GeoLocation,
-    GraphPathRAG,
-    HyperintensionalEvaluator,
-    InterfaceImplementation,
-    KnowledgeElicitationPipeline,
-    KnowledgeGraphVisualizer,
-    MultiAgentToposConsensus,
-    NeuronConceptAligner,
-    ObjectBacklinkRegistry,
-    OntoCleanPartition,
-    OntologicalHealthMonitor,
-    OntologyEventStreamProcessor,
-    OntologyHealthReport,
-    OntologyInterface,
-    OntologyLedgerValidator,
-    OntologySchemaMigrator,
-    OntologyTriple,
-    OWLImporter,
-    PMESTFacets,
-    RDFSerializer,
-    ReactiveRule,
-    ReducerType,
-    SchemaMigrationStep,
-    SchemaVersion,
-    SelfHealingGuardrailEngine,
-    SHACLConstraintGenerator,
-    SpatialProximityReasoner,
-    StateFragment,
-    StreamEvent,
-    StreamProcessingResult,
-    SubobjectClassifier,
-    TemporalSnapshotQueryEngine,
-    TemporalSpatialTriple,
-    TimeInterval,
-    TripleInductionEngine,
-    TruthValue,
-    WorldStateTimeline,
-)
-from em_cubed.orchestration.dual_engine_swarm import (  # noqa: E402
-    DualEngineSwarmOrchestrator,
-    SwarmExecutionReport,
-    SwarmRunConfig,
-)
-from em_cubed.benchmarks import BenchmarkReport, DualEngineBenchmarkRunner  # noqa: E402
-from em_cubed.gateway import EmCubedMCPServer, run_mcp_server  # noqa: E402
-from em_cubed.surfaces import OntologyMonad, SurfaceFunctor, SurfaceMorphism  # noqa: E402
+
+def __getattr__(name: str) -> Any:
+    if name in _DEPRECATED_LEGACY_EXPORTS:
+        mod_path, attr_name = _DEPRECATED_LEGACY_EXPORTS[name]
+        warnings.warn(
+            f"Direct top-level import of '{name}' from 'em_cubed' is deprecated. "
+            f"Please import from '{mod_path}' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        import importlib
+        mod = importlib.import_module(mod_path)
+        return getattr(mod, attr_name)
+
+    # Check ontology module for any remaining ontology symbols
+    try:
+        import importlib
+        mod = importlib.import_module("em_cubed.ontology")
+        if hasattr(mod, name):
+            warnings.warn(
+                f"Direct top-level import of '{name}' from 'em_cubed' is deprecated. "
+                f"Please import from 'em_cubed.ontology' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return getattr(mod, name)
+    except Exception:
+        pass
+
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+

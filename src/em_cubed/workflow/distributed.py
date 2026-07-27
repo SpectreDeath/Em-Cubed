@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 import threading
 import time
 import uuid
@@ -16,63 +17,67 @@ import structlog
 logger = structlog.get_logger()
 
 
+_TMPL_PATTERN = re.compile(
+    r"\{\{\s*tasks\.([a-zA-Z0-9_-]+)(?:\.(?:result|output|\$\.))?"
+    r"\.?([a-zA-Z0-9_.-]+)?\s*\}\}"
+)
+
+
+def _resolve_path(root: Any, path_str: Optional[str]) -> Any:
+    """Walk a dot-separated path into a nested dict/list."""
+    if not path_str or root is None:
+        return root
+    curr = root
+    for part in path_str.split("."):
+        if isinstance(curr, dict):
+            if part not in curr:
+                if "result" in curr and isinstance(curr["result"], dict) and part in curr["result"]:
+                    curr = curr["result"].get(part)
+                    continue
+                elif "output" in curr and isinstance(curr["output"], dict) and part in curr["output"]:
+                    curr = curr["output"].get(part)
+                    continue
+            curr = curr.get(part)
+        elif isinstance(curr, list) and part.isdigit():
+            idx = int(part)
+            curr = curr[idx] if 0 <= idx < len(curr) else None
+        else:
+            return None
+        if curr is None:
+            return None
+    return curr
+
+
 def resolve_template_value(val: Any, task_results: Dict[str, Any]) -> Any:
     """
     Resolve template placeholders like '{{ tasks.task_id.result.field }}' from completed parent task results.
     """
-    import re
-
     if isinstance(val, str) and "{{" in val and "}}" in val:
-        pattern = r"\{\{\s*tasks\.([a-zA-Z0-9_-]+)(?:\.(?:result|output|\$\.))?\.?([a-zA-Z0-9_.-]+)?\s*\}\}"
-
-        full_match = re.fullmatch(pattern, val.strip())
+        full_match = _TMPL_PATTERN.fullmatch(val.strip())
         if full_match:
             dep_id, path_str = full_match.groups()
             dep_res = task_results.get(dep_id)
             if dep_res is None:
                 return val
-            if not path_str:
-                return dep_res
-            curr = dep_res
-            for part in path_str.split("."):
-                if isinstance(curr, dict):
-                    curr = curr.get(part)
-                elif isinstance(curr, list) and part.isdigit():
-                    idx = int(part)
-                    curr = curr[idx] if 0 <= idx < len(curr) else None
-                else:
-                    curr = None
-                if curr is None:
-                    break
-            return curr if curr is not None else val
+            res = _resolve_path(dep_res, path_str)
+            return res if res is not None else val
 
-        def replace_match(match: re.Match) -> str:
+        def _replace_match(match: re.Match) -> str:
             dep_id, path_str = match.groups()
             dep_res = task_results.get(dep_id)
             if dep_res is None:
                 return match.group(0)
-            if not path_str:
-                return str(dep_res)
-            curr = dep_res
-            for part in path_str.split("."):
-                if isinstance(curr, dict):
-                    curr = curr.get(part)
-                elif isinstance(curr, list) and part.isdigit():
-                    idx = int(part)
-                    curr = curr[idx] if 0 <= idx < len(curr) else None
-                else:
-                    curr = None
-                if curr is None:
-                    break
-            return str(curr) if curr is not None else match.group(0)
+            res = _resolve_path(dep_res, path_str)
+            return str(res) if res is not None else match.group(0)
 
-        return re.sub(pattern, replace_match, val)
+        return _TMPL_PATTERN.sub(_replace_match, val)
 
     elif isinstance(val, dict):
         return {k: resolve_template_value(v, task_results) for k, v in val.items()}
     elif isinstance(val, list):
         return [resolve_template_value(item, task_results) for item in val]
     return val
+
 
 
 class TaskStatus(Enum):
@@ -225,7 +230,7 @@ class DistributedExecutor:
 
     def shutdown(self) -> None:
         """Shutdown the executor."""
-        pass
+        pass  # nosec B110 - intentional fallback; caller handles None/False return
 
 
 def _execute_distributed_task(task_dict: Dict[str, Any], skills_dir_str: str) -> Dict[str, Any]:
@@ -460,9 +465,9 @@ class ProcessDistributedExecutor(DistributedExecutor):
                         p.terminate()
                         p.kill()
                     except Exception:
-                        pass
+                        pass  # nosec B110 - intentional fallback; caller handles None/False return
         except Exception:
-            pass
+            pass  # nosec B110 - intentional fallback; caller handles None/False return
         self._process_executor.shutdown(wait=False)
 
 

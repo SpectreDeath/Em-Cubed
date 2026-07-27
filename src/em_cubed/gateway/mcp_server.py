@@ -122,11 +122,108 @@ class EmCubedMCPServer:
                 "required": ["scenario", "steps"],
             },
         },
+        {
+            "name": "em_cubed_search_skills",
+            "description": "Searches the Em-Cubed polyglot skill registry by keyword or topic.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"},
+                    "max_results": {"type": "integer"},
+                },
+                "required": ["query"],
+            },
+        },
+        {
+            "name": "em_cubed_list_surfaces",
+            "description": "Lists all available polyglot execution surfaces (Python, Prolog, Z3, Datalog, Hy, SQLite, WASM, etc.) and availability status.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {},
+            },
+        },
+        {
+            "name": "em_cubed_execute_skill",
+            "description": "Executes a skill from the registry using a specified reasoning surface.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "skill_id": {"type": "string"},
+                    "surface": {"type": "string"},
+                    "input_data": {"type": "object"},
+                },
+                "required": ["skill_id"],
+            },
+        },
     ]
 
     def call_tool(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         """Dispatch tool invocation to core subsystem handler."""
-        if name == "em_cubed_validate_triple":
+        if name == "em_cubed_search_skills":
+            from em_cubed.search import search_registry
+            from pathlib import Path
+            query = args.get("query", "")
+            max_res = args.get("max_results", 10)
+            reg_path = Path("registry.json")
+            if not reg_path.exists():
+                reg_path = Path("src/em_cubed/registry.json")
+            if reg_path.exists():
+                matches = search_registry(query, registry_path=reg_path, max_results=max_res)
+            else:
+                from em_cubed.skills import SkillRegistry
+                r = SkillRegistry()
+                matches = [s.to_dict() for s in r.search(query)[:max_res]] if hasattr(r, "search") else []
+            return {
+                "query": query,
+                "count": len(matches),
+                "skills": [
+                    {
+                        "skill_id": m.get("skill_id", m.get("name", "")),
+                        "name": m.get("name", ""),
+                        "domain": m.get("domain", ""),
+                        "surfaces": m.get("surfaces", []),
+                        "description": m.get("description", ""),
+                    }
+                    for m in matches
+                ],
+            }
+
+        elif name == "em_cubed_list_surfaces":
+            from em_cubed.surfaces import (
+                PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
+                SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
+                ClingoSurface, KanrenSurface, JanusSurface
+            )
+            surfaces = [
+                PythonSurface(), PrologSurface(), Z3Surface(), DatalogSurface(),
+                SQLiteSurface(), HySurface(), QuickJSSurface(), WASMSurface(),
+                ClingoSurface(), KanrenSurface(), JanusSurface()
+            ]
+            return {
+                "surfaces": [
+                    {
+                        "name": s.name,
+                        "description": s.description,
+                        "available": s.available,
+                    }
+                    for s in surfaces
+                ]
+            }
+
+        elif name == "em_cubed_execute_skill":
+            from em_cubed.skills import SkillExecutor
+            executor = SkillExecutor()
+            skill_id = args.get("skill_id", "")
+            surface = args.get("surface")
+            input_data = args.get("input_data", {})
+            res = executor.execute_skill_sync(skill_id, surface=surface, input_data=input_data)
+            return {
+                "status": getattr(res, "status", "unknown"),
+                "value": getattr(res, "output", getattr(res, "value", str(res))),
+                "execution_time": getattr(res, "execution_time", 0.0),
+            }
+
+        elif name == "em_cubed_validate_triple":
             triple = OntologyTriple(subject=args["subject"], predicate=args["predicate"], object=args["object"])
             validator = OntologyLedgerValidator()
             is_valid, msg = validator.validate_and_commit(triple)
@@ -191,8 +288,119 @@ class EmCubedMCPServer:
         return {"error": f"Unknown tool: {name}"}
 
 
-def run_mcp_server() -> None:
-    """Run MCP Server on STDIO processing JSON-RPC commands."""
-    server = EmCubedMCPServer()
-    sys.stdout.write(json.dumps({"status": "EmCubed MCP Server Running", "tools_count": len(server.TOOLS)}) + "\n")
+def _write_response(response: dict[str, Any]) -> None:
+    """Write a JSON-RPC response to stdout and flush immediately."""
+    sys.stdout.write(json.dumps(response) + "\n")
     sys.stdout.flush()
+
+
+def _handle_request(server: EmCubedMCPServer, request: dict[str, Any]) -> None:
+    """Dispatch a single JSON-RPC request and write the response."""
+    req_id = request.get("id")
+    method = request.get("method", "")
+    params = request.get("params", {})
+
+    try:
+        if method == "initialize":
+            _write_response({
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "protocolVersion": "2024-11-05",
+                    "serverInfo": {
+                        "name": "em-cubed",
+                        "version": "0.8.0",
+                    },
+                    "capabilities": {"tools": {}},
+                },
+            })
+
+        elif method == "notifications/initialized":
+            # Client acknowledgment — no response required.
+            pass
+
+        elif method == "tools/list":
+            _write_response({
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {"tools": server.TOOLS},
+            })
+
+        elif method == "tools/call":
+            tool_name = params.get("name", "")
+            tool_args = params.get("arguments", {})
+            try:
+                result = server.call_tool(tool_name, tool_args)
+                _write_response({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "content": [{"type": "text", "text": json.dumps(result)}],
+                        "isError": False,
+                    },
+                })
+            except Exception as exc:
+                _write_response({
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "content": [{"type": "text", "text": str(exc)}],
+                        "isError": True,
+                    },
+                })
+
+        elif method == "ping":
+            _write_response({"jsonrpc": "2.0", "id": req_id, "result": {}})
+
+        else:
+            _write_response({
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32601, "message": f"Method not found: {method}"},
+            })
+
+    except Exception as exc:
+        logger.exception("MCP request handler error", method=method, error=str(exc))
+        _write_response({
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "error": {"code": -32603, "message": f"Internal error: {exc}"},
+        })
+
+
+def run_mcp_server() -> None:
+    """Run MCP Server on STDIO processing JSON-RPC 2.0 commands.
+
+    Implements the MCP STDIO transport specification:
+    - Reads newline-delimited JSON-RPC requests from stdin.
+    - Writes newline-delimited JSON-RPC responses to stdout.
+    - Supports: initialize, tools/list, tools/call, ping.
+
+    Usage:
+        em3-mcp                     # via installed entry point
+        python -m em_cubed.gateway.mcp_server
+    """
+    server = EmCubedMCPServer()
+    logger.info("Em-Cubed MCP Server started", tools_count=len(server.TOOLS))
+
+    # Emit an MCP-compliant ready notification on stderr (not stdout, which is JSON-RPC channel).
+    sys.stderr.write(
+        json.dumps({"status": "Em-Cubed MCP Server Running",
+                    "tools_count": len(server.TOOLS)}) + "\n"
+    )
+    sys.stderr.flush()
+
+    for raw_line in sys.stdin:
+        line = raw_line.strip()
+        if not line:
+            continue
+        try:
+            request = json.loads(line)
+        except json.JSONDecodeError as exc:
+            _write_response({
+                "jsonrpc": "2.0",
+                "id": None,
+                "error": {"code": -32700, "message": f"Parse error: {exc}"},
+            })
+            continue
+        _handle_request(server, request)
