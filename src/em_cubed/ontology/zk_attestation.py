@@ -11,7 +11,7 @@ import hashlib
 import json
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from em_cubed.ontology.schema import OntologyTriple
 from em_cubed.ontology.topos import SubobjectClassifier

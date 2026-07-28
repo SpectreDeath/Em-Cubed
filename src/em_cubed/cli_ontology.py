@@ -159,8 +159,8 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
     elif subcommand == "prove":
         from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
 
-        sample = [OntologyTriple(subject="SubjectA", predicate=args.predicates[0], object="Value1")]
-        commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(args.proposition, sample, args.predicates)
+        sample: list[OntologyTriple] = [OntologyTriple(subject="SubjectA", predicate=str(args.predicates[0]), object="Value1")]
+        commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(args.proposition, sample, list(args.predicates))
         print(f"[ZK Attestation] Proof ID: {commitment.proof_id}")
         print(f"  Proposition Hash: {commitment.proposition_hash[:16]}...")
         print(f"  Merkle State Root: {commitment.merkle_state_root[:16]}...")
