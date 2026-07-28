@@ -164,6 +164,8 @@ class EmCubedMCPServer:
             from pathlib import Path
             query = args.get("query", "")
             max_res = args.get("max_results", 10)
+            query = args.get("query", "")
+            max_res = args.get("max_results", 10)
             reg_path = Path("registry.json")
             if not reg_path.exists():
                 reg_path = Path("src/em_cubed/registry.json")
@@ -171,8 +173,8 @@ class EmCubedMCPServer:
                 matches = search_registry(query, registry_path=reg_path, max_results=max_res)
             else:
                 from em_cubed.skills import SkillRegistry
-                r = SkillRegistry()
-                matches = [s.to_dict() for s in r.search(query)[:max_res]] if hasattr(r, "search") else []
+                r = SkillRegistry(Path("skills"), reg_path)
+                matches = [s.to_dict() for s in r.search(query)[:max_res]] if hasattr(r, "search") else []  # type: ignore[attr-defined]
             return {
                 "query": query,
                 "count": len(matches),
@@ -194,11 +196,12 @@ class EmCubedMCPServer:
                 SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
                 ClingoSurface, KanrenSurface, JanusSurface
             )
-            surfaces = [
-                PythonSurface(), PrologSurface(), Z3Surface(), DatalogSurface(),
-                SQLiteSurface(), HySurface(), QuickJSSurface(), WASMSurface(),
-                ClingoSurface(), KanrenSurface(), JanusSurface()
+            raw_classes = [
+                PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
+                SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
+                ClingoSurface, KanrenSurface, JanusSurface
             ]
+            surfaces = [cls() for cls in raw_classes if cls is not None]
             return {
                 "surfaces": [
                     {
@@ -211,16 +214,26 @@ class EmCubedMCPServer:
             }
 
         elif name == "em_cubed_execute_skill":
-            from em_cubed.skills import SkillExecutor
-            executor = SkillExecutor()
+            import asyncio
+            from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest, get_skill_executor
+            from em_cubed.skills import SkillRegistry
+            from em_cubed.plugin_registry import get_plugin_manager
+
+            skills_dir = Path("skills")
+            reg_file = Path("registry.json")
+            reg = SkillRegistry(skills_dir, reg_file)
+            pm = get_plugin_manager()
+            executor = get_skill_executor() or SkillExecutor(pm, reg, skills_dir)
+
             skill_id = args.get("skill_id", "")
             surface = args.get("surface")
             input_data = args.get("input_data", {})
-            res = executor.execute_skill_sync(skill_id, surface=surface, input_data=input_data)
+            req = SkillExecutionRequest(skill_id=skill_id, input_data=input_data, surface=surface)
+            res = asyncio.run(executor.execute(req))
             return {
-                "status": getattr(res, "status", "unknown"),
-                "value": getattr(res, "output", getattr(res, "value", str(res))),
-                "execution_time": getattr(res, "execution_time", 0.0),
+                "status": "ok" if res.success else "error",
+                "value": res.output if res.success else res.error,
+                "execution_time": res.execution_time_ms,
             }
 
         elif name == "em_cubed_validate_triple":
@@ -231,12 +244,13 @@ class EmCubedMCPServer:
 
         elif name == "em_cubed_elicit_ontology":
             pipeline = KnowledgeElicitationPipeline()
-            report = pipeline.execute_pipeline(
+            elicitation_report = pipeline.execute_pipeline(
                 executive_prompt=args["prompt"],
                 dsq_texts=["What is the supply risk?"],
                 cq_texts=["Which suppliers provide Folic Acid?"],
             )
-            return {"triples_count": len(report.triples), "triples": [t.to_dict() for t in report.triples]}
+            formatted_triples = [{"subject": t.subject, "predicate": t.predicate, "object": t.object} for t in elicitation_report.triples]
+            return {"triples_count": len(elicitation_report.triples), "triples": formatted_triples}
 
         elif name == "em_cubed_evaluate_topos":
             truth_val = SubobjectClassifier.evaluate_confidence(float(args["confidence"]))
@@ -266,8 +280,8 @@ class EmCubedMCPServer:
             }
 
         elif name == "em_cubed_check_health":
-            report = OntologicalHealthMonitor.audit_health([])
-            return {"coherence_index": report.coherence_index, "health_status": report.health_status}
+            health_report = OntologicalHealthMonitor.audit_health([])
+            return {"coherence_index": health_report.coherence_index, "health_status": health_report.health_status}
 
         elif name == "em_cubed_run_monad":
             t = OntologyTriple(subject=args["subject"], predicate=args["predicate"], object=args["object"])
@@ -360,7 +374,7 @@ def _handle_request(server: EmCubedMCPServer, request: dict[str, Any]) -> None:
             })
 
     except Exception as exc:
-        logger.exception("MCP request handler error", method=method, error=str(exc))
+        logger.exception("MCP request handler error: method=%s, error=%s", method, str(exc))
         _write_response({
             "jsonrpc": "2.0",
             "id": req_id,
@@ -381,7 +395,7 @@ def run_mcp_server() -> None:
         python -m em_cubed.gateway.mcp_server
     """
     server = EmCubedMCPServer()
-    logger.info("Em-Cubed MCP Server started", tools_count=len(server.TOOLS))
+    logger.info("Em-Cubed MCP Server started with %d tools", len(server.TOOLS))
 
     # Emit an MCP-compliant ready notification on stderr (not stdout, which is JSON-RPC channel).
     sys.stderr.write(

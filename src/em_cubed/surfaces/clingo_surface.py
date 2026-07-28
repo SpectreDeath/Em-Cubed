@@ -13,7 +13,7 @@ class ClingoSurface(SurfaceBase):
     of shown atoms.
     """
 
-    _execution_cache = {}
+    _execution_cache: dict[str, Any] = {}
 
     @property
     def name(self) -> str:

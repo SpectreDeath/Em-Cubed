@@ -16,7 +16,7 @@ logger = structlog.get_logger()
 class PrologSurface(SurfaceBase):
     """Handle Prolog code execution and predicate extraction."""
 
-    _consulted_hashes = set()
+    _consulted_hashes: set[str] = set()
 
     @property
     def name(self) -> str:

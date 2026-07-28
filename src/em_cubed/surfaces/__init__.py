@@ -94,13 +94,16 @@ except (ImportError, Exception):
     pass
 
 try:
-    from .morphism import SurfaceMorphism
-except ImportError:
+    from .morphism import SurfaceMorphism as _SurfaceMorphism
+    SurfaceMorphism = _SurfaceMorphism  # type: ignore[assignment]
+except (ImportError, Exception):
     SurfaceMorphism = None  # type: ignore[assignment]
 
 try:
-    from .functor import OntologyMonad, SurfaceFunctor
-except ImportError:
+    from .functor import OntologyMonad as _OntologyMonad, SurfaceFunctor as _SurfaceFunctor
+    SurfaceFunctor = _SurfaceFunctor  # type: ignore[assignment]
+    OntologyMonad = _OntologyMonad  # type: ignore[assignment]
+except (ImportError, Exception):
     SurfaceFunctor = None  # type: ignore[assignment]
     OntologyMonad = None  # type: ignore[assignment]
 

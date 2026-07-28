@@ -130,55 +130,40 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
 
     elif subcommand == "visualize":
         triples = [OntologyTriple(subject="EntityA", predicate="relates_to", object="EntityB")]
-        html_code = KnowledgeGraphVisualizer.render_subgraph_html(triples, title="CLI Knowledge Graph")
+        html_code = KnowledgeGraphVisualizer.render_subgraph_html(triples, title="CLI Knowledge Graph")  # type: ignore[arg-type]
         with open(args.output_html, "w", encoding="utf-8") as f:
             f.write(html_code)
         print(f"[Visualizer] Wrote interactive Knowledge Graph to '{args.output_html}'.")
         return 0
 
     elif subcommand == "migrate":
+        from em_cubed.ontology.schema_evolution import DynamicSchemaEvolutionChain
         triples = [OntologyTriple(subject="SubjectA", predicate=args.from_pred, object="Value1")]
-        steps = [
-            SchemaMigrationStep(
-                step_name="CLIMigration",
-                action_type="RENAME_PREDICATE",
-                old_value=args.from_pred,
-                new_value=args.to_pred,
-            )
-        ]
-        migrated = AutomatedTripleMigrationEngine.migrate_triples(triples, steps)
-        print(f"[Schema Evolution] Migrated predicate '{args.from_pred}' -> '{migrated[0].predicate}'")
+        migrated = DynamicSchemaEvolutionChain.execute_migration_chain(triples, from_predicate=args.from_pred, to_predicate=args.to_pred)
+        print(f"[Schema Evolution] Migrated {len(migrated)} triples to '{args.to_pred}'.")
         return 0
 
     elif subcommand == "export":
-        from em_cubed.ontology.interoperability import RDFSerializer, SHACLConstraintGenerator
+        from em_cubed.ontology.interoperability import RDFSerializer, SHACLConstraintGenerator, RDFSHACLInteroperability
         from em_cubed.ontology.schema import FunctionalPropertyConstraint
 
+        triples = [OntologyTriple(subject="ConceptA", predicate="subClassOf", object="ConceptB")]
         if args.format == "turtle":
-            triples = [OntologyTriple(subject="SampleEntity", predicate="rdf:type", object="bfo:IndependentContinuant")]
-            content = RDFSerializer.to_turtle(triples)
+            content = RDFSHACLInteroperability.export_to_rdf_turtle(triples)
         else:
-            content = SHACLConstraintGenerator.generate_shacl_shapes([FunctionalPropertyConstraint(predicate="has_id")])
+            content = RDFSHACLInteroperability.generate_shacl_shapes(triples)
 
         with open(args.output, "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"[Interoperability] Wrote W3C {args.format.upper()} export to '{args.output}'.")
+        print(f"[RDF/SHACL Interoperability] Exported W3C {args.format.upper()} to '{args.output}'.")
         return 0
 
     elif subcommand == "prove":
         from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
 
-        sample_triple = OntologyTriple(subject="Agent_01", predicate=args.predicates[0], object="VerifiedValue")
-        commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(
-            proposition=args.proposition,
-            state_triples=[sample_triple],
-            relevant_predicates=args.predicates,
-        )
-        print(f"[ZKP Attestation] Proof ID: {commitment.proof_id}")
-        print(f"  Proposition Hash: {commitment.proposition_hash[:16]}...")
-        print(f"  Merkle State Root: {commitment.merkle_state_root[:16]}...")
-        print(f"  Satisfied: {commitment.is_satisfied}")
-        print(f"  PQC Signature: {commitment.signature[:16]}...")
+        sample = [OntologyTriple(subject="SubjectA", predicate=args.predicates[0], object="Value1")]
+        commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(args.proposition, sample, args.predicates)
+        print(f"[ZK Attestation] Commitment Hash: {commitment.commitment_hash[:16]}... Valid: {commitment.is_satisfied}")
         return 0
 
     elif subcommand == "tui":
@@ -189,13 +174,13 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
     elif subcommand == "health":
         from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
 
-        report = OntologicalHealthMonitor.audit_tri_engine_health()
+        health_report = OntologicalHealthMonitor.audit_tri_engine_health()
         print("Tri-Engine Cross-Repository Health Audit:")
-        print(f"  SME Status           : {report['sme_status']} (Trust Index: {report['sme_trust_index']})")
-        print(f"  Em-Cubed Status      : {report['em_cubed_status']} (Coherence: {report['em_cubed_coherence']})")
-        print(f"  Strategify Status    : {report['strategify_status']} ({report['strategify_unit_tests']} Unit Tests)")
-        print(f"  Coherence Index      : {report['tri_engine_coherence_index'] * 100:.1f}%")
-        print(f"  Overall Health       : {report['health_status']}")
+        print(f"  SME Status           : {health_report['sme_status']} (Trust Index: {health_report['sme_trust_index']})")
+        print(f"  Em-Cubed Status      : {health_report['em_cubed_status']} (Coherence: {health_report['em_cubed_coherence']})")
+        print(f"  Strategify Status    : {health_report['strategify_status']} ({health_report['strategify_unit_tests']} Unit Tests)")
+        print(f"  Coherence Index      : {health_report['tri_engine_coherence_index'] * 100:.1f}%")
+        print(f"  Overall Health       : {health_report['health_status']}")
         return 0
 
     else:
