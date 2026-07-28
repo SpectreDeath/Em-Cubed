@@ -30,7 +30,7 @@ class ZKPCommitment:
     is_satisfied: bool
     modal_status: str
     timestamp: float
-    signature: str = field(default_factory=str)
+    signature: str = ""
 
     def to_json(self) -> str:
         """Serialize commitment to JSON for ledger broadcasting."""

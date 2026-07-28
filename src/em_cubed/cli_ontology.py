@@ -19,10 +19,7 @@ from typing import Sequence
 from em_cubed.ontology.concept_induction import ConceptInductionEngine
 from em_cubed.ontology.elicitation import KnowledgeElicitationPipeline
 from em_cubed.ontology.schema import OntologyTriple
-from em_cubed.ontology.schema_evolution import (
-    AutomatedTripleMigrationEngine,
-    SchemaMigrationStep,
-)
+
 from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier
 from em_cubed.ontology.validator import OntologyLedgerValidator
 from em_cubed.ontology.visualizer import KnowledgeGraphVisualizer
@@ -137,21 +134,22 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         return 0
 
     elif subcommand == "migrate":
-        from em_cubed.ontology.schema_evolution import DynamicSchemaEvolutionChain
+        from em_cubed.ontology.schema_evolution import AutomatedTripleMigrationEngine, SchemaMigrationStep
         triples = [OntologyTriple(subject="SubjectA", predicate=args.from_pred, object="Value1")]
-        migrated = DynamicSchemaEvolutionChain.execute_migration_chain(triples, from_predicate=args.from_pred, to_predicate=args.to_pred)
-        print(f"[Schema Evolution] Migrated {len(migrated)} triples to '{args.to_pred}'.")
+        steps = [SchemaMigrationStep(step_name="CLIMigration", action_type="RENAME_PREDICATE", old_value=args.from_pred, new_value=args.to_pred)]
+        migrated = AutomatedTripleMigrationEngine.migrate_triples(triples, steps)
+        print(f"[Schema Evolution] Migrated predicate '{args.from_pred}' -> '{migrated[0].predicate}'")
         return 0
 
     elif subcommand == "export":
-        from em_cubed.ontology.interoperability import RDFSerializer, SHACLConstraintGenerator, RDFSHACLInteroperability
+        from em_cubed.ontology.interoperability import RDFSerializer, SHACLConstraintGenerator
         from em_cubed.ontology.schema import FunctionalPropertyConstraint
 
         triples = [OntologyTriple(subject="ConceptA", predicate="subClassOf", object="ConceptB")]
         if args.format == "turtle":
-            content = RDFSHACLInteroperability.export_to_rdf_turtle(triples)
+            content = RDFSerializer.to_turtle(triples)
         else:
-            content = RDFSHACLInteroperability.generate_shacl_shapes(triples)
+            content = SHACLConstraintGenerator.generate_shacl_shapes([FunctionalPropertyConstraint(predicate="subClassOf")])
 
         with open(args.output, "w", encoding="utf-8") as f:
             f.write(content)
@@ -163,7 +161,11 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
 
         sample = [OntologyTriple(subject="SubjectA", predicate=args.predicates[0], object="Value1")]
         commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(args.proposition, sample, args.predicates)
-        print(f"[ZK Attestation] Commitment Hash: {commitment.commitment_hash[:16]}... Valid: {commitment.is_satisfied}")
+        print(f"[ZK Attestation] Proof ID: {commitment.proof_id}")
+        print(f"  Proposition Hash: {commitment.proposition_hash[:16]}...")
+        print(f"  Merkle State Root: {commitment.merkle_state_root[:16]}...")
+        print(f"  Satisfied: {commitment.is_satisfied}")
+        print(f"  Signature: {str(commitment.signature)[:16]}...")
         return 0
 
     elif subcommand == "tui":
