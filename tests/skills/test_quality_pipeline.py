@@ -143,7 +143,7 @@ Test
         metadata = pipeline._load_skill_metadata(skill_file)
         # PyYAML may parse this leniently or return None depending on the YAML
         # The important thing is it shouldn't crash
-        assert metadata is None or hasattr(metadata, 'name')
+        assert metadata is None or hasattr(metadata, "name")
 
     def test_load_skill_metadata_no_frontmatter(self, pipeline, tmp_path):
         """Test loading skill metadata without frontmatter."""
@@ -201,6 +201,7 @@ def hello():
 
         # Run validation
         import asyncio
+
         results = asyncio.run(pipeline.validate_all_skills())
 
         # Should have at least one validated skill
@@ -252,6 +253,7 @@ def hello():
         pipeline.registry_file = registry_file
 
         import asyncio
+
         results = asyncio.run(pipeline.benchmark_all_skills())
 
         assert isinstance(results, dict)
@@ -299,6 +301,7 @@ def test_function():
 
         # Test validation
         import asyncio
+
         validation_results = asyncio.run(pipeline.validate_all_skills())
         assert isinstance(validation_results, dict)
 
@@ -318,7 +321,8 @@ def test_function():
 
         # Create empty registry
         import json
-        with open(registry_file, 'w') as f:
+
+        with open(registry_file, "w") as f:
             json.dump([], f)
 
         pipeline.registry_file = registry_file

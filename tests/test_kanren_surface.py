@@ -13,7 +13,7 @@ async def test_kanren_surface_availability():
 async def test_kanren_basic_relation():
     surface = KanrenSurface()
 
-    code = '''
+    code = """
 from kanren import Relation, fact, run, Var
 
 parent = Relation()
@@ -22,7 +22,7 @@ fact(parent, "mary", "ann")
 
 q = Var()
 result = run(0, q, parent("john", q))
-'''
+"""
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
     assert "mary" in result["value"]

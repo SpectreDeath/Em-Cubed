@@ -20,8 +20,7 @@ logger = structlog.get_logger()
 class SkillQualityPipeline:
     """End-to-end quality pipeline for skills."""
 
-    def __init__(self, skills_dir: Path, registry_file: Path,
-                 plugin_manager=None):
+    def __init__(self, skills_dir: Path, registry_file: Path, plugin_manager=None):
         self.skills_dir = skills_dir
         self.registry_file = registry_file
         self.validator = SkillValidator()
@@ -163,10 +162,12 @@ class SkillQualityPipeline:
     def _load_skill_metadata(self, skill_file: Path) -> Optional[SkillMetadata]:
         """Load SkillMetadata from file."""
         from .metadata import SkillMetadata
+
         try:
             with open(skill_file, encoding="utf-8") as f:
                 content = f.read()
             import yaml
+
             parts = content.split("---", 2)
             if len(parts) < 3:
                 return None
@@ -189,8 +190,8 @@ class SkillQualityPipeline:
 
 # Convenience functions for CLI usage
 
-async def run_quality_pipeline(skills_dir: Path, registry_file: Path,
-                              plugin_manager=None) -> Dict[str, Any]:
+
+async def run_quality_pipeline(skills_dir: Path, registry_file: Path, plugin_manager=None) -> Dict[str, Any]:
     """Run the complete quality pipeline."""
     pipeline = SkillQualityPipeline(skills_dir, registry_file, plugin_manager)
 
@@ -210,9 +211,7 @@ async def run_quality_pipeline(skills_dir: Path, registry_file: Path,
     report["validation"] = {k: v.to_dict() for k, v in validation_results.items()}
     report["testing"] = test_results
 
-    logger.info("Quality pipeline complete",
-                total=report["total_skills"],
-                passing=report["passing_quality"])
+    logger.info("Quality pipeline complete", total=report["total_skills"], passing=report["passing_quality"])
 
     return report
 
@@ -228,6 +227,7 @@ def generate_all_skill_tests(skills_dir: Path, output_dir: Path = Path("tests/sk
             with open(skill_file, encoding="utf-8") as f:
                 content = f.read()
             import yaml
+
             parts = content.split("---", 2)
             if len(parts) < 3:
                 continue

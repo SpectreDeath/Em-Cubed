@@ -73,7 +73,9 @@ class MultiAgentToposConsensus:
             evidence_chain.append(f"[{e.agent_id}]: conf={e.truth_value.confidence:.2f}")
 
         is_satisfied = all_boolean and min_conf >= min_consensus_confidence
-        logger.info("Consensus computed: satisfied=%s, conf=%.2f, modal=%s", is_satisfied, min_conf, consensus_modal.value)
+        logger.info(
+            "Consensus computed: satisfied=%s, conf=%.2f, modal=%s", is_satisfied, min_conf, consensus_modal.value
+        )
 
         return TruthValue(
             is_boolean=is_satisfied,

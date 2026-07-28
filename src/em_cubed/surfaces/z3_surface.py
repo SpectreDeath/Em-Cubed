@@ -39,7 +39,7 @@ class Z3Surface(SurfaceBase):
     @staticmethod
     def extract_tags(source: Optional[str]) -> list:
         """Extract assertion/query identifiers from Z3 source.
-        
+
         Looks for common Z3 patterns like:
         - Assertions: solver.add(), assert()
         - Variables: Int(), Real(), Bool(), BitVec()
@@ -50,43 +50,43 @@ class Z3Surface(SurfaceBase):
         import re
 
         tags = set()
-        
+
         # Extract variable/function declarations
         var_patterns = [
-            r'\b(Int|Real|Bool|BitVec)\s*\(',  # Variable types
-            r'\bFunction\s*\(',                 # Function declarations
-            r'\bDeclareFun\s*\(',               # Function declarations
-            r'\bConst\s*\(',                    # Constants
+            r"\b(Int|Real|Bool|BitVec)\s*\(",  # Variable types
+            r"\bFunction\s*\(",  # Function declarations
+            r"\bDeclareFun\s*\(",  # Function declarations
+            r"\bConst\s*\(",  # Constants
         ]
-        
+
         for pattern in var_patterns:
             matches = re.findall(pattern, source)
             tags.update(matches)
-            
+
         # Extract common assertion patterns
         assert_patterns = [
-            r'\.add\s*\(',                      # solver.add()
-            r'\bassert\s*\(',                   # assert()
-            r'\boptimize\s*\.',                 # optimize operations
-            r'\bmaximize\s*\(',                 # maximize()
-            r'\bminimize\s*\(',                 # minimize()
+            r"\.add\s*\(",  # solver.add()
+            r"\bassert\s*\(",  # assert()
+            r"\boptimize\s*\.",  # optimize operations
+            r"\bmaximize\s*\(",  # maximize()
+            r"\bminimize\s*\(",  # minimize()
         ]
-        
+
         for pattern in assert_patterns:
             if re.search(pattern, source):
                 tags.add("assertion")
-                
+
         # Extract query patterns
         query_patterns = [
-            r'\bcheck\s*\(',                    # check()
-            r'\bmodel\s*\.',                    # model access
-            r'\bvalue\s*\(',                    # value()
+            r"\bcheck\s*\(",  # check()
+            r"\bmodel\s*\.",  # model access
+            r"\bvalue\s*\(",  # value()
         ]
-        
+
         for pattern in query_patterns:
             if re.search(pattern, source):
                 tags.add("query")
-        
+
         return list(tags)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -98,45 +98,66 @@ class Z3Surface(SurfaceBase):
             return {"status": "error", "message": "z3 not available"}
 
         try:
-            from z3 import Solver, Optimize, sat, unsat, unknown, Int, Real, Bool, BitVec, Function, Const, And, Or, Not, Xor, Implies, If, Distinct, Sum, Product
+            from z3 import (
+                Solver,
+                Optimize,
+                sat,
+                unsat,
+                unknown,
+                Int,
+                Real,
+                Bool,
+                BitVec,
+                Function,
+                Const,
+                And,
+                Or,
+                Not,
+                Xor,
+                Implies,
+                If,
+                Distinct,
+                Sum,
+                Product,
+            )
             from asteval import Interpreter
 
             def execute_code():
                 # Determine if this is an optimization problem based on keywords
-                is_optimization = any(keyword in code.lower() for keyword in ['maximize', 'minimize', 'optimize'])
-                 
+                is_optimization = any(keyword in code.lower() for keyword in ["maximize", "minimize", "optimize"])
+
                 # Create appropriate solver (expose to user code)
                 solver_instance = Optimize() if is_optimization else Solver()
 
                 # Create asteval interpreter with Z3 symbols pre-registered
-                aeval = Interpreter(excluded_symbols=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
+                aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"])
                 # Explicitly remove dangerous names (excluded_symbols alone is not sufficient in asteval 1.x)
-                for bad in ['open', '__import__', 'eval', 'exec', 'compile', '__builtins__']:
+                for bad in ["open", "__import__", "eval", "exec", "compile", "__builtins__"]:
                     aeval.symtable.pop(bad, None)
 
                 # Inject Z3 symbols and solver into interpreter's namespace
-                aeval.symtable['Solver'] = Solver
-                aeval.symtable['Optimize'] = Optimize
-                aeval.symtable['sat'] = sat
-                aeval.symtable['unsat'] = unsat
-                aeval.symtable['unknown'] = unknown
-                aeval.symtable['Int'] = Int
-                aeval.symtable['Real'] = Real
-                aeval.symtable['Bool'] = Bool
-                aeval.symtable['BitVec'] = BitVec
-                aeval.symtable['Function'] = Function
-                aeval.symtable['Const'] = Const
-                aeval.symtable['And'] = And
-                aeval.symtable['Or'] = Or
-                aeval.symtable['Not'] = Not
-                aeval.symtable['Xor'] = Xor
-                aeval.symtable['Implies'] = Implies
-                aeval.symtable['If'] = If
-                aeval.symtable['Distinct'] = Distinct
-                aeval.symtable['Sum'] = Sum
-                aeval.symtable['Product'] = Product
+                aeval.symtable["Solver"] = Solver
+                aeval.symtable["Optimize"] = Optimize
+                aeval.symtable["sat"] = sat
+                aeval.symtable["unsat"] = unsat
+                aeval.symtable["unknown"] = unknown
+                aeval.symtable["Int"] = Int
+                aeval.symtable["Real"] = Real
+                aeval.symtable["Bool"] = Bool
+                aeval.symtable["BitVec"] = BitVec
+                aeval.symtable["Function"] = Function
+                aeval.symtable["Const"] = Const
+                aeval.symtable["And"] = And
+                aeval.symtable["Or"] = Or
+                aeval.symtable["Not"] = Not
+                aeval.symtable["Xor"] = Xor
+                aeval.symtable["Implies"] = Implies
+                aeval.symtable["If"] = If
+                aeval.symtable["Distinct"] = Distinct
+                aeval.symtable["Sum"] = Sum
+                aeval.symtable["Product"] = Product
                 # Provide a pre-created solver instance for convenience
-                aeval.symtable['solver'] = solver_instance
+                aeval.symtable["solver"] = solver_instance
 
                 # Add context to interpreter if provided
                 if context:
@@ -153,33 +174,28 @@ class Z3Surface(SurfaceBase):
 
                 # Build result info from solver state if available
                 result_info = {}
-                if 'solver' in aeval.symtable:
-                    solver = aeval.symtable['solver']
-                    if hasattr(solver, 'check'):
+                if "solver" in aeval.symtable:
+                    solver = aeval.symtable["solver"]
+                    if hasattr(solver, "check"):
                         check_result = solver.check()
-                        result_info['status'] = str(check_result)
+                        result_info["status"] = str(check_result)
                         if check_result == sat:
-                            result_info['model'] = str(solver.model())
-                        elif hasattr(solver, 'upper') and is_optimization:
+                            result_info["model"] = str(solver.model())
+                        elif hasattr(solver, "upper") and is_optimization:
                             try:
-                                result_info['upper'] = str(solver.upper())
-                                result_info['lower'] = str(solver.lower())
+                                result_info["upper"] = str(solver.upper())
+                                result_info["lower"] = str(solver.lower())
                             except Exception:
                                 pass  # nosec B110 - intentional fallback; caller handles None/False return
 
                 logger.info("Z3 execution successful")
                 return {"status": "ok", "value": result_info or "Execution completed"}
 
-            return await asyncio.get_event_loop().run_in_executor(
-                self._executor, execute_code
-            )
+            return await asyncio.get_event_loop().run_in_executor(self._executor, execute_code)
 
         except asyncio.TimeoutError:
             logger.warning("Z3 execution timed out", timeout=self.timeout)
-            return {
-                "status": "error",
-                "message": f"Execution timed out after {self.timeout}s"
-            }
+            return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
         except Exception as e:
             logger.exception("Z3 execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}

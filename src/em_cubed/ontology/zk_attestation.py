@@ -57,10 +57,7 @@ class ZeroKnowledgeOntologyAttestor:
         if not triples:
             return "0" * 64
 
-        hashes = [
-            hashlib.sha256(f"{t.subject}|{t.predicate}|{t.object}".encode("utf-8")).hexdigest()
-            for t in triples
-        ]
+        hashes = [hashlib.sha256(f"{t.subject}|{t.predicate}|{t.object}".encode("utf-8")).hexdigest() for t in triples]
         combined = "".join(sorted(hashes))
         return hashlib.sha256(combined.encode("utf-8")).hexdigest()
 

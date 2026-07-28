@@ -79,11 +79,7 @@ class SQLiteSurface(SurfaceBase):
             if should_close:
                 conn.close()
             logger.info("SQL execution successful")
-            return {
-                "status": "ok",
-                "value": last_result,
-                "all_results": results
-            }
+            return {"status": "ok", "value": last_result, "all_results": results}
 
         except Exception as e:
             logger.exception("SQL execution failed", error=str(e))
@@ -98,6 +94,7 @@ class SQLiteSurface(SurfaceBase):
         if not source:
             return []
         import re
+
         tables = re.findall(r"CREATE\s+TABLE\s+([a-zA-Z0-9_]+)", source, re.IGNORECASE)
         tables.extend(re.findall(r"FROM\s+([a-zA-Z0-9_]+)", source, re.IGNORECASE))
         tables.extend(re.findall(r"JOIN\s+([a-zA-Z0-9_]+)", source, re.IGNORECASE))

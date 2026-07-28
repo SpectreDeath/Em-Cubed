@@ -14,14 +14,15 @@ import pytest
 # Extracted deterministic mirrors of Prolog/Python logic
 # ============================================================
 
+
 class MeasurementLevelLogic:
     """Python mirror of Prolog measurement hierarchy (dominates/2)."""
 
     DOMINANCE = {
-        "ratio":    ["interval"],      # direct (one-step) dominance
+        "ratio": ["interval"],  # direct (one-step) dominance
         "interval": ["ordinal"],
-        "ordinal":  ["nominal"],
-        "nominal":  [],
+        "ordinal": ["nominal"],
+        "nominal": [],
     }
 
     @staticmethod
@@ -41,12 +42,18 @@ class MeasurementLevelLogic:
 
     # Test families
     PARAMETRIC = {
-        "t_test_independent", "t_test_paired", "pearson_r",
-        "one_way_anova", "linear_regression",
+        "t_test_independent",
+        "t_test_paired",
+        "pearson_r",
+        "one_way_anova",
+        "linear_regression",
     }
     NONPARAMETRIC = {
-        "mann_whitney_u", "wilcoxon_signed_rank", "spearman_rho",
-        "kruskal_wallis", "friedman",
+        "mann_whitney_u",
+        "wilcoxon_signed_rank",
+        "spearman_rho",
+        "kruskal_wallis",
+        "friedman",
     }
     CHISQUARE = {"chi_square"}
 
@@ -66,23 +73,34 @@ class MeasurementLevelLogic:
 
 
 MIN_N_TABLE = {
-    "t_test_independent": 2, "t_test_paired": 2, "pearson_r": 3,
-    "spearman_rho": 3, "one_way_anova": 3, "linear_regression": 3,
-    "chi_square": 5, "kruskal_wallis": 3, "mann_whitney_u": 2,
-    "wilcoxon_signed_rank": 2, "friedman": 3,
+    "t_test_independent": 2,
+    "t_test_paired": 2,
+    "pearson_r": 3,
+    "spearman_rho": 3,
+    "one_way_anova": 3,
+    "linear_regression": 3,
+    "chi_square": 5,
+    "kruskal_wallis": 3,
+    "mann_whitney_u": 2,
+    "wilcoxon_signed_rank": 2,
+    "friedman": 3,
 }
 
 REQUIRES_NORMALITY = {
-    "t_test_independent", "t_test_paired", "pearson_r",
-    "one_way_anova", "linear_regression",
-    "kruskal_wallis", "mann_whitney_u", "wilcoxon_signed_rank",
+    "t_test_independent",
+    "t_test_paired",
+    "pearson_r",
+    "one_way_anova",
+    "linear_regression",
+    "kruskal_wallis",
+    "mann_whitney_u",
+    "wilcoxon_signed_rank",
 }
 NO_NORMALITY_NEEDED = {"chi_square", "spearman_rho"}
 
 
 def _clean(values):
-    return [v for v in values
-            if v is not None and not (isinstance(v, float) and math.isnan(v))]
+    return [v for v in values if v is not None and not (isinstance(v, float) and math.isnan(v))]
 
 
 def sample_size(columns, data):
@@ -100,6 +118,7 @@ def sample_size(columns, data):
 def normal_flag(columns, data):
     """Shapiro-Wilk or skewness/kurtosis fallback."""
     import numpy as np
+
     for vec in [data.get(c, []) for c in columns]:
         clean = _clean(vec)
         n = len(clean)
@@ -110,6 +129,7 @@ def normal_flag(columns, data):
             return False
         try:
             from scipy.stats import shapiro
+
             _, p = shapiro(clean)
             if p < 0.05:
                 return False
@@ -117,8 +137,8 @@ def normal_flag(columns, data):
             mean = arr.mean()
             std = arr.std(ddof=1)
             z = (arr - mean) / std
-            skew = float(np.mean(z ** 3))
-            kurt = float(np.mean(z ** 4)) - 3.0
+            skew = float(np.mean(z**3))
+            kurt = float(np.mean(z**4)) - 3.0
             if abs(skew) >= 1.0 or abs(kurt) >= 2.0:
                 return False
     return True
@@ -127,6 +147,7 @@ def normal_flag(columns, data):
 # ============================================================
 # 1. Prolog symbolic layer: measurement hierarchy
 # ============================================================
+
 
 class TestMeasurementHierarchy:
     """Pure first-order logic: dominates/2 rules."""
@@ -175,48 +196,76 @@ class TestMeasurementHierarchy:
 # 2. Prolog symbolic layer: test-family routing
 # ============================================================
 
+
 class TestTestFamilyRouting:
     """Prolog valid_measurement_for/2 rules."""
 
     # --- Parametric tests: interval and ratio ONLY ---
-    @pytest.mark.parametrize("test", [
-        "t_test_independent", "t_test_paired", "pearson_r",
-        "one_way_anova", "linear_regression",
-    ])
+    @pytest.mark.parametrize(
+        "test",
+        [
+            "t_test_independent",
+            "t_test_paired",
+            "pearson_r",
+            "one_way_anova",
+            "linear_regression",
+        ],
+    )
     def test_parametric_allowed_interval(self, test):
         assert MeasurementLevelLogic.valid_measurement_for(test, "interval")
 
-    @pytest.mark.parametrize("test", [
-        "t_test_independent", "t_test_paired", "pearson_r",
-        "one_way_anova", "linear_regression",
-    ])
+    @pytest.mark.parametrize(
+        "test",
+        [
+            "t_test_independent",
+            "t_test_paired",
+            "pearson_r",
+            "one_way_anova",
+            "linear_regression",
+        ],
+    )
     def test_parametric_allowed_ratio(self, test):
         assert MeasurementLevelLogic.valid_measurement_for(test, "ratio")
 
-    @pytest.mark.parametrize("test", [
-        "t_test_independent", "t_test_paired", "pearson_r",
-        "one_way_anova", "linear_regression",
-    ])
+    @pytest.mark.parametrize(
+        "test",
+        [
+            "t_test_independent",
+            "t_test_paired",
+            "pearson_r",
+            "one_way_anova",
+            "linear_regression",
+        ],
+    )
     def test_parametric_blocked_nominal(self, test):
         assert not MeasurementLevelLogic.valid_measurement_for(test, "nominal")
 
-    @pytest.mark.parametrize("test", [
-        "t_test_independent", "t_test_paired", "pearson_r",
-        "one_way_anova", "linear_regression",
-    ])
+    @pytest.mark.parametrize(
+        "test",
+        [
+            "t_test_independent",
+            "t_test_paired",
+            "pearson_r",
+            "one_way_anova",
+            "linear_regression",
+        ],
+    )
     def test_parametric_blocked_ordinal(self, test):
         assert not MeasurementLevelLogic.valid_measurement_for(test, "ordinal")
 
     # --- Non-parametric tests: ordinal and above ---
-    @pytest.mark.parametrize("test,level", [
-        ("mann_whitney_u", "ordinal"),
-        ("mann_whitney_u", "interval"),
-        ("mann_whitney_u", "ratio"),
-        ("wilcoxon_signed_rank", "ordinal"),
-        ("spearman_rho", "ordinal"),
-        ("kruskal_wallis", "interval"),
-        ("friedman", "ratio"),
-    ])
+    @pytest.mark.parametrize(
+        "test,level",
+        [
+            ("mann_whitney_u", "ordinal"),
+            ("mann_whitney_u", "interval"),
+            ("mann_whitney_u", "ratio"),
+            ("wilcoxon_signed_rank", "ordinal"),
+            ("spearman_rho", "ordinal"),
+            ("kruskal_wallis", "interval"),
+            ("friedman", "ratio"),
+        ],
+    )
     def test_non_parametric_allowed(self, test, level):
         assert MeasurementLevelLogic.valid_measurement_for(test, level)
 
@@ -225,8 +274,9 @@ class TestTestFamilyRouting:
 
     def test_non_parametric_blocked_nominal(self):
         for test in MeasurementLevelLogic.NONPARAMETRIC:
-            assert not MeasurementLevelLogic.valid_measurement_for(test, "nominal"), \
+            assert not MeasurementLevelLogic.valid_measurement_for(test, "nominal"), (
                 f"{test} should be blocked for nominal"
+            )
 
     # --- Chi-square: nominal ONLY ---
     def test_chisquare_allowed_nominal(self):
@@ -245,6 +295,7 @@ class TestTestFamilyRouting:
 # ============================================================
 # 3. Python numeric layer: sample-size gate
 # ============================================================
+
 
 class TestSampleSizeGate:
     """Python computes n; Prolog min_n/2 enforces minimums."""
@@ -294,17 +345,20 @@ class TestSampleSizeGate:
 # 4. Python numeric layer: normality gate
 # ============================================================
 
+
 class TestNormalityGate:
     """Shapiro-Wilk / skewness/kurtosis fallback."""
 
     def test_normal_data_accepted(self):
         import numpy as np
+
         rng = np.random.default_rng(42)
         data = {"x": rng.normal(0, 1, 60).tolist()}
         assert normal_flag(["x"], data) is True
 
     def test_lognormal_skewed_rejected(self):
         import numpy as np
+
         rng = np.random.default_rng(42)
         data = {"x": np.exp(rng.normal(0, 1, 60)).tolist()}
         assert normal_flag(["x"], data) is False
@@ -332,16 +386,17 @@ class TestNormalityGate:
 # 5. Hybrid: conjunction of all gates
 # ============================================================
 
+
 class TestHybridConstraintConjunction:
     """End-to-end: Prolog symbolic + Python numeric conjunction."""
 
     def test_parametric_ratio_data_passes(self):
         import numpy as np
+
         rng = np.random.default_rng(42)
         level = "ratio"
         test = "pearson_r"
-        data = {"x": rng.normal(0, 1, 100).tolist(),
-                "y": rng.normal(0, 1, 100).tolist()}
+        data = {"x": rng.normal(0, 1, 100).tolist(), "y": rng.normal(0, 1, 100).tolist()}
         n = sample_size(["x", "y"], data)
         norm = normal_flag(["x"], data)
         assert MeasurementLevelLogic.valid_measurement_for(test, level)

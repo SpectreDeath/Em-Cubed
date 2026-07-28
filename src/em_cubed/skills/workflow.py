@@ -16,9 +16,11 @@ from .composer import ExecutionContext, CompositionStep, CompositionResult
 
 logger = structlog.get_logger()
 
+
 @dataclass
 class WorkflowStep:
     """A single step in a DAG workflow."""
+
     id: str  # Unique ID for this step in the workflow
     skill_id: str  # The skill to execute
     input_mapping: Dict[str, str] = field(default_factory=dict)
@@ -27,13 +29,16 @@ class WorkflowStep:
     condition: Optional[str] = None  # Python expression evaluated against context
     timeout: Optional[float] = None
 
+
 @dataclass
 class WorkflowDefinition:
     """Definition of a DAG-based workflow."""
+
     name: str
     steps: List[WorkflowStep]
     description: Optional[str] = None
     timeout: Optional[float] = None
+
 
 class WorkflowExecutor:
     """Executes a DAG of skills with dependency resolution."""
@@ -48,31 +53,31 @@ class WorkflowExecutor:
         """Execute a DAG workflow."""
         context = ExecutionContext(data=initial_data.copy())
         context.start_time = datetime.utcnow()
-        
+
         self.logger.info("Starting workflow execution", workflow=workflow.name, steps=len(workflow.steps))
-        
+
         # 1. Build dependency graph
         graph: Dict[str, Set[str]] = {step.id: set(step.dependencies) for step in workflow.steps}
         _steps_by_id: Dict[str, WorkflowStep] = {step.id: step for step in workflow.steps}
-        
+
         # 2. Check for cycles
         visited: Set[str] = set()
         rec_stack: Set[str] = set()
-        
+
         def has_cycle(step_id: str) -> bool:
             visited.add(step_id)
             rec_stack.add(step_id)
-            
+
             for dependency in graph.get(step_id, set()):
                 if dependency not in visited:
                     if has_cycle(dependency):
                         return True
                 elif dependency in rec_stack:
                     return True
-            
+
             rec_stack.remove(step_id)
             return False
-        
+
         # Check for cycles in all nodes
         for step_id in graph:
             if step_id not in visited:
@@ -81,13 +86,13 @@ class WorkflowExecutor:
                         success=False,
                         context=context,
                         steps_executed=0,
-                        error=f"circular dependency detected involving step {step_id}"
+                        error=f"circular dependency detected involving step {step_id}",
                     )
-        
+
         # 3. Execute steps layer by layer or as tasks complete
         completed_steps: Set[str] = set()
         failed_steps: Set[str] = set()
-        
+
         # Use a lock for context access during parallel execution
         context_lock = asyncio.Lock()
 
@@ -98,15 +103,14 @@ class WorkflowExecutor:
                     self.logger.warning("Skipping step due to dependency failure", step=step.id)
                     return False
                 await asyncio.sleep(0.1)
-            
+
             # Check condition if present
             if step.condition:
                 try:
                     # Safe condition evaluation via asteval — blocks imports, exec,
                     # open, __builtins__, and other dangerous constructs.
                     _aeval = _ASTInterpreter(
-                        excluded_symbols=["open", "__import__", "eval", "exec",
-                                          "compile", "__builtins__"]
+                        excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"]
                     )
                     _aeval.symtable["context"] = context.data
                     result = _aeval(step.condition)
@@ -128,9 +132,9 @@ class WorkflowExecutor:
                 skill_id=step.skill_id,
                 input_mapping=step.input_mapping,
                 output_mapping=step.output_mapping,
-                timeout=step.timeout
+                timeout=step.timeout,
             )
-            
+
             self.logger.info("Executing step", step=step.id, skill=step.skill_id)
             try:
                 success = await self.composer._execute_step(comp_step, context)
@@ -149,15 +153,15 @@ class WorkflowExecutor:
         # Create tasks for all steps
         tasks = [asyncio.create_task(run_step(step)) for step in workflow.steps]
         await asyncio.gather(*tasks)
-        
+
         context.end_time = datetime.utcnow()
         success = len(failed_steps) == 0
-        
+
         return CompositionResult(
             success=success,
             context=context,
             steps_executed=len(completed_steps),
-            error="One or more steps failed" if not success else None
+            error="One or more steps failed" if not success else None,
         )
 
     def _has_cycle(self, graph: Dict[str, Set[str]]) -> bool:

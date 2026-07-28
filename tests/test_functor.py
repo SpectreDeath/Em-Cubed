@@ -16,7 +16,7 @@ def test_surface_functor_mappings():
     # Functor F: Prolog -> Z3 SMT
     z3_str = SurfaceFunctor.prolog_to_z3(prolog_str)
     assert "(declare-fun hasRole (String String) Bool)" in z3_str
-    assert "(assert (hasRole \"Agent_X\" \"Auditor\"))" in z3_str
+    assert '(assert (hasRole "Agent_X" "Auditor"))' in z3_str
     assert "(check-sat)" in z3_str
 
 

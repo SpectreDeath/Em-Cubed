@@ -16,6 +16,7 @@ async def test_clingo_surface_availability():
 @pytest.mark.asyncio
 async def test_clingo_surface_not_installed():
     import sys
+
     original = sys.modules.get("clingo")
     sys.modules["clingo"] = None
     try:

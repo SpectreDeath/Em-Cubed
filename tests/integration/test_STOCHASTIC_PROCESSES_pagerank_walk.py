@@ -16,6 +16,7 @@ import pytest
 # Re-implementations from SKILL.md (self-contained, zero imports)
 # ============================================================
 
+
 def _pagerank(edges, damping=0.85, max_iter=1000, tol=1e-10, personalization=None):
     if not (0.0 < damping < 1.0):
         raise ValueError("damping must be in (0,1)")
@@ -73,12 +74,17 @@ def _pagerank(edges, damping=0.85, max_iter=1000, tol=1e-10, personalization=Non
         if delta < tol:
             break
     total = sum(pi)
-    pi = [p/total for p in pi] if total > 0 else [1.0/n]*n
+    pi = [p / total for p in pi] if total > 0 else [1.0 / n] * n
     ranks = {s: p for s, p in zip(node_list, pi)}
     sorted_ranks = tuple(sorted(ranks.items(), key=lambda x: x[1], reverse=True))
-    return {"ranks": ranks, "sorted_ranks": sorted_ranks,
-            "iterations": iters, "linf_norm_delta": delta,
-            "damping": damping, "n_nodes": n}
+    return {
+        "ranks": ranks,
+        "sorted_ranks": sorted_ranks,
+        "iterations": iters,
+        "linf_norm_delta": delta,
+        "damping": damping,
+        "n_nodes": n,
+    }
 
 
 def _sample_next(state, state_to_idx, matrix, rng):
@@ -93,9 +99,9 @@ def _sample_next(state, state_to_idx, matrix, rng):
     return list(state_to_idx.keys())[-1]
 
 
-def execute_monte_carlo_walk(matrix, states, start_state, n_steps,
-                             seed=None, context_callback=None,
-                             absorbing_threshold=0.99):
+def execute_monte_carlo_walk(
+    matrix, states, start_state, n_steps, seed=None, context_callback=None, absorbing_threshold=0.99
+):
     if start_state not in states:
         raise ValueError("start_state not in states")
     if n_steps < 1:
@@ -134,7 +140,7 @@ def execute_monte_carlo_walk(matrix, states, start_state, n_steps,
                             active_matrix[idx][j] += delta
                     row_sum = sum(active_matrix[idx])
                     if row_sum > 0:
-                        active_matrix[idx] = [p/row_sum for p in active_matrix[idx]]
+                        active_matrix[idx] = [p / row_sum for p in active_matrix[idx]]
         cur_idx = state_to_idx[cur]
         if active_matrix[cur_idx][cur_idx] >= absorbing_threshold:
             absorbing_step = step
@@ -146,10 +152,15 @@ def execute_monte_carlo_walk(matrix, states, start_state, n_steps,
         history.append(next_state)
         visit_counts[next_state] = visit_counts.get(next_state, 0) + 1
         cur = next_state
-    return {"path": tuple(path), "final_state": cur,
-            "steps_taken": len(transition_log), "absorbing_step": absorbing_step,
-            "state_visit_counts": visit_counts, "seed": seed,
-            "transition_log": tuple(transition_log)}
+    return {
+        "path": tuple(path),
+        "final_state": cur,
+        "steps_taken": len(transition_log),
+        "absorbing_step": absorbing_step,
+        "state_visit_counts": visit_counts,
+        "seed": seed,
+        "transition_log": tuple(transition_log),
+    }
 
 
 def compile_simulation_histogram(paths, states=None, target_state=None):
@@ -184,24 +195,34 @@ def compile_simulation_histogram(paths, states=None, target_state=None):
                         first_passage[target_state] = t
                     break
     total = sum(counts)
-    dist = [c/total if total > 0 else 0.0 for c in counts]
-    mean_len = sum(path_lengths)/len(path_lengths) if path_lengths else 0.0
-    var_len = (sum((path_len - mean_len) ** 2 for path_len in path_lengths) / (len(path_lengths) - 1)
-               if len(path_lengths) > 1 else 0.0)
+    dist = [c / total if total > 0 else 0.0 for c in counts]
+    mean_len = sum(path_lengths) / len(path_lengths) if path_lengths else 0.0
+    var_len = (
+        sum((path_len - mean_len) ** 2 for path_len in path_lengths) / (len(path_lengths) - 1)
+        if len(path_lengths) > 1
+        else 0.0
+    )
     std_len = math.sqrt(var_len) if var_len > 0 else 0.0
-    uniform = [1.0/n]*n if n > 0 else []
-    l1 = sum(abs(d-u) for d, u in zip(dist, uniform))
-    return {"states": tuple(states), "visit_counts": tuple(counts),
-            "total_visits": total, "empirical_distribution": tuple(dist),
-            "path_count": len(paths), "total_steps": sum(path_lengths),
-            "mean_path_length": mean_len, "std_path_length": std_len,
-            "first_passage_times": first_passage,
-            "chi_square_convergence": l1}
+    uniform = [1.0 / n] * n if n > 0 else []
+    l1 = sum(abs(d - u) for d, u in zip(dist, uniform))
+    return {
+        "states": tuple(states),
+        "visit_counts": tuple(counts),
+        "total_visits": total,
+        "empirical_distribution": tuple(dist),
+        "path_count": len(paths),
+        "total_steps": sum(path_lengths),
+        "mean_path_length": mean_len,
+        "std_path_length": std_len,
+        "first_passage_times": first_passage,
+        "chi_square_convergence": l1,
+    }
 
 
 # ============================================================
 # Section 1 — PageRank
 # ============================================================
+
 
 class TestCalculatePageRankVector:
     """Damping factor (85/15), dangling redistribution, convergence, ranking stability."""
@@ -211,7 +232,7 @@ class TestCalculatePageRankVector:
         r = _pagerank(edges, damping=0.85)
         assert r["n_nodes"] == 3
         for v in r["ranks"].values():
-            assert abs(v - 1.0/3) < 1e-4
+            assert abs(v - 1.0 / 3) < 1e-4
         assert abs(sum(r["ranks"].values()) - 1.0) < 1e-10
 
     def test_two_node_cycle(self):
@@ -294,6 +315,7 @@ class TestCalculatePageRankVector:
 # Section 2 — Monte Carlo Walk
 # ============================================================
 
+
 class TestExecuteMonteCarloWalk:
     """Deterministic seed, absorbing states, stochastic distribution tolerance."""
 
@@ -330,24 +352,20 @@ class TestExecuteMonteCarloWalk:
 
     def test_start_state_in_path(self):
         states = ["X", "Y"]
-        r = execute_monte_carlo_walk([[0.8, 0.2], [0.3, 0.7]],
-                                     states, "X", 10, seed=7)
+        r = execute_monte_carlo_walk([[0.8, 0.2], [0.3, 0.7]], states, "X", 10, seed=7)
         assert r["path"][0] == "X"
 
     def test_path_length(self):
-        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "A", 25, seed=3)
+        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "A", 25, seed=3)
         assert len(r["path"]) == 26  # initial state + 25 steps
 
     def test_state_visit_counts_non_negative(self):
-        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "A", 100, seed=5)
+        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "A", 100, seed=5)
         for cnt in r["state_visit_counts"].values():
             assert cnt >= 0
 
     def test_both_states_visited(self):
-        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "A", 100, seed=9)
+        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "A", 100, seed=9)
         assert r["state_visit_counts"]["A"] > 0
         assert r["state_visit_counts"]["B"] > 0
 
@@ -361,24 +379,20 @@ class TestExecuteMonteCarloWalk:
                 return {"state_boost": {"B": 0.5}}
             return None
 
-        r = execute_monte_carlo_walk(matrix, states, "A", 20, seed=11,
-                                     context_callback=boost_callback)
+        r = execute_monte_carlo_walk(matrix, states, "A", 20, seed=11, context_callback=boost_callback)
         assert r["steps_taken"] == 20
 
     def test_invalid_start_raises(self):
         with pytest.raises(ValueError, match="start_state"):
-            execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "Z", 10)
+            execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "Z", 10)
 
     def test_n_steps_zero_raises(self):
         with pytest.raises(ValueError, match="n_steps"):
-            execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "A", 0)
+            execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "A", 0)
 
     def test_non_stochastic_matrix_raises(self):
         with pytest.raises(ValueError, match="not row-stochastic"):
-            execute_monte_carlo_walk([[0.5, 0.5], [0.3, 0.3]],
-                                     ["A", "B"], "A", 10)
+            execute_monte_carlo_walk([[0.5, 0.5], [0.3, 0.3]], ["A", "B"], "A", 10)
 
     def test_walk_stationary_distribution_tolerance(self):
         """
@@ -406,12 +420,12 @@ class TestExecuteMonteCarloWalk:
         r = execute_monte_carlo_walk(matrix, states, "A", 50_000, seed=99)
         counts = r["state_visit_counts"]
         total = sum(counts.values())
-        empirical = {s: counts[s]/total for s in states}
+        empirical = {s: counts[s] / total for s in states}
         # Compute theoretical stationary
         # πA = 0.6*0.4 / (0.2*0.4 + 0.6*0.8)  [wrong formula]
-        # Correct: π = [πA, πB], πA = 0.6πB, πA+πB=1, πA = 0.6*0.4/(0.2*0.4+0.6*0.8)? 
+        # Correct: π = [πA, πB], πA = 0.6πB, πA+πB=1, πA = 0.6*0.4/(0.2*0.4+0.6*0.8)?
         # Let me solve correctly: πA = 0.2πA + 0.6πB → 0.8πA = 0.6πB → πB = (0.8/0.6)πA
-        # πA + (0.8/0.6)πA = 1 → πA = 0.6/(1.0+0.8/0.6) ... 
+        # πA + (0.8/0.6)πA = 1 → πA = 0.6/(1.0+0.8/0.6) ...
         # Simpler: 0.8πA = 0.6πB → πB/πA = 0.8/0.6 = 4/3
         # πA + 4/3 πA = 1 → πA = 3/7 ≈ 0.4286
         theo_a = 3.0 / 7.0
@@ -427,32 +441,29 @@ class TestExecuteMonteCarloWalk:
         assert r1["transition_log"] == r2["transition_log"]
 
     def test_transition_log_length(self):
-        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "A", 30, seed=7)
+        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "A", 30, seed=7)
         assert len(r["transition_log"]) == 30
 
     def test_each_transition_log_has_valid_probability(self):
-        r = execute_monte_carlo_walk([[0.3, 0.7], [0.6, 0.4]],
-                                     ["A", "B"], "A", 20, seed=8)
+        r = execute_monte_carlo_walk([[0.3, 0.7], [0.6, 0.4]], ["A", "B"], "A", 20, seed=8)
         for step, src, dst, prob in r["transition_log"]:
             assert 0.0 <= prob <= 1.0
             assert src in ("A", "B")
             assert dst in ("A", "B")
 
     def test_seed_echoed_in_result(self):
-        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "A", 10, seed=42)
+        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "A", 10, seed=42)
         assert r["seed"] == 42
 
     def test_none_seed_echoed(self):
-        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]],
-                                     ["A", "B"], "A", 10, seed=None)
+        r = execute_monte_carlo_walk([[0.5, 0.5], [0.5, 0.5]], ["A", "B"], "A", 10, seed=None)
         assert r["seed"] is None
 
 
 # ============================================================
 # Section 3 — Compile Simulation Histogram
 # ============================================================
+
 
 class TestCompileSimulationHistogram:
     """Empirical stationary distribution from aggregated walk paths."""
@@ -511,10 +522,8 @@ class TestCompileSimulationHistogram:
         """L1 distance from uniform decreases with more data."""
         matrix = [[0.5, 0.5], [0.5, 0.5]]
         states = ["A", "B"]
-        paths_short = [execute_monte_carlo_walk(matrix, states, "A", 10, seed=i)["path"]
-                       for i in range(10)]
-        paths_long = [execute_monte_carlo_walk(matrix, states, "A", 10, seed=i)["path"]
-                      for i in range(500)]
+        paths_short = [execute_monte_carlo_walk(matrix, states, "A", 10, seed=i)["path"] for i in range(10)]
+        paths_long = [execute_monte_carlo_walk(matrix, states, "A", 10, seed=i)["path"] for i in range(500)]
         h_short = compile_simulation_histogram(paths_short)
         h_long = compile_simulation_histogram(paths_long)
         assert h_long["chi_square_convergence"] < h_short["chi_square_convergence"]

@@ -7,8 +7,10 @@ resource usage, and quality metrics across different surfaces.
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 import time
+
 try:
     import psutil
+
     _psutil_available = True
 except ImportError:
     psutil = None
@@ -30,6 +32,7 @@ logger = structlog.get_logger()
 @dataclass
 class BenchmarkConfig:
     """Configuration for a benchmark run."""
+
     warmup_iterations: int = 3
     measurement_iterations: int = 10
     timeout: float = 30.0
@@ -51,6 +54,7 @@ class BenchmarkConfig:
 @dataclass
 class BenchmarkResult:
     """Results from a single benchmark execution."""
+
     skill_id: str
     surface: str
     iterations: int
@@ -97,8 +101,15 @@ class BenchmarkResult:
         }
 
     @classmethod
-    def from_timing_data(cls, skill_id: str, surface: str, times: List[float],
-                         memory_samples: List[float], errors: List[str], config: BenchmarkConfig) -> "BenchmarkResult":
+    def from_timing_data(
+        cls,
+        skill_id: str,
+        surface: str,
+        times: List[float],
+        memory_samples: List[float],
+        errors: List[str],
+        config: BenchmarkConfig,
+    ) -> "BenchmarkResult":
         """Construct result from raw timing data."""
         iterations = len(times)
         timestamp = datetime.utcnow().isoformat()
@@ -107,8 +118,8 @@ class BenchmarkResult:
             sorted_times = sorted(times)
             p95_idx = int(0.95 * len(times)) - 1
             p99_idx = int(0.99 * len(times)) - 1
-            p95 = sorted_times[min(p95_idx, len(times)-1)]
-            p99 = sorted_times[min(p99_idx, len(times)-1)]
+            p95 = sorted_times[min(p95_idx, len(times) - 1)]
+            p99 = sorted_times[min(p99_idx, len(times) - 1)]
 
             result = cls(
                 skill_id=skill_id,
@@ -131,13 +142,22 @@ class BenchmarkResult:
             )
         else:
             result = cls(
-                skill_id=skill_id, surface=surface, iterations=0,
-                mean_execution_time=0.0, median_execution_time=0.0,
-                p95_execution_time=0.0, p99_execution_time=0.0,
-                min_execution_time=0.0, max_execution_time=0.0,
-                std_execution_time=0.0, peak_memory_mb=0.0,
-                avg_memory_mb=0.0, success_rate=0.0, error_rate=1.0,
-                errors=["No successful executions"], timestamp=timestamp,
+                skill_id=skill_id,
+                surface=surface,
+                iterations=0,
+                mean_execution_time=0.0,
+                median_execution_time=0.0,
+                p95_execution_time=0.0,
+                p99_execution_time=0.0,
+                min_execution_time=0.0,
+                max_execution_time=0.0,
+                std_execution_time=0.0,
+                peak_memory_mb=0.0,
+                avg_memory_mb=0.0,
+                success_rate=0.0,
+                error_rate=1.0,
+                errors=["No successful executions"],
+                timestamp=timestamp,
                 config=config.to_dict(),
             )
 
@@ -154,8 +174,9 @@ class SkillBenchmark:
         self.logger = logger.bind(component="skill_benchmark")
         self._benchmark_data: Dict[str, List[BenchmarkResult]] = defaultdict(list)
 
-    async def benchmark_skill(self, skill_id: str, config: Optional[BenchmarkConfig] = None,
-                              test_input: Optional[Dict[str, Any]] = None) -> BenchmarkResult:
+    async def benchmark_skill(
+        self, skill_id: str, config: Optional[BenchmarkConfig] = None, test_input: Optional[Dict[str, Any]] = None
+    ) -> BenchmarkResult:
         """Benchmark a single skill across its surfaces."""
         config = config or BenchmarkConfig()
         skill = self.registry.get_skill(skill_id)
@@ -188,17 +209,28 @@ class SkillBenchmark:
             return best
         else:
             return BenchmarkResult(
-                skill_id=skill_id, surface="none", iterations=0,
-                mean_execution_time=0.0, median_execution_time=0.0,
-                p95_execution_time=0.0, p99_execution_time=0.0,
-                min_execution_time=0.0, max_execution_time=0.0,
-                std_execution_time=0.0, peak_memory_mb=0.0, avg_memory_mb=0.0,
-                success_rate=0.0, error_rate=1.0, errors=["No surfaces available"],
-                timestamp=datetime.utcnow().isoformat(), config=config.to_dict(),
+                skill_id=skill_id,
+                surface="none",
+                iterations=0,
+                mean_execution_time=0.0,
+                median_execution_time=0.0,
+                p95_execution_time=0.0,
+                p99_execution_time=0.0,
+                min_execution_time=0.0,
+                max_execution_time=0.0,
+                std_execution_time=0.0,
+                peak_memory_mb=0.0,
+                avg_memory_mb=0.0,
+                success_rate=0.0,
+                error_rate=1.0,
+                errors=["No surfaces available"],
+                timestamp=datetime.utcnow().isoformat(),
+                config=config.to_dict(),
             )
 
-    async def _benchmark_surface(self, skill: SkillMetadata, plugin, config: BenchmarkConfig,
-                                 test_input: Optional[Dict[str, Any]]) -> BenchmarkResult:
+    async def _benchmark_surface(
+        self, skill: SkillMetadata, plugin, config: BenchmarkConfig, test_input: Optional[Dict[str, Any]]
+    ) -> BenchmarkResult:
         """Benchmark a skill on a specific surface."""
         assert skill.skill_id is not None, "Skill must have a valid ID"
         # Prepare test input
@@ -258,10 +290,10 @@ class SkillBenchmark:
     async def _execute_skill_once(self, skill: SkillMetadata, plugin, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a skill once using the actual SkillExecutor for realistic execution conditions."""
         from .executor import SkillExecutor, SkillExecutionRequest
-        
+
         if not skill.skill_id:
             return {"status": "error", "message": "Skill ID is missing"}
-        
+
         # Resolve skill path
         skill_path = None
         if skill.path:
@@ -274,22 +306,18 @@ class SkillBenchmark:
 
         # Create executor and execute skill
         executor = SkillExecutor(plugin_manager=self.plugin_manager, registry=self.registry, skills_dir=self.skills_dir)
-        
+
         # Create execution request
         request = SkillExecutionRequest(
             skill_id=skill.skill_id,
             input_data=input_data,
             surface=plugin.name,
-            timeout=self.config.timeout if hasattr(self, 'config') else None
+            timeout=self.config.timeout if hasattr(self, "config") else None,
         )
-        
+
         try:
             result = await executor.execute(request)
-            return {
-                "status": "ok" if result.success else "error",
-                "value": result.output,
-                "message": result.error
-            }
+            return {"status": "ok" if result.success else "error", "value": result.output, "message": result.error}
         except Exception as e:
             return {"status": "error", "message": str(e)}
 

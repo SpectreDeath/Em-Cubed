@@ -5,12 +5,13 @@ from collections import defaultdict
 
 import pytest
 
+
 def _prefix_key(tokens):
     return "|".join(tokens)
 
+
 class NGramModel:
-    def __init__(self, n, vocabulary, prefix_counts, transition_counts,
-                 laplace_alpha, min_frequency):
+    def __init__(self, n, vocabulary, prefix_counts, transition_counts, laplace_alpha, min_frequency):
         self.n = n
         self.vocabulary = vocabulary
         self.prefix_counts = prefix_counts
@@ -18,15 +19,16 @@ class NGramModel:
         self.laplace_alpha = laplace_alpha
         self.min_frequency = min_frequency
 
+
 class PredictionResult:
-    def __init__(self, context, predicted_tokens, top_token,
-                 top_probability, entropy, model_n):
+    def __init__(self, context, predicted_tokens, top_token, top_probability, entropy, model_n):
         self.context = context
         self.predicted_tokens = predicted_tokens
         self.top_token = top_token
         self.top_probability = top_probability
         self.entropy = entropy
         self.model_n = model_n
+
 
 def build_ngram_model(corpus, n=3, laplace_alpha=1.0, min_frequency=1):
     if not corpus or n < 1:
@@ -42,7 +44,7 @@ def build_ngram_model(corpus, n=3, laplace_alpha=1.0, min_frequency=1):
         for tok in seq:
             vocab.add(tok)
         for i in range(len(seq) - n + 1):
-            window = tuple(seq[i: i + n - 1])
+            window = tuple(seq[i : i + n - 1])
             suffix = seq[i + n - 1]
             key = _prefix_key(window)
             prefix_counts[key] = prefix_counts.get(key, 0) + 1
@@ -56,6 +58,7 @@ def build_ngram_model(corpus, n=3, laplace_alpha=1.0, min_frequency=1):
         laplace_alpha=laplace_alpha,
         min_frequency=min_frequency,
     )
+
 
 def predict_next(model, context, top_k=5):
     n = model.n
@@ -79,10 +82,7 @@ def predict_next(model, context, top_k=5):
         suffix_counts = model.transition_counts[key]
         total_observed = sum(suffix_counts.values())
         denom = total_observed + alpha * v_size
-        probs = {
-            t: (suffix_counts.get(t, 0) + alpha) / denom
-            for t in model.vocabulary
-        }
+        probs = {t: (suffix_counts.get(t, 0) + alpha) / denom for t in model.vocabulary}
 
     ranked = sorted(probs.items(), key=lambda x: x[1], reverse=True)[:top_k]
     entropy = -sum(p * math.log2(p) for p in probs.values() if p > 0)
@@ -98,18 +98,23 @@ def predict_next(model, context, top_k=5):
         model_n=n,
     )
 
+
 def valid_n(n):
     return 1 <= n <= 10
 
+
 def min_frequency_met(count, min_freq):
     return count >= min_freq
+
 
 def prefix_suffix_consistent(prefix, suffix, transition_counts):
     key = _prefix_key(prefix)
     return key in transition_counts and suffix in transition_counts[key]
 
+
 def vocabulary_consistent(corpus_tokens, vocab):
     return set(corpus_tokens).issubset(set(vocab))
+
 
 class TestPrefixKey:
     def test_empty(self):
@@ -120,6 +125,7 @@ class TestPrefixKey:
 
     def test_multiple(self):
         assert _prefix_key(("a", "b", "c")) == "a|b|c"
+
 
 class TestBuildNGramModel:
     def test_unigram(self):
@@ -167,6 +173,7 @@ class TestBuildNGramModel:
         assert model.transition_counts["b"]["c"] == 1
         assert model.transition_counts["b"]["d"] == 1
 
+
 class TestPredictNext:
     def test_known_context_top_token(self):
         corpus = [["a", "b", "c", "d", "c"]]
@@ -206,6 +213,7 @@ class TestPredictNext:
         probs = [p for _, p in result.predicted_tokens]
         assert probs == sorted(probs, reverse=True)
 
+
 class TestLaplaceSmoothing:
     def test_zero_frequency_suffix_nonzero_probability(self):
         corpus = [["a", "b", "c"]]
@@ -224,6 +232,7 @@ class TestLaplaceSmoothing:
         total = sum(p for _, p in result.predicted_tokens)
         assert abs(total - 1.0) < 1e-9
 
+
 class TestEntropy:
     def test_uniform_distribution_log2_vocabulary(self):
         corpus = [["a", "b", "c"]]
@@ -237,6 +246,7 @@ class TestEntropy:
         model = build_ngram_model(corpus, n=2, laplace_alpha=1.0)
         result = predict_next(model, ["x"])
         assert abs(result.entropy - 0.0) < 1e-9
+
 
 class TestPrologValidation:
     def test_valid_n_in_range(self):

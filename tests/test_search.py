@@ -127,10 +127,10 @@ class TestSearchRegistry:
     def test_search_whoosh_indexing(self, tmp_path):
         """Test Whoosh search index creation and querying."""
         from em_cubed.search import WhooshSearchIndex
-        
+
         # Create a search index
         search_index = WhooshSearchIndex(tmp_path / "whoosh_test")
-        
+
         # Create sample registry
         registry = [
             {
@@ -148,20 +148,20 @@ class TestSearchRegistry:
                 "path": "test/logic",
             },
         ]
-        
+
         # Index the skills
         search_index.index_skills(registry)
-        
+
         # Search for calculator
         results = search_index.search("calculator", max_results=10)
         assert len(results) >= 1
         assert results[0]["name"] == "Test Calculator"
-        
+
         # Search for logic
         results = search_index.search("logic", max_results=10)
         assert len(results) >= 1
         assert results[0]["name"] == "Logic Engine"
-        
+
         # Search for tag
         results = search_index.search("math", max_results=10)
         assert len(results) >= 1
@@ -169,7 +169,7 @@ class TestSearchRegistry:
     def test_search_whoosh_fallback(self, tmp_path):
         """Test Whoosh search falls back gracefully when unavailable."""
         from em_cubed.search import search_registry
-        
+
         registry_file = tmp_path / "registry.json"
         registry_data = [
             {
@@ -184,9 +184,10 @@ class TestSearchRegistry:
             }
         ]
         import json
+
         with open(registry_file, "w") as f:
             json.dump(registry_data, f)
-        
+
         # Search with whoosh disabled (should use naive search)
         results = search_registry("test", registry_file, use_whoosh=False)
         assert len(results) == 1
@@ -195,10 +196,10 @@ class TestSearchRegistry:
     def test_search_registry_hash_update(self, tmp_path):
         """Test that registry hash triggers index update."""
         from em_cubed.search import search_registry, _get_registry_hash
-        
+
         registry_file = tmp_path / "registry.json"
         index_dir = tmp_path / "whoosh_index"
-        
+
         # Initial registry
         registry_data = [
             {
@@ -213,33 +214,36 @@ class TestSearchRegistry:
             }
         ]
         import json
+
         with open(registry_file, "w") as f:
             json.dump(registry_data, f)
-        
+
         # Get initial hash
         initial_hash = _get_registry_hash(registry_data)
-        
+
         # Search to create index
         search_registry("skill", registry_file, use_whoosh=True, index_dir=index_dir)
 
         # Verify hash file was created
         hash_file = index_dir / ".registry_hash"
         assert hash_file.exists()
-        
+
         # Modify registry
-        registry_data.append({
-            "name": "Skill Two",
-            "domain": "Test",
-            "purpose": "Test",
-            "description": "Test",
-            "surfaces": ["prolog"],
-            "logic_tags": [],
-            "heuristic_tags": [],
-            "path": "skill2",
-        })
+        registry_data.append(
+            {
+                "name": "Skill Two",
+                "domain": "Test",
+                "purpose": "Test",
+                "description": "Test",
+                "surfaces": ["prolog"],
+                "logic_tags": [],
+                "heuristic_tags": [],
+                "path": "skill2",
+            }
+        )
         with open(registry_file, "w") as f:
             json.dump(registry_data, f)
-        
+
         # New hash should be different
         new_hash = _get_registry_hash(registry_data)
         assert new_hash != initial_hash
@@ -247,7 +251,7 @@ class TestSearchRegistry:
     def test_naive_search_scoring(self, tmp_path):
         """Test naive search scoring prioritizes name matches."""
         from em_cubed.search import _naive_search_registry
-        
+
         registry = [
             {
                 "name": "Python Calculator",
@@ -270,19 +274,19 @@ class TestSearchRegistry:
                 "path": "logic",
             },
         ]
-        
+
         # Search for 'python' - should match name/surface
         results = _naive_search_registry("python", registry)
         assert len(results) == 1
         assert results[0]["name"] == "Python Calculator"
         # Name match should have higher score than surface match
         assert results[0]["score"] > 0
-        
+
         # Search for 'calculate' - should match heuristic tag
         results = _naive_search_registry("calculate", registry)
         assert len(results) == 1
         assert results[0]["name"] == "Python Calculator"
-        
+
         # Search for 'solve' - should match logic tag (highest weight)
         results = _naive_search_registry("solve", registry)
         assert len(results) == 1
@@ -291,11 +295,11 @@ class TestSearchRegistry:
     def test_search_empty_registry(self, tmp_path):
         """Test search with empty registry."""
         from em_cubed.search import search_registry
-        
+
         registry_file = tmp_path / "registry.json"
         with open(registry_file, "w") as f:
             f.write("[]")
-        
+
         # Use a unique index directory to avoid conflicts with other tests
         index_dir = tmp_path / "whoosh_index"
         results = search_registry("test", registry_file, use_whoosh=True, index_dir=index_dir)

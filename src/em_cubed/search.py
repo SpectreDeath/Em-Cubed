@@ -121,10 +121,7 @@ class WhooshSearchIndex:
             searcher = self.ix.searcher(weighting=scoring.BM25F())
 
             # Parse query with fuzzy matching for typos
-            parser = qparser.MultifieldParser(
-                ["name", "description", "content", "tags"],
-                self.ix.schema
-            )
+            parser = qparser.MultifieldParser(["name", "description", "content", "tags"], self.ix.schema)
             parser.add_plugin(qparser.FuzzyTermPlugin())
 
             # Add fuzzy terms for common typos
@@ -161,21 +158,27 @@ class WhooshSearchIndex:
                 purpose = hit.get("purpose", "")
                 logic_tags_raw = hit.get("logic_tags", "")
                 heuristic_tags_raw = hit.get("heuristic_tags", "")
-                logic_tags_list = logic_tags_raw.split(",") if isinstance(logic_tags_raw, str) and logic_tags_raw else []
-                heuristic_tags_list = heuristic_tags_raw.split(",") if isinstance(heuristic_tags_raw, str) and heuristic_tags_raw else []
+                logic_tags_list = (
+                    logic_tags_raw.split(",") if isinstance(logic_tags_raw, str) and logic_tags_raw else []
+                )
+                heuristic_tags_list = (
+                    heuristic_tags_raw.split(",") if isinstance(heuristic_tags_raw, str) and heuristic_tags_raw else []
+                )
 
-                search_results.append({
-                    "name": hit.get("name"),
-                    "domain": domain,
-                    "purpose": purpose,
-                    "description": hit.get("description"),
-                    "path": hit.get("path"),
-                    "surfaces": surfaces_list,
-                    "logic_tags": logic_tags_list,
-                    "heuristic_tags": heuristic_tags_list,
-                    "tags": tags_list,
-                    "score": score,
-                })
+                search_results.append(
+                    {
+                        "name": hit.get("name"),
+                        "domain": domain,
+                        "purpose": purpose,
+                        "description": hit.get("description"),
+                        "path": hit.get("path"),
+                        "surfaces": surfaces_list,
+                        "logic_tags": logic_tags_list,
+                        "heuristic_tags": heuristic_tags_list,
+                        "tags": tags_list,
+                        "score": score,
+                    }
+                )
 
             searcher.close()
             return search_results
@@ -200,9 +203,17 @@ def _get_registry_hash(registry: List[Dict[str, Any]]) -> str:
     return hashlib.sha256(stable_json.encode()).hexdigest()
 
 
-def search_registry(query: str, registry_path: Path, max_results: int = 10, use_whoosh: bool = True, index_dir: Optional[Path] = None) -> List[Dict[str, Any]]:
+def search_registry(
+    query: str, registry_path: Path, max_results: int = 10, use_whoosh: bool = True, index_dir: Optional[Path] = None
+) -> List[Dict[str, Any]]:
     """Search the skill registry with whoosh or fallback to naive search."""
-    logger.info("Searching registry", query=query, registry_path=str(registry_path), max_results=max_results, use_whoosh=use_whoosh)
+    logger.info(
+        "Searching registry",
+        query=query,
+        registry_path=str(registry_path),
+        max_results=max_results,
+        use_whoosh=use_whoosh,
+    )
 
     query = query.strip()
     if not query:
@@ -314,6 +325,3 @@ def _naive_search_registry(query: str, registry: List[Dict[str, Any]], max_resul
 
     logger.info("Naive search completed", total_matches=len(results), returned=len(top_results))
     return top_results
-
-
-

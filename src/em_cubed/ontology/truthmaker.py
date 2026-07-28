@@ -78,7 +78,9 @@ class ExactTruthmakerClassifier:
                 ground_explanation=f"Exact Falsemaker: Missing relevant facts for predicates {relevant_predicates}",
             )
 
-        logger.info("Classified Exact Truthmaker (s ⊩ A) for '%s' with %d relevant triples.", proposition, len(wholly_relevant))
+        logger.info(
+            "Classified Exact Truthmaker (s ⊩ A) for '%s' with %d relevant triples.", proposition, len(wholly_relevant)
+        )
         return ExactTruthmaker(
             proposition=proposition,
             exact_truthmakers=[fragment],

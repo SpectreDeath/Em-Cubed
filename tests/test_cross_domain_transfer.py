@@ -17,7 +17,11 @@ def test_cross_domain_concept_mapping():
 
 def test_cross_domain_triple_transfer():
     source_triples = [OntologyTriple(subject="PathogenVariant_X", predicate="causes", object="OutbreakEvent_01")]
-    concept_map = {"PathogenVariant_X": "StateActor_Alpha", "causes": "initiates", "OutbreakEvent_01": "MilitarySkirmish_01"}
+    concept_map = {
+        "PathogenVariant_X": "StateActor_Alpha",
+        "causes": "initiates",
+        "OutbreakEvent_01": "MilitarySkirmish_01",
+    }
 
     transferred = CrossDomainKnowledgeTransferEngine.transfer_triples(source_triples, concept_map)
     assert len(transferred) == 1

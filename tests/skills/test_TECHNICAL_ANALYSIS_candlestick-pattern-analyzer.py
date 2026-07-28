@@ -6,7 +6,9 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(__file__).parent.parent.parent / "skills" / "TECHNICAL_ANALYSIS" / "candlestick-pattern-analyzer" / "SKILL.md"
+SKILL_FILE = (
+    Path(__file__).parent.parent.parent / "skills" / "TECHNICAL_ANALYSIS" / "candlestick-pattern-analyzer" / "SKILL.md"
+)
 SKILL_ID = "TECHNICAL_ANALYSIS/candlestick-pattern-analyzer"
 
 
@@ -51,9 +53,7 @@ class Testcandlestick_pattern_analyzerSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -72,15 +72,13 @@ class Testcandlestick_pattern_analyzerSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
 
 @pytest.mark.asyncio
 async def test_candlestick_encoder():
     """Test candlestick pattern encoding logic."""
-    code = '''
+    code = """
 # Inline candlestick encoding without class
 open_price, high, low, close = 100, 110, 99, 109
 body = abs(close - open_price)
@@ -88,8 +86,9 @@ range_total = high - low
 is_bullish = close > open_price
 result = "bullish_maribozu" if is_bullish and close > open_price + 0.9 * range_total else ("bullish" if is_bullish else "bearish")
 result == "bullish_maribozu"
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -98,13 +97,14 @@ result == "bullish_maribozu"
 @pytest.mark.asyncio
 async def test_candlestick_prolog_patterns():
     """Test candlestick pattern validation logic."""
-    code = '''
+    code = """
 # Inline pattern check without generator
 bullish_patterns = ["hammer", "bullish_maribozu", "bullish"]
 seq = ["hammer", "bullish_maribozu"]
 len([p for p in seq if p in bullish_patterns]) == 2
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"

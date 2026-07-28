@@ -26,17 +26,12 @@ async def test_context_injection_primitives(quickjs_surface):
     """Test that context variables are injected into JS context."""
     if not quickjs_surface.available:
         pytest.skip("pyquickjs not installed")
-    context = {
-        "x": 10,
-        "name": "test",
-        "flag": True,
-        "items": [1, 2, 3],
-        "mapping": {"a": 1, "b": 2}
-    }
+    context = {"x": 10, "name": "test", "flag": True, "items": [1, 2, 3], "mapping": {"a": 1, "b": 2}}
     code = "JSON.stringify({x, name, flag, items, mapping})"
     result = await quickjs_surface.execute(code, context=context)
     assert result["status"] == "ok"
     import json
+
     output = json.loads(result["value"])
     assert output["x"] == 10
     assert output["name"] == "test"
@@ -99,6 +94,7 @@ async def test_quickjs_without_pyquickjs(monkeypatch):
     """Test that surface reports unavailable and returns error if pyquickjs missing."""
     # Mock import to fail
     import importlib.util
+
     original_find_spec = importlib.util.find_spec
 
     def mock_find_spec(name, package=None):

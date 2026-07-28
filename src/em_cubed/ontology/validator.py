@@ -103,5 +103,10 @@ class OntologyLedgerValidator:
                 self.entity_classes[entity_id] = set()
             self.entity_classes[entity_id].add(new_class)
 
-        logger.info("Ledger Validation Passed. Committed triple (%s, %s, %s).", new_triple.subject, new_triple.predicate, new_triple.object)
+        logger.info(
+            "Ledger Validation Passed. Committed triple (%s, %s, %s).",
+            new_triple.subject,
+            new_triple.predicate,
+            new_triple.object,
+        )
         return True, "Passed structural and ontological ledger validation."

@@ -59,7 +59,13 @@ class OntologicalHealthMonitor:
         objects = {t.object for t in triples if not t.object.startswith("http") and not t.object.isnumeric()}
 
         # Dangling IRIs: Objects referencing entities never defined as subjects or standard classes
-        dangling_count = len([obj for obj in objects if obj not in subjects and not obj.startswith("bfo:") and not obj.startswith("skos:")])
+        dangling_count = len(
+            [
+                obj
+                for obj in objects
+                if obj not in subjects and not obj.startswith("bfo:") and not obj.startswith("skos:")
+            ]
+        )
 
         # Confidence satisfaction score
         avg_confidence = sum(t.confidence for t in triples) / len(triples)
@@ -124,7 +130,13 @@ class SelfHealingGuardrailEngine:
 
         for t in triples:
             if t.confidence < min_confidence_threshold:
-                logger.warning("Self-Healing: Purging low-confidence triple (%s, %s, %s) [conf=%.2f]", t.subject, t.predicate, t.object, t.confidence)
+                logger.warning(
+                    "Self-Healing: Purging low-confidence triple (%s, %s, %s) [conf=%.2f]",
+                    t.subject,
+                    t.predicate,
+                    t.object,
+                    t.confidence,
+                )
                 continue
             healed.append(t)
 

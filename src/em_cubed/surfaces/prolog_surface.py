@@ -157,8 +157,9 @@ class PrologSurface(SurfaceBase):
                 program = "\n".join(lines)
                 if not program.strip():
                     return {"status": "ok", "message": "No Prolog code to execute"}
-                
+
                 import hashlib
+
                 code_hash = hashlib.sha256(program.encode("utf-8")).hexdigest()
                 if code_hash in self._consulted_hashes:
                     logger.info("Prolog rules already consulted (cache hit)", hash=code_hash)
@@ -285,11 +286,12 @@ class PrologSurface(SurfaceBase):
                     err_str = str(first_err)
                     if "permission_error" in err_str and "static_procedure" in err_str:
                         import re as _re
+
                         head = processed_code.split(":-")[0].strip()
                         m = _re.match(r"([a-z][a-zA-Z0-9_]*)\s*\(", head)
                         if m:
                             functor = m.group(1)
-                            inner = head[head.index("(") + 1:]
+                            inner = head[head.index("(") + 1 :]
                             depth, arity = 1, 1
                             for ch in inner:
                                 if ch in "([":

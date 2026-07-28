@@ -30,6 +30,7 @@ CURRENT_SCHEMA_VERSION = 1
 @dataclass
 class QualityMetrics:
     """Aggregated quality metrics for a skill."""
+
     skill_id: str
     validation_score: float = 0.0  # From validator
     test_coverage: float = 0.0  # Percentage
@@ -73,6 +74,7 @@ class QualityMetrics:
 @dataclass
 class CompositionEdge:
     """Represents a skill composition relationship."""
+
     source_skill_id: str
     target_skill_id: str
     compatibility_score: float  # 0-1 based on schema compatibility
@@ -103,9 +105,9 @@ class SkillRegistry:
         # Remote registry federation
         self._remote_registry_manager: Optional[RemoteSkillRegistry] = None
         self._remote_skill_cache: Dict[str, List[SkillMetadata]] = {}  # Cache for discovered skills
-        
+
         self._load_registry()
-        
+
         # Initialize remote registry if configured
         self._initialize_remote_registry()
 
@@ -121,7 +123,7 @@ class SkillRegistry:
 
     def set_remote_registry_manager(self, manager):
         """Set the remote registry manager for federation.
-        
+
         Args:
             manager: The RemoteSkillRegistry instance to use for federation
         """
@@ -130,59 +132,59 @@ class SkillRegistry:
 
     def sync_with_remote_registries(self, force: bool = False) -> Dict[str, bool]:
         """Synchronize with all configured remote registries.
-        
+
         Args:
             force: Whether to force sync even if not due
-            
+
         Returns:
             Dictionary mapping registry names to sync success boolean
         """
         if self._remote_registry_manager is None:
             self.logger.warning("Remote registry manager not configured")
             return {}
-        
+
         return self._remote_registry_manager.sync_all_registries(force=force)
 
     def discover_remote_skills(self, query: str, limit: int = 10) -> List[SkillMetadata]:
         """Discover skills from remote registries matching a query.
-        
+
         Args:
             query: Search query
             limit: Maximum number of results to return
-            
+
         Returns:
             List of matching SkillMetadata objects from remote registries
         """
         if self._remote_registry_manager is None:
             self.logger.warning("Remote registry manager not configured")
             return []
-        
+
         # Check cache first
         cache_key = f"{query}:{limit}"
         if cache_key in self._remote_skill_cache:
             # Check if cache is fresh (5 minutes)
             # In a real implementation, we'd timestamp cache entries
             return self._remote_skill_cache[cache_key]
-        
+
         # Discover from remote registries
         skills = self._remote_registry_manager.discover_skills(query, limit)
-        
+
         # Cache results
         self._remote_skill_cache[cache_key] = skills
-        
+
         return skills
 
     def get_remote_registry_info(self) -> Dict[str, Dict[str, Any]]:
         """Get information about configured remote registries.
-        
+
         Returns:
             Dictionary with registry configuration and status
         """
         if self._remote_registry_manager is None:
             return {}
-        
+
         return self._remote_registry_manager.get_registry_info()
-        
+
         # Initialize remote registry if configured
         self._initialize_remote_registry()
 
@@ -208,7 +210,9 @@ class SkillRegistry:
                     avg_execution_time=metrics_data.get("avg_execution_time", 0.0),
                     avg_token_savings=metrics_data.get("avg_token_savings", 0.0),
                     usage_count=metrics_data.get("applied_count", 0),
-                    last_execution=datetime.fromisoformat(metrics_data["last_executed"]) if metrics_data.get("last_executed") else None,
+                    last_execution=datetime.fromisoformat(metrics_data["last_executed"])
+                    if metrics_data.get("last_executed")
+                    else None,
                 )
                 self._quality_metrics[metadata.skill_id] = qm
 
@@ -230,10 +234,7 @@ class SkillRegistry:
 
     def _deserialize_metadata(self, data: Dict[str, Any]) -> SkillMetadata:
         """Deserialize dictionary into SkillMetadata object."""
-        from .metadata import (
-            SkillDependency, InputOutputSchema, SkillCapability,
-            CompatibilityRange, QualityThresholds
-        )
+        from .metadata import SkillDependency, InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds
 
         # Parse dependencies
         deps = [SkillDependency.from_dict(d) for d in data.get("dependencies", [])]
@@ -254,7 +255,7 @@ class SkillRegistry:
             min_test_coverage=qt_data.get("min_test_coverage", 0.8),
             min_success_rate=qt_data.get("min_success_rate", 0.7),
             max_execution_time=qt_data.get("max_execution_time", 30.0),
-            max_memory_usage=qt_data.get("max_memory_usage", 512*1024*1024),
+            max_memory_usage=qt_data.get("max_memory_usage", 512 * 1024 * 1024),
             required_surfaces=qt_data.get("required_surfaces", 1),
             min_documentation_ratio=qt_data.get("min_documentation_ratio", 0.3),
         )
@@ -266,7 +267,9 @@ class SkillRegistry:
             success_count=metrics_data.get("success_count", 0),
             total_execution_time=metrics_data.get("total_execution_time", 0.0),
             total_token_usage=metrics_data.get("total_token_usage", 0),
-            last_executed=datetime.fromisoformat(metrics_data["last_executed"]) if metrics_data.get("last_executed") else None,
+            last_executed=datetime.fromisoformat(metrics_data["last_executed"])
+            if metrics_data.get("last_executed")
+            else None,
         )
 
         # Parse timestamps
@@ -317,7 +320,7 @@ class SkillRegistry:
             # Already slugified if newly indexed, but for backward compatibility:
             if sid == slug_id:
                 return metadata
-            
+
             # Check if stored ID slugifies to the target
             if "/" in sid:
                 s_dom, s_nam = sid.split("/", 1)
@@ -326,9 +329,9 @@ class SkillRegistry:
 
         return None
 
-    def list_skills(self, domain: Optional[str] = None,
-                    surface: Optional[str] = None,
-                    min_quality: Optional[float] = None) -> List[SkillMetadata]:
+    def list_skills(
+        self, domain: Optional[str] = None, surface: Optional[str] = None, min_quality: Optional[float] = None
+    ) -> List[SkillMetadata]:
         """List skills with optional filtering."""
         skills = list(self._skills.values())
 
@@ -337,7 +340,13 @@ class SkillRegistry:
         if surface:
             skills = [s for s in skills if surface in s.surfaces]
         if min_quality is not None:
-            skills = [s for s in skills if s.skill_id is not None and (qm := self.get_quality(s.skill_id)) is not None and qm.validation_score >= min_quality]
+            skills = [
+                s
+                for s in skills
+                if s.skill_id is not None
+                and (qm := self.get_quality(s.skill_id)) is not None
+                and qm.validation_score >= min_quality
+            ]
 
         return skills
 
@@ -345,8 +354,7 @@ class SkillRegistry:
         """Get quality metrics for a skill."""
         return self._quality_metrics.get(skill_id)
 
-    def update_metrics(self, skill_id: str, success: bool, execution_time: float,
-                       token_usage: int = 0) -> None:
+    def update_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
         """Update runtime metrics for a skill."""
         if skill_id in self._skills:
             self._skills[skill_id].metrics.record_execution(success, execution_time, token_usage)
@@ -358,7 +366,7 @@ class SkillRegistry:
                 qm.avg_token_savings = self._skills[skill_id].metrics.avg_token_savings
                 qm.usage_count = self._skills[skill_id].metrics.applied_count
                 qm.last_execution = self._skills[skill_id].metrics.last_executed
-            
+
             self.storage.update_skill_metrics(skill_id, success, execution_time, token_usage)
             if isinstance(self.storage, JSONFileRegistryStorage):
                 self._save_registry()
@@ -476,17 +484,17 @@ class SkillRegistry:
 
 class RegistryStorage(ABC):
     """Abstract base class for registry storage backends."""
-    
+
     @abstractmethod
     def load_skills(self) -> List[Dict[str, Any]]:
         """Load all skills from the storage backend."""
         pass  # nosec B110 - intentional fallback; caller handles None/False return
-        
+
     @abstractmethod
     def save_skills(self, skills: List[Dict[str, Any]]) -> None:
         """Save all skills to the storage backend."""
         pass  # nosec B110 - intentional fallback; caller handles None/False return
-        
+
     @abstractmethod
     def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
         """Update runtime metrics for a specific skill atomically."""
@@ -495,10 +503,10 @@ class RegistryStorage(ABC):
 
 class JSONFileRegistryStorage(RegistryStorage):
     """JSON file-based registry storage backend (default)."""
-    
+
     def __init__(self, registry_file: Path):
         self.registry_file = registry_file
-        
+
     def load_skills(self) -> List[Dict[str, Any]]:
         if not self.registry_file.exists():
             return []
@@ -507,7 +515,7 @@ class JSONFileRegistryStorage(RegistryStorage):
                 return json.load(f)
         except Exception:
             return []
-            
+
     def save_skills(self, skills: List[Dict[str, Any]]) -> None:
         try:
             tmp_file = self.registry_file.with_name(f".{self.registry_file.name}.{uuid.uuid4().hex}.tmp")
@@ -516,7 +524,7 @@ class JSONFileRegistryStorage(RegistryStorage):
             tmp_file.replace(self.registry_file)
         except Exception as e:
             logger.error("Failed to save registry to JSON file", error=str(e))
-            
+
     def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
         # Atomic update not natively supported for single JSON file, caller uses save_skills
         pass  # nosec B110 - intentional fallback; caller handles None/False return
@@ -524,11 +532,11 @@ class JSONFileRegistryStorage(RegistryStorage):
 
 class SQLiteRegistryStorage(RegistryStorage):
     """SQLite database-based registry storage backend for thread-safe concurrent access."""
-    
+
     def __init__(self, db_path: Path):
         self.db_path = db_path
         self._init_db()
-        
+
     def _init_db(self):
         try:
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -555,30 +563,38 @@ class SQLiteRegistryStorage(RegistryStorage):
                 conn.commit()
         except Exception as e:
             logger.error("Failed to initialize SQLite registry database", error=str(e))
-            
+
     def load_skills(self) -> List[Dict[str, Any]]:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
-                cursor = conn.execute("SELECT data, validation_score, test_coverage, applied_count, success_count, total_execution_time, total_token_usage, last_executed FROM skills")
+                cursor = conn.execute(
+                    "SELECT data, validation_score, test_coverage, applied_count, success_count, total_execution_time, total_token_usage, last_executed FROM skills"
+                )
                 skills = []
                 for row in cursor.fetchall():
                     try:
                         skill_data = json.loads(row["data"])
                         skill_data["validation_score"] = row["validation_score"]
                         skill_data["test_coverage"] = row["test_coverage"]
-                        
+
                         metrics = skill_data.setdefault("metrics", {})
                         metrics["applied_count"] = row["applied_count"]
                         metrics["success_count"] = row["success_count"]
                         metrics["total_execution_time"] = row["total_execution_time"]
                         metrics["total_token_usage"] = row["total_token_usage"]
                         metrics["last_executed"] = row["last_executed"]
-                        
-                        metrics["completion_rate"] = row["success_count"] / row["applied_count"] if row["applied_count"] > 0 else 0.0
-                        metrics["avg_execution_time"] = row["total_execution_time"] / row["success_count"] if row["success_count"] > 0 else 0.0
-                        metrics["avg_token_savings"] = row["total_token_usage"] / row["applied_count"] if row["applied_count"] > 0 else 0.0
-                        
+
+                        metrics["completion_rate"] = (
+                            row["success_count"] / row["applied_count"] if row["applied_count"] > 0 else 0.0
+                        )
+                        metrics["avg_execution_time"] = (
+                            row["total_execution_time"] / row["success_count"] if row["success_count"] > 0 else 0.0
+                        )
+                        metrics["avg_token_savings"] = (
+                            row["total_token_usage"] / row["applied_count"] if row["applied_count"] > 0 else 0.0
+                        )
+
                         skills.append(skill_data)
                     except Exception:
                         pass  # nosec B110 - intentional fallback; caller handles None/False return
@@ -586,7 +602,7 @@ class SQLiteRegistryStorage(RegistryStorage):
         except Exception as e:
             logger.error("Failed to load skills from SQLite registry", error=str(e))
             return []
-            
+
     def save_skills(self, skills: List[Dict[str, Any]]) -> None:
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -595,38 +611,44 @@ class SQLiteRegistryStorage(RegistryStorage):
                     skill_id = skill["skill_id"]
                     surfaces_str = ",".join(skill.get("surfaces", []))
                     metrics = skill.get("metrics", {})
-                    conn.execute("""
+                    conn.execute(
+                        """
                         INSERT OR REPLACE INTO skills (
                             skill_id, name, domain, version, surfaces, purpose, description,
                             validation_score, test_coverage, applied_count, success_count,
                             total_execution_time, total_token_usage, last_executed, data
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        skill_id,
-                        skill["name"],
-                        skill["domain"],
-                        skill.get("version", "0.1.0"),
-                        surfaces_str,
-                        skill.get("purpose", ""),
-                        skill.get("description", ""),
-                        skill.get("validation_score", 0.0),
-                        skill.get("test_coverage", 0.0),
-                        metrics.get("applied_count", 0),
-                        metrics.get("success_count", 0),
-                        metrics.get("total_execution_time", 0.0),
-                        metrics.get("total_token_usage", 0),
-                        metrics.get("last_executed"),
-                        json.dumps(skill)
-                    ))
+                    """,
+                        (
+                            skill_id,
+                            skill["name"],
+                            skill["domain"],
+                            skill.get("version", "0.1.0"),
+                            surfaces_str,
+                            skill.get("purpose", ""),
+                            skill.get("description", ""),
+                            skill.get("validation_score", 0.0),
+                            skill.get("test_coverage", 0.0),
+                            metrics.get("applied_count", 0),
+                            metrics.get("success_count", 0),
+                            metrics.get("total_execution_time", 0.0),
+                            metrics.get("total_token_usage", 0),
+                            metrics.get("last_executed"),
+                            json.dumps(skill),
+                        ),
+                    )
                 conn.commit()
         except Exception as e:
             logger.error("Failed to save skills to SQLite registry", error=str(e))
-            
+
     def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
-                cursor = conn.execute("SELECT data, applied_count, success_count, total_execution_time, total_token_usage FROM skills WHERE skill_id = ?", (skill_id,))
+                cursor = conn.execute(
+                    "SELECT data, applied_count, success_count, total_execution_time, total_token_usage FROM skills WHERE skill_id = ?",
+                    (skill_id,),
+                )
                 row = cursor.fetchone()
                 if row:
                     new_applied = row["applied_count"] + 1
@@ -634,7 +656,7 @@ class SQLiteRegistryStorage(RegistryStorage):
                     new_time = row["total_execution_time"] + execution_time
                     new_token = row["total_token_usage"] + token_usage
                     last_exec = datetime.utcnow().isoformat()
-                    
+
                     try:
                         skill_data = json.loads(row["data"])
                         metrics = skill_data.setdefault("metrics", {})
@@ -643,23 +665,26 @@ class SQLiteRegistryStorage(RegistryStorage):
                         metrics["total_execution_time"] = new_time
                         metrics["total_token_usage"] = new_token
                         metrics["last_executed"] = last_exec
-                        
+
                         hist = metrics.setdefault("execution_history", [])
-                        hist.append({
-                            "timestamp": last_exec,
-                            "success": success,
-                            "execution_time": execution_time,
-                            "token_usage": token_usage
-                        })
+                        hist.append(
+                            {
+                                "timestamp": last_exec,
+                                "success": success,
+                                "execution_time": execution_time,
+                                "token_usage": token_usage,
+                            }
+                        )
                         if len(hist) > 100:
                             hist = hist[-100:]
                         metrics["execution_history"] = hist
-                        
+
                         updated_data = json.dumps(skill_data)
                     except Exception:
                         updated_data = row["data"]
-                        
-                    conn.execute("""
+
+                    conn.execute(
+                        """
                         UPDATE skills SET
                             applied_count = ?,
                             success_count = ?,
@@ -668,7 +693,9 @@ class SQLiteRegistryStorage(RegistryStorage):
                             last_executed = ?,
                             data = ?
                         WHERE skill_id = ?
-                    """, (new_applied, new_success, new_time, new_token, last_exec, updated_data, skill_id))
+                    """,
+                        (new_applied, new_success, new_time, new_token, last_exec, updated_data, skill_id),
+                    )
                     conn.commit()
         except Exception as e:
             logger.error("Failed to update skill metrics in SQLite registry", skill_id=skill_id, error=str(e))

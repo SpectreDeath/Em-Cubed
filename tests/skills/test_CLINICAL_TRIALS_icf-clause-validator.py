@@ -1,11 +1,14 @@
 """Tests for icf-clause-validator skill."""
+
 import pytest
 from pathlib import Path
 from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "CLINICAL_TRIALS" / "icf-clause-validator" / "SKILL.md")
+SKILL_FILE = Path(
+    Path(__file__).parent.parent.parent / "skills" / "CLINICAL_TRIALS" / "icf-clause-validator" / "SKILL.md"
+)
 SKILL_ID = "CLINICAL_TRIALS/icf-clause-validator"
 
 
@@ -13,9 +16,11 @@ SKILL_ID = "CLINICAL_TRIALS/icf-clause-validator"
 def plugin_manager():
     return PluginManager()
 
+
 @pytest.fixture
 def test_generator(plugin_manager):
     return SkillTestGenerator(plugin_manager)
+
 
 @pytest.fixture
 def test_runner(plugin_manager):
@@ -46,6 +51,7 @@ class TestIcfClauseValidatorSkill:
         if not metadata_dict:
             pytest.skip("Skill metadata not available")
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
         for key, value in metadata_dict.items():
             if hasattr(metadata, key):
@@ -68,9 +74,7 @@ class TestIcfClauseValidatorSkill:
             "contact_info": "PI: Dr. Smith, 555-1234.",
             "compensation": "No compensation.",
         }
-        present = {
-            k for k, v in icf_text.items() if v
-        }
+        present = {k for k, v in icf_text.items() if v}
         assert "risks" not in present
         assert "procedures" in present
 
@@ -88,9 +92,16 @@ class TestIcfClauseValidatorSkill:
             "compensation": "No compensation.",
         }
         required = {
-            "research_purpose", "study_duration", "procedures", "risks",
-            "benefits", "alternatives", "confidentiality", "voluntary_participation",
-            "contact_info", "compensation",
+            "research_purpose",
+            "study_duration",
+            "procedures",
+            "risks",
+            "benefits",
+            "alternatives",
+            "confidentiality",
+            "voluntary_participation",
+            "contact_info",
+            "compensation",
         }
         present = {k for k, v in icf_text.items() if v}
         missing = required - present
@@ -99,9 +110,16 @@ class TestIcfClauseValidatorSkill:
     def test_python_icf_fuzz_none_input(self):
         icf_text = None
         required = {
-            "research_purpose", "study_duration", "procedures", "risks",
-            "benefits", "alternatives", "confidentiality", "voluntary_participation",
-            "contact_info", "compensation",
+            "research_purpose",
+            "study_duration",
+            "procedures",
+            "risks",
+            "benefits",
+            "alternatives",
+            "confidentiality",
+            "voluntary_participation",
+            "contact_info",
+            "compensation",
         }
         if icf_text is None:
             missing = list(required)
@@ -113,9 +131,16 @@ class TestIcfClauseValidatorSkill:
     def test_python_icf_fuzz_empty_dict(self):
         icf_text = {}
         required = {
-            "research_purpose", "study_duration", "procedures", "risks",
-            "benefits", "alternatives", "confidentiality", "voluntary_participation",
-            "contact_info", "compensation",
+            "research_purpose",
+            "study_duration",
+            "procedures",
+            "risks",
+            "benefits",
+            "alternatives",
+            "confidentiality",
+            "voluntary_participation",
+            "contact_info",
+            "compensation",
         }
         present = {k for k, v in icf_text.items() if v}
         missing = list(required - present)

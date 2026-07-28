@@ -48,7 +48,9 @@ class FederatedOntologyRegistry:
         node.triples.extend(new_triples)
         node.state_checksum = self.compute_state_checksum(node.triples)
 
-        logger.info("Synchronized %d triples for node '%s'. Checksum: %s", len(new_triples), node_id, node.state_checksum[:8])
+        logger.info(
+            "Synchronized %d triples for node '%s'. Checksum: %s", len(new_triples), node_id, node.state_checksum[:8]
+        )
         return True, node.state_checksum
 
     def verify_swarm_alignment(self) -> tuple[bool, str]:

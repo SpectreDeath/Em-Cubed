@@ -4,9 +4,7 @@
 def build_context_facts(agent_state: dict) -> list:
     facts = []
     if "capability" in agent_state:
-        facts.append(
-            f"capability_permits({agent_state['capability']}, CURRENT_ACTION)."
-        )
+        facts.append(f"capability_permits({agent_state['capability']}, CURRENT_ACTION).")
     if "resource_level" in agent_state:
         facts.append(f"resource_context({agent_state['resource_level']}).")
     if "recent_transitions" in agent_state:

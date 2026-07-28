@@ -5,7 +5,20 @@ from em_cubed.cli_ontology import main
 
 
 def test_cli_ontology_validate(capsys):
-    ret = main(["ontology", "validate", "--subject", "SubjA", "--predicate", "has_item", "--object", "ObjA", "--functional-prop", "has_item"])
+    ret = main(
+        [
+            "ontology",
+            "validate",
+            "--subject",
+            "SubjA",
+            "--predicate",
+            "has_item",
+            "--object",
+            "ObjA",
+            "--functional-prop",
+            "has_item",
+        ]
+    )
     assert ret == 0
     captured = capsys.readouterr()
     assert "[Ontology Ledger Validator] Triple valid: True" in captured.out
@@ -19,7 +32,9 @@ def test_cli_ontology_elicit(capsys):
 
 
 def test_cli_ontology_truthmaker(capsys):
-    ret = main(["ontology", "truthmaker", "--proposition", "Compliance Check", "--predicates", "has_ingredient", "has_origin"])
+    ret = main(
+        ["ontology", "truthmaker", "--proposition", "Compliance Check", "--predicates", "has_ingredient", "has_origin"]
+    )
     assert ret == 0
     captured = capsys.readouterr()
     assert "[Truthmaker Semantics]" in captured.out

@@ -63,5 +63,7 @@ class TripleInductionEngine:
 
         self.graph_rag.add_triple(triple)
         induced.append(triple)
-        logger.info("Induced new OntologyTriple: (%s, %s, %s) [conf=%.2f]", subject_id, predicate, obj_val[:30], confidence)
+        logger.info(
+            "Induced new OntologyTriple: (%s, %s, %s) [conf=%.2f]", subject_id, predicate, obj_val[:30], confidence
+        )
         return induced

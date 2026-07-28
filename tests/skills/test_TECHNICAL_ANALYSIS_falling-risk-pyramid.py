@@ -38,7 +38,6 @@ class Testfalling_risk_pyramidSkill:
     def test_skill_file_exists(self):
         assert SKILL_FILE.exists(), f"SKILL.md not found at {SKILL_FILE}"
 
-
     def test_surfaces_implemented(self, plugin_manager):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         available_surfaces = []
@@ -46,9 +45,7 @@ class Testfalling_risk_pyramidSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -66,15 +63,13 @@ class Testfalling_risk_pyramidSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
 
 @pytest.mark.asyncio
 async def test_falling_risk_pyramid_calculator():
     """Test falling-risk pyramid core logic."""
-    code = '''
+    code = """
 def compute_pyramid(entry_price, market_price, account_risk, max_levels=5):
     price_distance = abs(market_price - entry_price)
     threshold = 0.001 * entry_price
@@ -106,8 +101,9 @@ def compute_pyramid(entry_price, market_price, account_risk, max_levels=5):
 
 r = compute_pyramid(100.0, 105.0, 1000.0, 5)
 r["current_level"] >= 0 and r["total_units"] > 0
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -116,14 +112,15 @@ r["current_level"] >= 0 and r["total_units"] > 0
 @pytest.mark.asyncio
 async def test_pyramid_bullish_scaling():
     """Test pyramid scaling in bullish direction."""
-    code = '''
+    code = """
 entry_price = 100.0
 market_price = 103.0
 price_distance = abs(market_price - entry_price)
 current_level = min(int(price_distance / (0.005 * entry_price)), 4)
 current_level >= 0
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -133,14 +130,15 @@ current_level >= 0
 @pytest.mark.asyncio
 async def test_pyramid_bearish_scaling():
     """Test pyramid scaling in bearish direction."""
-    code = '''
+    code = """
 entry_price = 100.0
 market_price = 95.0
 price_distance = abs(market_price - entry_price)
 current_level = min(int(price_distance / (0.005 * entry_price)), 4)
 current_level >= 0
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"

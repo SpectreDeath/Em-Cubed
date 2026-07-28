@@ -11,34 +11,31 @@ logger = structlog.get_logger()
 
 class TelemetryAPI:
     """REST API for accessing telemetry data."""
-    
+
     def __init__(self, telemetry_collector):
         self.collector = telemetry_collector
         self.logger = logger.bind(component="telemetry_api")
-    
+
     def get_skill_metrics(self, skill_id: str, window_seconds: int = 3600) -> Dict[str, Any]:
         """Get metrics for a specific skill."""
         return cast(Dict[str, Any], self.collector.get_skill_metrics(skill_id, window_seconds))
-    
+
     def get_overall_stats(self) -> Dict[str, Any]:
         """Get overall telemetry statistics."""
         return cast(Dict[str, Any], self.collector.get_overall_stats())
-    
+
     def get_recent_executions(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get recent skill executions."""
         records = self.collector.get_records(limit)
         return [record.to_dict() for record in records]
-    
+
     def get_skill_executions(self, skill_id: str, limit: int = 50) -> List[Dict[str, Any]]:
         """Get executions for a specific skill."""
         records = self.collector.get_records()
         cutoff = datetime.now(timezone.utc).timestamp() - 3600
-        relevant = [
-            r for r in records
-            if r.skill_id == skill_id and r.timestamp.timestamp() > cutoff
-        ][-limit:]
+        relevant = [r for r in records if r.skill_id == skill_id and r.timestamp.timestamp() > cutoff][-limit:]
         return [record.to_dict() for record in relevant]
-    
+
     def get_available_skills(self) -> List[str]:
         """Get list of skills with telemetry data."""
         records = self.collector.get_records()
@@ -46,7 +43,7 @@ class TelemetryAPI:
             return []
         skill_ids = set(r.skill_id for r in records)
         return list(skill_ids)
-    
+
     def get_system_health(self) -> Dict[str, Any]:
         """Get overall system health metrics."""
         stats = self.get_overall_stats()
@@ -56,13 +53,13 @@ class TelemetryAPI:
             "success_rate": stats.get("overall_success_rate", 0),
             "unique_skills": stats.get("unique_skills", 0),
             "total_token_usage": stats.get("total_token_usage", 0),
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 
 class WebSocketTelemetryHandler:
     """WebSocket handler for real-time telemetry updates."""
-    
+
     def __init__(self, telemetry_collector):
         self.collector = telemetry_collector
         self.logger = logger.bind(component="websocket_telemetry")
@@ -70,14 +67,14 @@ class WebSocketTelemetryHandler:
         self._last_broadcast = time.time()
         self._broadcast_interval = 5.0
         self._broadcast_task: Optional[asyncio.Task] = None
-    
+
     def subscribe(self, websocket):
         """Subscribe a WebSocket client to telemetry updates."""
         self._subscribers.append(websocket)
         self.logger.info("WebSocket client subscribed", count=len(self._subscribers))
         if self._broadcast_task is None or self._broadcast_task.done():
             self._broadcast_task = asyncio.create_task(self._broadcast_loop())
-    
+
     def unsubscribe(self, websocket):
         """Unsubscribe a WebSocket client."""
         if websocket in self._subscribers:
@@ -85,7 +82,7 @@ class WebSocketTelemetryHandler:
         self.logger.info("WebSocket client unsubscribed", count=len(self._subscribers))
         if len(self._subscribers) == 0 and self._broadcast_task and not self._broadcast_task.done():
             self._broadcast_task.cancel()
-    
+
     async def _broadcast_loop(self):
         """Background task to periodically broadcast telemetry updates."""
         try:
@@ -97,16 +94,16 @@ class WebSocketTelemetryHandler:
             self.logger.info("WebSocket broadcast task cancelled")
         except Exception as e:
             self.logger.error("Error in WebSocket broadcast loop", error=str(e))
-    
+
     async def broadcast_telemetry_update(self):
         """Broadcast telemetry update to all subscribers."""
         if not self._subscribers:
             return
-            
+
         try:
             overall_stats = self.collector.get_overall_stats()
             available_skills = self._get_available_skills()
-            
+
             update_data = {
                 "type": "telemetry_update",
                 "data": {
@@ -115,28 +112,28 @@ class WebSocketTelemetryHandler:
                     "available_skills": available_skills,
                     "total_executions": overall_stats.get("total_executions", 0),
                     "success_rate": overall_stats.get("overall_success_rate", 0),
-                    "unique_skills": overall_stats.get("unique_skills", 0)
-                }
+                    "unique_skills": overall_stats.get("unique_skills", 0),
+                },
             }
-            
+
             disconnected = []
             for websocket in self._subscribers[:]:
                 try:
                     await websocket.send_json(update_data)
                 except Exception:
                     disconnected.append(websocket)
-            
+
             for ws in disconnected:
                 if ws in self._subscribers:
                     self._subscribers.remove(ws)
-                    
+
         except Exception as e:
             self.logger.error("Failed to prepare or send telemetry update", error=str(e))
-    
+
     def record_execution_with_notification(self, record):
         """Record execution and notify subscribers."""
         self.collector.record_execution(record)
-    
+
     def _get_available_skills(self) -> List[str]:
         """Get list of skill IDs that have at least one telemetry record."""
         records = self.collector.get_records()

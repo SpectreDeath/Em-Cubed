@@ -8,11 +8,7 @@ from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
 SKILL_FILE = Path(
-    Path(__file__).parent.parent.parent
-    / "skills"
-    / "OPTIMIZATION"
-    / "central-force-optimization"
-    / "SKILL.md"
+    Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "central-force-optimization" / "SKILL.md"
 )
 SKILL_ID = "OPTIMIZATION/central-force-optimization"
 
@@ -59,9 +55,7 @@ class TestCentralForceOptimizationSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -80,9 +74,7 @@ class TestCentralForceOptimizationSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
     @pytest.mark.asyncio
     async def test_cfo_python_sphere(self):
@@ -90,7 +82,7 @@ class TestCentralForceOptimizationSkill:
         import random
 
         def sphere(x):
-            return -sum(xi ** 2 for xi in x)  # Negative for maximization
+            return -sum(xi**2 for xi in x)  # Negative for maximization
 
         pop_size, g, alpha, beta, max_iter = 30, 1.0, 0.1, 0.1, 80
         dim = 2
@@ -121,7 +113,7 @@ class TestCentralForceOptimizationSkill:
                     distance = math.sqrt(dist_sq)
                     for c in range(dim):
                         direction = (probes[k][c] - probes[i][c]) / distance
-                        accelerations[i][c] += g * (mass_diff ** alpha) / (distance ** beta) * direction
+                        accelerations[i][c] += g * (mass_diff**alpha) / (distance**beta) * direction
 
             # Update positions
             for i in range(pop_size):
@@ -141,7 +133,7 @@ class TestCentralForceOptimizationSkill:
         """Gravitational force should be positive for better particles."""
         g, alpha, beta = 1.0, 0.1, 0.1
         mass_diff, distance = 5.0, 2.0
-        force = g * (mass_diff ** alpha) / (distance ** beta)
+        force = g * (mass_diff**alpha) / (distance**beta)
         assert force > 0
 
     @pytest.mark.asyncio
@@ -155,9 +147,10 @@ class TestCentralForceOptimizationSkill:
     async def test_prolog_params(self):
         """Prolog parameter validation should work."""
         from em_cubed.surfaces import PrologSurface
+
         surface = PrologSurface()
-        code = '''
+        code = """
 ?- 30 >= 4, 30 =< 100, 0.1 >= 0.01, 0.1 =< 2.0, 0.1 >= 0.01, 0.1 =< 2.0.
-'''
+"""
         result = await surface.execute(code, {})
         assert result["status"] == "ok"

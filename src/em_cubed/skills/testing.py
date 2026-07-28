@@ -18,6 +18,7 @@ logger = structlog.get_logger()
 @dataclass
 class TestCase:
     """A single test case extracted from SKILL.md or generated."""
+
     name: str
     surface: str  # python, prolog, hy
     code: str
@@ -41,6 +42,7 @@ class TestCase:
 @dataclass
 class TestResult:
     """Result of a single test."""
+
     test_name: str
     skill_id: str
     surface: str
@@ -86,15 +88,16 @@ class SkillTestGenerator:
             self.logger.warning("Failed to re-parse skill metadata, using provided", error=str(e))
             # Fallback: convert any dict attributes to proper dataclass instances
             from .metadata import InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds
-            if hasattr(skill_metadata, 'input_schema') and isinstance(skill_metadata.input_schema, dict):
+
+            if hasattr(skill_metadata, "input_schema") and isinstance(skill_metadata.input_schema, dict):
                 skill_metadata.input_schema = InputOutputSchema.from_dict(skill_metadata.input_schema)
-            if hasattr(skill_metadata, 'output_schema') and isinstance(skill_metadata.output_schema, dict):
+            if hasattr(skill_metadata, "output_schema") and isinstance(skill_metadata.output_schema, dict):
                 skill_metadata.output_schema = InputOutputSchema.from_dict(skill_metadata.output_schema)
-            if hasattr(skill_metadata, 'capabilities') and isinstance(skill_metadata.capabilities, dict):
+            if hasattr(skill_metadata, "capabilities") and isinstance(skill_metadata.capabilities, dict):
                 skill_metadata.capabilities = SkillCapability.from_dict(skill_metadata.capabilities)
-            if hasattr(skill_metadata, 'compatibility') and isinstance(skill_metadata.compatibility, dict):
+            if hasattr(skill_metadata, "compatibility") and isinstance(skill_metadata.compatibility, dict):
                 skill_metadata.compatibility = CompatibilityRange.from_dict(skill_metadata.compatibility)
-            if hasattr(skill_metadata, 'quality_thresholds') and isinstance(skill_metadata.quality_thresholds, dict):
+            if hasattr(skill_metadata, "quality_thresholds") and isinstance(skill_metadata.quality_thresholds, dict):
                 skill_metadata.quality_thresholds = QualityThresholds(**skill_metadata.quality_thresholds)
             # metrics can remain dict/RuntimeMetrics - not used in schema generation
 
@@ -108,7 +111,7 @@ class SkillTestGenerator:
         test_blocks = self._extract_test_blocks(content)
         for i, (lang, code) in enumerate(test_blocks):
             test = TestCase(
-                name=f"test_explicit_{i+1}",
+                name=f"test_explicit_{i + 1}",
                 surface=lang,
                 code=code,
             )
@@ -119,7 +122,7 @@ class SkillTestGenerator:
         tests.extend(impl_tests)
 
         # 3. Generate schema validation tests if input/output schemas exist
-        if hasattr(skill_metadata, 'input_schema') and skill_metadata.input_schema.properties:
+        if hasattr(skill_metadata, "input_schema") and skill_metadata.input_schema.properties:
             schema_tests = self._generate_schema_tests(skill_metadata)
             tests.extend(schema_tests)
 
@@ -134,6 +137,7 @@ class SkillTestGenerator:
     def _extract_test_blocks(self, content: str) -> List[Tuple[str, str]]:
         """Extract fenced code blocks marked as tests."""
         import re
+
         blocks = []
 
         # Look for ```python followed by test code
@@ -262,6 +266,7 @@ class SkillTestRunner:
     async def run_test(self, test: TestCase, context: Optional[Dict] = None) -> TestResult:
         """Run a single test case."""
         import time
+
         surface = self.plugin_manager.get(test.surface)
         if not surface or not surface.available:
             return TestResult(
@@ -279,6 +284,7 @@ class SkillTestRunner:
                 ctx = context or {}
                 if trace_ctx:
                     from .executor import TelemetryProxy
+
                     # Inject proxies for sub-surface calls in tests
                     surfaces = self.plugin_manager.registry.get_plugins()
                     proxies = {name: TelemetryProxy(surf, trace_ctx) for name, surf in surfaces.items()}
@@ -294,7 +300,7 @@ class SkillTestRunner:
                 skill_id=f"test:{test.name}",
                 input_data={},
                 surface=test.surface,
-                timeout=test.timeout
+                timeout=test.timeout,
             )
             elapsed = (time.perf_counter() - start) * 1000
 
@@ -360,11 +366,13 @@ class SkillTestRunner:
             "results": [r.to_dict() for r in results],
         }
 
-        self.logger.info("Test suite completed",
-                        skill=skill_id,
-                        total=len(tests),
-                        passed=passed,
-                        failed=failed,
-                        duration_ms=total_duration)
+        self.logger.info(
+            "Test suite completed",
+            skill=skill_id,
+            total=len(tests),
+            passed=passed,
+            failed=failed,
+            duration_ms=total_duration,
+        )
 
         return summary

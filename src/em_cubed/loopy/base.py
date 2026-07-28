@@ -51,9 +51,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         Optional validator for ontology-backed state transitions.
     """
 
-    def __init__(
-        self, max_iterations: int = 5, ledger_validator: OntologyLedgerValidator | None = None
-    ) -> None:
+    def __init__(self, max_iterations: int = 5, ledger_validator: OntologyLedgerValidator | None = None) -> None:
         self.max_iterations = max_iterations
         self.ledger_validator = ledger_validator or OntologyLedgerValidator()
 
@@ -101,6 +99,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Exact truthmaker valuation.
         """
         from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier
+
         return ExactTruthmakerClassifier.classify_exact_truthmaker(
             proposition=proposition,
             state_triples=getattr(state, "triples", []),
@@ -116,6 +115,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Synthesized DL class expression.
         """
         from em_cubed.ontology.concept_induction import ConceptInductionEngine
+
         sample = {"type": "LoopyState", "property": "has_state", "target": str(type(state).__name__)}
         return ConceptInductionEngine.induce_concept(subclass_name=subclass_name, positive_samples=[sample])
 
@@ -134,6 +134,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Calculated dynamic derived property value.
         """
         from em_cubed.ontology.advanced_ontology import DerivedPropertyReducer, ReducerType
+
         return DerivedPropertyReducer.compute_reducer(
             triples=getattr(state, "triples", []),
             subject=subject,
@@ -150,6 +151,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             True if interface contract is valid.
         """
         from em_cubed.ontology.advanced_ontology import InterfaceImplementation, OntologyInterface
+
         interface = OntologyInterface(name="SkillStateInterface", required_predicates=required_predicates)
         return InterfaceImplementation.validates_interface(
             triples=getattr(state, "triples", []),
@@ -166,6 +168,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Migrated triples list.
         """
         from em_cubed.ontology.schema_evolution import AutomatedTripleMigrationEngine
+
         return AutomatedTripleMigrationEngine.migrate_triples(
             triples=getattr(state, "triples", []),
             steps=steps,
@@ -180,6 +183,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Health metrics report.
         """
         from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
+
         return OntologicalHealthMonitor.audit_health(triples=getattr(state, "triples", []))
 
     def query_temporal_snapshot(self, timeline: Any, timestamp: Any) -> list[Any]:
@@ -191,9 +195,12 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Valid base triples list at timestamp t.
         """
         from em_cubed.ontology.temporal_spatial import TemporalSnapshotQueryEngine
+
         return TemporalSnapshotQueryEngine.snapshot_at(timeline=timeline, timestamp=timestamp)
 
-    def evaluate_spatial_proximity(self, timeline: Any, lat: float, lon: float, radius_km: float) -> list[tuple[str, float]]:
+    def evaluate_spatial_proximity(
+        self, timeline: Any, lat: float, lon: float, radius_km: float
+    ) -> list[tuple[str, float]]:
         """Spatial Proximity Reasoner: Finds entities within radius_km of (lat, lon).
 
         Returns
@@ -202,8 +209,11 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Matching (subject, distance_km) list.
         """
         from em_cubed.ontology.temporal_spatial import GeoLocation, SpatialProximityReasoner
+
         center = GeoLocation(latitude=lat, longitude=lon)
-        return SpatialProximityReasoner.find_entities_within_radius(timeline=timeline, center=center, radius_km=radius_km)
+        return SpatialProximityReasoner.find_entities_within_radius(
+            timeline=timeline, center=center, radius_km=radius_km
+        )
 
     def export_rdf_turtle(self, state: T_State) -> str:
         """W3C RDF Export: Serializes skill state triples to RDF Turtle (.ttl) syntax.
@@ -214,6 +224,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Serialized Turtle text.
         """
         from em_cubed.ontology.interoperability import RDFSerializer
+
         return RDFSerializer.to_turtle(triples=getattr(state, "triples", []))
 
     def export_shacl_shapes(self) -> str:
@@ -225,6 +236,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Serialized SHACL shapes Turtle text.
         """
         from em_cubed.ontology.interoperability import SHACLConstraintGenerator
+
         return SHACLConstraintGenerator.generate_shacl_shapes(self.ledger_validator.functional_constraints)
 
     def extract_result(self, state: T_State) -> T_Result:
@@ -287,7 +299,9 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             # Evaluate against Topos Subobject Classifier
             truth_val = self.verify_topos(state)
             passed = truth_val.is_satisfied()
-            observation = "; ".join(truth_val.evidence) if truth_val.evidence else f"Confidence: {truth_val.confidence:.2f}"
+            observation = (
+                "; ".join(truth_val.evidence) if truth_val.evidence else f"Confidence: {truth_val.confidence:.2f}"
+            )
 
             trajectory.append(
                 LoopTrajectory(

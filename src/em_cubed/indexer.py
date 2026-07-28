@@ -29,6 +29,7 @@ def extract_prolog_tags(prolog_source: Optional[str]) -> List[str]:
     if not prolog_source:
         return []
     import re
+
     # Match predicate heads: name( or name :-
     # Don't anchor to line start - allows finding predicates with indentation
     heads = re.findall(r"([a-z][a-zA-Z0-9_]*)\s*[:(]", prolog_source)
@@ -63,6 +64,7 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
 
         # Use new SkillMetadata class for full extraction
         from .skills.metadata import SkillMetadata
+
         metadata = SkillMetadata.from_frontmatter(fm, body, file_path)
         result = metadata.to_registry_dict()
 
@@ -76,16 +78,17 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         if python_source:
             try:
                 from .surfaces.python_surface import PythonSurface
+
                 heuristic_tags.extend(PythonSurface.extract_tags(python_source))
             except ImportError:
                 pass
-        
 
         # Kanren tag extraction
         kanren_source = extract_fenced_block(body, "kanren") or extract_fenced_block(body, "kan")
         if kanren_source:
             try:
                 from .surfaces.kanren_surface import KanrenSurface
+
                 heuristic_tags.extend(KanrenSurface.extract_tags(kanren_source))
             except ImportError:
                 pass
@@ -95,6 +98,7 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, 
         if clingo_source:
             try:
                 from .surfaces.clingo_surface import ClingoSurface
+
                 heuristic_tags.extend(ClingoSurface.extract_tags(clingo_source))
             except ImportError:
                 pass
@@ -133,7 +137,7 @@ def reindex_incremental(skills_dir: Path, registry_output: Path) -> None:
             logger.warning("Could not load existing registry, starting fresh", error=str(e))
             existing_registry = []
 
-     # Build lookup by path for existing skills
+    # Build lookup by path for existing skills
     existing_by_path = {skill["path"]: skill for skill in existing_registry}
 
     updated_registry = []

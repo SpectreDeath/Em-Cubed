@@ -53,10 +53,11 @@ class Testgithub_pr_managerSkill:
     async def test_skill_execution(self, test_runner, test_generator):
         """Test basic skill execution."""
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         if not metadata_dict:
             pytest.skip("Skill metadata not available")
-        
+
         metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
         # Populate from dict
         for key, value in metadata_dict.items():
@@ -68,4 +69,3 @@ class Testgithub_pr_managerSkill:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
             # At least some tests should pass for a valid skill
             assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
-

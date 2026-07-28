@@ -74,7 +74,9 @@ class ConceptInductionEngine:
             logger.warning("Empty positive samples for concept induction.")
             return DescriptionLogicExpression(subclass_name=subclass_name, parent_class="Thing")
 
-        logger.info("Executing Concept Induction for '%s' over %d positive samples...", subclass_name, len(positive_samples))
+        logger.info(
+            "Executing Concept Induction for '%s' over %d positive samples...", subclass_name, len(positive_samples)
+        )
 
         # Extract common parent type and common properties across positive samples
         parent = positive_samples[0].get("type", "Thing")
@@ -128,7 +130,9 @@ class NeuronConceptAligner:
         list[OntologyTriple]
             Aligned semantic triples with assigned confidence scores.
         """
-        logger.info("De-anonymizing neuron cluster '%s' against %d candidate triples...", cluster_id, len(candidate_triples))
+        logger.info(
+            "De-anonymizing neuron cluster '%s' against %d candidate triples...", cluster_id, len(candidate_triples)
+        )
         aligned: list[OntologyTriple] = []
 
         # Simple norm-based score alignment

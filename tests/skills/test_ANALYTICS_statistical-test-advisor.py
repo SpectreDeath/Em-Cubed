@@ -6,7 +6,9 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "ANALYTICS" / "statistical-test-advisor" / "SKILL.md")
+SKILL_FILE = Path(
+    Path(__file__).parent.parent.parent / "skills" / "ANALYTICS" / "statistical-test-advisor" / "SKILL.md"
+)
 SKILL_ID = "ANALYTICS/statistical-test-advisor"
 
 
@@ -47,10 +49,11 @@ class Teststatistical_test_advisorSkill:
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         if not metadata_dict:
             pytest.skip("Skill metadata not available")
-        
+
         metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
         for key, value in metadata_dict.items():
             if hasattr(metadata, key):
@@ -63,21 +66,25 @@ class Teststatistical_test_advisorSkill:
 
     def test_python_fallback_small_sample(self):
         """Test Python fallback logic for small samples."""
-        metrics = {'groups': 2, 'independent': True, 'samples': [[1, 2], [3]]}
+        metrics = {"groups": 2, "independent": True, "samples": [[1, 2], [3]]}
         test_rec = "Independent Two-Sample t-Test"
-        
+
         result = evaluate_and_advise(metrics, test_rec)
-        
+
         assert result["recommended_test"] == "Exact Permutation Test"
         assert "Sample size" in result["reasoning"]
 
     def test_python_full_sample(self):
         """Test Python logic for adequate sample size."""
-        metrics = {'groups': 2, 'independent': True, 'samples': [[1, 2, 3, 4, 5, 6, 7, 8], [9, 10, 11, 12, 13, 14, 15, 16]]}
+        metrics = {
+            "groups": 2,
+            "independent": True,
+            "samples": [[1, 2, 3, 4, 5, 6, 7, 8], [9, 10, 11, 12, 13, 14, 15, 16]],
+        }
         test_rec = "Independent Two-Sample t-Test"
-        
+
         result = evaluate_and_advise(metrics, test_rec)
-        
+
         assert result["recommended_test"] == test_rec
         assert result["sample_count"] == 16
         assert result["execution_status"] == "ready_for_calculation"
@@ -86,17 +93,17 @@ class Teststatistical_test_advisorSkill:
 def evaluate_and_advise(metrics, test_recommendation):
     """Copy of the Python function for unit testing."""
     total_samples = 0
-    for seq in metrics.get('samples', []):
+    for seq in metrics.get("samples", []):
         total_samples += len(seq)
-        
+
     if total_samples < 8:
         return {
             "recommended_test": "Exact Permutation Test",
-            "reasoning": "Sample size too small for asymptotic approximations recommended by Prolog rule."
+            "reasoning": "Sample size too small for asymptotic approximations recommended by Prolog rule.",
         }
-        
+
     return {
         "recommended_test": test_recommendation,
         "sample_count": total_samples,
-        "execution_status": "ready_for_calculation"
+        "execution_status": "ready_for_calculation",
     }

@@ -6,7 +6,9 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "META_SKILLS" / "prompt-quality-evaluator" / "SKILL.md")
+SKILL_FILE = Path(
+    Path(__file__).parent.parent.parent / "skills" / "META_SKILLS" / "prompt-quality-evaluator" / "SKILL.md"
+)
 SKILL_ID = "META_SKILLS/prompt-quality-evaluator"
 
 
@@ -51,10 +53,11 @@ class Testprompt_quality_evaluatorSkill:
     async def test_skill_execution(self, test_runner, test_generator):
         """Test basic skill execution."""
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         if not metadata_dict:
             pytest.skip("Skill metadata not available")
-        
+
         metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
         # Populate from dict
         for key, value in metadata_dict.items():
@@ -66,4 +69,3 @@ class Testprompt_quality_evaluatorSkill:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
             # At least some tests should pass for a valid skill
             assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
-

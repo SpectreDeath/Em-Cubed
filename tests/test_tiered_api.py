@@ -1,4 +1,4 @@
-﻿"""Tests for Tiered Public API and PEP 562 deprecation handling in em_cubed."""
+"""Tests for Tiered Public API and PEP 562 deprecation handling in em_cubed."""
 
 import pytest
 import warnings
@@ -9,11 +9,24 @@ def test_public_all_contains_primary_api():
     """__all__ should contain only the ~18 primary public symbols."""
     assert len(em_cubed.__all__) <= 20
     expected = {
-        "reindex", "get_skill_metadata", "search_registry",
-        "PythonSurface", "PrologSurface", "Z3Surface", "DatalogSurface",
-        "SQLiteSurface", "HySurface", "QuickJSSurface", "WASMSurface",
-        "ClingoSurface", "KanrenSurface", "JanusSurface",
-        "SkillRegistry", "SkillExecutor", "SkillValidator", "__version__"
+        "reindex",
+        "get_skill_metadata",
+        "search_registry",
+        "PythonSurface",
+        "PrologSurface",
+        "Z3Surface",
+        "DatalogSurface",
+        "SQLiteSurface",
+        "HySurface",
+        "QuickJSSurface",
+        "WASMSurface",
+        "ClingoSurface",
+        "KanrenSurface",
+        "JanusSurface",
+        "SkillRegistry",
+        "SkillExecutor",
+        "SkillValidator",
+        "__version__",
     }
     assert set(em_cubed.__all__) == expected
 

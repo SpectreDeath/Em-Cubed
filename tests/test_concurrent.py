@@ -15,10 +15,7 @@ class TestConcurrentExecution:
         """Multiple Python surface calls in parallel should all succeed."""
         os.environ.setdefault("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", "10")
         surface = PythonSurface()
-        tasks = [
-            surface.execute("x * 2", {"x": i})
-            for i in range(10)
-        ]
+        tasks = [surface.execute("x * 2", {"x": i}) for i in range(10)]
         results = await asyncio.gather(*tasks)
 
         assert all(r["status"] == "ok" for r in results)
@@ -71,10 +68,7 @@ class TestConcurrentExecution:
         # Use a CPU-intensive loop that will exceed the timeout
         # (imports are blocked by asteval, so we use a tight loop)
         long_running_code = "i = 0\nwhile i < 100000000:\n    i += 1"
-        tasks = [
-            surface.execute(long_running_code, {})
-            for _ in range(3)
-        ]
+        tasks = [surface.execute(long_running_code, {}) for _ in range(3)]
         results = await asyncio.gather(*tasks, return_exceptions=False)
 
         # All should error with timeout

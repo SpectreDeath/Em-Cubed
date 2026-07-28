@@ -13,7 +13,6 @@ class ToposState:
 
 
 class ModalToposSkill(BaseLoopySkill[ToposState, str]):
-
     def initialize_state(self, initial_confidence: float) -> ToposState:
         return ToposState(confidence=initial_confidence)
 

@@ -68,7 +68,13 @@ class GraphPathRAG:
         logger.info("Finding graph paths from '%s' (max_depth=%d)...", start_entity, max_depth)
         paths: list[SubgraphPath] = []
 
-        def dfs(current_entity: str, current_nodes: list[str], current_preds: list[str], current_triples: list[OntologyTriple], depth: int) -> None:
+        def dfs(
+            current_entity: str,
+            current_nodes: list[str],
+            current_preds: list[str],
+            current_triples: list[OntologyTriple],
+            depth: int,
+        ) -> None:
             if depth >= max_depth:
                 return
 

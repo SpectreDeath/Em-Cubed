@@ -14,6 +14,7 @@ import pytest
 # Shared math helpers
 # ============================================================
 
+
 def _clean_pairs(x, y):
     dropped = 0
     cx, cy = [], []
@@ -34,9 +35,9 @@ def _pearson_r(x, y):
         return float("nan")
     mx = sum(x) / n
     my = sum(y) / n
-    num = sum((xi - mx)*(yi - my) for xi, yi in zip(x, y))
-    dx = math.sqrt(sum((xi - mx)**2 for xi in x))
-    dy = math.sqrt(sum((yi - my)**2 for yi in y))
+    num = sum((xi - mx) * (yi - my) for xi, yi in zip(x, y))
+    dx = math.sqrt(sum((xi - mx) ** 2 for xi in x))
+    dy = math.sqrt(sum((yi - my) ** 2 for yi in y))
     denom = dx * dy
     if denom == 0:
         return 0.0
@@ -50,21 +51,26 @@ def _spearman_rho(x, y):
         i = 0
         while i < len(indexed):
             j = i
-            while j < len(indexed)-1 and indexed[j+1][1] == indexed[j][1]:
+            while j < len(indexed) - 1 and indexed[j + 1][1] == indexed[j][1]:
                 j += 1
-            avg = sum(range(i+1, j+2)) / (j-i+1)
-            for k in range(i, j+1):
+            avg = sum(range(i + 1, j + 2)) / (j - i + 1)
+            for k in range(i, j + 1):
                 ranks[indexed[k][0]] = avg
             i = j + 1
         return ranks
+
     rx, ry = rank(x), rank(y)
     return _pearson_r(rx, ry)
 
 
 _MAGNITUDE_BANDS = [
-    (0.90, "very_strong"), (0.70, "strong"), (0.40, "moderate"),
-    (0.10, "weak"), (0.00, "negligible"),
+    (0.90, "very_strong"),
+    (0.70, "strong"),
+    (0.40, "moderate"),
+    (0.10, "weak"),
+    (0.00, "negligible"),
 ]
+
 
 def _magnitude_band(abs_r):
     for threshold, label in _MAGNITUDE_BANDS:
@@ -76,19 +82,20 @@ def _magnitude_band(abs_r):
 def _r_pvalue(r, n):
     if n < 3:
         return 1.0
-    denom = 1.0 - r*r
+    denom = 1.0 - r * r
     if denom <= 0:
         return 0.0
-    t_stat = abs(r * math.sqrt((n-2) / denom))
+    t_stat = abs(r * math.sqrt((n - 2) / denom))
     try:
         from scipy.stats import t as t_dist
-        return float(2.0 * t_dist.sf(t_stat, n-2))
+
+        return float(2.0 * t_dist.sf(t_stat, n - 2))
     except ImportError:
         return 2.0 * (1.0 - _normal_cdf(t_stat, 0.0, 1.0))
 
 
 def _normal_cdf(x, mu, sigma):
-    return 0.5 * (1.0 + math.erf((x-mu)/(sigma*math.sqrt(2.0))))
+    return 0.5 * (1.0 + math.erf((x - mu) / (sigma * math.sqrt(2.0))))
 
 
 def calculate_correlation_profile(x, y, method="pearson"):
@@ -105,9 +112,16 @@ def calculate_correlation_profile(x, y, method="pearson"):
     r_val = max(-1.0, min(1.0, r_val))
     p_val = _r_pvalue(r_val, n_used)
     mag = _magnitude_band(abs(r_val))
-    return {"method": method, "r": r_val, "rho": r_val,
-            "p_value": p_val, "magnitude": mag,
-            "n": len(x), "n_used": n_used, "n_dropped": dropped}
+    return {
+        "method": method,
+        "r": r_val,
+        "rho": r_val,
+        "p_value": p_val,
+        "magnitude": mag,
+        "n": len(x),
+        "n_used": n_used,
+        "n_dropped": dropped,
+    }
 
 
 def fit_linear_regression(x, y):
@@ -117,34 +131,45 @@ def fit_linear_regression(x, y):
         raise ValueError("insufficient_sample")
     x_bar = sum(cx) / n
     y_bar = sum(cy) / n
-    ss_xy = sum((xi-x_bar)*(yi-y_bar) for xi, yi in zip(cx, cy))
-    ss_xx = sum((xi-x_bar)**2 for xi in cx)
+    ss_xy = sum((xi - x_bar) * (yi - y_bar) for xi, yi in zip(cx, cy))
+    ss_xx = sum((xi - x_bar) ** 2 for xi in cx)
     if ss_xx == 0:
         raise ValueError("zero_variance")
     beta_1 = ss_xy / ss_xx
     beta_0 = y_bar - beta_1 * x_bar
-    ss_yy = sum((yi-y_bar)**2 for yi in cy)
+    ss_yy = sum((yi - y_bar) ** 2 for yi in cy)
     r_squared = (ss_xy**2) / (ss_xx * ss_yy) if ss_yy != 0 else 0.0
-    residuals = [yi - (beta_0 + beta_1*xi) for xi, yi in zip(cx, cy)]
-    ss_res = sum(e*e for e in residuals)
+    residuals = [yi - (beta_0 + beta_1 * xi) for xi, yi in zip(cx, cy)]
+    ss_res = sum(e * e for e in residuals)
     df = n - 2
     mse = ss_res / df if df > 0 else 0.0
     se_b1 = math.sqrt(mse / ss_xx)
     t_stat = beta_1 / se_b1 if se_b1 > 0 else 0.0
     try:
         from scipy.stats import t as t_dist
+
         p_value = float(2.0 * t_dist.sf(abs(t_stat), df))
     except ImportError:
         p_value = 2.0 * (1.0 - _normal_cdf(abs(t_stat), 0.0, 1.0))
-    return {"beta_0": beta_0, "beta_1": beta_1, "r_squared": r_squared,
-            "std_err_beta1": se_b1, "t_stat": t_stat, "p_value": p_value,
-            "n": len(x), "df": df, "n_used": n, "n_dropped": dropped,
-            "residuals": residuals}
+    return {
+        "beta_0": beta_0,
+        "beta_1": beta_1,
+        "r_squared": r_squared,
+        "std_err_beta1": se_b1,
+        "t_stat": t_stat,
+        "p_value": p_value,
+        "n": len(x),
+        "df": df,
+        "n_used": n,
+        "n_dropped": dropped,
+        "residuals": residuals,
+    }
 
 
 # ============================================================
 # 1. Pearson r
 # ============================================================
+
 
 class TestCalculateCorrelationProfilePearson:
     """Deterministic hardness: sign, magnitude, p-value contract."""
@@ -166,6 +191,7 @@ class TestCalculateCorrelationProfilePearson:
 
     def test_no_correlation(self):
         import random
+
         rng = random.Random(42)
         x = list(range(20))
         y = [rng.gauss(5, 2) for _ in range(20)]
@@ -184,9 +210,9 @@ class TestCalculateCorrelationProfilePearson:
 
     def test_p_value_decreases_with_stronger_r(self):
         weak_x = list(range(50))
-        weak_y = [v + 0.5*((v % 3)-1) for v in range(50)]
+        weak_y = [v + 0.5 * ((v % 3) - 1) for v in range(50)]
         strong_x = list(range(50))
-        strong_y = [2.0*v + 0.01 for v in range(50)]
+        strong_y = [2.0 * v + 0.01 for v in range(50)]
         r_w = calculate_correlation_profile(weak_x, weak_y, method="pearson")
         r_s = calculate_correlation_profile(strong_x, strong_y, method="pearson")
         assert r_s["p_value"] < r_w["p_value"]
@@ -210,6 +236,7 @@ class TestCalculateCorrelationProfilePearson:
 # ============================================================
 # 2. Spearman rho
 # ============================================================
+
 
 class TestCalculateCorrelationProfileSpearman:
     def test_monotonic_increasing(self):
@@ -245,6 +272,7 @@ class TestCalculateCorrelationProfileSpearman:
 # 3. Linear Regression OLS
 # ============================================================
 
+
 class TestFitLinearRegression:
     """OLS: coefficients, R², residual constraints, t-stat."""
 
@@ -266,7 +294,7 @@ class TestFitLinearRegression:
 
     def test_noisy_data_r_squared_less_than_one(self):
         x = list(range(50))
-        y = [2.0*v + 1.0 + 0.5*((v % 3) - 1) for v in range(50)]
+        y = [2.0 * v + 1.0 + 0.5 * ((v % 3) - 1) for v in range(50)]
         r = fit_linear_regression(x, y)
         assert 0.0 < r["r_squared"] < 1.0
         assert abs(r["beta_1"] - 2.0) < 0.5
@@ -315,7 +343,7 @@ class TestFitLinearRegression:
 
     def test_significant_slope_has_low_pvalue(self):
         x = list(range(100))
-        y = [3.0*v + 2.0 + 0.001 for v in range(100)]
+        y = [3.0 * v + 2.0 + 0.001 for v in range(100)]
         r = fit_linear_regression(x, y)
         assert r["p_value"] < 1e-20
 
@@ -325,8 +353,8 @@ class TestFitLinearRegression:
         y = [2.0, 4.0, 5.0, 4.0]
         r = fit_linear_regression(x, y)
         x_bar, y_bar = 2.5, 3.75
-        ss_xy = sum((xi-x_bar)*(yi-y_bar) for xi, yi in zip(x, y))
-        ss_xx = sum((xi-x_bar)**2 for xi in x)
+        ss_xy = sum((xi - x_bar) * (yi - y_bar) for xi, yi in zip(x, y))
+        ss_xx = sum((xi - x_bar) ** 2 for xi in x)
         expected_b1 = ss_xy / ss_xx
         expected_b0 = y_bar - expected_b1 * x_bar
         assert abs(r["beta_1"] - expected_b1) < 1e-10

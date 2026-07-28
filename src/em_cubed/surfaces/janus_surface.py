@@ -56,6 +56,7 @@ class JanusSurface(SurfaceBase):
         """Get or create Janus connection."""
         if self._janus is None:
             import janus_swi
+
             self._janus = janus_swi
         return self._janus
 
@@ -105,11 +106,11 @@ class JanusSurface(SurfaceBase):
             stripped_code = code.strip()
 
             # Detect assertion (ends with .) vs query (starts with ?-)
-            if stripped_code.endswith('.'):
+            if stripped_code.endswith("."):
                 # Assertion mode: assert fact or rule
                 # For Janus, we can use assertz for facts; rules might need consult?
                 # Simplified: strip trailing '.' and assert
-                fact = stripped_code.rstrip('.').strip()
+                fact = stripped_code.rstrip(".").strip()
                 try:
                     # Use assertz for simple facts; for rules, might need different approach
                     # We'll use assertz for now; if it fails, try consult? but consult is for files
@@ -121,16 +122,14 @@ class JanusSurface(SurfaceBase):
                     return {"status": "error", "message": str(e)}
             else:
                 # Query mode: starts with ?- or no trailing dot
-                query_code = stripped_code.lstrip('?-').strip()
+                query_code = stripped_code.lstrip("?-").strip()
                 logger.info("Janus query mode detected", query=query_code)
 
                 def execute_query():
                     return janus.query_once(query_code)
 
                 try:
-                    result = await asyncio.get_event_loop().run_in_executor(
-                        self._executor, execute_query
-                    )
+                    result = await asyncio.get_event_loop().run_in_executor(self._executor, execute_query)
                     logger.info("Janus query successful", result=result)
                     return {"status": "ok", "message": "Query executed successfully", "result": result}
                 except asyncio.TimeoutError:

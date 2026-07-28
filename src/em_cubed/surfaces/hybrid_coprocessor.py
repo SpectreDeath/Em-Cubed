@@ -88,16 +88,26 @@ class HybridCoprocessor:
 
             if isinstance(logic_res_raw, dict):
                 logic_success = logic_res_raw.get("success", False) or logic_res_raw.get("status") in ("ok", "success")
-                if not logic_success and ("pyDatalog" in str(logic_res_raw.get("message", "")) or "syntax" in str(logic_res_raw.get("message", "")).lower()):
+                if not logic_success and (
+                    "pyDatalog" in str(logic_res_raw.get("message", ""))
+                    or "syntax" in str(logic_res_raw.get("message", "")).lower()
+                ):
                     logger.warning(
                         f"Logic surface '{logic_surface_type}' syntax/solver fallback triggered: {logic_res_raw.get('message')}"
                     )
                     logic_success = True
-                    symbolic_facts = ctx.get("query") or ctx.get("symbolic_facts") or {"deduced_facts": [clean_logic_rules]}
+                    symbolic_facts = (
+                        ctx.get("query") or ctx.get("symbolic_facts") or {"deduced_facts": [clean_logic_rules]}
+                    )
                     logic_dict = {"status": "simulated_fallback", "value": symbolic_facts}
                     logic_time = 0.5
                 else:
-                    symbolic_facts = logic_res_raw.get("value") or logic_res_raw.get("output") or logic_res_raw.get("message") or logic_res_raw
+                    symbolic_facts = (
+                        logic_res_raw.get("value")
+                        or logic_res_raw.get("output")
+                        or logic_res_raw.get("message")
+                        or logic_res_raw
+                    )
                     logic_dict = logic_res_raw
                     logic_time = logic_res_raw.get("execution_time_ms", 0.0)
             else:

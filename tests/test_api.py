@@ -45,7 +45,10 @@ class TestAPI:
 
         # Mock Whoosh index to use a temporary directory
         from em_cubed.search import WhooshSearchIndex
-        monkeypatch.setattr("em_cubed.search.get_search_index", lambda index_dir=None: WhooshSearchIndex(tmp_path / "whoosh_index"))
+
+        monkeypatch.setattr(
+            "em_cubed.search.get_search_index", lambda index_dir=None: WhooshSearchIndex(tmp_path / "whoosh_index")
+        )
 
         return registry_file
 
@@ -242,8 +245,10 @@ class TestAPI:
         monkeypatch.setenv("EM_CUBED_API_KEY", "test-secret-key")
         import importlib
         import api.main
+
         importlib.reload(api.main)
         from api.main import app as auth_app
+
         # Create new test client for reloaded app
         test_client = TestClient(auth_app)
 
@@ -265,8 +270,10 @@ class TestAPI:
         monkeypatch.delenv("EM_CUBED_API_KEY", raising=False)
         import importlib
         import api.main as main_mod
+
         importlib.reload(main_mod)
         from api.main import app as noauth_app
+
         test_client = TestClient(noauth_app)
 
         # Request without key should succeed

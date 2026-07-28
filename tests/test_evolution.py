@@ -14,7 +14,6 @@ class RetryState:
 
 
 class FlakySkill(BaseLoopySkill[RetryState, str]):
-
     def initialize_state(self, *args, **kwargs) -> RetryState:
         return RetryState(attempt=0)
 

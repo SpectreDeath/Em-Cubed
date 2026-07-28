@@ -14,6 +14,7 @@ import pytest
 # Shared math extras
 # ============================================================
 
+
 def _flatten_matrix(m):
     return [v for row in m for v in row]
 
@@ -21,6 +22,7 @@ def _flatten_matrix(m):
 # ============================================================
 # Extracted implementations from SKILL.md
 # ============================================================
+
 
 class TransitionMatrixLogic:
     """Pure-python reimplementation of generate_transition_matrix."""
@@ -33,9 +35,9 @@ class TransitionMatrixLogic:
             states = sorted(set(sequence))
         n = len(states)
         idx = {s: i for i, s in enumerate(states)}
-        counts = [[0]*n for _ in range(n)]
-        for i in range(len(sequence)-1):
-            s, d = sequence[i], sequence[i+1]
+        counts = [[0] * n for _ in range(n)]
+        for i in range(len(sequence) - 1):
+            s, d = sequence[i], sequence[i + 1]
             if s in idx and d in idx:
                 counts[idx[s]][idx[d]] += 1
         return TransitionMatrixLogic._normalize(counts, states, alpha)
@@ -56,21 +58,22 @@ class TransitionMatrixLogic:
         a = max(alpha, 0.0)
         matrix, row_sums, absorbing = [], [], []
         for i in range(n):
-            total = sum(counts[i]) + n*a
+            total = sum(counts[i]) + n * a
             row_sums.append(float(total))
             if total == 0:
-                probs = [1.0/n]*n
+                probs = [1.0 / n] * n
             else:
-                probs = [(c+a)/total for c in counts[i]]
+                probs = [(c + a) / total for c in counts[i]]
             matrix.append(probs)
         for i, row in enumerate(matrix):
-            if all((row[j]==1.0 and j==i) or (row[j]==0.0 and j!=i)
-                   for j in range(n)):
+            if all((row[j] == 1.0 and j == i) or (row[j] == 0.0 and j != i) for j in range(n)):
                 absorbing.append(states[i])
         return {
-            "states": tuple(states), "matrix": tuple(tuple(r) for r in matrix),
+            "states": tuple(states),
+            "matrix": tuple(tuple(r) for r in matrix),
             "raw_counts": tuple(tuple(r) for r in counts),
-            "absorbing_states": tuple(absorbing), "laplace_alpha": a,
+            "absorbing_states": tuple(absorbing),
+            "laplace_alpha": a,
             "row_sums": tuple(row_sums),
         }
 
@@ -113,11 +116,7 @@ def evaluate_stationarity(matrix, max_iter=10_000, tol=1e-12):
             raise ValueError(f"not_row_stochastic: row {i} sum={s}")
 
     # Absorbing-state detection
-    absorbing = [
-        all((matrix[i][j] > 0.999 if j == i else matrix[i][j] < 0.001)
-            for j in range(n))
-        for i in range(n)
-    ]
+    absorbing = [all((matrix[i][j] > 0.999 if j == i else matrix[i][j] < 0.001) for j in range(n)) for i in range(n)]
     has_absorbing = any(absorbing)
     reducible = _is_reducible(matrix)
     aperiodic = _is_aperiodic(matrix)
@@ -132,11 +131,11 @@ def evaluate_stationarity(matrix, max_iter=10_000, tol=1e-12):
         chain_type = "ergodic"
 
     # Power iteration
-    pi = [1.0/n]*n
+    pi = [1.0 / n] * n
     iters = 0
     delta = float("inf")
     for it in range(max_iter):
-        new_pi = [0.0]*n
+        new_pi = [0.0] * n
         for i in range(n):
             for j in range(n):
                 new_pi[j] += pi[i] * matrix[i][j]
@@ -147,7 +146,7 @@ def evaluate_stationarity(matrix, max_iter=10_000, tol=1e-12):
             break
 
     total = sum(pi)
-    pi = [p/total for p in pi] if total > 0 else [1.0/n]*n
+    pi = [p / total for p in pi] if total > 0 else [1.0 / n] * n
 
     return {
         "is_stationary": chain_type == "ergodic",
@@ -165,6 +164,7 @@ def evaluate_stationarity(matrix, max_iter=10_000, tol=1e-12):
 # ============================================================
 # 1. Row-stochastic invariant
 # ============================================================
+
 
 class TestGenerateTransitionMatrix:
     """Every row must sum to exactly 1.0."""
@@ -186,9 +186,7 @@ class TestGenerateTransitionMatrix:
         """Markov's original: P(V→V)=0.13, P(V→C)=0.87, P(C→V)=0.66, P(C→C)=0.34."""
         counts = [[13, 87], [66, 34]]
         states = ["Vowel", "Consonant"]
-        result = TransitionMatrixLogic.from_count_matrix(
-            counts, states
-        )
+        result = TransitionMatrixLogic.from_count_matrix(counts, states)
         # After normalization: each row should sum to 1.0
         for row in result["matrix"]:
             assert abs(sum(row) - 1.0) < 1e-12
@@ -234,15 +232,11 @@ class TestGenerateTransitionMatrix:
 
     def test_count_matrix_mismatch_raises(self):
         with pytest.raises(ValueError, match="states_mismatch"):
-            TransitionMatrixLogic.from_count_matrix(
-                [[1, 0], [0, 1]], ["A", "B", "C"]
-            )
+            TransitionMatrixLogic.from_count_matrix([[1, 0], [0, 1]], ["A", "B", "C"])
 
     def test_ragged_count_matrix_raises(self):
         with pytest.raises(ValueError, match="ragged"):
-            TransitionMatrixLogic.from_count_matrix(
-                [[1, 0], [0, 1, 2]], ["A", "B"]
-            )
+            TransitionMatrixLogic.from_count_matrix([[1, 0], [0, 1, 2]], ["A", "B"])
 
     def test_absorbing_state_isolation(self):
         """A state that only transitions to itself."""
@@ -263,6 +257,7 @@ class TestGenerateTransitionMatrix:
 # 2. Stationarity evaluation
 # ============================================================
 
+
 class TestEvaluateStationarity:
     """Chain classification and stationary distribution."""
 
@@ -281,7 +276,7 @@ class TestEvaluateStationarity:
         r = evaluate_stationarity(P, max_iter=10_000)
         # Power iteration on a 3-cycle converges to uniform
         for p in r["stationary_vector"]:
-            assert abs(p - 1.0/3) < 0.01
+            assert abs(p - 1.0 / 3) < 0.01
 
     def test_two_cycle_equal_stationary(self):
         P = [[0, 1], [1, 0]]
@@ -298,10 +293,7 @@ class TestEvaluateStationarity:
 
     def test_reducible_chain(self):
         """Two disconnected components."""
-        P = [[0.5, 0.5, 0.0, 0.0],
-             [0.5, 0.5, 0.0, 0.0],
-             [0.0, 0.0, 0.7, 0.3],
-             [0.0, 0.0, 0.3, 0.7]]
+        P = [[0.5, 0.5, 0.0, 0.0], [0.5, 0.5, 0.0, 0.0], [0.0, 0.0, 0.7, 0.3], [0.0, 0.0, 0.3, 0.7]]
         r = evaluate_stationarity(P)
         assert r["is_reducible"] is True
         assert r["chain_type"] == "reducible"

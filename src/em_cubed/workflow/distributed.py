@@ -79,9 +79,9 @@ def resolve_template_value(val: Any, task_results: Dict[str, Any]) -> Any:
     return val
 
 
-
 class TaskStatus(Enum):
     """Status of a distributed task."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -92,6 +92,7 @@ class TaskStatus(Enum):
 @dataclass
 class DistributedTask:
     """A task to be executed in a distributed system."""
+
     task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     workflow_id: str = ""
     skill_id: str = ""
@@ -105,7 +106,7 @@ class DistributedTask:
     completed_at: Optional[float] = None
     retry_count: int = 0
     max_retries: int = 3
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
@@ -121,11 +122,11 @@ class DistributedTask:
             "started_at": self.started_at,
             "completed_at": self.completed_at,
             "retry_count": self.retry_count,
-            "max_retries": self.max_retries
+            "max_retries": self.max_retries,
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DistributedTask':
+    def from_dict(cls, data: Dict[str, Any]) -> "DistributedTask":
         """Create from dictionary."""
         task = cls(
             task_id=data["task_id"],
@@ -133,7 +134,7 @@ class DistributedTask:
             skill_id=data["skill_id"],
             input_data=data.get("input_data", {}),
             dependencies=data.get("dependencies", []),
-            max_retries=data.get("max_retries", 3)
+            max_retries=data.get("max_retries", 3),
         )
         task.status = TaskStatus(data["status"])
         task.result = data.get("result")
@@ -147,19 +148,19 @@ class DistributedTask:
 
 class DistributedExecutor:
     """Base class for distributed workflow executors."""
-    
+
     def __init__(self):
         self.logger = logger.bind(component="distributed_executor")
         self._tasks: Dict[str, DistributedTask] = {}
         self._workflows: Dict[str, List[str]] = {}  # workflow_id -> task_ids
-    
+
     def submit_workflow(self, workflow_id: str, tasks: List[DistributedTask]) -> bool:
         """Submit a workflow for distributed execution.
-        
+
         Args:
             workflow_id: Unique identifier for the workflow
             tasks: List of tasks to execute
-            
+
         Returns:
             True if submission successful
         """
@@ -172,27 +173,27 @@ class DistributedExecutor:
         except Exception as e:
             self.logger.error("Failed to submit workflow", workflow_id=workflow_id, error=str(e))
             return False
-    
+
     def get_task_status(self, task_id: str) -> Optional[TaskStatus]:
         """Get the status of a task."""
         task = self._tasks.get(task_id)
         return task.status if task else None
-    
+
     def get_workflow_status(self, workflow_id: str) -> Dict[str, Any]:
         """Get the status of a workflow."""
         task_ids = self._workflows.get(workflow_id, [])
         if not task_ids:
             return {"status": "not_found"}
-        
+
         tasks = [self._tasks[tid] for tid in task_ids if tid in self._tasks]
         if not tasks:
             return {"status": "no_tasks"}
-        
+
         completed = sum(1 for t in tasks if t.status == TaskStatus.COMPLETED)
         failed = sum(1 for t in tasks if t.status == TaskStatus.FAILED)
         running = sum(1 for t in tasks if t.status == TaskStatus.RUNNING)
         pending = sum(1 for t in tasks if t.status == TaskStatus.PENDING)
-        
+
         if failed > 0:
             status = "failed"
         elif completed == len(tasks):
@@ -201,21 +202,21 @@ class DistributedExecutor:
             status = "running"
         else:
             status = "pending"
-            
+
         return {
             "status": status,
             "total_tasks": len(tasks),
             "completed": completed,
             "failed": failed,
             "running": running,
-            "pending": pending
+            "pending": pending,
         }
-    
+
     def get_task_result(self, task_id: str) -> Optional[Any]:
         """Get the result of a completed task."""
         task = self._tasks.get(task_id)
         return task.result if task and task.status == TaskStatus.COMPLETED else None
-    
+
     def cancel_workflow(self, workflow_id: str) -> bool:
         """Cancel a workflow and all its tasks."""
         task_ids = self._workflows.get(workflow_id, [])
@@ -241,14 +242,14 @@ def _execute_distributed_task(task_dict: Dict[str, Any], skills_dir_str: str) ->
         from em_cubed.plugin_manager import PluginManager
         from em_cubed.skills.registry import SkillRegistry
         from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
-        
+
         # Initialize an isolated event loop for this worker process
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         skills_dir = Path(skills_dir_str)
         plugin_manager = PluginManager()
-        
+
         # Load registry dynamically relative to skills_dir or current working dir
         registry_candidates = [
             Path.cwd() / "registry.json",
@@ -258,37 +259,29 @@ def _execute_distributed_task(task_dict: Dict[str, Any], skills_dir_str: str) ->
         registry_file = next((path for path in registry_candidates if path.exists()), skills_dir / "registry.json")
         registry = SkillRegistry(skills_dir, registry_file)
         executor = SkillExecutor(plugin_manager, registry, skills_dir)
-        
+
         # Construct and dispatch execution request
-        request = SkillExecutionRequest(
-            skill_id=task_dict["skill_id"],
-            input_data=task_dict.get("input_data", {})
-        )
-        
+        request = SkillExecutionRequest(skill_id=task_dict["skill_id"], input_data=task_dict.get("input_data", {}))
+
         async def run():
             return await executor.execute(request)
-            
+
         result = loop.run_until_complete(run())
         loop.close()
-        
+
         return {
             "success": result.success,
             "output": result.output,
             "error": result.error,
-            "execution_time_ms": result.execution_time_ms
+            "execution_time_ms": result.execution_time_ms,
         }
     except Exception as e:
-        return {
-            "success": False,
-            "output": None,
-            "error": str(e),
-            "execution_time_ms": 0.0
-        }
+        return {"success": False, "output": None, "error": str(e), "execution_time_ms": 0.0}
 
 
 class ProcessDistributedExecutor(DistributedExecutor):
     """Actual distributed task executor that runs tasks in separate sandboxed OS processes."""
-    
+
     def __init__(self, skills_dir: Path, max_workers: int = 4):
         super().__init__()
         self.skills_dir = skills_dir
@@ -297,7 +290,7 @@ class ProcessDistributedExecutor(DistributedExecutor):
         self._futures: Dict[str, Any] = {}
         self._scheduler_tasks: Dict[str, asyncio.Task] = {}
         self._callback_lock = threading.Lock()  # Guards _tasks mutations in done-callbacks
-        
+
     def submit_workflow(self, workflow_id: str, tasks: List[DistributedTask]) -> bool:
         """Submit a workflow and start scheduling tasks across workers."""
         success = super().submit_workflow(workflow_id, tasks)
@@ -327,11 +320,11 @@ class ProcessDistributedExecutor(DistributedExecutor):
             t = _threading.Thread(target=_run_loop, daemon=True, name=f"dag-scheduler-{workflow_id[:8]}")
             t.start()
         return True
-        
+
     async def _scheduler_loop(self, workflow_id: str):
         """Asynchronous scheduler that submits tasks when dependencies are completed."""
         task_ids = self._workflows.get(workflow_id, [])
-        
+
         while True:
             # Check if all tasks in the workflow are done/failed
             all_done = True
@@ -339,15 +332,15 @@ class ProcessDistributedExecutor(DistributedExecutor):
                 task = self._tasks[tid]
                 if task.status in [TaskStatus.PENDING, TaskStatus.RUNNING]:
                     all_done = False
-                    
+
             if all_done:
                 break
-                
+
             for tid in task_ids:
                 task = self._tasks[tid]
                 if task.status != TaskStatus.PENDING:
                     continue
-                    
+
                 # Verify that all parent task dependencies are fully completed
                 deps_satisfied = True
                 for dep_id in task.dependencies:
@@ -355,7 +348,7 @@ class ProcessDistributedExecutor(DistributedExecutor):
                     if not dep_task or dep_task.status != TaskStatus.COMPLETED:
                         deps_satisfied = False
                         break
-                        
+
                 if deps_satisfied:
                     # Resolve dynamic template placeholders from parent task results
                     completed_results = {
@@ -369,23 +362,20 @@ class ProcessDistributedExecutor(DistributedExecutor):
                     # Promote task to RUNNING status
                     task.status = TaskStatus.RUNNING
                     task.started_at = time.time()
-                    
+
                     # Offload compilation/execution to ProcessPoolExecutor
                     loop = asyncio.get_running_loop()
                     fut = loop.run_in_executor(
-                        self._process_executor,
-                        _execute_distributed_task,
-                        task.to_dict(),
-                        str(self.skills_dir)
+                        self._process_executor, _execute_distributed_task, task.to_dict(), str(self.skills_dir)
                     )
-                    
+
                     self._futures[task.task_id] = fut
                     fut.add_done_callback(
                         lambda f, t_id=task.task_id: self._task_completed_callback(t_id, f)  # type: ignore[misc]
                     )
-                    
+
             await asyncio.sleep(0.05)
-    
+
     def _task_completed_callback(self, task_id: str, future: Any):
         """Callback triggered when a worker process finishes task execution."""
         with self._callback_lock:
@@ -397,16 +387,17 @@ class ProcessDistributedExecutor(DistributedExecutor):
                     task.status = TaskStatus.COMPLETED
                     task.result = res["output"]
                     self.logger.info("Distributed task completed successfully", task_id=task_id)
-                    
+
                     # Checkpoint progress durably using global manager (if initialised)
                     from em_cubed.workflow.checkpoint import get_checkpoint_manager
+
                     manager = get_checkpoint_manager()
                     if manager is not None:
                         manager.create_checkpoint(
                             workflow_id=task.workflow_id,
                             execution_id=task_id,
                             step_name=f"task_{task.skill_id}",
-                            state_data={"result": task.result}
+                            state_data={"result": task.result},
                         )
                     else:
                         self.logger.warning(
@@ -429,7 +420,9 @@ class ProcessDistributedExecutor(DistributedExecutor):
                     else:
                         task.status = TaskStatus.FAILED
                         task.error = res["error"]
-                        self.logger.error("Distributed task failed after max retries", task_id=task_id, error=res["error"])
+                        self.logger.error(
+                            "Distributed task failed after max retries", task_id=task_id, error=res["error"]
+                        )
             except Exception as e:
                 task = self._tasks[task_id]
                 if task.retry_count < task.max_retries:

@@ -23,5 +23,7 @@ def test_subobject_classifier_methods():
     tv_temp = SubobjectClassifier.classify_temporal(True, step=5, validity_window=(1, 10), message="Step 5 in window")
     assert tv_temp.is_boolean is True
 
-    tv_temp_out = SubobjectClassifier.classify_temporal(True, step=15, validity_window=(1, 10), message="Step 15 out of window")
+    tv_temp_out = SubobjectClassifier.classify_temporal(
+        True, step=15, validity_window=(1, 10), message="Step 15 out of window"
+    )
     assert tv_temp_out.is_boolean is False

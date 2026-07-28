@@ -30,6 +30,7 @@ class ClingoSurface(SurfaceBase):
     @property
     def _spec_available(self) -> bool:
         import importlib.util
+
         return importlib.util.find_spec("clingo") is not None
 
     def _check_availability(self) -> bool:
@@ -37,6 +38,7 @@ class ClingoSurface(SurfaceBase):
             return False
         try:
             import clingo  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -61,6 +63,7 @@ class ClingoSurface(SurfaceBase):
 
         import hashlib
         import json
+
         serialized_ctx = json.dumps(context, sort_keys=True) if context else ""
         cache_key = hashlib.sha256(f"{code}:{serialized_ctx}".encode("utf-8")).hexdigest()
         if cache_key in self._execution_cache:

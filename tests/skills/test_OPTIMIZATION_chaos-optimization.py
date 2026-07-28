@@ -6,13 +6,7 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(
-    Path(__file__).parent.parent.parent
-    / "skills"
-    / "OPTIMIZATION"
-    / "chaos-optimization"
-    / "SKILL.md"
-)
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "chaos-optimization" / "SKILL.md")
 SKILL_ID = "OPTIMIZATION/chaos-optimization"
 
 
@@ -58,9 +52,7 @@ class TestChaosOptimizationSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -79,9 +71,7 @@ class TestChaosOptimizationSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
     @pytest.mark.asyncio
     async def test_coa_python_sphere(self):
@@ -89,7 +79,7 @@ class TestChaosOptimizationSkill:
         import random
 
         def sphere(x):
-            return sum(xi ** 2 for xi in x)
+            return sum(xi**2 for xi in x)
 
         def logistic_map(x):
             return 4.0 * x * (1.0 - x)
@@ -143,6 +133,7 @@ class TestChaosOptimizationSkill:
     @pytest.mark.asyncio
     async def test_tent_map_symmetry(self):
         """Tent map should be symmetric around 0.5."""
+
         def tent_map(x):
             return 1.0 - 2.0 * abs(0.5 - x)
 
@@ -156,6 +147,7 @@ class TestChaosOptimizationSkill:
     async def test_sinusoidal_map_range(self):
         """Sinusoidal map should produce values in [-1,1]."""
         import math
+
         for x in [0.0, 0.25, 0.5, 0.75, 1.0]:
             val = math.sin(math.pi * x)
             assert -1 <= val <= 1, f"Sinusoidal map out of range: {val}"
@@ -164,9 +156,10 @@ class TestChaosOptimizationSkill:
     async def test_coa_prolog_params(self):
         """Prolog parameter validation should work."""
         from em_cubed.surfaces import PrologSurface
+
         surface = PrologSurface()
-        code = '''
+        code = """
 ?- 30 >= 4, 30 =< 200, 40 >= 10, 40 =< 100, 60 >= 10, 60 =< 200, 0.8 >= 0.0, 0.8 =< 1.0.
-'''
+"""
         result = await surface.execute(code, {})
         assert result["status"] == "ok"

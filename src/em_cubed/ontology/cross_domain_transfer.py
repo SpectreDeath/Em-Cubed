@@ -118,5 +118,7 @@ class CrossDomainKnowledgeTransferEngine:
             new_subject = concept_map.get(t.subject, t.subject)
             new_predicate = concept_map.get(t.predicate, t.predicate)
             new_object = concept_map.get(t.object, t.object)
-            transferred.append(OntologyTriple(subject=new_subject, predicate=new_predicate, object=new_object, confidence=t.confidence))
+            transferred.append(
+                OntologyTriple(subject=new_subject, predicate=new_predicate, object=new_object, confidence=t.confidence)
+            )
         return transferred

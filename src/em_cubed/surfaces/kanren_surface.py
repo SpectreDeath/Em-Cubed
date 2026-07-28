@@ -27,6 +27,7 @@ class KanrenSurface(SurfaceBase):
 
     def _check_availability(self) -> bool:
         import importlib.util
+
         return importlib.util.find_spec("kanren") is not None
 
     @staticmethod
@@ -95,11 +96,7 @@ class KanrenSurface(SurfaceBase):
 
         value = exec_globals.get("result")
         if value is None:
-            value = {
-                key: val
-                for key, val in exec_globals.items()
-                if key not in namespace and not key.startswith("_")
-            }
+            value = {key: val for key, val in exec_globals.items() if key not in namespace and not key.startswith("_")}
 
         return {"status": "ok", "value": value}
 

@@ -39,7 +39,9 @@ class DatalogSurface(SurfaceBase):
         self._executor = ThreadPoolExecutor(max_workers=1)
         self.max_fact_lines = int(os.getenv("EM_CUBED_DATALOG_MAX_FACT_LINES", "5000"))
         self._concurrency_limit = int(os.getenv("EM_CUBED_DATALOG_MAX_CONCURRENCY", "1"))
-        self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        self._concurrency_semaphore = (
+            asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        )
         self._rejected_executions = 0
         # Per-instance cache: isolated between instances and test runs.
         self._execution_cache: Dict[str, Any] = {}
@@ -66,7 +68,7 @@ class DatalogSurface(SurfaceBase):
     @staticmethod
     def extract_tags(source: Optional[str]) -> List[str]:
         """Extract predicate names from Datalog source.
-        
+
         Looks for:
         - Predicate definitions: pred(X, Y) :- ...
         - Fact assertions: pred(a, b).
@@ -78,21 +80,23 @@ class DatalogSurface(SurfaceBase):
         import re
 
         predicates = set()
-        
+
         # Match predicate heads in rules: name(...) :-
-        rule_head_pattern = r'^([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*:-'
+        rule_head_pattern = r"^([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*:-"
         # Match facts: name(...).
-        fact_pattern = r'^([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\.'
+        fact_pattern = r"^([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*\."
         # Match query patterns: ?- name(...).
-        query_pattern = r'\?-\s*([a-z][a-zA-Z0-9_]*)\s*\('
+        query_pattern = r"\?-\s*([a-z][a-zA-Z0-9_]*)\s*\("
         # Match predicates in rule bodies: , name(...) or :- name(...) or name(...) ,
-        body_predicate_pattern = r'(?:,|:-)\s*([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)|\b([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*(?:,|$)'
-        
+        body_predicate_pattern = (
+            r"(?:,|:-)\s*([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)|\b([a-z][a-zA-Z0-9_]*)\s*\([^)]*\)\s*(?:,|$)"
+        )
+
         # Extract from heads, facts, and queries
         for pattern in [rule_head_pattern, fact_pattern, query_pattern]:
             matches = re.findall(pattern, source, re.MULTILINE | re.IGNORECASE)
             predicates.update(matches)
-        
+
         # Extract from rule bodies
         body_matches = re.findall(body_predicate_pattern, source, re.MULTILINE | re.IGNORECASE)
         for match in body_matches:
@@ -101,7 +105,7 @@ class DatalogSurface(SurfaceBase):
                 if group:
                     predicates.add(group)
                     break
-        
+
         return list(predicates)
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -137,6 +141,7 @@ class DatalogSurface(SurfaceBase):
 
         import hashlib
         import json
+
         try:
             serialized_ctx = json.dumps(context, sort_keys=True) if context else ""
         except TypeError:

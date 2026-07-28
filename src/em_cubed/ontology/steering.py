@@ -40,16 +40,22 @@ class ConstraintSteeringCompiler:
         if self.functional_constraints:
             instructions.append("\n1. FUNCTIONAL PROPERTY UNIQUENESS (SINGLE-VALUE CONSTRAINTS):")
             for fc in self.functional_constraints:
-                instructions.append(f"   - Predicate '{fc.predicate}' is single-valued per subject. Never assign duplicate values.")
+                instructions.append(
+                    f"   - Predicate '{fc.predicate}' is single-valued per subject. Never assign duplicate values."
+                )
 
         if self.disjoint_constraints:
             instructions.append("\n2. DISJOINT CLASS BOUNDARIES:")
             for dc in self.disjoint_constraints:
-                instructions.append(f"   - Entity cannot simultaneously belong to '{dc.class_a}' and '{dc.class_b}'. Roles are disjoint.")
+                instructions.append(
+                    f"   - Entity cannot simultaneously belong to '{dc.class_a}' and '{dc.class_b}'. Roles are disjoint."
+                )
 
         if self.domain_range_inferences:
             instructions.append("\n3. DOMAIN & RANGE INFERENCES:")
             for dr in self.domain_range_inferences:
-                instructions.append(f"   - Predicate '{dr.predicate}' implies Subject MUST be class '{dr.domain_class}' and Object MUST be class '{dr.range_class}'.")
+                instructions.append(
+                    f"   - Predicate '{dr.predicate}' implies Subject MUST be class '{dr.domain_class}' and Object MUST be class '{dr.range_class}'."
+                )
 
         return "\n".join(instructions)

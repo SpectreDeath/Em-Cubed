@@ -39,10 +39,10 @@ class QuickJSSurface(SurfaceBase):
         """Synchronous QuickJS execution to run inside the executor thread."""
         import quickjs
         import json
-        
+
         # Use a fresh context for each execution
         ctx = quickjs.Context()
-        
+
         # Inject context variables if provided (primitive types only)
         if context:
             for key, value in context.items():
@@ -66,13 +66,9 @@ class QuickJSSurface(SurfaceBase):
 
         try:
             import asyncio
+
             loop = asyncio.get_running_loop()
-            result = await loop.run_in_executor(
-                self._executor,
-                self._run_quickjs,
-                code,
-                context
-            )
+            result = await loop.run_in_executor(self._executor, self._run_quickjs, code, context)
             logger.info("JavaScript execution successful")
             return result
 
@@ -89,6 +85,7 @@ class QuickJSSurface(SurfaceBase):
         if not source:
             return []
         import re
+
         # Match function declarations or assignments
         fns = re.findall(r"function\s+([a-zA-Z0-9_]+)\s*\(", source)
         fns.extend(re.findall(r"const\s+([a-zA-Z0-9_]+)\s*=\s*(?:function|\()", source))

@@ -54,7 +54,7 @@ def _risk_category(risk):
 def _complementary_confidence(*confidences):
     product = 1.0
     for ci in confidences:
-        product *= (1 - ci)
+        product *= 1 - ci
     return 1 - product
 
 

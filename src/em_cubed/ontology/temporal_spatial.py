@@ -47,9 +47,7 @@ class GeoLocation:
         dlon = math.radians(other.longitude - self.longitude)
         a = (
             math.sin(dlat / 2) ** 2
-            + math.cos(math.radians(self.latitude))
-            * math.cos(math.radians(other.latitude))
-            * math.sin(dlon / 2) ** 2
+            + math.cos(math.radians(self.latitude)) * math.cos(math.radians(other.latitude)) * math.sin(dlon / 2) ** 2
         )
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return r * c
@@ -116,11 +114,7 @@ class TemporalSnapshotQueryEngine:
         list[OntologyTriple]
             Active base triples valid at timestamp t.
         """
-        valid_triples = [
-            t.to_base_triple()
-            for t in timeline.temporal_triples
-            if t.interval.is_valid_at(timestamp)
-        ]
+        valid_triples = [t.to_base_triple() for t in timeline.temporal_triples if t.interval.is_valid_at(timestamp)]
         logger.info("Snapshot query at %s returned %d valid triples.", timestamp.isoformat(), len(valid_triples))
         return valid_triples
 

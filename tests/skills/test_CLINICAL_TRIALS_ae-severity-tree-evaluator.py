@@ -1,11 +1,14 @@
 """Tests for ae-severity-tree-evaluator skill."""
+
 import pytest
 from pathlib import Path
 from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "CLINICAL_TRIALS" / "ae-severity-tree-evaluator" / "SKILL.md")
+SKILL_FILE = Path(
+    Path(__file__).parent.parent.parent / "skills" / "CLINICAL_TRIALS" / "ae-severity-tree-evaluator" / "SKILL.md"
+)
 SKILL_ID = "CLINICAL_TRIALS/ae-severity-tree-evaluator"
 
 
@@ -13,9 +16,11 @@ SKILL_ID = "CLINICAL_TRIALS/ae-severity-tree-evaluator"
 def plugin_manager():
     return PluginManager()
 
+
 @pytest.fixture
 def test_generator(plugin_manager):
     return SkillTestGenerator(plugin_manager)
+
 
 @pytest.fixture
 def test_runner(plugin_manager):
@@ -46,6 +51,7 @@ class TestAeSeverityTreeEvaluatorSkill:
         if not metadata_dict:
             pytest.skip("Skill metadata not available")
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
         for key, value in metadata_dict.items():
             if hasattr(metadata, key):
@@ -66,9 +72,12 @@ class TestAeSeverityTreeEvaluatorSkill:
         all_grades = []
         for rec in ae_records:
             matched = [
-                r for r in grade_rules
+                r
+                for r in grade_rules
                 if r["lab_name"] == rec["lab_name"]
-                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+                and min(r["grade_low"], r["grade_high"])
+                <= float(rec["observed_value"])
+                <= max(r["grade_low"], r["grade_high"])
             ]
             if matched:
                 all_grades.append(max(m["grade"] for m in matched))
@@ -82,9 +91,12 @@ class TestAeSeverityTreeEvaluatorSkill:
         all_grades = []
         for rec in ae_records:
             matched = [
-                r for r in grade_rules
+                r
+                for r in grade_rules
                 if r["lab_name"] == rec["lab_name"]
-                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+                and min(r["grade_low"], r["grade_high"])
+                <= float(rec["observed_value"])
+                <= max(r["grade_low"], r["grade_high"])
             ]
             if matched:
                 all_grades.append(max(m["grade"] for m in matched))
@@ -98,9 +110,12 @@ class TestAeSeverityTreeEvaluatorSkill:
         all_grades = []
         for rec in ae_records:
             matched = [
-                r for r in grade_rules
+                r
+                for r in grade_rules
                 if r["lab_name"] == rec["lab_name"]
-                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+                and min(r["grade_low"], r["grade_high"])
+                <= float(rec["observed_value"])
+                <= max(r["grade_low"], r["grade_high"])
             ]
             if matched:
                 all_grades.append(max(m["grade"] for m in matched))
@@ -118,9 +133,12 @@ class TestAeSeverityTreeEvaluatorSkill:
         all_grades = []
         for rec in ae_records:
             matched = [
-                r for r in grade_rules
+                r
+                for r in grade_rules
                 if r["lab_name"] == rec["lab_name"]
-                and min(r["grade_low"], r["grade_high"]) <= float(rec["observed_value"]) <= max(r["grade_low"], r["grade_high"])
+                and min(r["grade_low"], r["grade_high"])
+                <= float(rec["observed_value"])
+                <= max(r["grade_low"], r["grade_high"])
             ]
             if matched:
                 all_grades.append(max(m["grade"] for m in matched))
@@ -139,9 +157,9 @@ class TestAeSeverityTreeEvaluatorSkill:
                 results.append("error")
                 continue
             matched = [
-                r for r in grade_rules
-                if r["lab_name"] == rec["lab_name"]
-                and r["grade_low"] <= observed <= r["grade_high"]
+                r
+                for r in grade_rules
+                if r["lab_name"] == rec["lab_name"] and r["grade_low"] <= observed <= r["grade_high"]
             ]
             results.append("matched" if matched else "no_match")
         assert results == ["error"]
@@ -160,9 +178,7 @@ class TestAeSeverityTreeEvaluatorSkill:
                 continue
             lab_name = rec.get("lab_name", "")
             matched = [
-                r for r in grade_rules
-                if r["lab_name"] == lab_name
-                and r["grade_low"] <= observed <= r["grade_high"]
+                r for r in grade_rules if r["lab_name"] == lab_name and r["grade_low"] <= observed <= r["grade_high"]
             ]
             results.append("matched" if matched else "no_match")
         assert results == ["no_match"]
@@ -180,9 +196,9 @@ class TestAeSeverityTreeEvaluatorSkill:
                 all_grades.append("error")
                 continue
             matched = [
-                r for r in grade_rules
-                if r["lab_name"] == rec["lab_name"]
-                and r["grade_low"] <= observed <= r["grade_high"]
+                r
+                for r in grade_rules
+                if r["lab_name"] == rec["lab_name"] and r["grade_low"] <= observed <= r["grade_high"]
             ]
             if matched:
                 all_grades.append(max(m["grade"] for m in matched))

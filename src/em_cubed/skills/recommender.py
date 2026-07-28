@@ -20,6 +20,7 @@ logger = structlog.get_logger()
 @dataclass
 class TaskRequirement:
     """A requirement for a task."""
+
     category: str  # e.g., "optimization", "nlp", "decision"
     surfaces: List[str] = field(default_factory=list)  # Preferred surfaces
     capabilities: List[str] = field(default_factory=list)  # Required capabilities
@@ -45,6 +46,7 @@ class TaskRequirement:
 @dataclass
 class RecommendationResult:
     """A skill recommendation."""
+
     skill_id: str
     name: str
     relevance_score: float  # 0-1
@@ -73,6 +75,7 @@ class SkillRecommender:
         self.logger = logger.bind(component="skill_recommender")
         # Initialize semantic search manager if not already initialized
         from .semantic_search import initialize_semantic_search
+
         initialize_semantic_search(registry)
         self.semantic_search = get_semantic_search_manager()
 
@@ -99,13 +102,13 @@ class SkillRecommender:
                 requirement.category,
                 " ".join(requirement.surfaces),
                 " ".join(requirement.capabilities),
-                requirement.complexity
+                requirement.complexity,
             ]
             query = " ".join(filter(None, query_parts)).strip()
-            
+
             if query:
                 try:
-                    semantic_matches = self.semantic_search.search(query, limit=limit*2)
+                    semantic_matches = self.semantic_search.search(query, limit=limit * 2)
                     # Convert to same format as keyword results
                     for skill, similarity in semantic_matches:
                         # Only add if not already in keyword results or if it has higher similarity
@@ -252,13 +255,15 @@ class SkillRecommender:
         for score, candidate in scored[:limit]:
             assert candidate.skill_id is not None, "Candidate skill ID should not be None"
             qm = self.registry.get_quality(candidate.skill_id)
-            results.append(RecommendationResult(
-                skill_id=candidate.skill_id,
-                name=candidate.name,
-                relevance_score=score,
-                matching_criteria=[f"Similar to {skill.name}"],
-                quality_metrics=qm.to_dict() if qm else {},
-            ))
+            results.append(
+                RecommendationResult(
+                    skill_id=candidate.skill_id,
+                    name=candidate.name,
+                    relevance_score=score,
+                    matching_criteria=[f"Similar to {skill.name}"],
+                    quality_metrics=qm.to_dict() if qm else {},
+                )
+            )
 
         return results
 
@@ -289,7 +294,9 @@ class SkillRecommender:
 
         return min(1.0, score)
 
-    def get_recommendations_for_task(self, task_description: str, context: Optional[Dict[str, Any]] = None) -> List[RecommendationResult]:
+    def get_recommendations_for_task(
+        self, task_description: str, context: Optional[Dict[str, Any]] = None
+    ) -> List[RecommendationResult]:
         """Parse task description and recommend skills (heuristic-based)."""
         # Simple keyword-based extraction from description
         keywords = self._extract_keywords(task_description)

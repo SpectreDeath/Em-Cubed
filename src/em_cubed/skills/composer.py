@@ -23,18 +23,20 @@ logger = structlog.get_logger()
 
 class CompositionPattern(Enum):
     """Patterns for composing multiple skills."""
-    SEQUENTIAL = "sequential"     # Execute skills in order, passing output to next
-    PARALLEL = "parallel"         # Execute independent skills concurrently
-    FANOUT = "fanout"            # One skill triggers multiple downstream
-    FANIN = "fanin"              # Multiple skills converge to one
+
+    SEQUENTIAL = "sequential"  # Execute skills in order, passing output to next
+    PARALLEL = "parallel"  # Execute independent skills concurrently
+    FANOUT = "fanout"  # One skill triggers multiple downstream
+    FANIN = "fanin"  # Multiple skills converge to one
     CONDITIONAL = "conditional"  # Conditional branching based on output
-    MAP_REDUCE = "map_reduce"    # Process collection then aggregate
-    PIPELINE = "pipeline"        # Streaming data through stages
+    MAP_REDUCE = "map_reduce"  # Process collection then aggregate
+    PIPELINE = "pipeline"  # Streaming data through stages
 
 
 @dataclass
 class ExecutionContext:
     """Runtime context for skill execution."""
+
     data: Dict[str, Any]  # Input data
     metadata: Dict[str, Any] = field(default_factory=dict)  # Execution metadata
     variables: Dict[str, Any] = field(default_factory=dict)  # Shared variables
@@ -68,6 +70,7 @@ class ExecutionContext:
 @dataclass
 class CompositionStep:
     """A single step in a skill composition."""
+
     skill_id: str
     input_mapping: Dict[str, str] = field(default_factory=dict)  # Map context -> skill input
     output_mapping: Dict[str, str] = field(default_factory=dict)  # Map skill output -> context
@@ -128,6 +131,7 @@ class CompositionStep:
 @dataclass
 class CompositionPlan:
     """A complete composition plan with execution steps."""
+
     name: str
     steps: List[CompositionStep]
     pattern: CompositionPattern = CompositionPattern.SEQUENTIAL
@@ -196,16 +200,16 @@ class SkillComposer:
                 if not success and plan.max_retries > 0:
                     # Retry logic
                     for attempt in range(plan.max_retries):
-                        self.logger.info("Retrying step", step=i+1, attempt=attempt+1)
+                        self.logger.info("Retrying step", step=i + 1, attempt=attempt + 1)
                         success = await self._execute_step(step, context)
                         if success:
                             break
                 if not success:
-                    self.logger.error("Step failed permanently", step=i+1)
+                    self.logger.error("Step failed permanently", step=i + 1)
                     return CompositionResult(
                         success=False,
                         context=context,
-                        error=f"Step {i+1} ({step.skill_id}) failed",
+                        error=f"Step {i + 1} ({step.skill_id}) failed",
                         steps_executed=len(context.skills_used),
                     )
             except Exception as e:
@@ -329,6 +333,7 @@ class SkillComposer:
             return {"status": "ok", "value": f"Executed {skill.name}", "skill": skill.name}
 
         import re
+
         pattern = rf"```{plugin.name}\s*\r?\n(.*?)```"
         match = re.search(pattern, content, re.DOTALL)
         if not match:
@@ -407,6 +412,7 @@ _skill_result
 @dataclass
 class CompositionResult:
     """Result of a composition execution."""
+
     success: bool
     context: ExecutionContext
     error: Optional[str] = None

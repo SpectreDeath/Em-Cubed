@@ -14,22 +14,22 @@ def test_wasm_surface_creation():
 def test_wasm_surface_available():
     """Test that WASM surface reports availability."""
     surface = WASMSurface()
-    assert hasattr(surface, '_wasm_available')
+    assert hasattr(surface, "_wasm_available")
 
 
 def test_wasm_surface_extract_tags():
     """Test extracting tags from WASM source."""
     surface = WASMSurface()
-    
+
     # Test with empty source
     tags = surface.extract_tags(None)
     assert tags == []
-    
+
     tags = surface.extract_tags("")
     assert tags == []
-    
+
     # Test with simple function in WAT format
-    wasm_code = "(module (func $add (param i32 i32) (result i32)) (export \"add\" (func $add)))"
+    wasm_code = '(module (func $add (param i32 i32) (result i32)) (export "add" (func $add)))'
     tags = surface.extract_tags(wasm_code)
     assert isinstance(tags, list)
     if surface.available:
@@ -53,14 +53,9 @@ async def test_wasm_surface_execution():
       (export "add" (func $add))
     )
     """
-    
+
     # Run the module
-    context = {
-        "skill_input": {
-            "a": 15,
-            "b": 27
-        }
-    }
+    context = {"skill_input": {"a": 15, "b": 27}}
     result = await surface.execute(wat_code, context)
     assert result["status"] == "ok"
     assert result["value"] == 42

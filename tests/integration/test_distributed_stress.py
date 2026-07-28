@@ -262,10 +262,7 @@ class TestUciCensusRandomForest:
         tasks = [surface.execute(long_running, {}) for _ in range(3)]
         results = await __import__("asyncio").gather(*tasks, return_exceptions=False)
         assert all(r["status"] == "error" for r in results)
-        assert any(
-            "timed out" in r["message"].lower() or "rejected" in r["message"].lower()
-            for r in results
-        )
+        assert any("timed out" in r["message"].lower() or "rejected" in r["message"].lower() for r in results)
 
 
 class TestSqliteDatalogWebDataCommons:
@@ -298,7 +295,9 @@ class TestSqliteDatalogWebDataCommons:
         result = await surface.execute(create_sql, context)
         assert result.get("status") in ("ok", "error")
 
-        insert_sql = "INSERT INTO products (product_id, name, price, category) VALUES ('P1', 'Product 1', 10.0, 'electronics');"
+        insert_sql = (
+            "INSERT INTO products (product_id, name, price, category) VALUES ('P1', 'Product 1', 10.0, 'electronics');"
+        )
         result = await surface.execute(insert_sql, context)
         assert result.get("status") in ("ok", "error")
 

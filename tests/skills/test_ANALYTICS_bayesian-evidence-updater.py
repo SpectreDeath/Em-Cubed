@@ -6,7 +6,9 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "ANALYTICS" / "bayesian-evidence-updater" / "SKILL.md")
+SKILL_FILE = Path(
+    Path(__file__).parent.parent.parent / "skills" / "ANALYTICS" / "bayesian-evidence-updater" / "SKILL.md"
+)
 SKILL_ID = "ANALYTICS/bayesian-evidence-updater"
 
 
@@ -53,10 +55,11 @@ class Testbayesian_evidence_updaterSkill:
     async def test_skill_execution(self, test_runner, test_generator):
         """Test basic skill execution."""
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         if not metadata_dict:
             pytest.skip("Skill metadata not available")
-        
+
         metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
         for key, value in metadata_dict.items():
             if hasattr(metadata, key):
@@ -85,10 +88,10 @@ class Testbayesian_evidence_updaterSkill:
         }
 
         result = calculate_posterior_update(matrix, likelihoods)
-        
+
         assert result["status"] == "success"
         assert result["marginal_likelihood"] > 0
-        
+
         total_prob = sum(d["posterior_probability"] for d in result["distribution"])
         assert abs(total_prob - 1.0) < 0.001, f"Distribution should sum to 1.0, got {total_prob}"
 
@@ -102,7 +105,7 @@ class Testbayesian_evidence_updaterSkill:
         }
 
         result = calculate_posterior_update(matrix, likelihoods)
-        
+
         assert result["status"] == "error"
         assert "Zero marginal" in result["message"]
 
@@ -111,29 +114,26 @@ def calculate_posterior_update(matrix, likelihood_dict):
     """Copy of the Python function for unit testing."""
     total_probability_evidence = 0.0
     unnormalized_posteriors = {}
-    
+
     for row in matrix:
-        h_id = row['hypothesis_id']
-        prior = row['prior_probability']
+        h_id = row["hypothesis_id"]
+        prior = row["prior_probability"]
         likelihood = likelihood_dict.get(h_id, 0.1)
         unnormalized_posterior = likelihood * prior
         unnormalized_posteriors[h_id] = unnormalized_posterior
         total_probability_evidence += unnormalized_posterior
-        
+
     if total_probability_evidence == 0:
-        return {'status': 'error', 'message': 'Zero marginal probability matrix'}
-        
+        return {"status": "error", "message": "Zero marginal probability matrix"}
+
     updated_distribution = []
     for row in matrix:
-        h_id = row['hypothesis_id']
+        h_id = row["hypothesis_id"]
         posterior = unnormalized_posteriors[h_id] / total_probability_evidence
-        updated_distribution.append({
-            'hypothesis_id': h_id,
-            'posterior_probability': posterior
-        })
-        
+        updated_distribution.append({"hypothesis_id": h_id, "posterior_probability": posterior})
+
     return {
-        'status': 'success',
-        'marginal_likelihood': total_probability_evidence,
-        'distribution': updated_distribution
+        "status": "success",
+        "marginal_likelihood": total_probability_evidence,
+        "distribution": updated_distribution,
     }

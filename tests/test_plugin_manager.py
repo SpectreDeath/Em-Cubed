@@ -42,15 +42,14 @@ class MockSurface(SurfacePlugin):
 
 
 class TestPluginManager:
-
     def test_init_registers_builtin_surfaces(self):
         """Test that PluginManager initializes and registers built-in surfaces."""
         manager = PluginManager()
-    
+
         # Should have registered some surfaces (at least python)
         assert len(manager.list_plugins()) > 0
         assert "python" in manager.list_plugins()
- 
+
         # Verify surfaces are properly registered
         python_surface = manager.get("python")
         assert python_surface is not None
@@ -149,7 +148,7 @@ class TestPluginManager:
     def test_discover_directory_nonexistent_dir(self):
         """Test directory discovery with nonexistent directory."""
         manager = PluginManager()
-         
+
         # Should not raise exception - just call the internal discovery method if it exists
         # Since we can't directly call _discover_directory, we'll test that initialization works
         # even with nonexistent paths by checking that the manager is still functional
@@ -179,13 +178,13 @@ class TestPluginManager:
     def test_discover_builtin_handles_missing_surfaces(self):
         """Test that _discover_builtin gracefully handles missing surface dependencies."""
         manager = PluginManager()
-    
+
         # All surfaces should be registered (available or not)
         surfaces = manager.list_plugins()
         lazy_surfaces = manager._lazy_classes.keys()
         all_surfaces = set(surfaces.keys()) | set(lazy_surfaces)
         expected_surfaces = {"python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs"}
-    
+
         # Should have all expected surface names
         assert expected_surfaces.issubset(all_surfaces)
 
@@ -234,13 +233,13 @@ class TestPluginManager:
         manager = PluginManager()
         plugins = manager.list_plugins()
         available = manager.get_available_surfaces()
-        
+
         # Core surfaces should be present in list_plugins (instantiated)
         assert "python" in plugins
         assert "sqlite" in plugins
         assert plugins["python"] is True
         assert plugins["sqlite"] is True
-        
+
         # Lazy surfaces should be present in get_available_surfaces (even if not yet instantiated)
         assert "z3" in available
         assert "datalog" in available
@@ -275,7 +274,7 @@ class TestPluginManager:
         available_surfaces = manager.get_available_surfaces()
         # SQLite should be available and not require lazy loading on first access
         assert "sqlite" in available_surfaces
-        
+
         # Get the surface - it should be immediately available without triggering lazy load
         sqlite_plugin = manager.get("sqlite")
         assert sqlite_plugin is not None

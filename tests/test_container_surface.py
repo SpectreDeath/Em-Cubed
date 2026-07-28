@@ -14,7 +14,7 @@ def test_containerized_surface_available_false_when_no_docker():
     # This test would need mocking to simulate Docker unavailability
     # For now, we'll just verify the attribute exists
     plugin = ContainerizedSurfacePlugin("python")
-    assert hasattr(plugin, '_docker_available')
+    assert hasattr(plugin, "_docker_available")
 
 
 if __name__ == "__main__":

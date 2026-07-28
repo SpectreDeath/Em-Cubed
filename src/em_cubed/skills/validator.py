@@ -1,4 +1,4 @@
-﻿"""Skill validation framework for enforcing quality standards.
+"""Skill validation framework for enforcing quality standards.
 
 Provides validation for skill structure, content quality, code correctness,
 surface implementations, and composition readiness.
@@ -14,15 +14,17 @@ logger = structlog.get_logger()
 
 class ValidationSeverity(Enum):
     """Severity levels for validation issues."""
-    ERROR = "error"      # Skill fails validation entirely
+
+    ERROR = "error"  # Skill fails validation entirely
     WARNING = "warning"  # Skill passes but has issues
-    INFO = "info"        # Informational suggestions
+    INFO = "info"  # Informational suggestions
     SUCCESS = "success"  # Validation passed
 
 
 @dataclass
 class ValidationIssue:
     """A single validation issue found."""
+
     severity: ValidationSeverity
     code: str  # Unique issue code (e.g., MISSING_PURPOSE, NO_TESTS)
     message: str
@@ -44,24 +46,33 @@ class ValidationIssue:
 @dataclass
 class ValidationResult:
     """Complete validation result for a skill."""
+
     skill_id: str
     valid: bool  # Overall pass/fail
     issues: List[ValidationIssue] = field(default_factory=list)
     quality_score: float = 0.0  # 0.0 to 1.0
     validated_at: str = ""  # ISO timestamp
 
-    def add_issue(self, severity: ValidationSeverity, code: str, message: str,
-                  component: str = "general", suggestion: Optional[str] = None,
-                  line_number: Optional[int] = None) -> None:
+    def add_issue(
+        self,
+        severity: ValidationSeverity,
+        code: str,
+        message: str,
+        component: str = "general",
+        suggestion: Optional[str] = None,
+        line_number: Optional[int] = None,
+    ) -> None:
         """Add a validation issue."""
-        self.issues.append(ValidationIssue(
-            severity=severity,
-            code=code,
-            message=message,
-            component=component,
-            suggestion=suggestion,
-            line_number=line_number,
-        ))
+        self.issues.append(
+            ValidationIssue(
+                severity=severity,
+                code=code,
+                message=message,
+                component=component,
+                suggestion=suggestion,
+                line_number=line_number,
+            )
+        )
         if severity in (ValidationSeverity.ERROR,):
             self.valid = False
 
@@ -108,6 +119,7 @@ class SkillValidator:
     def _load_manifest(self):
         """Load manifest.yaml to get valid domains and quality thresholds."""
         from pathlib import Path
+
         try:
             import yaml
         except ImportError:
@@ -116,11 +128,28 @@ class SkillValidator:
         manifest_path = Path("skills") / "manifest.yaml"
         # Default fallback domains (hardcoded)
         self.valid_domains = {
-            "AUTOMATION", "DATA_PROCESSING", "DECISION_MAKING", "DISTRIBUTED_SYSTEMS",
-            "ENSEMBLE", "EPIDEMIOLOGY", "FEATURE_ENGINEERING", "General", "GRAPH_ML", "KNOWLEDGE_GRAPH",
-            "MACHINE_LEARNING", "ML_OPERATIONS", "MODEL_VALIDATION", "NLP",
-            "OPTIMIZATION", "RECOMMENDER_SYSTEMS", "RESOURCE_MANAGEMENT",
-            "SIMULATION", "STATISTICS", "FORENSIC_ECONOMICS", "CLINICAL_TRIALS", "TIME_SERIES"
+            "AUTOMATION",
+            "DATA_PROCESSING",
+            "DECISION_MAKING",
+            "DISTRIBUTED_SYSTEMS",
+            "ENSEMBLE",
+            "EPIDEMIOLOGY",
+            "FEATURE_ENGINEERING",
+            "General",
+            "GRAPH_ML",
+            "KNOWLEDGE_GRAPH",
+            "MACHINE_LEARNING",
+            "ML_OPERATIONS",
+            "MODEL_VALIDATION",
+            "NLP",
+            "OPTIMIZATION",
+            "RECOMMENDER_SYSTEMS",
+            "RESOURCE_MANAGEMENT",
+            "SIMULATION",
+            "STATISTICS",
+            "FORENSIC_ECONOMICS",
+            "CLINICAL_TRIALS",
+            "TIME_SERIES",
         }
         self.default_required_surfaces = 1
 
@@ -145,7 +174,11 @@ class SkillValidator:
                 self.min_description_length = qt["min_description_length"]
             if "min_code_lines" in qt:
                 self.min_code_lines = qt["min_code_lines"]
-            self.logger.info("Loaded manifest", domains_count=len(self.valid_domains), required_surfaces=self.default_required_surfaces)
+            self.logger.info(
+                "Loaded manifest",
+                domains_count=len(self.valid_domains),
+                required_surfaces=self.default_required_surfaces,
+            )
         except Exception as e:
             self.logger.warning("Failed to parse manifest, using defaults", error=str(e))
 
@@ -185,7 +218,7 @@ class SkillValidator:
                     code="MISSING_REQUIRED_FIELD",
                     message=f"Required field '{required_field}' is missing",
                     component="metadata",
-                    suggestion=f"Add '{required_field}: value' to the YAML frontmatter"
+                    suggestion=f"Add '{required_field}: value' to the YAML frontmatter",
                 )
 
         # Check Purpose section
@@ -195,7 +228,7 @@ class SkillValidator:
                 code="SHORT_PURPOSE",
                 message=f"Purpose should be at least {self.min_purpose_length} characters",
                 component="content",
-                suggestion="Expand the skill's Purpose section with more detail"
+                suggestion="Expand the skill's Purpose section with more detail",
             )
 
         # Check Description section
@@ -205,21 +238,22 @@ class SkillValidator:
                 code="SHORT_DESCRIPTION",
                 message=f"Description should be at least {self.min_description_length} characters",
                 component="content",
-                suggestion="Provide a more comprehensive description"
+                suggestion="Provide a more comprehensive description",
             )
 
     def _validate_metadata(self, result: ValidationResult, skill_metadata) -> None:
         """Validate metadata consistency and quality."""
         # Validate version format (semver)
         import re
-        semver_pattern = r'^\d+\.\d+\.\d+$'
+
+        semver_pattern = r"^\d+\.\d+\.\d+$"
         if not re.match(semver_pattern, skill_metadata.version):
             result.add_issue(
                 severity=ValidationSeverity.WARNING,
                 code="INVALID_VERSION",
                 message=f"Version should follow semantic versioning (X.Y.Z), got '{skill_metadata.version}'",
                 component="metadata",
-                suggestion="Update version to follow semver (e.g., 1.0.0)"
+                suggestion="Update version to follow semver (e.g., 1.0.0)",
             )
 
         # Validate domain against manifest categories
@@ -229,7 +263,7 @@ class SkillValidator:
                 code="UNKNOWN_DOMAIN",
                 message=f"Domain '{skill_metadata.domain}' is not in the recognized domains list",
                 component="metadata",
-                suggestion=f"Use one of: {', '.join(sorted(self.valid_domains))}"
+                suggestion=f"Use one of: {', '.join(sorted(self.valid_domains))}",
             )
 
         # Validate surfaces
@@ -241,7 +275,7 @@ class SkillValidator:
                     code="UNKNOWN_SURFACE",
                     message=f"Surface '{surface}' is not supported",
                     component="metadata",
-                    suggestion=f"Use one of: {', '.join(sorted(valid_surfaces))}"
+                    suggestion=f"Use one of: {', '.join(sorted(valid_surfaces))}",
                 )
 
         # Check minimum surface count
@@ -251,7 +285,7 @@ class SkillValidator:
                 code="INSUFFICIENT_SURFACES",
                 message=f"Skill must implement at least {self.default_required_surfaces} surface(s), has {len(skill_metadata.surfaces)}",
                 component="metadata",
-                suggestion="Add implementations for missing surfaces (python, prolog, hy)"
+                suggestion="Add implementations for missing surfaces (python, prolog, hy)",
             )
 
     def _validate_surfaces(self, result: ValidationResult, skill_metadata) -> None:
@@ -272,7 +306,7 @@ class SkillValidator:
                 code="INVALID_SURFACE",
                 message=f"Surface '{surface}' is not a valid surface type",
                 component="metadata",
-                suggestion="Use python, prolog, hy, z3, datalog, sqlite, quickjs, kanren, or clingo"
+                suggestion="Use python, prolog, hy, z3, datalog, sqlite, quickjs, kanren, or clingo",
             )
 
     def _validate_dependencies(self, result: ValidationResult, skill_metadata) -> None:
@@ -285,20 +319,21 @@ class SkillValidator:
                     severity=ValidationSeverity.WARNING,
                     code="INVALID_DEPENDENCY_FORMAT",
                     message=f"Dependency '{dep.skill_id}' should be in format 'domain/skill-name'",
-                    component="dependencies"
+                    component="dependencies",
                 )
 
             # Validate version range format
             if dep.version_range:
                 import re
+
                 # Simple semver range validation
-                if not re.match(r'^[><=!]=?\d+\.\d+\.\d+(\s*,\s*[><=!]=?\d+\.\d+\.\d+)*$', dep.version_range):
+                if not re.match(r"^[><=!]=?\d+\.\d+\.\d+(\s*,\s*[><=!]=?\d+\.\d+\.\d+)*$", dep.version_range):
                     result.add_issue(
                         severity=ValidationSeverity.WARNING,
                         code="INVALID_VERSION_RANGE",
                         message=f"Dependency version range '{dep.version_range}' is invalid",
                         component="dependencies",
-                        suggestion="Use semver ranges like '>=1.0.0,<2.0.0'"
+                        suggestion="Use semver ranges like '>=1.0.0,<2.0.0'",
                     )
 
     def _validate_schemas(self, result: ValidationResult, skill_metadata) -> None:
@@ -312,7 +347,7 @@ class SkillValidator:
                         severity=ValidationSeverity.WARNING,
                         code="INVALID_PROPERTY_NAME",
                         message=f"Property name '{prop_name}' is not a valid identifier",
-                        component="schema"
+                        component="schema",
                     )
 
         # Check required properties exist in properties
@@ -322,7 +357,7 @@ class SkillValidator:
                     severity=ValidationSeverity.ERROR,
                     code="MISSING_REQUIRED_PROPERTY",
                     message=f"Required property '{req}' not defined in schema properties",
-                    component="schema"
+                    component="schema",
                 )
 
     def _calculate_quality_score(self, result: ValidationResult) -> None:
@@ -368,7 +403,7 @@ class SkillValidator:
                 severity=ValidationSeverity.WARNING,
                 code="TYPE_MISMATCH",
                 message=f"Output type '{src_out.type}' may not match input type '{tgt_in.type}'",
-                component="composition"
+                component="composition",
             )
 
         # Check required fields
@@ -378,7 +413,7 @@ class SkillValidator:
                     severity=ValidationSeverity.ERROR,
                     code="MISSING_REQUIRED_FIELD",
                     message=f"Target requires '{req_field}' but source doesn't provide it",
-                    component="composition"
+                    component="composition",
                 )
 
         return result

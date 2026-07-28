@@ -9,9 +9,7 @@ class BootstrapAnalyzer:
 
     def bootstrap_sample(self, statistic=None):
         statistic = statistic or self._mean
-        self.bootstrap_samples = [
-            statistic(self._resample()) for _ in range(self.n_bootstrap)
-        ]
+        self.bootstrap_samples = [statistic(self._resample()) for _ in range(self.n_bootstrap)]
         return self.bootstrap_samples
 
     def _resample(self):

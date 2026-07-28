@@ -16,6 +16,7 @@ import math
 # Function-under-test extracted from SKILL.md implementations
 # ============================================================
 
+
 def my_exp(x):
     """Taylor-series exponential matching SKILL.md implementation."""
     if x > 50:
@@ -124,6 +125,7 @@ def naive_bayes(features, labels, test_features):
 # 1. Gaussian PDF — value at mean, symmetry, edge cases
 # ============================================================
 
+
 class TestGaussianPDF:
     """Unit tests for gaussian_pdf function."""
 
@@ -168,6 +170,7 @@ class TestGaussianPDF:
 # ============================================================
 # 2. MyExp — Taylor series exponential verification
 # ============================================================
+
 
 class TestMyExp:
     """Unit tests for my_exp Taylor series implementation."""
@@ -258,6 +261,7 @@ class TestNaiveBayesTrain:
 # 4. Naive Bayes Predict — prediction behavior verification
 # ============================================================
 
+
 class TestNaiveBayesPredict:
     """Unit tests for prediction function."""
 
@@ -293,6 +297,7 @@ class TestNaiveBayesPredict:
 # 5. End-to-End — full pipeline tests
 # ============================================================
 
+
 class TestNaiveBayesEndToEnd:
     """End-to-end tests for naive_bayes function."""
 
@@ -322,6 +327,7 @@ class TestNaiveBayesEndToEnd:
 # ============================================================
 # 6. Edge Cases — boundary conditions
 # ============================================================
+
 
 class TestEdgeCases:
     """Edge case tests for unusual inputs."""

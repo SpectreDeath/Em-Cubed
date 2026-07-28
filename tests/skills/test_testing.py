@@ -195,7 +195,7 @@ def hello():
 Some text after
 """
         result = generator._extract_fenced(content, "python")
-        assert result == "def hello():\n    return \"world\""
+        assert result == 'def hello():\n    return "world"'
 
     def test_extract_fenced_not_found(self, generator):
         """Test extracting a fenced code block that doesn't exist."""
@@ -313,10 +313,9 @@ add(1, 2)
 """)
 
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata = SkillMetadata.from_frontmatter(
-            {"name": "Test Skill", "domain": "General", "version": "1.0.0", "surfaces": ["python"]},
-            "",
-            skill_file
+            {"name": "Test Skill", "domain": "General", "version": "1.0.0", "surfaces": ["python"]}, "", skill_file
         )
 
         tests = generator.generate_tests_for_skill(skill_file, metadata)
@@ -342,10 +341,9 @@ assert 1 + 1 == 2
 """)
 
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata = SkillMetadata.from_frontmatter(
-            {"name": "Test Skill", "domain": "General", "version": "1.0.0"},
-            "",
-            skill_file
+            {"name": "Test Skill", "domain": "General", "version": "1.0.0"}, "", skill_file
         )
 
         tests = generator.generate_tests_for_skill(skill_file, metadata)

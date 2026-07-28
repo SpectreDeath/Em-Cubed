@@ -1,4 +1,5 @@
 """Tests for semantic skill search functionality."""
+
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
@@ -16,10 +17,10 @@ def test_semantic_search_creation():
         skills_dir.mkdir()
         registry_file = Path(temp_dir) / "registry.json"
         registry_file.write_text("[]")  # Empty registry
-        
+
         local_registry = SkillRegistry(skills_dir, registry_file)
         semantic_search = SemanticSkillSearch(local_registry)
-        
+
         assert semantic_search.registry == local_registry
         assert semantic_search.cache_dir.exists()
 
@@ -31,14 +32,14 @@ def test_semantic_search_disabled_without_model():
         skills_dir.mkdir()
         registry_file = Path(temp_dir) / "registry.json"
         registry_file.write_text("[]")
-        
+
         local_registry = SkillRegistry(skills_dir, registry_file)
-        
+
         # Mock the import to fail
-        with patch('em_cubed.skills.semantic_search.SENTENCE_TRANSFORMERS_AVAILABLE', False):
+        with patch("em_cubed.skills.semantic_search.SENTENCE_TRANSFORMERS_AVAILABLE", False):
             semantic_search = SemanticSkillSearch(local_registry)
             assert semantic_search.model is None
-            
+
             # Search should return empty list
             results = semantic_search.search("test query")
             assert results == []
@@ -51,10 +52,10 @@ def test_get_skill_text():
         skills_dir.mkdir()
         registry_file = Path(temp_dir) / "registry.json"
         registry_file.write_text("[]")
-        
+
         local_registry = SkillRegistry(skills_dir, registry_file)
         semantic_search = SemanticSkillSearch(local_registry)
-        
+
         # Create a test skill
         skill = SkillMetadata(
             name="test-skill",
@@ -65,9 +66,9 @@ def test_get_skill_text():
             purpose="Testing semantic search",
             tags=["test", "semantic"],
         )
-        
+
         text = semantic_search._get_skill_text(skill)
-        
+
         # Check that key components are in the text
         assert "test-skill" in text
         assert "test-domain" in text
@@ -86,10 +87,10 @@ def test_get_skill_text_empty_skill():
         skills_dir.mkdir()
         registry_file = Path(temp_dir) / "registry.json"
         registry_file.write_text("[]")
-        
+
         local_registry = SkillRegistry(skills_dir, registry_file)
         semantic_search = SemanticSkillSearch(local_registry)
-        
+
         # Create a minimal skill
         skill = SkillMetadata(
             name="minimal",
@@ -97,9 +98,9 @@ def test_get_skill_text_empty_skill():
             version="1.0.0",
             surfaces=["python"],
         )
-        
+
         text = semantic_search._get_skill_text(skill)
-        
+
         # Should still produce some text
         assert "minimal" in text
         assert "python" in text
@@ -112,16 +113,16 @@ def test_search_empty_query():
         skills_dir.mkdir()
         registry_file = Path(temp_dir) / "registry.json"
         registry_file.write_text("[]")
-        
+
         local_registry = SkillRegistry(skills_dir, registry_file)
         semantic_search = SemanticSkillSearch(local_registry)
-        
+
         # Even with model mocked, empty query should return empty
-        with patch.object(semantic_search, 'model') as mock_model:
+        with patch.object(semantic_search, "model") as mock_model:
             mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
             results = semantic_search.search("")
             assert results == []
-            
+
             results = semantic_search.search("   ")
             assert results == []
 
@@ -133,10 +134,10 @@ def test_similar_skills():
         skills_dir.mkdir()
         registry_file = Path(temp_dir) / "registry.json"
         registry_file.write_text("[]")
-        
+
         local_registry = SkillRegistry(skills_dir, registry_file)
         semantic_search = SemanticSkillSearch(local_registry)
-        
+
         # Add a skill to the registry
         skill = SkillMetadata(
             name="test-skill",
@@ -146,9 +147,9 @@ def test_similar_skills():
             description="A test skill",
         )
         local_registry.add_skill(skill)
-        
+
         # Mock the model to return predictable embeddings
-        with patch.object(semantic_search, 'model') as mock_model:
+        with patch.object(semantic_search, "model") as mock_model:
             # Mock encode to return fixed vectors
             def mock_encode(texts):
                 # Return different vectors for different inputs
@@ -156,12 +157,12 @@ def test_similar_skills():
                     return [[1.0, 0.0, 0.0]]  # Query vector
                 else:
                     return [[0.0, 1.0, 0.0]]  # Skill vector (orthogonal)
-            
+
             mock_model.encode.side_effect = mock_encode
-            
+
             # Search for similar skills
             results = semantic_search.get_similar_skills(skill.skill_id, limit=5)
-            
+
             # Should return empty list since vectors are orthogonal (similarity 0)
             assert isinstance(results, list)
 

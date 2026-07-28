@@ -21,6 +21,7 @@ logger = structlog.get_logger()
 @dataclass
 class SkillExecutionRequest:
     """Request to execute a skill."""
+
     skill_id: str
     input_data: Dict[str, Any]
     surface: Optional[str] = None  # Override surface choice
@@ -31,6 +32,7 @@ class SkillExecutionRequest:
 @dataclass
 class SkillExecutionResult:
     """Result of skill execution."""
+
     skill_id: str
     success: bool
     output: Any
@@ -42,6 +44,7 @@ class SkillExecutionResult:
 
 class TelemetryProxy:
     """Proxy for surface plugins that records trace spans."""
+
     def __init__(self, surface, trace_ctx):
         self._surface = surface
         self._trace_ctx = trace_ctx
@@ -49,6 +52,7 @@ class TelemetryProxy:
     def __getattr__(self, name):
         attr = getattr(self._surface, name)
         if callable(attr) and name in ("execute", "execute_sync"):
+
             def wrapped(*args, **kwargs):
                 code = args[0] if args else kwargs.get("code", "")
                 span = self._trace_ctx.start_span(self._surface.name, code)
@@ -58,6 +62,7 @@ class TelemetryProxy:
                 except Exception as e:
                     self._trace_ctx.end_span(span, success=False, error=str(e))
                     raise
+
             return wrapped
         elif name == "substrate":
             return attr
@@ -65,27 +70,23 @@ class TelemetryProxy:
 
     def _wrap_result(self, res, span):
         if asyncio.iscoroutine(res):
+
             async def wrapper():
                 try:
                     r = await res
                     self._trace_ctx.end_span(
-                        span, 
-                        output_data=str(r)[:500], 
-                        success=r.get("status") == "ok", 
-                        error=r.get("message")
+                        span, output_data=str(r)[:500], success=r.get("status") == "ok", error=r.get("message")
                     )
                     return r
                 except Exception as e:
                     self._trace_ctx.end_span(span, success=False, error=str(e))
                     raise
+
             return wrapper()
         else:
             # Synchronous result
             self._trace_ctx.end_span(
-                span, 
-                output_data=str(res)[:500], 
-                success=res.get("status") == "ok", 
-                error=res.get("message")
+                span, output_data=str(res)[:500], success=res.get("status") == "ok", error=res.get("message")
             )
             return res
 
@@ -151,7 +152,7 @@ def coerce_data(data: Any, schema: Any) -> Any:
 class SkillExecutor:
     """Loads and executes skills from SKILL.md files."""
 
-    def __init__(self, plugin_manager, registry: 'SkillRegistry', skills_dir: Path):
+    def __init__(self, plugin_manager, registry: "SkillRegistry", skills_dir: Path):
         self.plugin_manager = plugin_manager
         self.registry = registry
         self.skills_dir = skills_dir
@@ -169,10 +170,10 @@ class SkillExecutor:
             raise ValueError(f"Skill '{skill_id}' not found or has no path")
 
         skill_file = Path(skill.path)
-        
+
         # Track if we've found the file
         found = False
-        
+
         if skill_file.is_absolute():
             # Absolute path - use directly or fail
             if skill_file.exists():
@@ -197,7 +198,7 @@ class SkillExecutor:
                         if candidate.exists():
                             skill_file = candidate
                             found = True
-        
+
         if not found:
             raise FileNotFoundError(f"Skill file not found: {skill.path}")
 
@@ -206,6 +207,7 @@ class SkillExecutor:
         # Extract code blocks
         code_blocks = {}
         import re
+
         # Match ```lang sections
         for match in re.finditer(r"```(\w+)\s*\r?\n(.*?)```", content, re.DOTALL):
             lang = match.group(1).lower()
@@ -231,6 +233,7 @@ class SkillExecutor:
         if skill.input_schema and (skill.input_schema.properties or skill.input_schema.required):
             try:
                 import jsonschema
+
                 coerced_input = coerce_data(request.input_data, skill.input_schema)
                 jsonschema.validate(instance=coerced_input, schema=skill.input_schema.to_dict())
                 request.input_data = coerced_input
@@ -290,7 +293,7 @@ class SkillExecutor:
                 # Attempt to preserve type information through conversion
                 # In a full implementation, we might have type hints from schemas
                 converted_input[key] = value  # Keep as-is for now, conversion happens at surface boundary
-            
+
             context = {
                 "skill_input": converted_input,
                 "skill_metadata": skill.to_registry_dict(),
@@ -332,11 +335,12 @@ class SkillExecutor:
             success = result.get("status") == "ok"
             output = result.get("value")
             error_msg = result.get("message") if not success else None
-            
+
             # Coerce and validate output schema if defined
             if success and skill.output_schema and (skill.output_schema.properties or skill.output_schema.required):
                 try:
                     import jsonschema
+
                     coerced_output = coerce_data(output, skill.output_schema)
                     jsonschema.validate(instance=coerced_output, schema=skill.output_schema.to_dict())
                     output = coerced_output
@@ -352,12 +356,11 @@ class SkillExecutor:
 
         # Record telemetry
         from .telemetry import record_skill_execution, SkillTelemetry
+
         # Estimate token usage
-        token_usage = SkillTelemetry(get_telemetry_collector())._estimate_tokens(request.input_data, {
-            "status": "ok" if success else "error",
-            "value": output,
-            "message": error_msg
-        })
+        token_usage = SkillTelemetry(get_telemetry_collector())._estimate_tokens(
+            request.input_data, {"status": "ok" if success else "error", "value": output, "message": error_msg}
+        )
         record_skill_execution(
             skill_id=skill_id,
             success=success,

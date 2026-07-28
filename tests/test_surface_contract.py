@@ -9,18 +9,38 @@ Verifies that every Surface class in em_cubed.surfaces:
 
 import pytest
 from em_cubed.surfaces import (
-    PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
-    SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
-    ClingoSurface, KanrenSurface, LLMSurface, JanusSurface
+    PythonSurface,
+    PrologSurface,
+    Z3Surface,
+    DatalogSurface,
+    SQLiteSurface,
+    HySurface,
+    QuickJSSurface,
+    WASMSurface,
+    ClingoSurface,
+    KanrenSurface,
+    LLMSurface,
+    JanusSurface,
 )
 
 
 ALL_SURFACES = [
-    cls for cls in [
-        PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
-        SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
-        ClingoSurface, KanrenSurface, LLMSurface, JanusSurface
-    ] if cls is not None
+    cls
+    for cls in [
+        PythonSurface,
+        PrologSurface,
+        Z3Surface,
+        DatalogSurface,
+        SQLiteSurface,
+        HySurface,
+        QuickJSSurface,
+        WASMSurface,
+        ClingoSurface,
+        KanrenSurface,
+        LLMSurface,
+        JanusSurface,
+    ]
+    if cls is not None
 ]
 
 

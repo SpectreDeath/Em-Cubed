@@ -93,6 +93,7 @@ def skill_b_execute(result):
 
         registry_file = tmp_path / "registry.json"
         from em_cubed.indexer import reindex
+
         reindex(skills_dir, registry_file)
 
         return SkillRegistry(skills_dir, registry_file)
@@ -271,6 +272,7 @@ def test():
 
         registry_file = tmp_path / "registry.json"
         from em_cubed.indexer import reindex
+
         reindex(skills_dir, registry_file)
 
         registry = SkillRegistry(skills_dir, registry_file)
@@ -375,6 +377,7 @@ def execute(input_data):
         registry_file = tmp_path / "registry.json"
 
         from em_cubed.indexer import reindex
+
         reindex(skills_dir, registry_file)
 
         pipeline = SkillQualityPipeline(skills_dir, registry_file, PluginManager())

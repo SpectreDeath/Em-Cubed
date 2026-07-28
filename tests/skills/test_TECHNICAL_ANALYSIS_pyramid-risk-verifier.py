@@ -6,7 +6,9 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(__file__).parent.parent.parent / "skills" / "TECHNICAL_ANALYSIS" / "pyramid-risk-verifier" / "SKILL.md"
+SKILL_FILE = (
+    Path(__file__).parent.parent.parent / "skills" / "TECHNICAL_ANALYSIS" / "pyramid-risk-verifier" / "SKILL.md"
+)
 SKILL_ID = "TECHNICAL_ANALYSIS/pyramid-risk-verifier"
 
 
@@ -38,7 +40,6 @@ class Testpyramid_risk_verifierSkill:
     def test_skill_file_exists(self):
         assert SKILL_FILE.exists(), f"SKILL.md not found at {SKILL_FILE}"
 
-
     def test_surfaces_implemented(self, plugin_manager):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         available_surfaces = []
@@ -46,9 +47,7 @@ class Testpyramid_risk_verifierSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -66,15 +65,13 @@ class Testpyramid_risk_verifierSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
 
 @pytest.mark.asyncio
 async def test_pyramid_risk_verifier_z3_basic():
     """Test basic Z3 functionality."""
-    code = '''
+    code = """
 x = Real('x')
 y = Real('y')
 solver.add(x > 0)
@@ -82,8 +79,9 @@ solver.add(y > 0)
 solver.add(x * y <= 100)
 result = solver.check()
 result == sat
-'''
+"""
     from em_cubed.surfaces import Z3Surface
+
     surface = Z3Surface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -93,12 +91,13 @@ result == sat
 @pytest.mark.asyncio
 async def test_pyramid_risk_verifier_python_bounds():
     """Test Python risk boundary calculation."""
-    code = '''
+    code = """
 # Simple test that should always be True
 result = True
 result
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -108,7 +107,7 @@ result
 @pytest.mark.asyncio
 async def test_pyramid_risk_extreme_values():
     """Test pyramid risk with extreme values."""
-    code = '''
+    code = """
 def verify_pyramid_risk_bounds(entry_price, market_price, account_risk, max_levels=5):
     if entry_price <= 0 or market_price <= 0 or account_risk <= 0:
         return {"within_bounds": False}
@@ -135,8 +134,9 @@ def verify_pyramid_risk_bounds(entry_price, market_price, account_risk, max_leve
 # Extreme case: very small price movement
 result = verify_pyramid_risk_bounds(100.0, 100.001, 1000.0, 5)
 result["within_bounds"]
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"

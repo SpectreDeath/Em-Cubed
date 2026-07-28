@@ -11,18 +11,22 @@ from src.em_cubed.skills.executor import (
     SkillExecutionResult,
     TelemetryProxy,
     get_skill_executor,
-    initialize_executor
+    initialize_executor,
 )
 from src.em_cubed.skills.registry import SkillRegistry
 from src.em_cubed.skills.metadata import (
-    SkillMetadata, InputOutputSchema, SkillCapability,
-    CompatibilityRange, QualityThresholds, RuntimeMetrics
+    SkillMetadata,
+    InputOutputSchema,
+    SkillCapability,
+    CompatibilityRange,
+    QualityThresholds,
+    RuntimeMetrics,
 )
 
 
 class TestSkillExecutor:
     """Test cases for SkillExecutor class."""
-    
+
     @pytest.fixture
     def mock_plugin_manager(self):
         """Create a mock plugin manager."""
@@ -30,13 +34,13 @@ class TestSkillExecutor:
         manager.get.return_value = Mock()
         manager.get.return_value.available = True
         return manager
-    
+
     @pytest.fixture
     def mock_registry(self):
         """Create a mock skill registry."""
         registry = Mock(spec=SkillRegistry)
         return registry
-    
+
     @pytest.fixture
     def temp_skills_dir(self):
         """Create a temporary skills directory."""
@@ -70,14 +74,14 @@ class TestSkillExecutor:
             schema_version=1,
             tags=[],
             created_at=None,
-            updated_at=None
+            updated_at=None,
         )
         return skill
 
     def test_initialization(self, mock_plugin_manager, mock_registry, temp_skills_dir):
         """Test SkillExecutor initialization."""
         executor = SkillExecutor(mock_plugin_manager, mock_registry, temp_skills_dir)
-        
+
         assert executor.plugin_manager == mock_plugin_manager
         assert executor.registry == mock_registry
         assert executor.skills_dir == temp_skills_dir
@@ -90,12 +94,12 @@ class TestSkillExecutor:
         mock_skill = Mock()
         mock_skill.path = "/fake/path/skill.md"
         mock_registry.get_skill.return_value = mock_skill
-        
+
         with patch("pathlib.Path.exists", return_value=True):
             with patch("pathlib.Path.read_text", return_value="```python\nprint('hello')\n```"):
                 result1 = skill_executor._load_skill_code(skill_id)
                 result2 = skill_executor._load_skill_code(skill_id)
-                
+
                 assert result1 == result2
                 assert "python" in result1
                 assert result1["python"] == "print('hello')"
@@ -106,7 +110,7 @@ class TestSkillExecutor:
         mock_skill = Mock()
         mock_skill.path = "/fake/path/nonexistent/skill.md"
         mock_registry.get_skill.return_value = mock_skill
-        
+
         with patch("pathlib.Path.exists", return_value=False):
             with pytest.raises(FileNotFoundError, match="Skill file not found"):
                 skill_executor._load_skill_code(skill_id)
@@ -117,7 +121,7 @@ class TestSkillExecutor:
         mock_skill = Mock()
         mock_skill.path = "/fake/path/skill.md"
         mock_registry.get_skill.return_value = mock_skill
-        
+
         content = """```python
 def hello():
     return "world"
@@ -131,29 +135,27 @@ hello(world).
 console.log("hello");
 ```
 """
-        
+
         with patch("pathlib.Path.exists", return_value=True):
             with patch("pathlib.Path.read_text", return_value=content):
                 result = skill_executor._load_skill_code(skill_id)
-                
+
                 assert "python" in result
                 assert "prolog" in result
                 assert "javascript" in result
-                assert result["python"] == "def hello():\n    return \"world\""
+                assert result["python"] == 'def hello():\n    return "world"'
                 assert result["prolog"] == "hello(world)."
-                assert result["javascript"] == "console.log(\"hello\");"
+                assert result["javascript"] == 'console.log("hello");'
 
     def test_execute_skill_not_found(self, skill_executor, mock_registry):
         """Test execution when skill is not found in registry."""
-        request = SkillExecutionRequest(
-            skill_id="nonexistent/skill",
-            input_data={"param": "value"}
-        )
+        request = SkillExecutionRequest(skill_id="nonexistent/skill", input_data={"param": "value"})
         mock_registry.get_skill.return_value = None
-        
+
         import asyncio
+
         result = asyncio.run(skill_executor.execute(request))
-        
+
         assert not result.success
         assert "not found in registry" in result.error
         assert result.skill_id == "nonexistent/skill"
@@ -163,16 +165,13 @@ console.log("hello");
         mock_registry.get_skill.return_value = sample_skill
         mock_plugin_manager.get.return_value = Mock()
         mock_plugin_manager.get.return_value.available = False
-        
-        request = SkillExecutionRequest(
-            skill_id="test/skill",
-            input_data={"param": "value"},
-            surface="python"
-        )
-        
+
+        request = SkillExecutionRequest(skill_id="test/skill", input_data={"param": "value"}, surface="python")
+
         import asyncio
+
         result = asyncio.run(skill_executor.execute(request))
-        
+
         assert not result.success
         assert "not available" in result.error
         assert result.surface_used == "python"
@@ -184,17 +183,14 @@ console.log("hello");
         mock_plugin = Mock()
         mock_plugin.available = True
         mock_plugin_manager.get.return_value = mock_plugin
-        
-        with patch.object(skill_executor, '_load_skill_code', return_value={"prolog": "hello(world)."}):
-            request = SkillExecutionRequest(
-                skill_id="test/skill",
-                input_data={"param": "value"},
-                surface="python"
-            )
-            
+
+        with patch.object(skill_executor, "_load_skill_code", return_value={"prolog": "hello(world)."}):
+            request = SkillExecutionRequest(skill_id="test/skill", input_data={"param": "value"}, surface="python")
+
             import asyncio
+
             result = asyncio.run(skill_executor.execute(request))
-            
+
             assert not result.success
             assert "No python implementation found in skill" in result.error
             assert result.surface_used == "python"
@@ -206,11 +202,11 @@ console.log("hello");
         mock_trace_ctx = Mock()
         mock_span = Mock()
         mock_trace_ctx.start_span.return_value = mock_span
-        
+
         proxy = TelemetryProxy(mock_surface, mock_trace_ctx)
-        
+
         result = proxy.execute_sync("test code", input_data={})
-        
+
         assert result == {"status": "ok", "value": "result"}
         mock_surface.execute_sync.assert_called_once_with("test code", input_data={})
         mock_trace_ctx.start_span.assert_called_once()
@@ -219,24 +215,24 @@ console.log("hello");
     def test_telemetry_proxy_async(self):
         """Test TelemetryProxy with asynchronous execution."""
         import asyncio
-        
+
         mock_surface = Mock()
         mock_trace_ctx = Mock()
         mock_span = Mock()
         mock_trace_ctx.start_span.return_value = mock_span
-        
+
         async def mock_execute(*args, **kwargs):
             return {"status": "ok", "value": "async_result"}
-        
+
         mock_surface.execute = mock_execute
-        
+
         proxy = TelemetryProxy(mock_surface, mock_trace_ctx)
-        
+
         async def test_async():
             return await proxy.execute("test code", input_data={})
-        
+
         result = asyncio.run(test_async())
-        
+
         assert result == {"status": "ok", "value": "async_result"}
         mock_trace_ctx.start_span.assert_called_once()
         mock_trace_ctx.end_span.assert_called_once()
@@ -246,44 +242,43 @@ console.log("hello");
         mock_plugin_manager = Mock()
         mock_registry = Mock()
         skills_dir = Path("/tmp/skills")
-        
+
         executor = initialize_executor(mock_plugin_manager, mock_registry, skills_dir)
-        
+
         assert isinstance(executor, SkillExecutor)
         assert executor.plugin_manager == mock_plugin_manager
         assert executor.registry == mock_registry
         assert executor.skills_dir == skills_dir
-        
+
         from src.em_cubed.skills.executor import _global_executor
+
         assert _global_executor == executor
 
     def test_get_skill_executor(self):
         """Test getting global skill executor."""
         import src.em_cubed.skills.executor as executor_module
+
         executor_module._global_executor = None
-        
+
         assert get_skill_executor() is None
-        
+
         mock_plugin_manager = Mock()
         mock_registry = Mock()
         skills_dir = Path("/tmp/skills")
         executor = initialize_executor(mock_plugin_manager, mock_registry, skills_dir)
-        
+
         assert get_skill_executor() == executor
-        
+
         executor_module._global_executor = None
 
 
 class TestSkillExecutionRequest:
     """Test cases for SkillExecutionRequest dataclass."""
-    
+
     def test_default_creation(self):
         """Test creating request with default values."""
-        request = SkillExecutionRequest(
-            skill_id="test/skill",
-            input_data={"key": "value"}
-        )
-        
+        request = SkillExecutionRequest(skill_id="test/skill", input_data={"key": "value"})
+
         assert request.skill_id == "test/skill"
         assert request.input_data == {"key": "value"}
         assert request.surface is None
@@ -297,9 +292,9 @@ class TestSkillExecutionRequest:
             input_data={"key": "value"},
             surface="python",
             timeout=30.0,
-            context={"extra": "data"}
+            context={"extra": "data"},
         )
-        
+
         assert request.skill_id == "test/skill"
         assert request.input_data == {"key": "value"}
         assert request.surface == "python"
@@ -309,7 +304,7 @@ class TestSkillExecutionRequest:
 
 class TestSkillExecutionResult:
     """Test cases for SkillExecutionResult dataclass."""
-    
+
     def test_successful_result(self):
         """Test creating successful execution result."""
         result = SkillExecutionResult(
@@ -318,9 +313,9 @@ class TestSkillExecutionResult:
             output={"result": "value"},
             execution_time_ms=150.5,
             surface_used="python",
-            token_usage=42
+            token_usage=42,
         )
-        
+
         assert result.skill_id == "test/skill"
         assert result.success is True
         assert result.output == {"result": "value"}
@@ -337,9 +332,9 @@ class TestSkillExecutionResult:
             output=None,
             error="Something went wrong",
             execution_time_ms=50.0,
-            surface_used="prolog"
+            surface_used="prolog",
         )
-        
+
         assert result.skill_id == "test/skill"
         assert result.success is False
         assert result.output is None

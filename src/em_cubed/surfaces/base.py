@@ -1,4 +1,5 @@
 """Base class for surface plugins with timeout support."""
+
 import asyncio
 import os
 import threading
@@ -41,6 +42,7 @@ def _make_daemon_executor(max_workers: int = 1) -> ThreadPoolExecutor:
 
 class SurfaceTimeoutError(Exception):
     """Raised when a surface operation times out."""
+
     pass
 
 
@@ -57,7 +59,9 @@ class SurfaceBase(SurfacePlugin, ABC):
         self.timeout = timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
         self._executor = _make_daemon_executor(max_workers=1)
         self._concurrency_limit = int(os.getenv("EM_CUBED_SURFACE_MAX_CONCURRENCY", "0"))
-        self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        self._concurrency_semaphore = (
+            asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        )
         self._rejected_executions = 0
 
     def initialize(self) -> None:
@@ -112,20 +116,14 @@ class SurfaceBase(SurfacePlugin, ABC):
         if not await self._acquire_execution_slot():
             return {
                 "status": "error",
-                "message": f"Surface execution rejected: concurrency limit {self._concurrency_limit} reached"
+                "message": f"Surface execution rejected: concurrency limit {self._concurrency_limit} reached",
             }
         try:
-            result = await asyncio.wait_for(
-                self._execute_impl(code, context),
-                timeout=self.timeout
-            )
+            result = await asyncio.wait_for(self._execute_impl(code, context), timeout=self.timeout)
             return result
         except asyncio.TimeoutError:
             logger.warning("Surface execution timed out", timeout=self.timeout)
-            return {
-                "status": "error",
-                "message": f"Execution timed out after {self.timeout}s"
-            }
+            return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
         finally:
             self._release_execution_slot()
 

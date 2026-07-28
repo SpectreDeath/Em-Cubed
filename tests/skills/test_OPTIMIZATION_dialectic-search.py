@@ -7,13 +7,7 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(
-    Path(__file__).parent.parent.parent
-    / "skills"
-    / "OPTIMIZATION"
-    / "dialectic-search"
-    / "SKILL.md"
-)
+SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "dialectic-search" / "SKILL.md")
 SKILL_ID = "OPTIMIZATION/dialectic-search"
 
 
@@ -59,9 +53,7 @@ class TestDialecticSearchSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -80,9 +72,7 @@ class TestDialecticSearchSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
     @pytest.mark.asyncio
     async def test_da_python_sphere(self):
@@ -94,7 +84,7 @@ class TestDialecticSearchSkill:
             return math.sqrt(sum((ai - bi) ** 2 for ai, bi in zip(a, b)))
 
         def sphere(x):
-            return sum(xi ** 2 for xi in x)
+            return sum(xi**2 for xi in x)
 
         pop_size, k1, max_iter = 30, 3, 80
         dim = 2
@@ -117,7 +107,9 @@ class TestDialecticSearchSkill:
                 dist2 = euclidean_distance(population[i], population[anti2])
                 anti_idx = anti1 if dist1 < dist2 else anti2
                 for c in range(dim):
-                    population[i][c] = max(-5, min(5, population[i][c] + random.random() * (population[anti_idx][c] - population[i][c])))
+                    population[i][c] = max(
+                        -5, min(5, population[i][c] + random.random() * (population[anti_idx][c] - population[i][c]))
+                    )
 
             for i in range(pop_size):
                 fitness[i] = sphere(population[i])
@@ -131,6 +123,7 @@ class TestDialecticSearchSkill:
     async def test_da_euclidean_distance(self):
         """Euclidean distance should work correctly."""
         import math
+
         a, b = [0.0, 0.0], [3.0, 4.0]
         dist = math.sqrt(sum((ai - bi) ** 2 for ai, bi in zip(a, b)))
         assert abs(dist - 5.0) < 1e-9
@@ -139,9 +132,10 @@ class TestDialecticSearchSkill:
     async def test_da_prolog_params(self):
         """Prolog parameter validation should work."""
         from em_cubed.surfaces import PrologSurface
+
         surface = PrologSurface()
-        code = '''
+        code = """
 ?- 50 >= 4, 50 =< 200, 3 >= 1, 3 =< 10, 5 >= 5, 10 =< 50.
-'''
+"""
         result = await surface.execute(code, {})
         assert result["status"] == "ok"

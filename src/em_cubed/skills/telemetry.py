@@ -21,6 +21,7 @@ logger = structlog.get_logger()
 @dataclass
 class TraceSpan:
     """A single span within an execution trace."""
+
     span_id: str
     surface: str
     start_time: float
@@ -29,7 +30,7 @@ class TraceSpan:
     output_data: Any = None
     success: bool = True
     error: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "span_id": self.span_id,
@@ -45,6 +46,7 @@ class TraceSpan:
 @dataclass
 class ExecutionRecord:
     """Single skill execution record."""
+
     skill_id: str
     timestamp: datetime
     success: bool
@@ -82,6 +84,7 @@ class ExecutionRecord:
 @dataclass
 class TelemetryConfig:
     """Configuration for telemetry collection."""
+
     enabled: bool = True
     log_every_execution: bool = False  # Log to console on every execution
     persist_path: Optional[Path] = None  # Where to save telemetry data
@@ -119,18 +122,18 @@ class TelemetryCollector:
 
         # Log if configured
         if self.config.log_every_execution:
-            self.logger.info("Execution recorded",
-                        skill_id=record.skill_id,
-                        success=record.success,
-                        time_ms=record.execution_time_ms)
+            self.logger.info(
+                "Execution recorded", skill_id=record.skill_id, success=record.success, time_ms=record.execution_time_ms
+            )
 
         # Periodically aggregate
         if time.time() - self._last_aggregate > self.config.aggregate_interval_seconds:
             self._aggregate_and_persist()
-            
+
         # Notify WebSocket subscribers of new execution (non-blocking)
         try:
             from em_cubed.telemetry.api import get_websocket_handler
+
             websocket_handler = get_websocket_handler()
             if websocket_handler:
                 # In a real implementation, we would use asyncio.create_task or similar
@@ -147,10 +150,7 @@ class TelemetryCollector:
         """Get metrics for a specific skill over a time window."""
         cutoff = datetime.now(timezone.utc).timestamp() - window_seconds
 
-        relevant = [
-            r for r in self._records
-            if r.skill_id == skill_id and r.timestamp.timestamp() > cutoff
-        ]
+        relevant = [r for r in self._records if r.skill_id == skill_id and r.timestamp.timestamp() > cutoff]
 
         if not relevant:
             return {"count": 0}
@@ -203,8 +203,7 @@ class TelemetryCollector:
 
         aggregates = {}
         for skill_id, records in by_skill.items():
-            recent = [r for r in records if
-                     (datetime.now(timezone.utc) - r.timestamp).total_seconds() < 3600]
+            recent = [r for r in records if (datetime.now(timezone.utc) - r.timestamp).total_seconds() < 3600]
             if recent:
                 times = [r.execution_time_ms for r in recent if r.success]
                 aggregates[skill_id] = {
@@ -219,10 +218,11 @@ class TelemetryCollector:
         # Persist to disk if configured
         if self.config.persist_path:
             self._persist()
-            
+
         # Broadcast telemetry update via WebSocket (non-blocking)
         try:
             from em_cubed.telemetry.api import get_websocket_handler
+
             websocket_handler = get_websocket_handler()
             if websocket_handler and self._aggregates:
                 pass
@@ -263,19 +263,17 @@ class TelemetryCollector:
 
 class TraceContext:
     """Helper to manage hierarchical spans during execution."""
+
     def __init__(self, record: ExecutionRecord):
         self.record = record
-    
+
     def start_span(self, surface: str, input_data: Any = None) -> TraceSpan:
         span = TraceSpan(
-            span_id=str(uuid.uuid4()),
-            surface=surface,
-            start_time=time.perf_counter(),
-            input_data=input_data
+            span_id=str(uuid.uuid4()), surface=surface, start_time=time.perf_counter(), input_data=input_data
         )
         self.record.record_span(span)
         return span
-    
+
     def end_span(self, span: TraceSpan, output_data: Any = None, success: bool = True, error: Optional[str] = None):
         span.end_time = time.perf_counter()
         span.output_data = output_data
@@ -290,17 +288,21 @@ class SkillTelemetry:
         self.collector = collector
         self.logger = logger.bind(component="skill_telemetry")
 
-    async def execute_with_telemetry(self, skill_executor, skill_id: str,
-                                     input_data: Dict[str, Any],
-                                     surface: str = "python",
-                                     timeout: Optional[float] = None) -> Dict[str, Any]:
+    async def execute_with_telemetry(
+        self,
+        skill_executor,
+        skill_id: str,
+        input_data: Dict[str, Any],
+        surface: str = "python",
+        timeout: Optional[float] = None,
+    ) -> Dict[str, Any]:
         """Execute a skill while recording telemetry."""
         start = time.perf_counter()
         token_usage = 0
         success = False
         error_type = None
         error_message = None
-        
+
         record = ExecutionRecord(
             skill_id=skill_id,
             timestamp=datetime.now(timezone.utc),
@@ -335,6 +337,7 @@ class SkillTelemetry:
     def _estimate_tokens(self, input_data: Any, result: Dict[str, Any]) -> int:
         """Roughly estimate token usage from input/output size."""
         import json
+
         try:
             input_str = json.dumps(input_data)
             output_str = json.dumps(result)
@@ -342,20 +345,20 @@ class SkillTelemetry:
             return (len(input_str) + len(output_str)) // 4
         except Exception:
             return 0
-    
+
     def estimate_cost(self, token_usage: int, surface: str = "python") -> float:
         """Estimate cost based on token usage and surface type.
-        
+
         Args:
             token_usage: Number of tokens used
             surface: Surface type (for different pricing models)
-            
+
         Returns:
             Estimated cost in USD
         """
         # Rough cost estimates (would be made configurable in production)
         cost_per_1k_tokens = {
-            "python": 0.0001,   # Minimal cost for local execution
+            "python": 0.0001,  # Minimal cost for local execution
             "prolog": 0.0001,
             "hy": 0.0001,
             "z3": 0.0001,
@@ -363,9 +366,9 @@ class SkillTelemetry:
             "sqlite": 0.0001,
             "kanren": 0.0001,
             "clingo": 0.0001,
-            "llm": 0.002,       # Example LLM cost (would vary by model)
+            "llm": 0.002,  # Example LLM cost (would vary by model)
         }
-        
+
         rate = cost_per_1k_tokens.get(surface, 0.0001)
         return (token_usage / 1000) * rate
 
@@ -390,9 +393,9 @@ def initialize_telemetry(config: Optional[TelemetryConfig] = None) -> TelemetryC
     return _global_collector
 
 
-def record_skill_execution(skill_id: str, success: bool, execution_time_ms: float,
-                           token_usage: int = 0, surface: str = "python",
-                           **kwargs) -> None:
+def record_skill_execution(
+    skill_id: str, success: bool, execution_time_ms: float, token_usage: int = 0, surface: str = "python", **kwargs
+) -> None:
     """Convenience function to record a skill execution."""
     collector = get_telemetry_collector()
     record = ExecutionRecord(

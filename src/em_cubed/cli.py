@@ -42,14 +42,16 @@ def _bootstrap_services():
     """Initialize global services required for distributed execution and telemetry."""
     # Initialize checkpoint manager for durable execution
     initialize_checkpoint_manager()
-    
+
     # Initialize telemetry for observability
     from em_cubed.skills.telemetry import initialize_telemetry
+
     initialize_telemetry()
-    
+
     # Initialize telemetry API for dashboard endpoints
     from em_cubed.telemetry.api import initialize_telemetry_api, initialize_websocket_handler
     from em_cubed.skills.telemetry import get_telemetry_collector
+
     initialize_telemetry_api(get_telemetry_collector())
     initialize_websocket_handler(get_telemetry_collector())
 
@@ -58,10 +60,9 @@ def main():
     """Main CLI entrypoint."""
     # Bootstrap: Initialize checkpoint manager and telemetry API for durable execution
     _bootstrap_services()
-    
+
     parser = argparse.ArgumentParser(
-        description="Em-Cubed: Neuro-Symbolic Ontological Framework & Polyglot Skill Engine",
-        prog="em3"
+        description="Em-Cubed: Neuro-Symbolic Ontological Framework & Polyglot Skill Engine", prog="em3"
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
@@ -69,217 +70,98 @@ def main():
     index_parser = subparsers.add_parser("index", help="Index skills directory")
     index_parser.add_argument("skills_dir", help="Directory containing SKILL.md files")
     index_parser.add_argument(
-        "--output",
-        "-o",
-        default="registry.json",
-        help="Output registry file (default: registry.json)"
+        "--output", "-o", default="registry.json", help="Output registry file (default: registry.json)"
     )
     index_parser.add_argument(
-        "--incremental",
-        "-i",
-        action="store_true",
-        help="Only re-index changed files (faster for large collections)"
+        "--incremental", "-i", action="store_true", help="Only re-index changed files (faster for large collections)"
     )
 
     # Search command
     search_parser = subparsers.add_parser("search", help="Search skill registry")
     search_parser.add_argument("query", help="Search query")
     search_parser.add_argument(
-        "--registry",
-        "-r",
-        default="registry.json",
-        help="Registry file path (default: registry.json)"
+        "--registry", "-r", default="registry.json", help="Registry file path (default: registry.json)"
     )
     search_parser.add_argument(
-        "--max-results",
-        "-n",
-        type=int,
-        default=10,
-        help="Maximum number of results (default: 10)"
+        "--max-results", "-n", type=int, default=10, help="Maximum number of results (default: 10)"
     )
 
     # Serve command
     serve_parser = subparsers.add_parser("serve", help="Launch FastAPI server")
-    serve_parser.add_argument(
-        "--host",
-        default="127.0.0.1",
-        help="Host to bind server to (default: 127.0.0.1)"
-    )
-    serve_parser.add_argument(
-        "--port",
-        "-p",
-        type=int,
-        default=8000,
-        help="Port to bind server to (default: 8000)"
-    )
+    serve_parser.add_argument("--host", default="127.0.0.1", help="Host to bind server to (default: 127.0.0.1)")
+    serve_parser.add_argument("--port", "-p", type=int, default=8000, help="Port to bind server to (default: 8000)")
 
     # Run command
     run_parser = subparsers.add_parser("run", help="Execute code on specified surface")
-    run_parser.add_argument(
-        "--surface",
-        "-s",
-        required=True,
-        help="Surface to execute code on"
-    )
-    run_parser.add_argument(
-        "--code",
-        "-c",
-        required=True,
-        help="Code to execute"
-    )
-    run_parser.add_argument(
-        "--timeout",
-        "-t",
-        type=float,
-        help="Maximum execution time in seconds (default: 30)"
-    )
-    run_parser.add_argument(
-        "--trace",
-        action="store_true",
-        help="Show hierarchical execution trace after run"
-    )
+    run_parser.add_argument("--surface", "-s", required=True, help="Surface to execute code on")
+    run_parser.add_argument("--code", "-c", required=True, help="Code to execute")
+    run_parser.add_argument("--timeout", "-t", type=float, help="Maximum execution time in seconds (default: 30)")
+    run_parser.add_argument("--trace", action="store_true", help="Show hierarchical execution trace after run")
 
     # Validate command
     validate_parser = subparsers.add_parser("validate", help="Validate all skills")
-    validate_parser.add_argument(
-        "--skills-dir",
-        default="skills",
-        help="Skills directory (default: skills)"
-    )
-    validate_parser.add_argument(
-        "--registry",
-        default="registry.json",
-        help="Registry file (default: registry.json)"
-    )
-    validate_parser.add_argument(
-        "--json-output",
-        action="store_true",
-        help="Output results as JSON"
-    )
+    validate_parser.add_argument("--skills-dir", default="skills", help="Skills directory (default: skills)")
+    validate_parser.add_argument("--registry", default="registry.json", help="Registry file (default: registry.json)")
+    validate_parser.add_argument("--json-output", action="store_true", help="Output results as JSON")
 
     # Quality command
     quality_parser = subparsers.add_parser("quality", help="Run quality pipeline")
-    quality_parser.add_argument(
-        "--skills-dir",
-        default="skills",
-        help="Skills directory (default: skills)"
-    )
-    quality_parser.add_argument(
-        "--registry",
-        default="registry.json",
-        help="Registry file (default: registry.json)"
-    )
-    quality_parser.add_argument(
-        "--benchmark",
-        action="store_true",
-        help="Run benchmarks (may take a while)"
-    )
+    quality_parser.add_argument("--skills-dir", default="skills", help="Skills directory (default: skills)")
+    quality_parser.add_argument("--registry", default="registry.json", help="Registry file (default: registry.json)")
+    quality_parser.add_argument("--benchmark", action="store_true", help="Run benchmarks (may take a while)")
 
     # Test command
     test_parser = subparsers.add_parser("test", help="Run skill tests")
     test_parser.add_argument(
-        "skill_id",
-        nargs="?",
-        help="Specific skill ID to test (domain/skill-name), or omit for all"
+        "skill_id", nargs="?", help="Specific skill ID to test (domain/skill-name), or omit for all"
     )
-    test_parser.add_argument(
-        "--skills-dir",
-        default="skills",
-        help="Skills directory (default: skills)"
-    )
-    test_parser.add_argument(
-        "--generate",
-        action="store_true",
-        help="Generate test files before running"
-    )
+    test_parser.add_argument("--skills-dir", default="skills", help="Skills directory (default: skills)")
+    test_parser.add_argument("--generate", action="store_true", help="Generate test files before running")
 
     # Recommend command
     recommend_parser = subparsers.add_parser("recommend", help="Get skill recommendations")
-    recommend_parser.add_argument(
-        "query",
-        help="Task description or requirement"
-    )
-    recommend_parser.add_argument(
-        "--limit",
-        "-l",
-        type=int,
-        default=5,
-        help="Maximum recommendations (default: 5)"
-    )
+    recommend_parser.add_argument("query", help="Task description or requirement")
+    recommend_parser.add_argument("--limit", "-l", type=int, default=5, help="Maximum recommendations (default: 5)")
 
     # Compose command
     compose_parser = subparsers.add_parser("compose", help="Compose skills together")
-    compose_parser.add_argument(
-        "--source",
-        required=True,
-        help="Source skill ID"
-    )
-    compose_parser.add_argument(
-        "--target",
-        help="Target skill ID (for sequential composition)"
-    )
-    compose_parser.add_argument(
-        "--goal",
-        help="Goal description for auto-composition"
-    )
-    compose_parser.add_argument(
-        "--output",
-        "-o",
-        help="Output file for composition plan (JSON)"
-    )
+    compose_parser.add_argument("--source", required=True, help="Source skill ID")
+    compose_parser.add_argument("--target", help="Target skill ID (for sequential composition)")
+    compose_parser.add_argument("--goal", help="Goal description for auto-composition")
+    compose_parser.add_argument("--output", "-o", help="Output file for composition plan (JSON)")
 
     # Create-skill command
     create_parser = subparsers.add_parser("create-skill", help="Create a new skill from template")
     create_parser.add_argument("name", help="Name of the skill")
     create_parser.add_argument("--domain", "-d", default="General", help="Skill domain")
-    create_parser.add_argument("--template", "-t", default="basic_python", choices=["basic_python", "python_prolog", "sqlite_analysis", "z3_optimization", "quickjs_transform", "llm_decision_maker", "rag_pipeline", "llm_advanced_features"], help="Template to use")
+    create_parser.add_argument(
+        "--template",
+        "-t",
+        default="basic_python",
+        choices=[
+            "basic_python",
+            "python_prolog",
+            "sqlite_analysis",
+            "z3_optimization",
+            "quickjs_transform",
+            "llm_decision_maker",
+            "rag_pipeline",
+            "llm_advanced_features",
+        ],
+        help="Template to use",
+    )
     create_parser.add_argument("--output-dir", default="skills", help="Skills directory")
 
     # Trace-view command
     trace_parser = subparsers.add_parser("trace-view", help="View skill execution traces")
-    trace_parser.add_argument(
-        "--file",
-        "-f",
-        default="logs/skill_telemetry.jsonl",
-        help="Telemetry file path"
-    )
-    trace_parser.add_argument(
-        "--skill",
-        "-s",
-        help="Filter by skill ID"
-    )
-    trace_parser.add_argument(
-        "--last",
-        "-l",
-        type=int,
-        default=5,
-        help="Show last N traces"
-    )
-    trace_parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output as JSON"
-    )
-    trace_parser.add_argument(
-        "--surface",
-        help="Filter by surface name"
-    )
-    trace_parser.add_argument(
-        "--success-only",
-        action="store_true",
-        help="Show only successful traces"
-    )
-    trace_parser.add_argument(
-        "--failures-only",
-        action="store_true",
-        help="Show only failed traces"
-    )
-    trace_parser.add_argument(
-        "--verbose",
-        "-v",
-        action="store_true",
-        help="Show full span details"
-    )
+    trace_parser.add_argument("--file", "-f", default="logs/skill_telemetry.jsonl", help="Telemetry file path")
+    trace_parser.add_argument("--skill", "-s", help="Filter by skill ID")
+    trace_parser.add_argument("--last", "-l", type=int, default=5, help="Show last N traces")
+    trace_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    trace_parser.add_argument("--surface", help="Filter by surface name")
+    trace_parser.add_argument("--success-only", action="store_true", help="Show only successful traces")
+    trace_parser.add_argument("--failures-only", action="store_true", help="Show only failed traces")
+    trace_parser.add_argument("--verbose", "-v", action="store_true", help="Show full span details")
 
     # Surfaces command
     subparsers.add_parser("surfaces", help="List all registered surfaces")
@@ -300,11 +182,14 @@ def main():
     # Run-DAG command
     run_dag_parser = subparsers.add_parser("run-dag", help="Parse and execute a declarative YAML/JSON DAG workflow")
     run_dag_parser.add_argument("dag_file", help="Path to declarative DAG file (YAML/JSON)")
-    run_dag_parser.add_argument("--max-workers", "-w", type=int, default=4, help="Maximum worker processes (default: 4)")
+    run_dag_parser.add_argument(
+        "--max-workers", "-w", type=int, default=4, help="Maximum worker processes (default: 4)"
+    )
     run_dag_parser.add_argument("--skills-dir", "-s", default="skills", help="Skills directory (default: skills)")
 
     # Ontology command group
     from em_cubed.cli_ontology import build_ontology_parser, handle_ontology_cli
+
     build_ontology_parser(subparsers)
 
     args = parser.parse_args()
@@ -350,10 +235,12 @@ def main():
         logger.exception("CLI command failed", command=args.command, error=str(e))
         print(f"Error: {e}", file=sys.stderr)
         from em_cubed.skills.telemetry import get_telemetry_collector
+
         get_telemetry_collector().flush()
         sys.exit(1)
     finally:
         from em_cubed.skills.telemetry import get_telemetry_collector
+
         get_telemetry_collector().flush()
 
 
@@ -369,6 +256,7 @@ def _handle_index(args):
     if incremental:
         logger.info("Incremental indexing skills", skills_dir=str(skills_dir), output=str(registry_output))
         from em_cubed.indexer import reindex_incremental
+
         reindex_incremental(skills_dir, registry_output)
         print(f"Registry incrementally updated at {registry_output}")
     else:
@@ -391,6 +279,7 @@ def _handle_search(args):
         return
 
     import json
+
     print(json.dumps(results, indent=2))
 
 
@@ -410,6 +299,7 @@ def _handle_serve(args):
 
     # Import here to avoid import issues if uvicorn not available
     from api.main import app
+
     uvicorn.run(app, host=host, port=port)
 
 
@@ -436,34 +326,41 @@ def _handle_run(args):
             # Setup tracing for CLI run
             from em_cubed.skills.telemetry import initialize_telemetry, TelemetryConfig, ExecutionRecord, TraceContext
             from datetime import timezone
-            
+
             initialize_telemetry(TelemetryConfig(log_every_execution=False))
-            
+
             # Actually we need to mock the skill file load too...
             # Simplified: just run directly if it's a surface run
             # But tracing is tied to SkillExecutor.
             # I'll just run it via surface and manually trace it for CLI run if --trace is on
             from datetime import datetime
-            record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=0)
+
+            record = ExecutionRecord(
+                skill_id="cli_run", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=0
+            )
             trace_ctx = TraceContext(record)
-            
+
             from em_cubed.skills.executor import TelemetryProxy
-            proxies = {name: TelemetryProxy(plugin_manager.get(name), trace_ctx) 
-                       for name in plugin_manager.get_available_surfaces()}
+
+            proxies = {
+                name: TelemetryProxy(plugin_manager.get(name), trace_ctx)
+                for name in plugin_manager.get_available_surfaces()
+            }
             context = {"surfaces": proxies, "skill_input": {}, "trace": trace_ctx}
-            context["context"] = context # compatibility
-            
+            context["context"] = context  # compatibility
+
             start = asyncio.get_event_loop().time()
             result = await surface.execute(code, context)
             elapsed = (asyncio.get_event_loop().time() - start) * 1000
-            
+
             print(json.dumps(result, indent=2))
-            
+
             print(f"\nExecution Trace: {record.trace_id}")
             print(f"Total Time: {elapsed:.1f}ms")
-            
+
             # Record to collector for persistence
             from em_cubed.skills.telemetry import get_telemetry_collector
+
             get_telemetry_collector().record_execution(record)
             if record.spans:
                 print("Sub-surface calls:")
@@ -479,6 +376,7 @@ def _handle_run(args):
 
 
 # New command handlers
+
 
 async def _handle_validate(args):
     """Handle validate command."""
@@ -576,6 +474,7 @@ async def _handle_test(args):
         if metadata:
             # Generate and run tests
             from em_cubed.skills.testing import SkillTestGenerator
+
             generator = SkillTestGenerator(plugin_manager)
             tests = generator.generate_tests_for_skill(skill_file, metadata)
             summary = await test_runner.run_test_suite(tests, metadata["skill_id"])
@@ -589,6 +488,7 @@ async def _handle_test(args):
         # Test all skills
         print("Testing all skills...")
         from em_cubed.skills.quality_pipeline import SkillQualityPipeline
+
         pipeline = SkillQualityPipeline(skills_dir, registry_file, plugin_manager)
         results = await pipeline.test_all_skills()
 
@@ -599,7 +499,7 @@ async def _handle_test(args):
             if "error" in result:
                 print(f"  [ERROR] {skill_id}: {result['error']}")
             else:
-                rate = result.get('pass_rate', 0)
+                rate = result.get("pass_rate", 0)
                 status = "PASS" if rate >= 0.7 else "FAIL"
                 print(f"  [{status}] {skill_id}: pass rate {rate:.1%}")
 
@@ -671,8 +571,8 @@ async def _handle_compose(args):
                 print(f"   - {step.skill_id}")
 
         if args.output:
-            with open(args.output, 'w') as f:
-                json.dump([p.to_dict() if hasattr(p, 'to_dict') else str(p) for p in plans], f, indent=2)
+            with open(args.output, "w") as f:
+                json.dump([p.to_dict() if hasattr(p, "to_dict") else str(p) for p in plans], f, indent=2)
             print(f"\nCompositions saved to {args.output}")
 
 
@@ -702,12 +602,10 @@ def _handle_create_skill(args):
 
     # Render using Jinja2
     from jinja2 import Template
+
     template = Template(template_content)
     content = template.render(
-        name=name,
-        domain=domain,
-        purpose=f"A {name} skill.",
-        description=f"Detailed description for {name}."
+        name=name, domain=domain, purpose=f"A {name} skill.", description=f"Detailed description for {name}."
     )
 
     # Write file
@@ -751,7 +649,7 @@ def _handle_trace_view(args):
         return
 
     # Show last N
-    traces_to_show = traces[-args.last:]
+    traces_to_show = traces[-args.last :]
 
     if args.json:
         print(json.dumps(traces_to_show, indent=2))
@@ -760,7 +658,9 @@ def _handle_trace_view(args):
     for trace in traces_to_show:
         status_icon = "âœ“" if trace.get("success") else "âœ—"
         print(f"\n{status_icon} Trace: {trace.get('trace_id')} | Skill: {trace.get('skill_id')}")
-        print(f"  Status: {'[OK]' if trace.get('success') else '[FAIL]'} | Time: {trace.get('execution_time_ms', 0):.1f}ms")
+        print(
+            f"  Status: {'[OK]' if trace.get('success') else '[FAIL]'} | Time: {trace.get('execution_time_ms', 0):.1f}ms"
+        )
         print(f"  Surface: {trace.get('surface', 'unknown')} | Timestamp: {trace.get('timestamp', 'N/A')}")
         spans = trace.get("spans", [])
         if spans:
@@ -769,7 +669,9 @@ def _handle_trace_view(args):
                 span_status = "âœ“" if span.get("success") else "âœ—"
                 indent = "    " * (i + 1)
                 size_info = f" ({span.get('input_size', 0)}b -> {span.get('output_size', 0)}b)"
-                print(f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms{size_info}")
+                print(
+                    f"  {indent}{span_status} [{span.get('surface'):<10}] {span.get('duration_ms', 0):>6.1f}ms{size_info}"
+                )
                 if args.verbose and span.get("error"):
                     print(f"  {indent}  Error: {span['error']}")
                 if args.verbose and span.get("input_data"):
@@ -821,6 +723,7 @@ def _handle_skill_info(args):
     skills_dir = Path("skills")
 
     from em_cubed.skills.registry import SkillRegistry
+
     if not registry_path.exists():
         print(f"Error: Registry file not found at {registry_path}")
         sys.exit(1)
@@ -851,7 +754,6 @@ def _handle_skill_info(args):
         print("Quality metrics : not available")
 
 
-
 async def _handle_workflow(args):
     """Handle workflow command to execute a DAG of skills."""
     workflow_path = Path(args.workflow_file)
@@ -865,6 +767,7 @@ async def _handle_workflow(args):
                 wf_data = json.load(f)
             elif workflow_path.suffix in (".yaml", ".yml"):
                 import yaml
+
                 wf_data = yaml.safe_load(f)
             else:
                 print(f"Error: Unsupported workflow file format: {workflow_path.suffix}")
@@ -883,26 +786,29 @@ async def _handle_workflow(args):
     from em_cubed.skills.registry import SkillRegistry
     from em_cubed.skills.composer import SkillComposer
     from em_cubed.plugin_manager import PluginManager
+
     pm = PluginManager()
     registry = SkillRegistry(Path("skills"), registry_path)
     composer = SkillComposer(pm, registry)
     executor = WorkflowExecutor(composer)
     steps = []
     for s_data in wf_data.get("steps", []):
-        steps.append(WorkflowStep(
-            id=s_data["id"],
-            skill_id=s_data["skill_id"],
-            input_mapping=s_data.get("input_mapping", {}),
-            output_mapping=s_data.get("output_mapping", {}),
-            dependencies=s_data.get("dependencies", []),
-            condition=s_data.get("condition"),
-            timeout=s_data.get("timeout")
-        ))
+        steps.append(
+            WorkflowStep(
+                id=s_data["id"],
+                skill_id=s_data["skill_id"],
+                input_mapping=s_data.get("input_mapping", {}),
+                output_mapping=s_data.get("output_mapping", {}),
+                dependencies=s_data.get("dependencies", []),
+                condition=s_data.get("condition"),
+                timeout=s_data.get("timeout"),
+            )
+        )
     workflow = WorkflowDefinition(
         name=wf_data.get("name", workflow_path.stem),
         steps=steps,
         description=wf_data.get("description"),
-        timeout=wf_data.get("timeout")
+        timeout=wf_data.get("timeout"),
     )
     print(f"Executing workflow: {workflow.name} ({len(workflow.steps)} steps)...")
     result = await executor.execute(workflow, initial_data)
@@ -957,4 +863,3 @@ async def _handle_run_dag(args):
 
 if __name__ == "__main__":
     main()
-

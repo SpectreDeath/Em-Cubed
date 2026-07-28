@@ -61,10 +61,10 @@ class PMESTFacets:
     """PMEST Faceted Analysis Container."""
 
     personality: list[str] = field(default_factory=list)  # Core identity (e.g. Folic Acid, Rice Plant)
-    matter: list[str] = field(default_factory=list)       # Substances, properties (e.g. Nitrogen)
-    energy: list[str] = field(default_factory=list)       # Operations, processes (e.g. Manufacturing)
-    space: list[str] = field(default_factory=list)        # Spatial dimensions (e.g. Uruguay, Factory Floor)
-    time: list[str] = field(default_factory=list)         # Temporal dimensions (e.g. 2024 Harvest)
+    matter: list[str] = field(default_factory=list)  # Substances, properties (e.g. Nitrogen)
+    energy: list[str] = field(default_factory=list)  # Operations, processes (e.g. Manufacturing)
+    space: list[str] = field(default_factory=list)  # Spatial dimensions (e.g. Uruguay, Factory Floor)
+    time: list[str] = field(default_factory=list)  # Temporal dimensions (e.g. 2024 Harvest)
 
 
 @dataclass
@@ -72,8 +72,8 @@ class OntoCleanPartition:
     """OntoClean Independent vs Role Entity Partitioning with Opaque IRIs."""
 
     entity_name: str
-    opaque_iri: str                                       # e.g. USO_000123
-    entity_type: EntityType                               # INDEPENDENT_CONTINUANT vs RELATIVE_ROLE
+    opaque_iri: str  # e.g. USO_000123
+    entity_type: EntityType  # INDEPENDENT_CONTINUANT vs RELATIVE_ROLE
     natural_language_definition: str
     context_role_assigned: str | None = None
 

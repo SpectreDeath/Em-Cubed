@@ -36,7 +36,7 @@ _CLOUD_KEY_ENV_VARS = (
 
 _DEFAULT_OLLAMA_HOST = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL = "llama3"
-_DEFAULT_CLOUD_MODEL  = "gpt-3.5-turbo"
+_DEFAULT_CLOUD_MODEL = "gpt-3.5-turbo"
 
 
 # ---------------------------------------------------------------------------
@@ -44,17 +44,19 @@ _DEFAULT_CLOUD_MODEL  = "gpt-3.5-turbo"
 # a transitive dependency of LiteLLM and listed in [dev] extras).
 # ---------------------------------------------------------------------------
 
+
 class _OllamaClient:
     """Thin async client for the Ollama local REST API."""
 
     def __init__(self, host: str, timeout: float):
-        self._host    = host.rstrip("/")
+        self._host = host.rstrip("/")
         self._timeout = timeout
 
     async def is_available(self) -> bool:
         """Return True if the Ollama server is reachable."""
         try:
             import httpx
+
             async with httpx.AsyncClient(timeout=3.0) as client:
                 resp = await client.get(f"{self._host}/api/tags")
                 return resp.status_code == 200
@@ -65,6 +67,7 @@ class _OllamaClient:
         """Return names of locally-pulled models."""
         try:
             import httpx
+
             async with httpx.AsyncClient(timeout=5.0) as client:
                 resp = await client.get(f"{self._host}/api/tags")
                 resp.raise_for_status()
@@ -96,9 +99,9 @@ class _OllamaClient:
             messages.append({"role": "user", "content": prompt})
 
             payload = {
-                "model":   model,
+                "model": model,
                 "messages": messages,
-                "stream":   False,
+                "stream": False,
                 "options": {
                     "temperature": temperature,
                     "num_predict": max_tokens,
@@ -124,6 +127,7 @@ class _OllamaClient:
 # LLMSurface
 # ---------------------------------------------------------------------------
 
+
 class LLMSurface(SurfaceBase):
     """Handle LLM prompt execution using LiteLLM for cloud and Ollama for local.
 
@@ -147,12 +151,14 @@ class LLMSurface(SurfaceBase):
         """Return True if litellm is importable (cloud path) OR Ollama is available."""
         try:
             import litellm  # noqa: F401
+
             return True
         except ImportError:
             pass
         # Synchronous availability heuristic — just check if httpx is present
         try:
             import httpx  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -193,13 +199,11 @@ class LLMSurface(SurfaceBase):
         """Return True if any recognised cloud API key is set in the environment."""
         return any(os.getenv(var) for var in _CLOUD_KEY_ENV_VARS)
 
-    async def _run_prompt(
-        self, prompt: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def _run_prompt(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Route the prompt through the priority chain."""
         if not self.available:
             return {
-                "status":  "error",
+                "status": "error",
                 "message": "LLM surface unavailable: install litellm or httpx.",
             }
 
@@ -228,7 +232,7 @@ class LLMSurface(SurfaceBase):
             ollama_error=ollama_result.get("message"),
         )
         return {
-            "status":  "error",
+            "status": "error",
             "message": (
                 "No LLM backend available. "
                 "Set a cloud API key (e.g. OPENAI_API_KEY) or start an Ollama server "
@@ -241,9 +245,7 @@ class LLMSurface(SurfaceBase):
     # Path 1: LiteLLM (cloud)
     # ------------------------------------------------------------------
 
-    async def _run_via_litellm(
-        self, prompt: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def _run_via_litellm(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute the prompt through LiteLLM using a configured cloud provider."""
         try:
             import litellm
@@ -252,15 +254,21 @@ class LLMSurface(SurfaceBase):
             if context and (system := context.get("system")):
                 messages.insert(0, {"role": "system", "content": system})
             elif context:
-                ctx_str = str({k: v for k, v in context.items() if k not in ("model", "temperature", "max_tokens", "stream", "tools", "tool_choice", "system")})
+                ctx_str = str(
+                    {
+                        k: v
+                        for k, v in context.items()
+                        if k not in ("model", "temperature", "max_tokens", "stream", "tools", "tool_choice", "system")
+                    }
+                )
                 if ctx_str != "{}":
                     messages.insert(0, {"role": "system", "content": f"Context: {ctx_str}"})
 
-            model       = (context or {}).get("model", _DEFAULT_CLOUD_MODEL)
+            model = (context or {}).get("model", _DEFAULT_CLOUD_MODEL)
             temperature = (context or {}).get("temperature", 0.7)
-            max_tokens  = (context or {}).get("max_tokens", 1000)
-            stream      = (context or {}).get("stream", False)
-            tools       = (context or {}).get("tools")
+            max_tokens = (context or {}).get("max_tokens", 1000)
+            stream = (context or {}).get("stream", False)
+            tools = (context or {}).get("tools")
             tool_choice = (context or {}).get("tool_choice")
 
             logger.info(
@@ -316,19 +324,13 @@ class LLMSurface(SurfaceBase):
     # Path 2: Ollama (local)
     # ------------------------------------------------------------------
 
-    async def _run_via_ollama(
-        self, prompt: str, context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+    async def _run_via_ollama(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute the prompt through a locally-running Ollama server."""
         if not await self._ollama.is_available():
             return {"status": "error", "message": "Ollama server not reachable"}
 
         # Pick a model: prefer context override, then OLLAMA_MODEL env var, then default
-        model = (
-            (context or {}).get("model")
-            or os.getenv("OLLAMA_MODEL")
-            or _DEFAULT_OLLAMA_MODEL
-        )
+        model = (context or {}).get("model") or os.getenv("OLLAMA_MODEL") or _DEFAULT_OLLAMA_MODEL
 
         # If the requested model is not pulled yet, pick first available
         available_models = await self._ollama.list_models()
@@ -340,9 +342,9 @@ class LLMSurface(SurfaceBase):
             )
             model = available_models[0]
 
-        system      = (context or {}).get("system")
+        system = (context or {}).get("system")
         temperature = (context or {}).get("temperature", 0.7)
-        max_tokens  = (context or {}).get("max_tokens", 1024)
+        max_tokens = (context or {}).get("max_tokens", 1024)
 
         logger.info(
             "Executing LLM prompt via local Ollama",

@@ -7,11 +7,7 @@ from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
 SKILL_FILE = Path(
-    Path(__file__).parent.parent.parent
-    / "skills"
-    / "OPTIMIZATION"
-    / "anarchic-society-optimization"
-    / "SKILL.md"
+    Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "anarchic-society-optimization" / "SKILL.md"
 )
 SKILL_ID = "OPTIMIZATION/anarchic-society-optimization"
 
@@ -61,9 +57,7 @@ class TestASOOptimizerSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -82,9 +76,7 @@ class TestASOOptimizerSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
     @pytest.mark.asyncio
     async def test_aso_python_sphere(self):
@@ -98,8 +90,8 @@ class TestASOOptimizerSkill:
                 self.position = [0.0] * dim
                 self.prev_position = [0.0] * dim
                 self.p_best = [0.0] * dim
-                self.p_best_fitness = float('-inf')
-                self.fitness = float('-inf')
+                self.p_best_fitness = float("-inf")
+                self.fitness = float("-inf")
 
         def clip(val, lo, hi, step):
             val = max(lo, min(hi, val))
@@ -108,7 +100,7 @@ class TestASOOptimizerSkill:
             return val
 
         def neg_sphere(x):
-            return -sum(xi ** 2 for xi in x)
+            return -sum(xi**2 for xi in x)
 
         dim = 2
         bounds = [(-5.0, 5.0, 0.0)] * dim
@@ -120,7 +112,7 @@ class TestASOOptimizerSkill:
 
         agents = [ASOAgent(dim) for _ in range(pop_size)]
         g_best = [0.0] * dim
-        g_best_f = float('-inf')
+        g_best_f = float("-inf")
 
         for agent in agents:
             agent.position = [clip(random.uniform(b[0], b[1]), b[0], b[1], b[2]) for b in bounds]
@@ -135,8 +127,8 @@ class TestASOOptimizerSkill:
         for _ in range(max_iter):
             for agent in agents:
                 fi_denom = g_best_f - agent.fitness
-                fi = 0.0 if abs(fi_denom) < 1e-300 else (
-                    1.0 - alpha * (agent.p_best_fitness - agent.fitness) / fi_denom
+                fi = (
+                    0.0 if abs(fi_denom) < 1e-300 else (1.0 - alpha * (agent.p_best_fitness - agent.fitness) / fi_denom)
                 )
                 ei_denom = abs(g_best_f) * theta
                 if abs(ei_denom) < 1e-300:
@@ -160,9 +152,11 @@ class TestASOOptimizerSkill:
                         rnd = random.random()
                         if rnd > fi:
                             r1, r2 = random.random(), random.random()
-                            vel = (omega * (agent.position[c] - agent.p_best[c])
-                                   + lambda1 * r1 * (agent.p_best[c] - agent.position[c])
-                                   + lambda2 * r2 * (g_best[c] - agent.position[c]))
+                            vel = (
+                                omega * (agent.position[c] - agent.p_best[c])
+                                + lambda1 * r1 * (agent.p_best[c] - agent.position[c])
+                                + lambda2 * r2 * (g_best[c] - agent.position[c])
+                            )
                             nc = agent.position[c] + vel
                         elif rnd < ei:
                             other = random.randint(0, pop_size - 1)
@@ -193,17 +187,11 @@ class TestASOOptimizerSkill:
         curr, pbest, gbest = -5.0, -3.0, -1.0
 
         fi_denom = gbest - curr
-        fi = 0.0 if abs(fi_denom) < 1e-300 else (
-            1.0 - alpha * (pbest - curr) / fi_denom
-        )
+        fi = 0.0 if abs(fi_denom) < 1e-300 else (1.0 - alpha * (pbest - curr) / fi_denom)
         ei_denom = gbest * theta
-        ei = 0.0 if abs(ei_denom) < 1e-300 else (
-            1.0 - math.exp(-(gbest - curr) / ei_denom)
-        )
+        ei = 0.0 if abs(ei_denom) < 1e-300 else (1.0 - math.exp(-(gbest - curr) / ei_denom))
         ii_denom = pbest * delta
-        ii = 0.0 if abs(ii_denom) < 1e-300 else (
-            1.0 - math.exp(-(pbest - curr) / ii_denom)
-        )
+        ii = 0.0 if abs(ii_denom) < 1e-300 else (1.0 - math.exp(-(pbest - curr) / ii_denom))
 
         assert math.isfinite(fi), "FI must be finite"
         assert math.isfinite(ei), "EI must be finite"
@@ -211,6 +199,7 @@ class TestASOOptimizerSkill:
 
     def test_clip_quantization(self):
         """Clip + step quantization must produce values on the step grid."""
+
         def clip(val, lo, hi, step):
             val = max(lo, min(hi, val))
             if step > 0.0:

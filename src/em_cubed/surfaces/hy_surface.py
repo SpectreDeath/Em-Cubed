@@ -58,7 +58,7 @@ class HySurface(SurfaceBase):
                 """Rewrite bracket-style (cond [... ] [...]) to flat cond form."""
                 try:
                     return _re.sub(
-                        r'\(cond\b((?:\s*\[[^\]]+\])+)\s*\)',
+                        r"\(cond\b((?:\s*\[[^\]]+\])+)\s*\)",
                         lambda m: _rewrite_cond(m.group(1)),
                         code,
                         flags=_re.DOTALL,
@@ -68,7 +68,7 @@ class HySurface(SurfaceBase):
 
             def _rewrite_cond(bracket_block: str) -> str:
                 """Convert a sequence of [test result] bracket pairs to flat cond."""
-                pairs = _re.findall(r'\[(.*?)\]', bracket_block, _re.DOTALL)
+                pairs = _re.findall(r"\[(.*?)\]", bracket_block, _re.DOTALL)
                 flat_parts = []
                 for pair in pairs:
                     parts = pair.strip().split(None, 1)

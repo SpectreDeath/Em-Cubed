@@ -14,7 +14,6 @@ class OrderState:
 
 
 class OntologyGuardedSkill(BaseLoopySkill[OrderState, str]):
-
     def initialize_state(self, *args, **kwargs) -> OrderState:
         # Register functional property constraint: order_id can have at most ONE refund
         self.ledger_validator.add_functional_property(predicate="has_refund")

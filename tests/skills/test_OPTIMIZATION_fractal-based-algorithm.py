@@ -7,11 +7,7 @@ from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
 SKILL_FILE = Path(
-    Path(__file__).parent.parent.parent
-    / "skills"
-    / "OPTIMIZATION"
-    / "fractal-based-algorithm"
-    / "SKILL.md"
+    Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "fractal-based-algorithm" / "SKILL.md"
 )
 SKILL_ID = "OPTIMIZATION/fractal-based-algorithm"
 
@@ -58,9 +54,7 @@ class TestFractalBasedAlgorithmSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -79,9 +73,7 @@ class TestFractalBasedAlgorithmSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
     @pytest.mark.asyncio
     async def test_fba_python_sphere(self):
@@ -89,7 +81,7 @@ class TestFractalBasedAlgorithmSkill:
         import random
 
         def sphere(x):
-            return sum(xi ** 2 for xi in x)
+            return sum(xi**2 for xi in x)
 
         def power_distribution(center, out_min, out_max, p=5.0):
             rnd = random.uniform(-1.0, 1.0)
@@ -150,9 +142,10 @@ class TestFractalBasedAlgorithmSkill:
     async def test_prolog_params(self):
         """Prolog parameter validation should work."""
         from em_cubed.surfaces import PrologSurface
+
         surface = PrologSurface()
-        code = '''
+        code = """
 ?- 50 >= 4, 50 =< 200, 60 >= 10, 60 =< 100, 30 >= 10, 30 =< 100, 0.8 >= 0.0, 0.8 =< 1.0, 10 >= 5, 10 =< 20.
-'''
+"""
         result = await surface.execute(code, {})
         assert result["status"] == "ok"

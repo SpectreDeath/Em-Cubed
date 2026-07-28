@@ -113,6 +113,11 @@ class EpistemicReplayEngine:
         """
         for frame in self.frames:
             if frame.step_index == step_index:
-                logger.info("Replaying step #%d [Trust: %.2f, Modal: %s]", step_index, frame.sme_trust_score, frame.topos_modal_truth)
+                logger.info(
+                    "Replaying step #%d [Trust: %.2f, Modal: %s]",
+                    step_index,
+                    frame.sme_trust_score,
+                    frame.topos_modal_truth,
+                )
                 return frame
         return None

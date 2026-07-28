@@ -8,11 +8,7 @@ from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
 SKILL_FILE = Path(
-    Path(__file__).parent.parent.parent
-    / "skills"
-    / "OPTIMIZATION"
-    / "spiral-dynamics-optimization"
-    / "SKILL.md"
+    Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "spiral-dynamics-optimization" / "SKILL.md"
 )
 SKILL_ID = "OPTIMIZATION/spiral-dynamics-optimization"
 
@@ -59,9 +55,7 @@ class TestSpiralDynamicsOptimizationSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -80,9 +74,7 @@ class TestSpiralDynamicsOptimizationSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
     @pytest.mark.asyncio
     async def test_sdo_python_sphere(self):
@@ -90,7 +82,7 @@ class TestSpiralDynamicsOptimizationSkill:
         import random
 
         def sphere(x):
-            return -sum(xi ** 2 for xi in x)  # Negative for maximization
+            return -sum(xi**2 for xi in x)  # Negative for maximization
 
         pop_size, damping, frequency, max_iter = 100, 0.3, 4.0, 80
         dim = 2
@@ -100,43 +92,48 @@ class TestSpiralDynamicsOptimizationSkill:
         for _ in range(pop_size):
             pos = [random.uniform(-5, 5) for _ in range(dim)]
             amp = [random.uniform(-5, 5) for _ in range(dim)]
-            particles.append({'position': pos, 'amplitude': amp, 't': 0})
+            particles.append({"position": pos, "amplitude": amp, "t": 0})
 
-        fitness = [sphere(p['position']) for p in particles]
+        fitness = [sphere(p["position"]) for p in particles]
         best_score = max(fitness)
-        best_x = particles[fitness.index(best_score)]['position'][:]  # Copy the list
+        best_x = particles[fitness.index(best_score)]["position"][:]  # Copy the list
 
         for epoch in range(max_iter):
             for i in range(pop_size):
                 if fitness[i] >= best_score - 1e-10:
                     for c in range(dim):
-                        particles[i]['position'][c] = random.uniform(-5, 5)
-                    particles[i]['t'] = 0
+                        particles[i]["position"][c] = random.uniform(-5, 5)
+                    particles[i]["t"] = 0
                     continue
 
-                particles[i]['t'] += 1
-                t = particles[i]['t']
+                particles[i]["t"] += 1
+                t = particles[i]["t"]
                 for c in range(dim):
                     phi = random.uniform(0, 2 * math.pi)
-                    osc = particles[i]['amplitude'][c] * math.exp(-damping * t / precision) * math.cos(frequency * t / precision + phi)
-                    particles[i]['position'][c] += osc
-                    particles[i]['position'][c] = max(-5, min(5, particles[i]['position'][c]))
+                    osc = (
+                        particles[i]["amplitude"][c]
+                        * math.exp(-damping * t / precision)
+                        * math.cos(frequency * t / precision + phi)
+                    )
+                    particles[i]["position"][c] += osc
+                    particles[i]["position"][c] = max(-5, min(5, particles[i]["position"][c]))
 
-            fitness = [sphere(p['position']) for p in particles]
+            fitness = [sphere(p["position"]) for p in particles]
             current_best = max(fitness)
             if current_best > best_score:
                 best_score = current_best
-                best_x = particles[fitness.index(current_best)]['position'][:]  # Copy
+                best_x = particles[fitness.index(current_best)]["position"][:]  # Copy
                 for i in range(pop_size):
-                    particles[i]['t'] = 0
+                    particles[i]["t"] = 0
                     for c in range(dim):
-                        particles[i]['amplitude'][c] = best_x[c] - particles[i]['position'][c]
+                        particles[i]["amplitude"][c] = best_x[c] - particles[i]["position"][c]
 
         assert best_score > -1.0, f"SDO sphere result = {best_score}"
 
     @pytest.mark.asyncio
     async def test_damped_oscillation(self):
         """Damped oscillation should decay over time."""
+
         def damped_oscillation(amplitude, t, damping=0.3, freq=4.0):
             return amplitude * math.exp(-damping * t) * math.cos(freq * t)
 
@@ -156,9 +153,10 @@ class TestSpiralDynamicsOptimizationSkill:
     async def test_prolog_params(self):
         """Prolog parameter validation should work."""
         from em_cubed.surfaces import PrologSurface
+
         surface = PrologSurface()
-        code = '''
+        code = """
 ?- 100 >= 10, 100 =< 200, 0.3 >= 0.01, 0.3 =< 1.0, 4.0 >= 0.5, 4.0 =< 20.0.
-'''
+"""
         result = await surface.execute(code, {})
         assert result["status"] == "ok"

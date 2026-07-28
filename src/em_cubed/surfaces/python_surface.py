@@ -16,8 +16,8 @@ logger = structlog.get_logger()
 def _run_asteval_code(code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     from asteval import Interpreter
 
-    aeval = Interpreter(excluded_symbols=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
-    for bad in ['open', '__import__', 'eval', 'exec', 'compile', '__builtins__']:
+    aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"])
+    for bad in ["open", "__import__", "eval", "exec", "compile", "__builtins__"]:
         aeval.symtable.pop(bad, None)
 
     if context:
@@ -86,7 +86,9 @@ class PythonSurface(SurfaceBase):
         self._executor = _make_daemon_executor(max_workers=worker_count)
         self._process_executor = ProcessPoolExecutor(max_workers=worker_count)
         self._concurrency_limit = int(os.getenv("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", str(worker_count)))
-        self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        self._concurrency_semaphore = (
+            asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
+        )
         logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout, workers=worker_count)
 
     @staticmethod
@@ -116,10 +118,7 @@ class PythonSurface(SurfaceBase):
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Execute Python code safely using asteval and executor processes."""
         if not self.available:
-            return {
-                "status": "error",
-                "message": f"{self.name} surface not available"
-            }
+            return {"status": "error", "message": f"{self.name} surface not available"}
         loop = asyncio.get_running_loop()
         executor = self._process_executor if _is_picklable(context) else self._executor
         future = loop.run_in_executor(executor, _run_asteval_code, code, context)
@@ -147,9 +146,9 @@ class PythonSurface(SurfaceBase):
             from asteval import Interpreter
 
             # Create asteval interpreter with safe context
-            aeval = Interpreter(excluded_symbols=['open', '__import__', 'eval', 'exec', 'compile', '__builtins__'])
+            aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"])
             # Explicitly remove dangerous names (excluded_symbols alone is not sufficient in asteval 1.x)
-            for bad in ['open', '__import__', 'eval', 'exec', 'compile', '__builtins__']:
+            for bad in ["open", "__import__", "eval", "exec", "compile", "__builtins__"]:
                 aeval.symtable.pop(bad, None)
 
             # Add context variables if provided

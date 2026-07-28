@@ -51,10 +51,14 @@ class ForwardBackwardCompatibilityChecker:
     ) -> bool:
         """Check compatibility across versions."""
         if not from_version.is_compatible_with(to_version):
-            logger.warning("Breaking major version bump from %s to %s!", from_version.version_str, to_version.version_str)
+            logger.warning(
+                "Breaking major version bump from %s to %s!", from_version.version_str, to_version.version_str
+            )
             return False
 
-        logger.info("Schema migration from %s to %s is backward compatible.", from_version.version_str, to_version.version_str)
+        logger.info(
+            "Schema migration from %s to %s is backward compatible.", from_version.version_str, to_version.version_str
+        )
         return True
 
 
@@ -89,7 +93,12 @@ class AutomatedTripleMigrationEngine:
 
             for step in steps:
                 if step.action_type == "RENAME_PREDICATE" and current_pred == step.old_value:
-                    logger.info("Migrating predicate '%s' -> '%s' for subject '%s'", step.old_value, step.new_value, current_subj)
+                    logger.info(
+                        "Migrating predicate '%s' -> '%s' for subject '%s'",
+                        step.old_value,
+                        step.new_value,
+                        current_subj,
+                    )
                     current_pred = step.new_value
 
             migrated.append(

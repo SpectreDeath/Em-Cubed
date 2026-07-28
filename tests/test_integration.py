@@ -370,6 +370,7 @@ assert len(all_results["result"]) == 2
         # 2. Index the skills
         registry_file = tmp_path / "registry.json"
         from em_cubed.indexer import reindex
+
         reindex(skills_dir, registry_file)
 
         # 3. Execute via SkillExecutor (not direct surface)
@@ -381,10 +382,7 @@ assert len(all_results["result"]) == 2
         plugin_manager = PluginManager()
         executor = SkillExecutor(plugin_manager, registry, skills_dir)
 
-        request = SkillExecutionRequest(
-            skill_id="Testing/Sync Bridge Test",
-            input_data={}
-        )
+        request = SkillExecutionRequest(skill_id="Testing/Sync Bridge Test", input_data={})
 
         result = await executor.execute(request)
 

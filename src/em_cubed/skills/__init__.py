@@ -20,7 +20,13 @@ from .telemetry import (
     initialize_telemetry,
     record_skill_execution,
 )
-from .executor import SkillExecutor, SkillExecutionRequest, SkillExecutionResult, get_skill_executor, initialize_executor
+from .executor import (
+    SkillExecutor,
+    SkillExecutionRequest,
+    SkillExecutionResult,
+    get_skill_executor,
+    initialize_executor,
+)
 
 __all__ = [
     "SkillMetadata",

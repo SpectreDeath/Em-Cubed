@@ -12,6 +12,7 @@ def setup_module():
     """Set up the asteval interpreter with the Python Calculator skill's functions."""
     global _aeval
     from asteval import Interpreter
+
     _aeval = Interpreter()
 
     # Read the skill file and extract the Python code block
@@ -21,6 +22,7 @@ def setup_module():
 
     # Extract the Python code block (between ```python and ```)
     import re
+
     python_code_match = re.search(r"```python\s*\r?\n(.*?)```", content, re.DOTALL)
     if python_code_match:
         python_code = python_code_match.group(1).strip()
@@ -72,7 +74,7 @@ def test_square_root_property(a, b, c):
     # Generate non-negative x
     x = st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False).example()
     result = sqrt_func(x)
-    expected = x ** 0.5
+    expected = x**0.5
     assert abs(result - expected) < 1e-9
 
 

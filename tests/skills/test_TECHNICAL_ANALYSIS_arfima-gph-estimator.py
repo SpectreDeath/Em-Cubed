@@ -38,7 +38,6 @@ class Testarfima_gph_estimatorSkill:
     def test_skill_file_exists(self):
         assert SKILL_FILE.exists(), f"SKILL.md not found at {SKILL_FILE}"
 
-
     def test_surfaces_implemented(self, plugin_manager):
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         available_surfaces = []
@@ -46,9 +45,7 @@ class Testarfima_gph_estimatorSkill:
             plugin = plugin_manager.get(surface)
             if plugin and plugin.available:
                 available_surfaces.append(surface)
-        assert len(available_surfaces) >= 1, (
-            f"No available surfaces found for {metadata_dict['name']}"
-        )
+        assert len(available_surfaces) >= 1, f"No available surfaces found for {metadata_dict['name']}"
 
     @pytest.mark.asyncio
     async def test_skill_execution(self, test_runner, test_generator):
@@ -66,15 +63,13 @@ class Testarfima_gph_estimatorSkill:
         tests = test_generator.generate_tests_for_skill(SKILL_FILE, metadata)
         if tests:
             results = await test_runner.run_test_suite(tests, SKILL_ID)
-            assert results["pass_rate"] > 0.3, (
-                f"Pass rate too low: {results['pass_rate']}"
-            )
+            assert results["pass_rate"] > 0.3, f"Pass rate too low: {results['pass_rate']}"
 
 
 @pytest.mark.asyncio
 async def test_arfima_gph_calculator():
     """Test GPH estimator core logic."""
-    code = '''
+    code = """
 def calculate_gph(returns):
     n = len(returns)
     if n < 32:
@@ -148,8 +143,9 @@ def calculate_gph(returns):
 returns = [0.05, -0.02, 0.08, -0.03, 0.06, -0.01, 0.04, 0.02, -0.05, 0.03, 0.07, -0.04, 0.01, 0.09, -0.06, 0.02, 0.05, -0.02, 0.08, -0.01, 0.06, 0.03, -0.04, 0.02, 0.05, -0.03, 0.07, 0.01, -0.02, 0.04, 0.06, -0.05, 0.03, 0.08, -0.01, 0.02, 0.05, -0.04, 0.06, 0.01, -0.03, 0.07, 0.02, -0.02, 0.05, 0.04, -0.06, 0.01, 0.03, 0.08, -0.02, 0.06, 0.02, -0.01, 0.04, 0.05, -0.03, 0.07, 0.03, -0.04, 0.02, 0.06, 0.01, -0.02, 0.05, 0.04, -0.01, 0.03, 0.07, -0.03, 0.06, 0.02, -0.05, 0.04, 0.01, 0.08, -0.02, 0.05, 0.03]
 result = calculate_gph(returns)
 result["status"] == "success" and isinstance(result["d"], float)
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -158,12 +154,13 @@ result["status"] == "success" and isinstance(result["d"], float)
 @pytest.mark.asyncio
 async def test_arfima_insufficient_data():
     """Test GPH returns proper status for small datasets."""
-    code = '''
+    code = """
 returns = [0.0, 0.1, -0.1, 0.2]
 n = len(returns)
 n < 32
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"

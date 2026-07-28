@@ -101,12 +101,14 @@ def __getattr__(name: str) -> Any:
             stacklevel=2,
         )
         import importlib
+
         mod = importlib.import_module(mod_path)
         return getattr(mod, attr_name)
 
     # Check ontology module for any remaining ontology symbols
     try:
         import importlib
+
         mod = importlib.import_module("em_cubed.ontology")
         if hasattr(mod, name):
             warnings.warn(
@@ -120,4 +122,3 @@ def __getattr__(name: str) -> Any:
         pass
 
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-

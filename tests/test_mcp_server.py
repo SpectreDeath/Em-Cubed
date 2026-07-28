@@ -37,10 +37,11 @@ def test_mcp_call_search_skills():
     assert isinstance(res["skills"], list)
 
 
-
 def test_mcp_call_validate_triple():
     server = EmCubedMCPServer()
-    res = server.call_tool("em_cubed_validate_triple", {"subject": "Agent_X", "predicate": "hasRole", "object": "Auditor"})
+    res = server.call_tool(
+        "em_cubed_validate_triple", {"subject": "Agent_X", "predicate": "hasRole", "object": "Auditor"}
+    )
     assert res["valid"] is True
 
 
@@ -53,13 +54,17 @@ def test_mcp_call_evaluate_topos():
 
 def test_mcp_call_extract_truthmakers():
     server = EmCubedMCPServer()
-    res = server.call_tool("em_cubed_extract_truthmakers", {"proposition": "Security Audit", "subject": "Node_A", "object": "Cluster_B"})
+    res = server.call_tool(
+        "em_cubed_extract_truthmakers", {"proposition": "Security Audit", "subject": "Node_A", "object": "Cluster_B"}
+    )
     assert res["proposition"] == "Security Audit"
 
 
 def test_mcp_call_prove_zkp():
     server = EmCubedMCPServer()
-    res = server.call_tool("em_cubed_prove_zkp", {"proposition": "ZKP Compliance", "subject": "Node_A", "object": "Cluster_B"})
+    res = server.call_tool(
+        "em_cubed_prove_zkp", {"proposition": "ZKP Compliance", "subject": "Node_A", "object": "Cluster_B"}
+    )
     assert "proof_id" in res
     assert "merkle_state_root" in res
 

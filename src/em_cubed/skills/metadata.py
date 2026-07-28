@@ -14,6 +14,7 @@ from pathlib import Path
 @dataclass
 class InputOutputSchema:
     """Schema definitions for skill inputs and outputs."""
+
     type: str = "object"  # object, array, string, number, boolean, null
     properties: Dict[str, Any] = field(default_factory=dict)
     required: List[str] = field(default_factory=list)
@@ -47,6 +48,7 @@ class InputOutputSchema:
 @dataclass
 class SkillCapability:
     """Required capabilities for skill execution."""
+
     surfaces: List[str] = field(default_factory=list)  # Required surface plugins
     permissions: List[str] = field(default_factory=list)  # Required permissions/privileges
     resources: Dict[str, Any] = field(default_factory=dict)  # Resource requirements (memory, cpu, etc.)
@@ -73,6 +75,7 @@ class SkillCapability:
 @dataclass
 class CompatibilityRange:
     """Version compatibility constraints."""
+
     min_version: str = "0.1.0"
     max_version: Optional[str] = None  # Exclusive upper bound
     breaking_changes: List[str] = field(default_factory=list)
@@ -96,6 +99,7 @@ class CompatibilityRange:
 @dataclass
 class QualityThresholds:
     """Minimum quality thresholds for skill validation."""
+
     min_test_coverage: float = 0.8  # 80% code coverage
     min_success_rate: float = 0.7  # 70% execution success
     max_execution_time: float = 30.0  # seconds
@@ -117,6 +121,7 @@ class QualityThresholds:
 @dataclass
 class SkillDependency:
     """Dependency on another skill."""
+
     skill_id: str  # Unique skill identifier (domain/skill-name)
     version_range: str = ">=0.1.0"  # Semver range: defaults to any >=0.1.0
     optional: bool = False
@@ -143,6 +148,7 @@ class SkillDependency:
 @dataclass
 class RuntimeMetrics:
     """Runtime execution metrics for quality tracking."""
+
     applied_count: int = 0
     success_count: int = 0
     failure_count: int = 0
@@ -183,12 +189,14 @@ class RuntimeMetrics:
         self.total_execution_time += execution_time
         self.total_token_usage += token_usage
         self.last_executed = datetime.utcnow()
-        self.execution_history.append({
-            "timestamp": self.last_executed.isoformat(),
-            "success": success,
-            "execution_time": execution_time,
-            "token_usage": token_usage,
-        })
+        self.execution_history.append(
+            {
+                "timestamp": self.last_executed.isoformat(),
+                "success": success,
+                "execution_time": execution_time,
+                "token_usage": token_usage,
+            }
+        )
         # Keep last 100 executions
         if len(self.execution_history) > 100:
             self.execution_history = self.execution_history[-100:]
@@ -218,6 +226,7 @@ class RuntimeMetrics:
 @dataclass
 class SkillMetadata:
     """Extended skill metadata with full schema support."""
+
     # Core fields (from SKILL.md frontmatter)
     name: str
     domain: str
@@ -249,14 +258,15 @@ class SkillMetadata:
     def _slugify(text: str) -> str:
         """Slugify text for consistent IDs."""
         import re
+
         # Lowercase
         text = text.lower()
         # Replace spaces, underscores and periods with hyphens
-        text = re.sub(r'[\s_.]+', '-', text)
+        text = re.sub(r"[\s_.]+", "-", text)
         # Remove non-alphanumeric (except hyphens)
-        text = re.sub(r'[^a-z0-9\-]', '', text)
+        text = re.sub(r"[^a-z0-9\-]", "", text)
         # Remove leading/trailing hyphens
-        text = text.strip('-')
+        text = text.strip("-")
         return text
 
     def __post_init__(self):
@@ -274,7 +284,7 @@ class SkillMetadata:
                 min_test_coverage=self.quality_thresholds.get("min_test_coverage", 0.8),
                 min_success_rate=self.quality_thresholds.get("min_success_rate", 0.7),
                 max_execution_time=self.quality_thresholds.get("max_execution_time", 30.0),
-                max_memory_usage=self.quality_thresholds.get("max_memory_usage", 512*1024*1024),
+                max_memory_usage=self.quality_thresholds.get("max_memory_usage", 512 * 1024 * 1024),
                 required_surfaces=self.quality_thresholds.get("required_surfaces", 1),
                 min_documentation_ratio=self.quality_thresholds.get("min_documentation_ratio", 0.3),
             )
@@ -284,7 +294,11 @@ class SkillMetadata:
             if isinstance(quality_data, dict):
                 self.metrics.applied_count = quality_data.get("applied_count", 0)
                 self.metrics.success_count = quality_data.get("success_count", 0)
-                self.metrics.total_token_usage = quality_data.get("token_savings_avg", 0.0) * self.metrics.applied_count if self.metrics.applied_count > 0 else 0
+                self.metrics.total_token_usage = (
+                    quality_data.get("token_savings_avg", 0.0) * self.metrics.applied_count
+                    if self.metrics.applied_count > 0
+                    else 0
+                )
 
         if self.skill_id is None:
             # Use slugified components for internal ID
@@ -296,6 +310,7 @@ class SkillMetadata:
     def _extract_surfaces_from_body(body: str) -> List[str]:
         """Detect which surfaces are implemented by scanning fenced code blocks."""
         import re
+
         surfaces = []
         # Pattern: ```lang or ````lang
         for match in re.finditer(r"`{3,}(\w+)\s*\r?\n", body):
@@ -325,6 +340,7 @@ class SkillMetadata:
     def _extract_tags_from_body(body: str) -> List[str]:
         """Extract tags from code blocks."""
         import re
+
         tags = []
         # Python function names
         for match in re.finditer(r"^\s*def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(", body, re.MULTILINE):
@@ -357,6 +373,7 @@ class SkillMetadata:
     def check_compatibility(self, other_version: str) -> bool:
         """Check if another skill version is compatible with this one."""
         from packaging import version
+
         v_other = version.parse(other_version)
         min_v = version.parse(self.compatibility.min_version)
         max_v = version.parse(self.compatibility.max_version) if self.compatibility.max_version else None
@@ -392,7 +409,9 @@ class SkillMetadata:
         }
 
     @classmethod
-    def from_frontmatter(cls, frontmatter: Dict[str, Any], body: str = "", file_path: Optional[Path] = None) -> "SkillMetadata":
+    def from_frontmatter(
+        cls, frontmatter: Dict[str, Any], body: str = "", file_path: Optional[Path] = None
+    ) -> "SkillMetadata":
         """Construct SkillMetadata from SKILL.md frontmatter."""
         import re
 
@@ -455,7 +474,7 @@ class SkillMetadata:
             min_test_coverage=thresholds_data.get("min_test_coverage", 0.8),
             min_success_rate=thresholds_data.get("min_success_rate", 0.7),
             max_execution_time=thresholds_data.get("max_execution_time", 30.0),
-            max_memory_usage=thresholds_data.get("max_memory_usage", 512*1024*1024),
+            max_memory_usage=thresholds_data.get("max_memory_usage", 512 * 1024 * 1024),
             required_surfaces=thresholds_data.get("required_surfaces", 1),
             min_documentation_ratio=thresholds_data.get("min_documentation_ratio", 0.3),
         )
@@ -468,7 +487,9 @@ class SkillMetadata:
             metrics.success_count = quality_data.get("success_count", 0)
             # completion_rate is computed property, not stored directly
             # Set token usage: token_savings_avg * applied_count
-            metrics.total_token_usage = quality_data.get("token_savings_avg", 0.0) * metrics.applied_count if metrics.applied_count > 0 else 0
+            metrics.total_token_usage = (
+                quality_data.get("token_savings_avg", 0.0) * metrics.applied_count if metrics.applied_count > 0 else 0
+            )
 
         # Build metadata
         # Store path relative to cwd for portability, fallback to absolute

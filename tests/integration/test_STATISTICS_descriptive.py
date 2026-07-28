@@ -52,10 +52,13 @@ def calculate_central_tendency(values):
     modes = sorted([k for k, v in counts.items() if v == max_count])
     multimodal = len(modes) > 1
     return {
-        "mean": mean, "median": median,
+        "mean": mean,
+        "median": median,
         "mode": modes if multimodal else modes[0],
         "multimodal": multimodal,
-        "n": n, "n_original": len(values), "n_dropped": dropped,
+        "n": n,
+        "n_original": len(values),
+        "n_dropped": dropped,
     }
 
 
@@ -91,16 +94,22 @@ def calculate_dispersion(values):
     q25 = _percentile(s, 25.0)
     iqr = q75 - q25
     return {
-        "range": range_val, "variance": variance_pop,
+        "range": range_val,
+        "variance": variance_pop,
         "variance_sample": variance_samp,
-        "std": std_pop, "std_sample": std_samp, "iqr": iqr,
-        "n": n, "n_original": len(values), "n_dropped": dropped,
+        "std": std_pop,
+        "std_sample": std_samp,
+        "iqr": iqr,
+        "n": n,
+        "n_original": len(values),
+        "n_dropped": dropped,
     }
 
 
 # ============================================================
 # 1. Central Tendency — odd vs even median branches
 # ============================================================
+
 
 class TestCalculateCentralTendency:
     """Unit tests with hand-verified baselines."""
@@ -184,6 +193,7 @@ class TestCalculateCentralTendency:
 # ============================================================
 # 2. Dispersion — verified against standard formulas
 # ============================================================
+
 
 class TestCalculateDispersion:
     """Unit tests with hand-verified baselines."""

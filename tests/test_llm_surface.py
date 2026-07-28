@@ -41,6 +41,7 @@ async def test_llm_surface_execute_ollama_fallback(llm_surface):
     with patch.dict("os.environ", {}, clear=False):
         # Ensure no cloud keys leak in from the environment during this test
         import em_cubed.surfaces.llm_surface as mod
+
         with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
             with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
                 with patch.object(llm_surface._ollama, "list_models", new=AsyncMock(return_value=["llama3"])):
@@ -56,6 +57,7 @@ async def test_llm_surface_execute_ollama_fallback(llm_surface):
 async def test_llm_surface_error_when_all_unavailable(llm_surface):
     """Test that a clear error is returned when neither cloud nor Ollama is available."""
     import em_cubed.surfaces.llm_surface as mod
+
     with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
         with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)):
             result = await llm_surface.execute("Hello")
@@ -70,6 +72,7 @@ async def test_llm_surface_timeout(llm_surface):
     """Test LLM surface timeout handling."""
     with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
         with patch("litellm.acompletion") as mock_completion:
+
             async def delayed_completion(*args, **kwargs):
                 await asyncio.sleep(0.2)
                 mock_response = MagicMock()
@@ -118,6 +121,7 @@ async def test_llm_surface_health_with_cloud_key(llm_surface):
 async def test_llm_surface_health_with_ollama(llm_surface):
     """Health returns True when Ollama is reachable and no cloud keys are present."""
     import em_cubed.surfaces.llm_surface as mod
+
     with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
         with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
             result = await llm_surface.health()
@@ -128,6 +132,7 @@ async def test_llm_surface_health_with_ollama(llm_surface):
 async def test_llm_surface_health_when_nothing_available(llm_surface):
     """Health returns False when neither cloud keys nor Ollama are available."""
     import em_cubed.surfaces.llm_surface as mod
+
     with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
         with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)):
             result = await llm_surface.health()

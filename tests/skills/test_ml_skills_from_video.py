@@ -2,10 +2,11 @@
 
 import pytest
 
+
 # Test gradient-descent-optimizer (EPIDEMIOLOGY)
 @pytest.mark.asyncio
 async def test_gradient_descent_optimizer():
-    code = '''
+    code = """
 def my_exp(x):
     if x > 50:
         return 1e21
@@ -52,8 +53,9 @@ def gradient_descent(params, lr, max_iter, cost_fn):
 # Test: minimize (x-3)^2 + (y-2)^2
 result, final_cost = gradient_descent([0.0, 0.0], 0.1, 500, lambda x: (x[0] - 3)**2 + (x[1] - 2)**2)
 abs(result[0] - 3.0) < 0.1 and abs(result[1] - 2.0) < 0.1
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -62,7 +64,7 @@ abs(result[0] - 3.0) < 0.1 and abs(result[1] - 2.0) < 0.1
 # Test k-means-clustering (CLINICAL_TRIALS)
 @pytest.mark.asyncio
 async def test_k_means_clustering():
-    code = '''
+    code = """
 def newton_sqrt(n):
     if n < 0:
         return 0.0
@@ -109,8 +111,9 @@ def kmeans(points, k):
 points = [[1,1], [1.5,1.5], [2,2], [5,5], [5.5,5.5], [6,6], [9,1], [9.5,1.5], [10,1]]
 centroids = kmeans(points, 3)
 len(centroids) == 3
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -119,7 +122,7 @@ len(centroids) == 3
 # Test linear-regression (FORENSIC_ECONOMICS)
 @pytest.mark.asyncio
 async def test_linear_regression():
-    code = '''
+    code = """
 def linear_regression(features, targets):
     n = len(features)
     p = len(features[0])
@@ -168,8 +171,9 @@ features = [[1], [2], [3], [4], [5], [6]]
 targets = [3, 5, 7, 9, 11, 13]
 slope, intercept, preds, r2 = linear_regression(features, targets)
 abs(slope[0] - 2.0) < 0.01 and abs(intercept - 1.0) < 0.01
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -178,7 +182,7 @@ abs(slope[0] - 2.0) < 0.01 and abs(intercept - 1.0) < 0.01
 # Test logistic-regression-classifier (MACHINE_LEARNING)
 @pytest.mark.asyncio
 async def test_logistic_regression():
-    code = '''
+    code = """
 def my_exp(x):
     if x > 50:
         return 1e21
@@ -237,8 +241,9 @@ features = [[1], [2], [3], [4], [5], [6]]
 labels = [0, 0, 1, 1, 1, 1]
 weights, bias = logistic_regression(features, labels, 0.5, 1000)
 weights[0] > 0
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
@@ -247,7 +252,7 @@ weights[0] > 0
 # Test naive-bayes-classifier (STATISTICS)
 @pytest.mark.asyncio
 async def test_naive_bayes():
-    code = '''
+    code = """
 def my_exp(x):
     if x > 50:
         return 1e21
@@ -307,8 +312,9 @@ features = [[1.0, 1.0], [1.5, 2.0], [2.0, 1.5], [5.0, 5.0], [5.5, 4.5], [6.0, 5.
 labels = ["A", "A", "A", "B", "B", "B"]
 priors, likelihoods = naive_bayes_train(features, labels)
 len(priors) == 2
-'''
+"""
     from em_cubed.surfaces import PythonSurface
+
     surface = PythonSurface()
     result = await surface.execute(code, {})
     assert result["status"] == "ok"

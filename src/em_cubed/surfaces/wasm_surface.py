@@ -33,8 +33,9 @@ class WASMSurface(SurfaceBase):
         # Fuel budget: max instructions the WASM module may execute.
         # Set EM_CUBED_WASM_FUEL env var to tune. Lower = tighter sandbox.
         self._fuel_limit = int(os.getenv("EM_CUBED_WASM_FUEL", "1_000_000"))
-        logger.info("WASMSurface initialized", available=self._wasm_available,
-                    timeout=self.timeout, fuel_limit=self._fuel_limit)
+        logger.info(
+            "WASMSurface initialized", available=self._wasm_available, timeout=self.timeout, fuel_limit=self._fuel_limit
+        )
 
     def initialize(self) -> None:
         """Initialize the WASM engine with fuel metering enabled."""
@@ -55,6 +56,7 @@ class WASMSurface(SurfaceBase):
         """Check if wasmtime library is installed."""
         try:
             import wasmtime  # noqa: F401
+
             return True
         except ImportError:
             logger.warning("wasmtime not installed for WASM surface")
@@ -76,11 +78,12 @@ class WASMSurface(SurfaceBase):
         """Extract exported function names from WASM source as heuristic_tags."""
         if not wasm_source:
             return []
-        
+
         try:
             import wasmtime
+
             engine = wasmtime.Engine()
-            
+
             # Identify if it is .wat text format or raw/base64 binary wasm
             source_stripped = wasm_source.strip()
             if source_stripped.startswith("(module"):
@@ -91,27 +94,34 @@ class WASMSurface(SurfaceBase):
                     module = wasmtime.Module(engine, binary_data)
                 except Exception:
                     module = wasmtime.Module(engine, wasm_source)
-            
+
             # Extract exported functions
             funcs = []
             for exp in module.exports:
                 try:
-                    if hasattr(exp.type, 'func') and exp.type.func() is not None:
+                    if hasattr(exp.type, "func") and exp.type.func() is not None:
                         funcs.append(exp.name)
                 except Exception:
                     pass  # nosec B110 - best-effort export enumeration; non-security-critical
             return funcs
-            
+
         except Exception as e:
             logger.warning("Failed to extract WASM exports using wasmtime, falling back to regex", error=str(e))
             import re
-            funcs = re.findall(r'\(func\s+(?:\$?(\w+))', wasm_source)
+
+            funcs = re.findall(r"\(func\s+(?:\$?(\w+))", wasm_source)
             return list(dict.fromkeys(funcs))
 
     # WASI network socket import names to block (WASI Preview 1 + Preview 2 names).
     _BLOCKED_WASI_IMPORTS: List[str] = [
-        "sock_accept", "sock_recv", "sock_send", "sock_shutdown",
-        "sock_open", "sock_connect", "sock_listen", "sock_bind",
+        "sock_accept",
+        "sock_recv",
+        "sock_send",
+        "sock_shutdown",
+        "sock_open",
+        "sock_connect",
+        "sock_listen",
+        "sock_bind",
     ]
 
     def _check_network_imports(self, module: "wasmtime.Module") -> Optional[str]:
@@ -177,17 +187,18 @@ class WASMSurface(SurfaceBase):
         # Redirect WASM stdout/stderr to /dev/null (cross-platform via temp files on Windows).
         try:
             import os as _os
+
             null_path = _os.devnull
             wasi_config.stdout_file = null_path
             wasi_config.stderr_file = null_path
         except (AttributeError, Exception):
             pass  # nosec B110 - WasiConfig may not support file redirect on all versions
         store.set_wasi(wasi_config)
-        
+
         # 3. Instantiate the module
         instance = linker.instantiate(store, module)
         exports = instance.exports(store)
-        
+
         # 4. Locate entry function
         entry_point = (context or {}).get("entry_point")
         func = None
@@ -205,24 +216,25 @@ class WASMSurface(SurfaceBase):
                     if isinstance(item, wasmtime.Func):
                         func = item
                         break
-                        
+
         if not func:
             return {"status": "error", "message": "No exported function found in WASM module"}
-            
+
         # 5. Extract input values and map them to arguments
         import wasmtime
+
         func_val = cast(wasmtime.Func, func)
         func_typed = cast("Any", func_val.type(store))
         params: List[Any] = []
-        if hasattr(func_typed, 'params'):
-            params_val = getattr(func_typed, 'params')
-            if hasattr(params_val, 'vals'):
-                params = list(getattr(params_val, 'vals'))
+        if hasattr(func_typed, "params"):
+            params_val = getattr(func_typed, "params")
+            if hasattr(params_val, "vals"):
+                params = list(getattr(params_val, "vals"))
             else:
                 params = list(params_val)
-        
+
         args: List[Any] = []
-        
+
         input_data = (context or {}).get("skill_input", {})
         ctx = context or {}
         if "args" in ctx:
@@ -233,10 +245,10 @@ class WASMSurface(SurfaceBase):
             raw_args = input_data
         else:
             raw_args = []
-            
+
         for i, param_type in enumerate(params):
             val = raw_args[i] if i < len(raw_args) else 0
-            
+
             try:
                 type_str = str(param_type)
                 if "i32" in type_str:
@@ -249,18 +261,15 @@ class WASMSurface(SurfaceBase):
                     args.append(val)
             except Exception:
                 args.append(val)
-                
+
         # 6. Execute exported function
         result_val = func_val(store, *args)  # type: ignore[no-untyped-def,misc]
-        
+
         # In case of multiple return values, return the list or first item
         if isinstance(result_val, list) and len(result_val) == 1:
             result_val = result_val[0]
-            
-        return {
-            "status": "ok",
-            "value": result_val
-        }
+
+        return {"status": "ok", "value": result_val}
 
     async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Compile and execute WebAssembly code safely on the thread executor."""
@@ -271,20 +280,12 @@ class WASMSurface(SurfaceBase):
 
         try:
             loop = asyncio.get_running_loop()
-            result = await loop.run_in_executor(
-                self._executor,
-                self._run_wasm,
-                code,
-                context
-            )
+            result = await loop.run_in_executor(self._executor, self._run_wasm, code, context)
             logger.info("WASM execution successful")
             return result
         except Exception as e:
             logger.exception("WASM execution failed", error=str(e))
-            return {
-                "status": "error",
-                "message": f"WASM execution failed: {str(e)}"
-            }
+            return {"status": "error", "message": f"WASM execution failed: {str(e)}"}
 
     async def health(self) -> bool:
         """Check if the WASM surface is available."""

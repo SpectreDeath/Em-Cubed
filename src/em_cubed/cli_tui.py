@@ -83,33 +83,35 @@ class OntologyTUIDashboard:
         for idx, t in enumerate(active_triples[:5], start=1):
             lines.append(f"   {idx}. ({t.subject}) --[{t.predicate}]--> ({t.object})")
 
-        lines.extend([
-            "--------------------------------------------------------------------------------",
-            " [TOPOS Ω SUBOBJECT CLASSIFIER GAUGE]",
-            f"   Confidence Score : {tv.confidence:.2f} / 1.00",
-            f"   Modal Truth      : {tv.modal_type.value.upper()} (Satisfaction: {tv.is_satisfied()})",
-            "--------------------------------------------------------------------------------",
-            " [KIT FINE TRUTHMAKER GROUNDING (s ⊩ A)]",
-            f"   Proposition      : '{proposition}'",
-            f"   Grounded Status  : {tm.is_satisfied}",
-            f"   Explanation      : {tm.ground_explanation}",
-            "--------------------------------------------------------------------------------",
-            " [ONTOLOGICAL HEALTH MONITOR & SELF-HEALING GUARDRAILS]",
-            f"   Coherence Index  : {health.coherence_index * 100:.1f}%",
-            f"   Health Status    : {health.health_status}",
-            f"   Disjoint Viol.   : {health.disjoint_violations}",
-            "--------------------------------------------------------------------------------",
-            " [QUANTUM-RESISTANT ZERO-KNOWLEDGE PROOF ATTESTATION]",
-            f"   Proof ID         : {zkp.proof_id}",
-            f"   Merkle Root      : {zkp.merkle_state_root[:24]}...",
-            f"   PQC Signature    : {zkp.signature[:24]}...",
-            "--------------------------------------------------------------------------------",
-            " [TRI-ENGINE SYNERGY TELEMETRY (SME 🤝 Em-Cubed 🤝 Strategify)]",
-            "   SME OSINT Perception : ACTIVE (Trust Score: 0.89 / 1.00)",
-            "   Em-Cubed Topos Ω Guard: NECESSARY (100% Satisfaction)",
-            "   Strategify ABM Actors: 4 State Actors Active (Mesa Geo Simulation)",
-            "================================================================================",
-        ])
+        lines.extend(
+            [
+                "--------------------------------------------------------------------------------",
+                " [TOPOS Ω SUBOBJECT CLASSIFIER GAUGE]",
+                f"   Confidence Score : {tv.confidence:.2f} / 1.00",
+                f"   Modal Truth      : {tv.modal_type.value.upper()} (Satisfaction: {tv.is_satisfied()})",
+                "--------------------------------------------------------------------------------",
+                " [KIT FINE TRUTHMAKER GROUNDING (s ⊩ A)]",
+                f"   Proposition      : '{proposition}'",
+                f"   Grounded Status  : {tm.is_satisfied}",
+                f"   Explanation      : {tm.ground_explanation}",
+                "--------------------------------------------------------------------------------",
+                " [ONTOLOGICAL HEALTH MONITOR & SELF-HEALING GUARDRAILS]",
+                f"   Coherence Index  : {health.coherence_index * 100:.1f}%",
+                f"   Health Status    : {health.health_status}",
+                f"   Disjoint Viol.   : {health.disjoint_violations}",
+                "--------------------------------------------------------------------------------",
+                " [QUANTUM-RESISTANT ZERO-KNOWLEDGE PROOF ATTESTATION]",
+                f"   Proof ID         : {zkp.proof_id}",
+                f"   Merkle Root      : {zkp.merkle_state_root[:24]}...",
+                f"   PQC Signature    : {zkp.signature[:24]}...",
+                "--------------------------------------------------------------------------------",
+                " [TRI-ENGINE SYNERGY TELEMETRY (SME 🤝 Em-Cubed 🤝 Strategify)]",
+                "   SME OSINT Perception : ACTIVE (Trust Score: 0.89 / 1.00)",
+                "   Em-Cubed Topos Ω Guard: NECESSARY (100% Satisfaction)",
+                "   Strategify ABM Actors: 4 State Actors Active (Mesa Geo Simulation)",
+                "================================================================================",
+            ]
+        )
 
         return "\n".join(lines)
 

@@ -35,12 +35,12 @@ def execute_chi_square(contingency_table, alpha=0.05):
     row_tot = [sum(row) for row in observed]
     col_tot = [sum(observed[i][j] for i in range(r)) for j in range(c)]
     n = sum(row_tot)
-    expected = [[row_tot[i]*col_tot[j]/n for j in range(c)] for i in range(r)]
-    chi2 = sum((observed[i][j]-expected[i][j])**2/expected[i][j]
-               for i in range(r) for j in range(c))
-    df = (r-1)*(c-1)
+    expected = [[row_tot[i] * col_tot[j] / n for j in range(c)] for i in range(r)]
+    chi2 = sum((observed[i][j] - expected[i][j]) ** 2 / expected[i][j] for i in range(r) for j in range(c))
+    df = (r - 1) * (c - 1)
     try:
         from scipy.stats import chi2 as chi2_dist
+
         p_value = float(chi2_dist.sf(chi2, df))
     except ImportError:
         if chi2 < 1e-10:
@@ -49,7 +49,7 @@ def execute_chi_square(contingency_table, alpha=0.05):
             p_value = 1e-6
         else:
             p_value = 0.5
-    min_dim = min(r-1, c-1)
+    min_dim = min(r - 1, c - 1)
     effect_size = math.sqrt(chi2 / (n * min_dim)) if min_dim > 0 and n > 0 else 0.0
     warnings = []
     if any(e < 5.0 for row in expected for e in row):
@@ -60,14 +60,21 @@ def execute_chi_square(contingency_table, alpha=0.05):
     else:
         decision = "fail_to_reject_null"
         state = "not_rejected"
-    return {"statistic": chi2, "df": df, "p_value": p_value,
-            "effect_size": effect_size, "decision": decision,
-            "state": state, "warnings": warnings}
+    return {
+        "statistic": chi2,
+        "df": df,
+        "p_value": p_value,
+        "effect_size": effect_size,
+        "decision": decision,
+        "state": state,
+        "warnings": warnings,
+    }
 
 
 # ============================================================
 # Shared math helpers (extracted from SKILL.md implementations)
 # ============================================================
+
 
 def _erfinv(p):
     if p <= 0.0:
@@ -75,33 +82,37 @@ def _erfinv(p):
     if p >= 1.0:
         return float("inf")
     A = [
-        -3.969683028665376e+01, 2.209460984245205e+02,
-        -2.759285104469687e+02,  1.383577518672690e+02,
-        -3.066479806614716e+01,  2.506628277459239e+00,
+        -3.969683028665376e01,
+        2.209460984245205e02,
+        -2.759285104469687e02,
+        1.383577518672690e02,
+        -3.066479806614716e01,
+        2.506628277459239e00,
     ]
     B = [
-        -5.447609879822406e+01, -1.615858368580409e+02,
-         1.556049798740891e+02, -6.680131188771972e+01,
-         1.328068155288572e+01,
+        -5.447609879822406e01,
+        -1.615858368580409e02,
+        1.556049798740891e02,
+        -6.680131188771972e01,
+        1.328068155288572e01,
     ]
     sp = 0.140
     if p < sp:
         q = math.sqrt(-2.0 * math.log(p / 2.0))
-        num = (((((A[0]*q+A[1])*q+A[2])*q+A[3])*q+A[4])*q+A[5])
-        den = (((((B[0]*q+B[1])*q+B[2])*q+B[3])*q+B[4])*q+1.0)
-        return -(num/den)
-    q = math.sqrt(-2.0*math.log(1.0-p))
-    num = (((((A[0]*q+A[1])*q+A[2])*q+A[3])*q+A[4])*q+A[5])
-    den = (((((B[0]*q+B[1])*q+B[2])*q+B[3])*q+B[4])*q+1.0)
-    return num/den
+        num = ((((A[0] * q + A[1]) * q + A[2]) * q + A[3]) * q + A[4]) * q + A[5]
+        den = ((((B[0] * q + B[1]) * q + B[2]) * q + B[3]) * q + B[4]) * q + 1.0
+        return -(num / den)
+    q = math.sqrt(-2.0 * math.log(1.0 - p))
+    num = ((((A[0] * q + A[1]) * q + A[2]) * q + A[3]) * q + A[4]) * q + A[5]
+    den = ((((B[0] * q + B[1]) * q + B[2]) * q + B[3]) * q + B[4]) * q + 1.0
+    return num / den
 
 
 PROLOG_Z_MAP = {0.90: 1.645, 0.95: 1.960, 0.99: 2.576}
 
 
 def _clean(values):
-    return [v for v in values
-            if v is not None and not (isinstance(v, float) and math.isnan(v))]
+    return [v for v in values if v is not None and not (isinstance(v, float) and math.isnan(v))]
 
 
 def evaluate_p_value(p_value, alpha=0.05):
@@ -110,10 +121,8 @@ def evaluate_p_value(p_value, alpha=0.05):
     if not (0.0 < alpha < 1.0):
         raise ValueError(f"alpha must be in (0,1), got {alpha}")
     if p_value < alpha:
-        return {"decision": "reject_null", "state": "rejected",
-                "p_value": p_value, "alpha": alpha}
-    return {"decision": "fail_to_reject_null", "state": "not_rejected",
-            "p_value": p_value, "alpha": alpha}
+        return {"decision": "reject_null", "state": "rejected", "p_value": p_value, "alpha": alpha}
+    return {"decision": "fail_to_reject_null", "state": "not_rejected", "p_value": p_value, "alpha": alpha}
 
 
 def calculate_mean_ci(values, confidence_level=0.95):
@@ -122,7 +131,7 @@ def calculate_mean_ci(values, confidence_level=0.95):
     if n < 2:
         raise ValueError("insufficient_sample_size")
     mean = sum(clean) / n
-    var = sum((v - mean)**2 for v in clean) / (n - 1)
+    var = sum((v - mean) ** 2 for v in clean) / (n - 1)
     s = math.sqrt(var)
     se = s / math.sqrt(n)
     if confidence_level in PROLOG_Z_MAP:
@@ -131,9 +140,16 @@ def calculate_mean_ci(values, confidence_level=0.95):
         tail = (1.0 - confidence_level) / 2.0
         z = math.sqrt(2.0) * _erfinv(1.0 - tail)
     margin = z * se
-    return {"mean": mean, "std": s, "n": n, "z_score": z,
-            "ci_lower": mean - margin, "ci_upper": mean + margin,
-            "standard_error": se, "margin_of_error": margin}
+    return {
+        "mean": mean,
+        "std": s,
+        "n": n,
+        "z_score": z,
+        "ci_lower": mean - margin,
+        "ci_upper": mean + margin,
+        "standard_error": se,
+        "margin_of_error": margin,
+    }
 
 
 def _chi2_for_table(table):
@@ -142,16 +158,16 @@ def _chi2_for_table(table):
     row_tot = [sum(row) for row in o]
     col_tot = [sum(o[i][j] for i in range(r)) for j in range(c)]
     n = sum(row_tot)
-    e = [[row_tot[i]*col_tot[j]/n for j in range(c)] for i in range(r)]
-    chi2 = sum((o[i][j]-e[i][j])**2/e[i][j]
-               for i in range(r) for j in range(c))
-    df = (r-1)*(c-1)
+    e = [[row_tot[i] * col_tot[j] / n for j in range(c)] for i in range(r)]
+    chi2 = sum((o[i][j] - e[i][j]) ** 2 / e[i][j] for i in range(r) for j in range(c))
+    df = (r - 1) * (c - 1)
     return chi2, df
 
 
 # ============================================================
 # 1. P-Value Evaluation (first-order logic threshold gate)
 # ============================================================
+
 
 class TestEvaluatePValue:
     def test_reject_at_p005_alpha005(self):
@@ -192,12 +208,15 @@ class TestEvaluatePValue:
         with pytest.raises(ValueError):
             evaluate_p_value(0.05, 1.0)
 
-    @pytest.mark.parametrize("p,alpha,dec", [
-        (0.001, 0.05, "reject_null"),
-        (0.049, 0.05, "reject_null"),
-        (0.050, 0.05, "fail_to_reject_null"),
-        (0.051, 0.05, "fail_to_reject_null"),
-    ])
+    @pytest.mark.parametrize(
+        "p,alpha,dec",
+        [
+            (0.001, 0.05, "reject_null"),
+            (0.049, 0.05, "reject_null"),
+            (0.050, 0.05, "fail_to_reject_null"),
+            (0.051, 0.05, "fail_to_reject_null"),
+        ],
+    )
     def test_threshold_table(self, p, alpha, dec):
         assert evaluate_p_value(p, alpha)["decision"] == dec
 
@@ -205,6 +224,7 @@ class TestEvaluatePValue:
 # ============================================================
 # 2. Mean Confidence Interval — z-score contract
 # ============================================================
+
 
 class TestCalculateMeanConfidenceInterval:
     """z-score from Prolog lookup table; interval from Python."""
@@ -263,7 +283,7 @@ class TestCalculateMeanConfidenceInterval:
         """Hardcoded anchor: x=[3,5,7,9], n=4, mean=6, s=sqrt(20/3)=2.582."""
         values = [3, 5, 7, 9]
         r = calculate_mean_ci(values, 0.95)
-        se = math.sqrt(20.0/3.0) / 2.0  # s/sqrt(4)
+        se = math.sqrt(20.0 / 3.0) / 2.0  # s/sqrt(4)
         margin = 1.96 * se
         assert abs(r["mean"] - 6.0) < 1e-12
         assert abs(r["z_score"] - 1.96) < 1e-10
@@ -279,6 +299,7 @@ class TestCalculateMeanConfidenceInterval:
 # ============================================================
 # 3. Chi-Square Independence — structural + numeric
 # ============================================================
+
 
 class TestExecuteChiSquareIndependence:
     """Structural Prolog gates + Python χ² computation."""

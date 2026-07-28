@@ -113,6 +113,7 @@ def test_health(sqlite_surface):
     """Test health check returns True (sqlite3 always available)."""
     # health is sync method
     import asyncio
+
     assert asyncio.run(sqlite_surface.health()) is True
 
 

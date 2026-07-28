@@ -33,7 +33,7 @@ async def test_clingo_statlib_numeric_benchmark(clingo_surface):
     """Benchmark Clingo ASP reasoning over StatLib-style numeric observations."""
     observations = STATLIB_STYLE_DATASET["observations"]
     rows = [
-        f"observation({row['id']}, {int(row['x']*10)}, {int(row['y']*10)}, {1 if row['class'] == 'A' else 2})."
+        f"observation({row['id']}, {int(row['x'] * 10)}, {int(row['y'] * 10)}, {1 if row['class'] == 'A' else 2})."
         for row in observations
     ]
     code = "\n".join(

@@ -15,6 +15,7 @@ def llm_surface():
 # Basic availability / metadata
 # ---------------------------------------------------------------------------
 
+
 def test_llm_surface_initialization(llm_surface):
     assert llm_surface.name == "llm"
     assert "Unified LLM execution" in llm_surface.description
@@ -36,6 +37,7 @@ def test_llm_surface_extract_tags():
 # ---------------------------------------------------------------------------
 # No-cloud-keys paths (Ollama fallback)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_ollama_fallback_success(llm_surface):
@@ -91,6 +93,7 @@ async def test_all_unavailable_returns_error(llm_surface):
 # Cloud LiteLLM path
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_cloud_path_non_streaming(llm_surface):
     """Non-streaming cloud call returns the message content."""
@@ -117,6 +120,7 @@ async def test_cloud_path_streaming(llm_surface):
     """Streaming cloud call concatenates delta content from all chunks."""
     with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
         with patch("litellm.acompletion") as mock_acompletion:
+
             async def mock_stream(*args, **kwargs):
                 for word in ["Hello", " ", "world"]:
                     chunk = MagicMock()
@@ -189,11 +193,13 @@ async def test_litellm_error_surfaces_error_status(llm_surface):
 # Timeout
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_timeout_handling(llm_surface):
     """Execution exceeding the timeout returns a timeout error."""
     with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
         with patch("litellm.acompletion") as mock_completion:
+
             async def slow(*args, **kwargs):
                 await asyncio.sleep(0.3)
                 return MagicMock()
@@ -211,6 +217,7 @@ async def test_timeout_handling(llm_surface):
 # Health
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.asyncio
 async def test_health_cloud_key_present(llm_surface):
     with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
@@ -220,6 +227,7 @@ async def test_health_cloud_key_present(llm_surface):
 @pytest.mark.asyncio
 async def test_health_ollama_only(llm_surface):
     import em_cubed.surfaces.llm_surface as mod
+
     with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
         with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
             assert await llm_surface.health() is True
@@ -228,6 +236,7 @@ async def test_health_ollama_only(llm_surface):
 @pytest.mark.asyncio
 async def test_health_nothing_available(llm_surface):
     import em_cubed.surfaces.llm_surface as mod
+
     with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
         with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)):
             assert await llm_surface.health() is False
@@ -235,4 +244,5 @@ async def test_health_nothing_available(llm_surface):
 
 if __name__ == "__main__":
     import pytest
+
     pytest.main([__file__, "-v"])

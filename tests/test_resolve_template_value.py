@@ -1,4 +1,4 @@
-﻿"""Tests for resolve_template_value and _resolve_path in distributed workflow."""
+"""Tests for resolve_template_value and _resolve_path in distributed workflow."""
 
 from em_cubed.workflow.distributed import resolve_template_value, _resolve_path
 
@@ -43,12 +43,6 @@ def test_resolve_template_value_non_string():
 
 def test_resolve_template_value_nested_dict_and_list():
     results = {"t1": {"res": "ok"}}
-    data = {
-        "key1": "{{ tasks.t1.res }}",
-        "key2": ["{{ tasks.t1.res }}", 5]
-    }
-    expected = {
-        "key1": "ok",
-        "key2": ["ok", 5]
-    }
+    data = {"key1": "{{ tasks.t1.res }}", "key2": ["{{ tasks.t1.res }}", 5]}
+    expected = {"key1": "ok", "key2": ["ok", 5]}
     assert resolve_template_value(data, results) == expected

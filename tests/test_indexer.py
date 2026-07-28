@@ -1,6 +1,13 @@
 import pytest
 import json
-from em_cubed.indexer import reindex, reindex_incremental, get_skill_metadata, extract_fenced_block, extract_prolog_tags, extract_hy_tags
+from em_cubed.indexer import (
+    reindex,
+    reindex_incremental,
+    get_skill_metadata,
+    extract_fenced_block,
+    extract_prolog_tags,
+    extract_hy_tags,
+)
 
 
 class TestIndexerFunctions:
@@ -331,6 +338,7 @@ Adds two numbers.
 
         # Initial full reindex
         from em_cubed.indexer import reindex
+
         reindex(skills_dir, registry_file)
 
         with open(registry_file) as f:
@@ -383,6 +391,7 @@ Original purpose.
 
         # Initial full reindex
         from em_cubed.indexer import reindex
+
         reindex(skills_dir, registry_file)
 
         with open(registry_file) as f:
@@ -441,6 +450,7 @@ Second skill
 """)
 
         from em_cubed.indexer import reindex
+
         reindex(skills_dir, registry_file)
 
         with open(registry_file) as f:
@@ -451,6 +461,7 @@ Second skill
 
         # Remove skill1 directory
         import shutil
+
         shutil.rmtree(dir1)
 
         reindex_incremental(skills_dir, registry_file)

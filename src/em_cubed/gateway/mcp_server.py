@@ -162,6 +162,7 @@ class EmCubedMCPServer:
         if name == "em_cubed_search_skills":
             from em_cubed.search import search_registry
             from pathlib import Path
+
             query = args.get("query", "")
             max_res = args.get("max_results", 10)
             query = args.get("query", "")
@@ -173,6 +174,7 @@ class EmCubedMCPServer:
                 matches = search_registry(query, registry_path=reg_path, max_results=max_res)
             else:
                 from em_cubed.skills import SkillRegistry
+
                 r = SkillRegistry(Path("skills"), reg_path)
                 matches = [s.to_dict() for s in r.search(query)[:max_res]] if hasattr(r, "search") else []  # type: ignore[attr-defined]
             return {
@@ -192,14 +194,31 @@ class EmCubedMCPServer:
 
         elif name == "em_cubed_list_surfaces":
             from em_cubed.surfaces import (
-                PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
-                SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
-                ClingoSurface, KanrenSurface, JanusSurface
+                PythonSurface,
+                PrologSurface,
+                Z3Surface,
+                DatalogSurface,
+                SQLiteSurface,
+                HySurface,
+                QuickJSSurface,
+                WASMSurface,
+                ClingoSurface,
+                KanrenSurface,
+                JanusSurface,
             )
+
             raw_classes = [
-                PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
-                SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
-                ClingoSurface, KanrenSurface, JanusSurface
+                PythonSurface,
+                PrologSurface,
+                Z3Surface,
+                DatalogSurface,
+                SQLiteSurface,
+                HySurface,
+                QuickJSSurface,
+                WASMSurface,
+                ClingoSurface,
+                KanrenSurface,
+                JanusSurface,
             ]
             surfaces = [cls() for cls in raw_classes if cls is not None]
             return {
@@ -250,12 +269,18 @@ class EmCubedMCPServer:
                 dsq_texts=["What is the supply risk?"],
                 cq_texts=["Which suppliers provide Folic Acid?"],
             )
-            formatted_triples = [{"subject": t.subject, "predicate": t.predicate, "object": t.object} for t in elicitation_report.triples]
+            formatted_triples = [
+                {"subject": t.subject, "predicate": t.predicate, "object": t.object} for t in elicitation_report.triples
+            ]
             return {"triples_count": len(elicitation_report.triples), "triples": formatted_triples}
 
         elif name == "em_cubed_evaluate_topos":
             truth_val = SubobjectClassifier.evaluate_confidence(float(args["confidence"]))
-            return {"confidence": truth_val.confidence, "modal_type": truth_val.modal_type.value, "satisfied": truth_val.is_satisfied()}
+            return {
+                "confidence": truth_val.confidence,
+                "modal_type": truth_val.modal_type.value,
+                "satisfied": truth_val.is_satisfied(),
+            }
 
         elif name == "em_cubed_extract_truthmakers":
             t = OntologyTriple(subject=args["subject"], predicate="relatesTo", object=args["object"])
@@ -264,7 +289,11 @@ class EmCubedMCPServer:
                 state_triples=[t],
                 relevant_predicates=["relatesTo"],
             )
-            return {"proposition": tm.proposition, "is_satisfied": tm.is_satisfied, "ground_explanation": tm.ground_explanation}
+            return {
+                "proposition": tm.proposition,
+                "is_satisfied": tm.is_satisfied,
+                "ground_explanation": tm.ground_explanation,
+            }
 
         elif name == "em_cubed_prove_zkp":
             t = OntologyTriple(subject=args["subject"], predicate="relatesTo", object=args["object"])
@@ -317,70 +346,82 @@ def _handle_request(server: EmCubedMCPServer, request: dict[str, Any]) -> None:
 
     try:
         if method == "initialize":
-            _write_response({
-                "jsonrpc": "2.0",
-                "id": req_id,
-                "result": {
-                    "protocolVersion": "2024-11-05",
-                    "serverInfo": {
-                        "name": "em-cubed",
-                        "version": "0.8.0",
+            _write_response(
+                {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {
+                        "protocolVersion": "2024-11-05",
+                        "serverInfo": {
+                            "name": "em-cubed",
+                            "version": "0.8.0",
+                        },
+                        "capabilities": {"tools": {}},
                     },
-                    "capabilities": {"tools": {}},
-                },
-            })
+                }
+            )
 
         elif method == "notifications/initialized":
             # Client acknowledgment — no response required.
             pass
 
         elif method == "tools/list":
-            _write_response({
-                "jsonrpc": "2.0",
-                "id": req_id,
-                "result": {"tools": server.TOOLS},
-            })
+            _write_response(
+                {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": {"tools": server.TOOLS},
+                }
+            )
 
         elif method == "tools/call":
             tool_name = params.get("name", "")
             tool_args = params.get("arguments", {})
             try:
                 result = server.call_tool(tool_name, tool_args)
-                _write_response({
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "result": {
-                        "content": [{"type": "text", "text": json.dumps(result)}],
-                        "isError": False,
-                    },
-                })
+                _write_response(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {
+                            "content": [{"type": "text", "text": json.dumps(result)}],
+                            "isError": False,
+                        },
+                    }
+                )
             except Exception as exc:
-                _write_response({
-                    "jsonrpc": "2.0",
-                    "id": req_id,
-                    "result": {
-                        "content": [{"type": "text", "text": str(exc)}],
-                        "isError": True,
-                    },
-                })
+                _write_response(
+                    {
+                        "jsonrpc": "2.0",
+                        "id": req_id,
+                        "result": {
+                            "content": [{"type": "text", "text": str(exc)}],
+                            "isError": True,
+                        },
+                    }
+                )
 
         elif method == "ping":
             _write_response({"jsonrpc": "2.0", "id": req_id, "result": {}})
 
         else:
-            _write_response({
-                "jsonrpc": "2.0",
-                "id": req_id,
-                "error": {"code": -32601, "message": f"Method not found: {method}"},
-            })
+            _write_response(
+                {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32601, "message": f"Method not found: {method}"},
+                }
+            )
 
     except Exception as exc:
         logger.exception("MCP request handler error: method=%s, error=%s", method, str(exc))
-        _write_response({
-            "jsonrpc": "2.0",
-            "id": req_id,
-            "error": {"code": -32603, "message": f"Internal error: {exc}"},
-        })
+        _write_response(
+            {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32603, "message": f"Internal error: {exc}"},
+            }
+        )
 
 
 def run_mcp_server() -> None:
@@ -399,10 +440,7 @@ def run_mcp_server() -> None:
     logger.info("Em-Cubed MCP Server started with %d tools", len(server.TOOLS))
 
     # Emit an MCP-compliant ready notification on stderr (not stdout, which is JSON-RPC channel).
-    sys.stderr.write(
-        json.dumps({"status": "Em-Cubed MCP Server Running",
-                    "tools_count": len(server.TOOLS)}) + "\n"
-    )
+    sys.stderr.write(json.dumps({"status": "Em-Cubed MCP Server Running", "tools_count": len(server.TOOLS)}) + "\n")
     sys.stderr.flush()
 
     for raw_line in sys.stdin:
@@ -412,10 +450,12 @@ def run_mcp_server() -> None:
         try:
             request = json.loads(line)
         except json.JSONDecodeError as exc:
-            _write_response({
-                "jsonrpc": "2.0",
-                "id": None,
-                "error": {"code": -32700, "message": f"Parse error: {exc}"},
-            })
+            _write_response(
+                {
+                    "jsonrpc": "2.0",
+                    "id": None,
+                    "error": {"code": -32700, "message": f"Parse error: {exc}"},
+                }
+            )
             continue
         _handle_request(server, request)

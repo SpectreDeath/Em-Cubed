@@ -81,7 +81,9 @@ class DualEngineSwarmOrchestrator:
         modal_tv = SubobjectClassifier.evaluate_confidence(config.confidence_threshold)
 
         # Stage 4: Kit Fine Exact Truthmaker Semantics (s ⊩ A)
-        sample_triple = triples[0] if triples else OntologyTriple(subject="SwarmNode", predicate="status", object="Active")
+        sample_triple = (
+            triples[0] if triples else OntologyTriple(subject="SwarmNode", predicate="status", object="Active")
+        )
         truthmaker = ExactTruthmakerClassifier.classify_exact_truthmaker(
             proposition=config.domain_prompt,
             state_triples=[sample_triple],

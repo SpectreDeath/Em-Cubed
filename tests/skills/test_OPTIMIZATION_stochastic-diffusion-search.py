@@ -6,7 +6,9 @@ from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
 
-SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "stochastic-diffusion-search" / "SKILL.md")
+SKILL_FILE = Path(
+    Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "stochastic-diffusion-search" / "SKILL.md"
+)
 SKILL_ID = "OPTIMIZATION/stochastic-diffusion-search"
 
 
@@ -53,10 +55,11 @@ class TestSDSOptimizerSkill:
     async def test_skill_execution(self, test_runner, test_generator):
         """Test basic skill execution."""
         from em_cubed.skills.metadata import SkillMetadata
+
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         if not metadata_dict:
             pytest.skip("Skill metadata not available")
-        
+
         metadata = SkillMetadata.from_frontmatter({}, "", SKILL_FILE)
         # Populate from dict
         for key, value in metadata_dict.items():

@@ -92,7 +92,8 @@ class OntologyEventStreamProcessor:
         elif event.event_type == EventType.MUTATE_PROPERTY:
             # Replace existing subject-predicate triples with new object
             self.active_ledger = [
-                t for t in self.active_ledger
+                t
+                for t in self.active_ledger
                 if not (t.subject == event.triple.subject and t.predicate == event.triple.predicate)
             ]
             self.active_ledger.append(event.triple)

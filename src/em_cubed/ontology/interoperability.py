@@ -90,15 +90,17 @@ class SHACLConstraintGenerator:
         ]
 
         for idx, fc in enumerate(functional_constraints, 1):
-            lines.extend([
-                f":FunctionalShape_{idx} a sh:NodeShape ;",
-                "  sh:targetClass :Thing ;",
-                "  sh:property [",
-                f"    sh:path :{fc.predicate} ;",
-                "    sh:maxCount 1 ;",
-                "  ] .",
-                "",
-            ])
+            lines.extend(
+                [
+                    f":FunctionalShape_{idx} a sh:NodeShape ;",
+                    "  sh:targetClass :Thing ;",
+                    "  sh:property [",
+                    f"    sh:path :{fc.predicate} ;",
+                    "    sh:maxCount 1 ;",
+                    "  ] .",
+                    "",
+                ]
+            )
 
         logger.info("Generated %d SHACL shapes.", len(functional_constraints))
         return "\n".join(lines)

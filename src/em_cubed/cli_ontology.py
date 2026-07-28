@@ -106,7 +106,9 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
             dsq_texts=["What is the supply risk?"],
             cq_texts=["Which suppliers provide Folic Acid?"],
         )
-        print(f"[Knowledge Elicitation] Generated {len(report.triples)} triples and {len(report.common_logic_echoes)} CL echoes.")
+        print(
+            f"[Knowledge Elicitation] Generated {len(report.triples)} triples and {len(report.common_logic_echoes)} CL echoes."
+        )
         return 0
 
     elif subcommand == "truthmaker":
@@ -116,7 +118,9 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
             state_triples=[sample_triple],
             relevant_predicates=args.predicates,
         )
-        print(f"[Truthmaker Semantics] Proposition '{args.proposition}' Satisfied: {tm.is_satisfied}. Ground: {tm.ground_explanation}")
+        print(
+            f"[Truthmaker Semantics] Proposition '{args.proposition}' Satisfied: {tm.is_satisfied}. Ground: {tm.ground_explanation}"
+        )
         return 0
 
     elif subcommand == "induce":
@@ -135,8 +139,16 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
 
     elif subcommand == "migrate":
         from em_cubed.ontology.schema_evolution import AutomatedTripleMigrationEngine, SchemaMigrationStep
+
         triples = [OntologyTriple(subject="SubjectA", predicate=args.from_pred, object="Value1")]
-        steps = [SchemaMigrationStep(step_name="CLIMigration", action_type="RENAME_PREDICATE", old_value=args.from_pred, new_value=args.to_pred)]
+        steps = [
+            SchemaMigrationStep(
+                step_name="CLIMigration",
+                action_type="RENAME_PREDICATE",
+                old_value=args.from_pred,
+                new_value=args.to_pred,
+            )
+        ]
         migrated = AutomatedTripleMigrationEngine.migrate_triples(triples, steps)
         print(f"[Schema Evolution] Migrated predicate '{args.from_pred}' -> '{migrated[0].predicate}'")
         return 0
@@ -149,7 +161,9 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         if args.format == "turtle":
             content = RDFSerializer.to_turtle(triples)
         else:
-            content = SHACLConstraintGenerator.generate_shacl_shapes([FunctionalPropertyConstraint(predicate="subClassOf")])
+            content = SHACLConstraintGenerator.generate_shacl_shapes(
+                [FunctionalPropertyConstraint(predicate="subClassOf")]
+            )
 
         with open(args.output, "w", encoding="utf-8") as f:
             f.write(content)
@@ -159,7 +173,9 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
     elif subcommand == "prove":
         from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
 
-        sample: list[OntologyTriple] = [OntologyTriple(subject="SubjectA", predicate=str(args.predicates[0]), object="Value1")]
+        sample: list[OntologyTriple] = [
+            OntologyTriple(subject="SubjectA", predicate=str(args.predicates[0]), object="Value1")
+        ]
         commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(args.proposition, sample, list(args.predicates))
         print(f"[ZK Attestation] Proof ID: {commitment.proof_id}")
         print(f"  Proposition Hash: {commitment.proposition_hash[:16]}...")
@@ -178,15 +194,23 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
 
         health_report = OntologicalHealthMonitor.audit_tri_engine_health()
         print("Tri-Engine Cross-Repository Health Audit:")
-        print(f"  SME Status           : {health_report['sme_status']} (Trust Index: {health_report['sme_trust_index']})")
-        print(f"  Em-Cubed Status      : {health_report['em_cubed_status']} (Coherence: {health_report['em_cubed_coherence']})")
-        print(f"  Strategify Status    : {health_report['strategify_status']} ({health_report['strategify_unit_tests']} Unit Tests)")
+        print(
+            f"  SME Status           : {health_report['sme_status']} (Trust Index: {health_report['sme_trust_index']})"
+        )
+        print(
+            f"  Em-Cubed Status      : {health_report['em_cubed_status']} (Coherence: {health_report['em_cubed_coherence']})"
+        )
+        print(
+            f"  Strategify Status    : {health_report['strategify_status']} ({health_report['strategify_unit_tests']} Unit Tests)"
+        )
         print(f"  Coherence Index      : {health_report['tri_engine_coherence_index'] * 100:.1f}%")
         print(f"  Overall Health       : {health_report['health_status']}")
         return 0
 
     else:
-        print("Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove, tui, mcp, health).")
+        print(
+            "Please specify a valid ontology subcommand (validate, elicit, truthmaker, induce, visualize, migrate, export, prove, tui, mcp, health)."
+        )
         return 1
 
 

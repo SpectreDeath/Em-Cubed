@@ -12,7 +12,6 @@ class SimpleState:
 
 
 class SimpleLoopSkill(BaseLoopySkill[SimpleState, int]):
-
     def initialize_state(self, count: int) -> SimpleState:
         return SimpleState(count=count)
 

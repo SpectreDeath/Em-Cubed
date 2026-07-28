@@ -30,8 +30,7 @@ def compute_autocorrelation(values, lag):
     if variance_value == 0:
         return 0.0
     covariance = sum(
-        (values[index] - mean_value) * (values[index - lag] - mean_value)
-        for index in range(lag, len(values))
+        (values[index] - mean_value) * (values[index - lag] - mean_value) for index in range(lag, len(values))
     )
     return covariance / ((len(values) - lag) * variance_value)
 
@@ -50,7 +49,7 @@ def compute_pacf(values, max_lag=20):
         pacf.append(r1 / r0 if r0 != 0 else 0.0)
     for lag in range(2, max_lag + 1):
         pacf.append(compute_autocorrelation(values, lag))
-    return pacf[:max_lag + 1]
+    return pacf[: max_lag + 1]
 
 
 def adf_test(values):
@@ -67,11 +66,7 @@ def adf_test(values):
     mean1 = compute_mean(values[:half])
     mean2 = compute_mean(values[half:])
     pooled_variance = (compute_variance(values[:half]) + compute_variance(values[half:])) / 2
-    statistic = (
-        (mean1 - mean2) / math.sqrt(pooled_variance * sample_size)
-        if pooled_variance > 0
-        else 0.0
-    )
+    statistic = (mean1 - mean2) / math.sqrt(pooled_variance * sample_size) if pooled_variance > 0 else 0.0
     stationary = statistic < -2.86
 
     return {
@@ -94,10 +89,9 @@ def kpss_test(values):
 
     mean_value = compute_mean(values)
     residuals = [value - mean_value for value in values]
-    cumulative_variance = sum(
-        sum(residual**2 for residual in residuals[:index + 1])
-        for index in range(sample_size)
-    ) / sample_size
+    cumulative_variance = (
+        sum(sum(residual**2 for residual in residuals[: index + 1]) for index in range(sample_size)) / sample_size
+    )
     trend_variance = compute_variance(values)
     statistic = cumulative_variance / trend_variance if trend_variance > 0 else 0.0
     stationary = statistic < 0.74

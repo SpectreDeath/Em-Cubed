@@ -20,7 +20,7 @@ class ModalType(Enum):
 
     ASSERTION = "Assertion"  # Standard factual assertion
     NECESSARY = "Necessary"  # Box (Must hold in all accessible worlds)
-    POSSIBLE = "Possible"    # Diamond (Holds in at least one accessible world)
+    POSSIBLE = "Possible"  # Diamond (Holds in at least one accessible world)
 
 
 @dataclass
@@ -86,7 +86,11 @@ class SubobjectClassifier:
     def evaluate_confidence(confidence: float) -> TruthValue:
         """Classify confidence rating into modal truth value in Omega."""
         is_true = confidence >= 0.50
-        modal_type = ModalType.NECESSARY if confidence >= 0.90 else (ModalType.POSSIBLE if confidence >= 0.50 else ModalType.ASSERTION)
+        modal_type = (
+            ModalType.NECESSARY
+            if confidence >= 0.90
+            else (ModalType.POSSIBLE if confidence >= 0.50 else ModalType.ASSERTION)
+        )
         return TruthValue(
             is_boolean=is_true,
             confidence=confidence,

@@ -1,4 +1,5 @@
 """Base class for surface plugins."""
+
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, List
 import asyncio
@@ -10,6 +11,7 @@ logger = structlog.get_logger()
 
 class SurfaceTimeoutError(Exception):
     """Raised when a surface operation times out."""
+
     pass
 
 
@@ -24,7 +26,7 @@ class SurfacePlugin(ABC):
         """
         self.timeout = timeout
         self._executor: Optional[Any] = None  # Thread pool executor for async execution
-        self._substrate: Dict[str, Any] = {}   # Shared data substrate across surfaces
+        self._substrate: Dict[str, Any] = {}  # Shared data substrate across surfaces
 
     @property
     @abstractmethod
@@ -96,13 +98,9 @@ class SurfacePlugin(ABC):
         """
         try:
             result = await asyncio.wait_for(
-                self.execute(code, context),
-                timeout=self.timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
+                self.execute(code, context), timeout=self.timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
             )
             return result
         except asyncio.TimeoutError:
             logger.warning("Surface execution timed out", timeout=self.timeout)
-            return {
-                "status": "error",
-                "message": f"Execution timed out after {self.timeout}s"
-            }
+            return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}

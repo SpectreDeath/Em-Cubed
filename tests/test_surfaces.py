@@ -4,6 +4,7 @@ from unittest.mock import patch
 # Try to import surfaces, skip tests if dependencies are missing
 try:
     from em_cubed.surfaces import PythonSurface, HySurface, Z3Surface, DatalogSurface, JanusSurface, PrologSurface
+
     _core_surfaces_available = True
     _hy_available = HySurface is not None and HySurface().available
     _z3_available = Z3Surface is not None and Z3Surface().available
@@ -98,7 +99,7 @@ factorial(5)
     @pytest.mark.asyncio
     async def test_execute_unavailable(self):
         surface = PythonSurface()
-        with patch.object(surface, '_check_availability', return_value=False):
+        with patch.object(surface, "_check_availability", return_value=False):
             result = await surface.execute("1 + 1", {})
             assert result["status"] == "error"
             assert "not available" in result["message"]

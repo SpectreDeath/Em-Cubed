@@ -1,9 +1,10 @@
-﻿"""Tests for DatalogSurface execution cache isolation.
+"""Tests for DatalogSurface execution cache isolation.
 
 Verifies that each DatalogSurface instance has its own independent cache,
 cache is empty on fresh instantiation, clear_cache() works correctly,
 cache_size property tracks entries, and cache eviction fires at capacity.
 """
+
 from em_cubed.surfaces.datalog_surface import DatalogSurface
 
 
@@ -22,9 +23,7 @@ class TestCacheInstanceIsolation:
         )
 
     def test_class_level_dict_does_not_exist(self):
-        assert "_execution_cache" not in DatalogSurface.__dict__, (
-            "_execution_cache is still defined at class level."
-        )
+        assert "_execution_cache" not in DatalogSurface.__dict__, "_execution_cache is still defined at class level."
 
 
 class TestCacheFreshStart:
