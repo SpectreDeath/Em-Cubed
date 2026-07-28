@@ -215,14 +215,15 @@ class EmCubedMCPServer:
 
         elif name == "em_cubed_execute_skill":
             import asyncio
+            from pathlib import Path as _Path
             from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest, get_skill_executor
             from em_cubed.skills import SkillRegistry
-            from em_cubed.plugin_registry import get_plugin_manager
+            from em_cubed.plugin_registry import PluginRegistry
 
-            skills_dir = Path("skills")
-            reg_file = Path("registry.json")
+            skills_dir = _Path("skills")
+            reg_file = _Path("registry.json")
             reg = SkillRegistry(skills_dir, reg_file)
-            pm = get_plugin_manager()
+            pm = PluginRegistry()
             executor = get_skill_executor() or SkillExecutor(pm, reg, skills_dir)
 
             skill_id = args.get("skill_id", "")

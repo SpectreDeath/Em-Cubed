@@ -95,16 +95,16 @@ except (ImportError, Exception):
 
 try:
     from .morphism import SurfaceMorphism as _SurfaceMorphism
-    SurfaceMorphism = _SurfaceMorphism  # type: ignore[assignment]
+    SurfaceMorphism = _SurfaceMorphism  # type: ignore[assignment,misc]
 except (ImportError, Exception):
-    SurfaceMorphism = None  # type: ignore[assignment]
+    SurfaceMorphism = None  # type: ignore[assignment,misc]
 
 try:
     from .functor import OntologyMonad as _OntologyMonad, SurfaceFunctor as _SurfaceFunctor
-    SurfaceFunctor = _SurfaceFunctor  # type: ignore[assignment]
-    OntologyMonad = _OntologyMonad  # type: ignore[assignment]
+    SurfaceFunctor = _SurfaceFunctor  # type: ignore[assignment,misc]
+    OntologyMonad = _OntologyMonad  # type: ignore[assignment,misc]
 except (ImportError, Exception):
-    SurfaceFunctor = None  # type: ignore[assignment]
-    OntologyMonad = None  # type: ignore[assignment]
+    SurfaceFunctor = None  # type: ignore[assignment,misc]
+    OntologyMonad = None  # type: ignore[assignment,misc]
 
 __all__ = ["SurfaceBase", "PrologSurface", "HySurface", "PythonSurface", "Z3Surface", "DatalogSurface", "JanusSurface", "LLMSurface", "SQLiteSurface", "QuickJSSurface", "WASMSurface", "KanrenSurface", "ClingoSurface", "SurfaceMorphism", "SurfaceFunctor", "OntologyMonad"]
