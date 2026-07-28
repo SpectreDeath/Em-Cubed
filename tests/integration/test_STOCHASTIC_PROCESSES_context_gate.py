@@ -63,7 +63,7 @@ def evaluate_gate(from_, to_, agent_state) -> tuple:
     res_ok = resource_sufficient(resource, action)
     rec_ok = not recently_visited(from_, to_, history)
 
-    if "safe_targets" in agent_state and agent_state["safe_targets"]:
+    if agent_state.get("safe_targets"):
         safe_ok = to_ in agent_state["safe_targets"]
     else:
         unsafe = set(agent_state.get("unsafe_targets", ["dead_end", "void"]))

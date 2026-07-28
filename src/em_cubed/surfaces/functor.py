@@ -8,7 +8,8 @@ encapsulating loopy skill state transformations.
 from __future__ import annotations
 
 import logging
-from typing import Callable, Generic, TypeVar
+from collections.abc import Callable
+from typing import Generic, TypeVar
 
 from em_cubed.ontology.schema import OntologyTriple
 from em_cubed.surfaces.morphism import SurfaceMorphism

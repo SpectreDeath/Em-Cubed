@@ -5,14 +5,14 @@ and handles parallel execution of independent steps.
 """
 
 import asyncio
-import structlog
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Set
 from datetime import datetime
+from typing import Any
 
+import structlog
 from asteval import Interpreter as _ASTInterpreter
 
-from .composer import ExecutionContext, CompositionStep, CompositionResult
+from .composer import CompositionResult, CompositionStep, ExecutionContext
 
 logger = structlog.get_logger()
 
@@ -23,11 +23,11 @@ class WorkflowStep:
 
     id: str  # Unique ID for this step in the workflow
     skill_id: str  # The skill to execute
-    input_mapping: Dict[str, str] = field(default_factory=dict)
-    output_mapping: Dict[str, str] = field(default_factory=dict)
-    dependencies: List[str] = field(default_factory=list)  # IDs of steps this depends on
-    condition: Optional[str] = None  # Python expression evaluated against context
-    timeout: Optional[float] = None
+    input_mapping: dict[str, str] = field(default_factory=dict)
+    output_mapping: dict[str, str] = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)  # IDs of steps this depends on
+    condition: str | None = None  # Python expression evaluated against context
+    timeout: float | None = None
 
 
 @dataclass
@@ -35,9 +35,9 @@ class WorkflowDefinition:
     """Definition of a DAG-based workflow."""
 
     name: str
-    steps: List[WorkflowStep]
-    description: Optional[str] = None
-    timeout: Optional[float] = None
+    steps: list[WorkflowStep]
+    description: str | None = None
+    timeout: float | None = None
 
 
 class WorkflowExecutor:
@@ -49,7 +49,7 @@ class WorkflowExecutor:
         self.registry = composer.registry
         self.logger = logger.bind(component="workflow_executor")
 
-    async def execute(self, workflow: WorkflowDefinition, initial_data: Dict[str, Any]) -> CompositionResult:
+    async def execute(self, workflow: WorkflowDefinition, initial_data: dict[str, Any]) -> CompositionResult:
         """Execute a DAG workflow."""
         context = ExecutionContext(data=initial_data.copy())
         context.start_time = datetime.utcnow()
@@ -57,12 +57,12 @@ class WorkflowExecutor:
         self.logger.info("Starting workflow execution", workflow=workflow.name, steps=len(workflow.steps))
 
         # 1. Build dependency graph
-        graph: Dict[str, Set[str]] = {step.id: set(step.dependencies) for step in workflow.steps}
-        _steps_by_id: Dict[str, WorkflowStep] = {step.id: step for step in workflow.steps}
+        graph: dict[str, set[str]] = {step.id: set(step.dependencies) for step in workflow.steps}
+        _steps_by_id: dict[str, WorkflowStep] = {step.id: step for step in workflow.steps}
 
         # 2. Check for cycles
-        visited: Set[str] = set()
-        rec_stack: Set[str] = set()
+        visited: set[str] = set()
+        rec_stack: set[str] = set()
 
         def has_cycle(step_id: str) -> bool:
             visited.add(step_id)
@@ -80,18 +80,17 @@ class WorkflowExecutor:
 
         # Check for cycles in all nodes
         for step_id in graph:
-            if step_id not in visited:
-                if has_cycle(step_id):
-                    return CompositionResult(
-                        success=False,
-                        context=context,
-                        steps_executed=0,
-                        error=f"circular dependency detected involving step {step_id}",
-                    )
+            if step_id not in visited and has_cycle(step_id):
+                return CompositionResult(
+                    success=False,
+                    context=context,
+                    steps_executed=0,
+                    error=f"circular dependency detected involving step {step_id}",
+                )
 
         # 3. Execute steps layer by layer or as tasks complete
-        completed_steps: Set[str] = set()
-        failed_steps: Set[str] = set()
+        completed_steps: set[str] = set()
+        failed_steps: set[str] = set()
 
         # Use a lock for context access during parallel execution
         context_lock = asyncio.Lock()
@@ -164,10 +163,10 @@ class WorkflowExecutor:
             error="One or more steps failed" if not success else None,
         )
 
-    def _has_cycle(self, graph: Dict[str, Set[str]]) -> bool:
+    def _has_cycle(self, graph: dict[str, set[str]]) -> bool:
         """Simple DFS to detect cycles in the dependency graph."""
-        visited: Set[str] = set()
-        rec_stack: Set[str] = set()
+        visited: set[str] = set()
+        rec_stack: set[str] = set()
 
         def visit(node: str) -> bool:
             visited.add(node)
@@ -182,7 +181,6 @@ class WorkflowExecutor:
             return False
 
         for node in graph:
-            if node not in visited:
-                if visit(node):
-                    return True
+            if node not in visited and visit(node):
+                return True
         return False

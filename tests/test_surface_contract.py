@@ -8,21 +8,21 @@ Verifies that every Surface class in em_cubed.surfaces:
 """
 
 import pytest
+
 from em_cubed.surfaces import (
-    PythonSurface,
-    PrologSurface,
-    Z3Surface,
-    DatalogSurface,
-    SQLiteSurface,
-    HySurface,
-    QuickJSSurface,
-    WASMSurface,
     ClingoSurface,
+    DatalogSurface,
+    HySurface,
+    JanusSurface,
     KanrenSurface,
     LLMSurface,
-    JanusSurface,
+    PrologSurface,
+    PythonSurface,
+    QuickJSSurface,
+    SQLiteSurface,
+    WASMSurface,
+    Z3Surface,
 )
-
 
 ALL_SURFACES = [
     cls

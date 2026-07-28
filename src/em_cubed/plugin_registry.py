@@ -1,7 +1,6 @@
 """Plugin registry and lifecycle management for the PluginManager."""
 
 import logging
-from typing import Dict, Set
 
 logger = logging.getLogger(__name__)
 
@@ -10,8 +9,8 @@ class PluginRegistry:
     """Manages plugin registration, lookup, and lifecycle."""
 
     def __init__(self):
-        self._plugins: Dict[str, object] = {}  # Store as object to avoid circular import issues
-        self._initialized: Set[str] = set()
+        self._plugins: dict[str, object] = {}  # Store as object to avoid circular import issues
+        self._initialized: set[str] = set()
 
     def register(self, name: str, plugin) -> None:
         """
@@ -43,7 +42,7 @@ class PluginRegistry:
                 if hasattr(plugin, "shutdown"):
                     plugin.shutdown()
             except Exception as e:
-                logger.warning("Error shutting down plugin during unregister {}: {}".format(name, str(e)))
+                logger.warning(f"Error shutting down plugin during unregister {name}: {e!s}")
             self._initialized.discard(name)
             logger.debug("Plugin unregistered: %s", name)
             return True
@@ -107,7 +106,7 @@ class PluginRegistry:
                 return False
         return False
 
-    def initialize_all(self) -> Dict[str, bool]:
+    def initialize_all(self) -> dict[str, bool]:
         """
         Initialize all registered plugins.
 
@@ -119,7 +118,7 @@ class PluginRegistry:
             results[name] = self.initialize_plugin(name)
         return results
 
-    def shutdown_all(self) -> Dict[str, bool]:
+    def shutdown_all(self) -> dict[str, bool]:
         """
         Shutdown all registered plugins.
 
@@ -131,7 +130,7 @@ class PluginRegistry:
             results[name] = self.shutdown_plugin(name)
         return results
 
-    def list_plugins(self) -> Dict[str, bool]:
+    def list_plugins(self) -> dict[str, bool]:
         """
         List all registered plugins and their availability.
 
@@ -148,7 +147,7 @@ class PluginRegistry:
                 result[name] = True
         return result
 
-    def get_plugins(self) -> Dict[str, object]:
+    def get_plugins(self) -> dict[str, object]:
         """Get all registered plugins.
 
         Returns:
@@ -160,6 +159,6 @@ class PluginRegistry:
         """Get the number of registered plugins."""
         return len(self._plugins)
 
-    def get_plugin_names(self) -> Set[str]:
+    def get_plugin_names(self) -> set[str]:
         """Get the set of registered plugin names."""
         return set(self._plugins.keys())

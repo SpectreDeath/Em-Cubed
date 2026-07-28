@@ -7,7 +7,7 @@ to recommend appropriate skills for a given problem.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 import structlog
 
@@ -22,15 +22,15 @@ class TaskRequirement:
     """A requirement for a task."""
 
     category: str  # e.g., "optimization", "nlp", "decision"
-    surfaces: List[str] = field(default_factory=list)  # Preferred surfaces
-    capabilities: List[str] = field(default_factory=list)  # Required capabilities
+    surfaces: list[str] = field(default_factory=list)  # Preferred surfaces
+    capabilities: list[str] = field(default_factory=list)  # Required capabilities
     complexity: str = "medium"  # low, medium, high
-    expected_input_types: Dict[str, str] = field(default_factory=dict)
-    expected_output_types: Dict[str, str] = field(default_factory=dict)
-    max_execution_time: Optional[float] = None
+    expected_input_types: dict[str, str] = field(default_factory=dict)
+    expected_output_types: dict[str, str] = field(default_factory=dict)
+    max_execution_time: float | None = None
     min_success_rate: float = 0.8
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "category": self.category,
             "surfaces": self.surfaces,
@@ -50,12 +50,12 @@ class RecommendationResult:
     skill_id: str
     name: str
     relevance_score: float  # 0-1
-    matching_criteria: List[str] = field(default_factory=list)
-    composition_opportunities: List[str] = field(default_factory=list)
-    quality_metrics: Dict[str, Any] = field(default_factory=dict)
+    matching_criteria: list[str] = field(default_factory=list)
+    composition_opportunities: list[str] = field(default_factory=list)
+    quality_metrics: dict[str, Any] = field(default_factory=dict)
     reasoning: str = ""
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "skill_id": self.skill_id,
             "name": self.name,
@@ -79,7 +79,7 @@ class SkillRecommender:
         initialize_semantic_search(registry)
         self.semantic_search = get_semantic_search_manager()
 
-    def recommend(self, requirement: TaskRequirement, limit: int = 5) -> List[RecommendationResult]:
+    def recommend(self, requirement: TaskRequirement, limit: int = 5) -> list[RecommendationResult]:
         """Find skills matching the given requirements."""
         # First, get keyword-based recommendations
         candidates = self.registry.list_skills()
@@ -144,7 +144,7 @@ class SkillRecommender:
 
         return results
 
-    def _score_skill(self, skill, requirement: TaskRequirement) -> tuple[float, List[str]]:
+    def _score_skill(self, skill, requirement: TaskRequirement) -> tuple[float, list[str]]:
         """Score a skill against requirements."""
         score = 0.0
         criteria = []
@@ -192,7 +192,7 @@ class SkillRecommender:
 
         return min(1.0, max(0.0, score)), criteria
 
-    def _generate_reasoning(self, skill, criteria: List[str]) -> str:
+    def _generate_reasoning(self, skill, criteria: list[str]) -> str:
         """Generate human-readable reasoning for the recommendation."""
         reasons = []
         if criteria:
@@ -203,7 +203,7 @@ class SkillRecommender:
             reasons.append(f"Surfaces: {', '.join(skill.surfaces)}")
         return "; ".join(reasons)
 
-    def recommend_chain(self, start_skill_id: str, end_skill_id: str, max_hops: int = 3) -> List[List[str]]:
+    def recommend_chain(self, start_skill_id: str, end_skill_id: str, max_hops: int = 3) -> list[list[str]]:
         """Find skill chains between start and end skills."""
         from collections import deque
 
@@ -215,7 +215,7 @@ class SkillRecommender:
         # BFS to find shortest paths
         queue = deque([(start_skill_id, [start_skill_id])])
         visited = {start_skill_id}
-        paths: List[List[str]] = []
+        paths: list[list[str]] = []
 
         while queue and len(paths) < 5:  # Find up to 5 paths
             current, path = queue.popleft()
@@ -233,7 +233,7 @@ class SkillRecommender:
 
         return paths
 
-    def get_similar_skills(self, skill_id: str, limit: int = 5) -> List[RecommendationResult]:
+    def get_similar_skills(self, skill_id: str, limit: int = 5) -> list[RecommendationResult]:
         """Find skills similar to the given skill."""
         skill = self.registry.get_skill(skill_id)
         if not skill:
@@ -295,8 +295,8 @@ class SkillRecommender:
         return min(1.0, score)
 
     def get_recommendations_for_task(
-        self, task_description: str, context: Optional[Dict[str, Any]] = None
-    ) -> List[RecommendationResult]:
+        self, task_description: str, context: dict[str, Any] | None = None
+    ) -> list[RecommendationResult]:
         """Parse task description and recommend skills (heuristic-based)."""
         # Simple keyword-based extraction from description
         keywords = self._extract_keywords(task_description)
@@ -315,10 +315,10 @@ class SkillRecommender:
 
         return self.recommend(requirement)
 
-    def _extract_keywords(self, text: str) -> Dict[str, List[str]]:
+    def _extract_keywords(self, text: str) -> dict[str, list[str]]:
         """Extract task keywords from natural language description."""
         text_lower = text.lower()
-        keywords: Dict[str, List[str]] = {"domains": [], "surfaces": [], "capabilities": []}
+        keywords: dict[str, list[str]] = {"domains": [], "surfaces": [], "capabilities": []}
 
         # Domain keywords
         domain_keywords = {

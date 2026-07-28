@@ -9,7 +9,8 @@ Security model:
 import asyncio
 import base64
 import os
-from typing import Dict, Any, Optional, List, cast
+from typing import Any, cast
+
 import structlog
 import wasmtime
 
@@ -21,7 +22,7 @@ logger = structlog.get_logger()
 class WASMSurface(SurfaceBase):
     """Handle WebAssembly code compilation and execution using wasmtime."""
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         """Initialize WASM surface.
 
         Args:
@@ -29,7 +30,7 @@ class WASMSurface(SurfaceBase):
         """
         super().__init__(timeout)
         self._wasm_available = self._check_wasm_availability()
-        self._engine: Optional[wasmtime.Engine] = None
+        self._engine: wasmtime.Engine | None = None
         # Fuel budget: max instructions the WASM module may execute.
         # Set EM_CUBED_WASM_FUEL env var to tune. Lower = tighter sandbox.
         self._fuel_limit = int(os.getenv("EM_CUBED_WASM_FUEL", "1_000_000"))
@@ -74,7 +75,7 @@ class WASMSurface(SurfaceBase):
     def available(self) -> bool:
         return self._wasm_available
 
-    def extract_tags(self, wasm_source: Optional[str]) -> List[str]:
+    def extract_tags(self, wasm_source: str | None) -> list[str]:
         """Extract exported function names from WASM source as heuristic_tags."""
         if not wasm_source:
             return []
@@ -113,7 +114,7 @@ class WASMSurface(SurfaceBase):
             return list(dict.fromkeys(funcs))
 
     # WASI network socket import names to block (WASI Preview 1 + Preview 2 names).
-    _BLOCKED_WASI_IMPORTS: List[str] = [
+    _BLOCKED_WASI_IMPORTS: list[str] = [
         "sock_accept",
         "sock_recv",
         "sock_send",
@@ -124,7 +125,7 @@ class WASMSurface(SurfaceBase):
         "sock_bind",
     ]
 
-    def _check_network_imports(self, module: "wasmtime.Module") -> Optional[str]:
+    def _check_network_imports(self, module: "wasmtime.Module") -> str | None:
         """Return an error string if the module imports any WASI network functions."""
         try:
             for imp in module.imports:
@@ -137,7 +138,7 @@ class WASMSurface(SurfaceBase):
             pass  # nosec B110 - best-effort; fail open (log but allow)
         return None
 
-    def _run_wasm(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _run_wasm(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Synchronous WASM compilation and execution to run inside the thread pool executor."""
         try:
             import wasmtime
@@ -225,15 +226,15 @@ class WASMSurface(SurfaceBase):
 
         func_val = cast(wasmtime.Func, func)
         func_typed = cast("Any", func_val.type(store))
-        params: List[Any] = []
+        params: list[Any] = []
         if hasattr(func_typed, "params"):
-            params_val = getattr(func_typed, "params")
+            params_val = func_typed.params
             if hasattr(params_val, "vals"):
-                params = list(getattr(params_val, "vals"))
+                params = list(params_val.vals)
             else:
                 params = list(params_val)
 
-        args: List[Any] = []
+        args: list[Any] = []
 
         input_data = (context or {}).get("skill_input", {})
         ctx = context or {}
@@ -251,9 +252,7 @@ class WASMSurface(SurfaceBase):
 
             try:
                 type_str = str(param_type)
-                if "i32" in type_str:
-                    args.append(int(val))
-                elif "i64" in type_str:
+                if "i32" in type_str or "i64" in type_str:
                     args.append(int(val))
                 elif "f32" in type_str or "f64" in type_str:
                     args.append(float(val))
@@ -271,7 +270,7 @@ class WASMSurface(SurfaceBase):
 
         return {"status": "ok", "value": result_val}
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Compile and execute WebAssembly code safely on the thread executor."""
         logger.info("Executing WebAssembly code", code_length=len(code))
 
@@ -285,7 +284,7 @@ class WASMSurface(SurfaceBase):
             return result
         except Exception as e:
             logger.exception("WASM execution failed", error=str(e))
-            return {"status": "error", "message": f"WASM execution failed: {str(e)}"}
+            return {"status": "error", "message": f"WASM execution failed: {e!s}"}
 
     async def health(self) -> bool:
         """Check if the WASM surface is available."""

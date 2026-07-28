@@ -6,7 +6,6 @@ import pytest
 
 from em_cubed.surfaces import PythonSurface
 
-
 _RF_TRAINING_CODE = """
 def my_log2(x):
     if x <= 0:
@@ -271,8 +270,8 @@ class TestSqliteDatalogWebDataCommons:
     @pytest.mark.asyncio
     async def test_sqlite_surface_persists_session(self):
         """Verify SQLite surface can execute queries with session context."""
-        from em_cubed.surfaces.sqlite_surface import SQLiteSurface
         from em_cubed.skills.telemetry import initialize_telemetry
+        from em_cubed.surfaces.sqlite_surface import SQLiteSurface
 
         initialize_telemetry()
 

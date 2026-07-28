@@ -9,8 +9,8 @@ Bottom-up: PageRank stationary vector → seedable MC walk → empirical histogr
 
 import math
 import random
-import pytest
 
+import pytest
 
 # ============================================================
 # Re-implementations from SKILL.md (self-contained, zero imports)

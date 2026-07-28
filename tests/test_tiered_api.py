@@ -1,7 +1,9 @@
 """Tests for Tiered Public API and PEP 562 deprecation handling in em_cubed."""
 
-import pytest
 import warnings
+
+import pytest
+
 import em_cubed
 
 
@@ -45,9 +47,9 @@ def test_legacy_symbol_deprecation_warning():
     """Legacy internal symbols emit DeprecationWarning but return the object."""
     with warnings.catch_warnings(record=True) as recorded:
         warnings.simplefilter("always")
-        validator_cls = getattr(em_cubed, "OntologyLedgerValidator")
+        validator_cls = em_cubed.OntologyLedgerValidator
         assert validator_cls is not None
-        mcp_cls = getattr(em_cubed, "EmCubedMCPServer")
+        mcp_cls = em_cubed.EmCubedMCPServer
         assert mcp_cls is not None
 
     dep_warnings = [w for w in recorded if issubclass(w.category, DeprecationWarning)]
@@ -61,4 +63,4 @@ def test_legacy_symbol_deprecation_warning():
 def test_invalid_attribute_raises_attribute_error():
     """Non-existent attribute raises AttributeError."""
     with pytest.raises(AttributeError):
-        _ = getattr(em_cubed, "NonExistentClass12345")
+        _ = em_cubed.NonExistentClass12345

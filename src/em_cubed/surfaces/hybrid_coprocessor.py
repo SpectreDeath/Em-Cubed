@@ -8,13 +8,14 @@ surfaces, extracting deduced facts and injecting them into downstream code conte
 from __future__ import annotations
 
 import textwrap
-from typing import Any, Dict, Optional
+from typing import Any
+
 import structlog
 
-from em_cubed.surfaces.python_surface import PythonSurface
-from em_cubed.surfaces.prolog_surface import PrologSurface
 from em_cubed.surfaces.clingo_surface import ClingoSurface
 from em_cubed.surfaces.datalog_surface import DatalogSurface
+from em_cubed.surfaces.prolog_surface import PrologSurface
+from em_cubed.surfaces.python_surface import PythonSurface
 
 logger = structlog.get_logger()
 
@@ -50,8 +51,8 @@ class HybridCoprocessor:
         logic_rules: str,
         logic_surface_type: str = "prolog",
         python_code: str = "",
-        initial_context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        initial_context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Co-execute logic rules and Python code in sequence.
         """

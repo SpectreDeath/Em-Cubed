@@ -1,6 +1,7 @@
 """Tests for QuickJS surface implementation."""
 
 import pytest
+
 from em_cubed.surfaces.quickjs_surface import QuickJSSurface
 
 

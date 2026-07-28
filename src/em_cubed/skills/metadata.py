@@ -6,9 +6,9 @@ dependency management, and quality tracking.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -16,12 +16,12 @@ class InputOutputSchema:
     """Schema definitions for skill inputs and outputs."""
 
     type: str = "object"  # object, array, string, number, boolean, null
-    properties: Dict[str, Any] = field(default_factory=dict)
-    required: List[str] = field(default_factory=list)
+    properties: dict[str, Any] = field(default_factory=dict)
+    required: list[str] = field(default_factory=list)
     additional_properties: bool = True
-    description: Optional[str] = None
+    description: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary representation."""
         res = {
             "type": self.type,
@@ -34,7 +34,7 @@ class InputOutputSchema:
         return res
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "InputOutputSchema":
+    def from_dict(cls, data: dict[str, Any]) -> "InputOutputSchema":
         """Construct from dictionary."""
         return cls(
             type=data.get("type", "object"),
@@ -49,12 +49,12 @@ class InputOutputSchema:
 class SkillCapability:
     """Required capabilities for skill execution."""
 
-    surfaces: List[str] = field(default_factory=list)  # Required surface plugins
-    permissions: List[str] = field(default_factory=list)  # Required permissions/privileges
-    resources: Dict[str, Any] = field(default_factory=dict)  # Resource requirements (memory, cpu, etc.)
-    external_services: List[str] = field(default_factory=list)  # External API/service dependencies
+    surfaces: list[str] = field(default_factory=list)  # Required surface plugins
+    permissions: list[str] = field(default_factory=list)  # Required permissions/privileges
+    resources: dict[str, Any] = field(default_factory=dict)  # Resource requirements (memory, cpu, etc.)
+    external_services: list[str] = field(default_factory=list)  # External API/service dependencies
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "surfaces": self.surfaces,
             "permissions": self.permissions,
@@ -63,7 +63,7 @@ class SkillCapability:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "SkillCapability":
+    def from_dict(cls, data: dict[str, Any]) -> "SkillCapability":
         return cls(
             surfaces=data.get("surfaces", []),
             permissions=data.get("permissions", []),
@@ -77,10 +77,10 @@ class CompatibilityRange:
     """Version compatibility constraints."""
 
     min_version: str = "0.1.0"
-    max_version: Optional[str] = None  # Exclusive upper bound
-    breaking_changes: List[str] = field(default_factory=list)
+    max_version: str | None = None  # Exclusive upper bound
+    breaking_changes: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "min_version": self.min_version,
             "max_version": self.max_version,
@@ -88,7 +88,7 @@ class CompatibilityRange:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "CompatibilityRange":
+    def from_dict(cls, data: dict[str, Any]) -> "CompatibilityRange":
         return cls(
             min_version=data.get("min_version", "0.1.0"),
             max_version=data.get("max_version"),
@@ -107,7 +107,7 @@ class QualityThresholds:
     required_surfaces: int = 1  # At least 1 surface implementation
     min_documentation_ratio: float = 0.3  # Documentation/comments vs code ratio
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "min_test_coverage": self.min_test_coverage,
             "min_success_rate": self.min_success_rate,
@@ -125,9 +125,9 @@ class SkillDependency:
     skill_id: str  # Unique skill identifier (domain/skill-name)
     version_range: str = ">=0.1.0"  # Semver range: defaults to any >=0.1.0
     optional: bool = False
-    description: Optional[str] = None
+    description: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "skill_id": self.skill_id,
             "version_range": self.version_range,
@@ -136,7 +136,7 @@ class SkillDependency:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "SkillDependency":
+    def from_dict(cls, data: dict[str, Any]) -> "SkillDependency":
         return cls(
             skill_id=data["skill_id"],
             version_range=data.get("version_range", ">=0.1.0"),
@@ -154,9 +154,9 @@ class RuntimeMetrics:
     failure_count: int = 0
     total_execution_time: float = 0.0  # seconds
     total_token_usage: int = 0
-    last_executed: Optional[datetime] = None
-    execution_history: List[Dict[str, Any]] = field(default_factory=list)
-    performance_history: List[float] = field(default_factory=list)  # Success rates over time
+    last_executed: datetime | None = None
+    execution_history: list[dict[str, Any]] = field(default_factory=list)
+    performance_history: list[float] = field(default_factory=list)  # Success rates over time
 
     @property
     def completion_rate(self) -> float:
@@ -208,7 +208,7 @@ class RuntimeMetrics:
             if len(self.performance_history) > 100:
                 self.performance_history = self.performance_history[-100:]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "applied_count": self.applied_count,
             "success_count": self.success_count,
@@ -231,12 +231,12 @@ class SkillMetadata:
     name: str
     domain: str
     version: str = "0.1.0"
-    surfaces: List[str] = field(default_factory=list)
-    purpose: Optional[str] = None
-    description: Optional[str] = None
+    surfaces: list[str] = field(default_factory=list)
+    purpose: str | None = None
+    description: str | None = None
 
     # Extended fields
-    dependencies: List[SkillDependency] = field(default_factory=list)
+    dependencies: list[SkillDependency] = field(default_factory=list)
     input_schema: InputOutputSchema = field(default_factory=InputOutputSchema)
     output_schema: InputOutputSchema = field(default_factory=InputOutputSchema)
     capabilities: SkillCapability = field(default_factory=SkillCapability)
@@ -247,12 +247,12 @@ class SkillMetadata:
     metrics: RuntimeMetrics = field(default_factory=RuntimeMetrics)
 
     # File/registry metadata
-    skill_id: Optional[str] = None  # Computed: domain/name
-    path: Optional[str] = None
+    skill_id: str | None = None  # Computed: domain/name
+    path: str | None = None
     schema_version: int = 1
-    tags: List[str] = field(default_factory=list)  # Derived from code analysis
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    tags: list[str] = field(default_factory=list)  # Derived from code analysis
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
     @staticmethod
     def _slugify(text: str) -> str:
@@ -307,7 +307,7 @@ class SkillMetadata:
             self.skill_id = f"{slug_domain}/{slug_name}"
 
     @staticmethod
-    def _extract_surfaces_from_body(body: str) -> List[str]:
+    def _extract_surfaces_from_body(body: str) -> list[str]:
         """Detect which surfaces are implemented by scanning fenced code blocks."""
         import re
 
@@ -337,7 +337,7 @@ class SkillMetadata:
         return list(dict.fromkeys(surfaces))
 
     @staticmethod
-    def _extract_tags_from_body(body: str) -> List[str]:
+    def _extract_tags_from_body(body: str) -> list[str]:
         """Extract tags from code blocks."""
         import re
 
@@ -380,11 +380,9 @@ class SkillMetadata:
 
         if v_other < min_v:
             return False
-        if max_v and v_other >= max_v:
-            return False
-        return True
+        return not (max_v and v_other >= max_v)
 
-    def to_registry_dict(self) -> Dict[str, Any]:
+    def to_registry_dict(self) -> dict[str, Any]:
         """Convert to registry JSON-compatible dict."""
         return {
             "skill_id": self.skill_id,
@@ -410,7 +408,7 @@ class SkillMetadata:
 
     @classmethod
     def from_frontmatter(
-        cls, frontmatter: Dict[str, Any], body: str = "", file_path: Optional[Path] = None
+        cls, frontmatter: dict[str, Any], body: str = "", file_path: Path | None = None
     ) -> "SkillMetadata":
         """Construct SkillMetadata from SKILL.md frontmatter."""
         import re

@@ -8,7 +8,7 @@ Implements "Pydantic at the Door, Ontology at the Ledger":
 from __future__ import annotations
 
 import logging
-from typing import Any, Type
+from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
@@ -49,7 +49,7 @@ class OntologyLedgerValidator:
     def validate_and_commit(
         self,
         new_triple: OntologyTriple,
-        schema_model: Type[BaseModel] | None = None,
+        schema_model: type[BaseModel] | None = None,
         raw_payload: dict[str, Any] | None = None,
     ) -> tuple[bool, str]:
         """Validate payload structure and ontological constraints before committing to ledger.

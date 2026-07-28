@@ -6,7 +6,6 @@ import pytest
 
 from em_cubed.surfaces import ClingoSurface
 
-
 STATLIB_STYLE_DATASET = {
     "observations": [
         {"id": 1, "x": 1.2, "y": 2.3, "class": "A"},

@@ -1,11 +1,13 @@
 """Tests for remote registry discovery functionality."""
 
-import pytest
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
-from src.em_cubed.skills.remote_registry import RemoteSkillRegistry
+
+import pytest
+
 from src.em_cubed.skills.registry import SkillRegistry
+from src.em_cubed.skills.remote_registry import RemoteSkillRegistry
 
 
 def test_remote_registry_discovery_with_mock():

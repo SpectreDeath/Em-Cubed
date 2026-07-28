@@ -1,7 +1,8 @@
 """Hy surface integration using hy-lang."""
 
 import importlib.util
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -24,7 +25,7 @@ class HySurface(SurfaceBase):
     def available(self) -> bool:
         return self._check_availability()
 
-    def __init__(self, timeout: Optional[float] = None) -> None:
+    def __init__(self, timeout: float | None = None) -> None:
         super().__init__(timeout)
         logger.info("HySurface initialized", available=self.available, timeout=self.timeout)
 
@@ -33,7 +34,7 @@ class HySurface(SurfaceBase):
         return importlib.util.find_spec("hy") is not None
 
     @staticmethod
-    def extract_tags(hy_source: Optional[str]) -> List[str]:
+    def extract_tags(hy_source: str | None) -> list[str]:
         """Extract function names from Hy defn forms as heuristic_tags."""
         if not hy_source:
             return []
@@ -42,7 +43,7 @@ class HySurface(SurfaceBase):
         fns = re.findall(r"\(defn\s+([a-zA-Z][a-zA-Z0-9_\-?!]*)", hy_source)
         return list(dict.fromkeys(fns))
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute Hy code - implementation with timeout protection."""
         logger.info("Executing Hy code", code_length=len(code), has_context=context is not None)
 
@@ -51,8 +52,9 @@ class HySurface(SurfaceBase):
             return {"status": "error", "message": "Hy not available"}
 
         try:
-            import hy
             import re as _re
+
+            import hy
 
             def _fix_hy_cond(code: str) -> str:
                 """Rewrite bracket-style (cond [... ] [...]) to flat cond form."""

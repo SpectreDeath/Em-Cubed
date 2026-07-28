@@ -1,8 +1,10 @@
-import pytest
 import asyncio
 from unittest.mock import MagicMock
-from em_cubed.skills.workflow import WorkflowExecutor, WorkflowDefinition, WorkflowStep
+
+import pytest
+
 from em_cubed.skills.composer import SkillComposer
+from em_cubed.skills.workflow import WorkflowDefinition, WorkflowExecutor, WorkflowStep
 
 
 @pytest.fixture

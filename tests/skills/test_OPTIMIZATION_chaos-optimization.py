@@ -1,10 +1,12 @@
 """Tests for chaos-optimization skill."""
 
-import pytest
 from pathlib import Path
-from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
+
+import pytest
+
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
+from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 
 SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "chaos-optimization" / "SKILL.md")
 SKILL_ID = "OPTIMIZATION/chaos-optimization"
@@ -113,13 +115,11 @@ class TestChaosOptimizationSkill:
                         population[i][c] += velocity[i][c]
 
                 f = sphere(population[i])
-                if f < best_score:
-                    best_score = f
+                best_score = min(best_score, f)
 
             # Convergence check
-            if epoch > 10 and epoch % 10 == 0:
-                if best_score < 0.01:
-                    break
+            if epoch > 10 and epoch % 10 == 0 and best_score < 0.01:
+                break
 
         assert best_score < 1.0, f"COA sphere result = {best_score}"
 

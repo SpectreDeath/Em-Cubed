@@ -1,7 +1,9 @@
 """Tests for Janus surface implementation with mocked dependencies."""
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from em_cubed.surfaces.janus_surface import JanusSurface
 
 

@@ -6,14 +6,16 @@ and coordinating multi-skill execution patterns.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Callable, cast
-from enum import Enum
 import asyncio
-import structlog
-from pathlib import Path
 import json
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, cast
+
+import structlog
 
 from .metadata import SkillMetadata
 from .registry import SkillRegistry
@@ -37,15 +39,15 @@ class CompositionPattern(Enum):
 class ExecutionContext:
     """Runtime context for skill execution."""
 
-    data: Dict[str, Any]  # Input data
-    metadata: Dict[str, Any] = field(default_factory=dict)  # Execution metadata
-    variables: Dict[str, Any] = field(default_factory=dict)  # Shared variables
-    skills_used: List[str] = field(default_factory=list)  # Track skill invocations
-    errors: List[Dict[str, Any]] = field(default_factory=list)
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    data: dict[str, Any]  # Input data
+    metadata: dict[str, Any] = field(default_factory=dict)  # Execution metadata
+    variables: dict[str, Any] = field(default_factory=dict)  # Shared variables
+    skills_used: list[str] = field(default_factory=list)  # Track skill invocations
+    errors: list[dict[str, Any]] = field(default_factory=list)
+    start_time: datetime | None = None
+    end_time: datetime | None = None
 
-    def add_result(self, skill_id: str, result: Dict[str, Any]) -> None:
+    def add_result(self, skill_id: str, result: dict[str, Any]) -> None:
         """Add a skill execution result to context."""
         self.skills_used.append(skill_id)
         if "output" not in self.data:
@@ -62,7 +64,7 @@ class ExecutionContext:
             last_skill = self.skills_used[-1]
             val = self.data.get("output", {}).get(last_skill, {}).get("value")
             if isinstance(val, dict) and len(val) == 1:
-                return list(val.values())[0]
+                return next(iter(val.values()))
             return val
         return None
 
@@ -72,14 +74,14 @@ class CompositionStep:
     """A single step in a skill composition."""
 
     skill_id: str
-    input_mapping: Dict[str, str] = field(default_factory=dict)  # Map context -> skill input
-    output_mapping: Dict[str, str] = field(default_factory=dict)  # Map skill output -> context
-    condition: Optional[Callable[[ExecutionContext], bool]] = None
-    transform: Optional[Callable[[Any], Any]] = None
-    retry_policy: Optional[Dict[str, Any]] = None
-    timeout: Optional[float] = None
+    input_mapping: dict[str, str] = field(default_factory=dict)  # Map context -> skill input
+    output_mapping: dict[str, str] = field(default_factory=dict)  # Map skill output -> context
+    condition: Callable[[ExecutionContext], bool] | None = None
+    transform: Callable[[Any], Any] | None = None
+    retry_policy: dict[str, Any] | None = None
+    timeout: float | None = None
 
-    def prepare_input(self, context: ExecutionContext) -> Dict[str, Any]:
+    def prepare_input(self, context: ExecutionContext) -> dict[str, Any]:
         """Map context data to skill input according to input_mapping."""
         if not self.input_mapping:
             return context.data.copy()
@@ -92,7 +94,7 @@ class CompositionStep:
                 skill_input[dest_key] = value
         return skill_input
 
-    def apply_output(self, context: ExecutionContext, skill_output: Dict[str, Any]) -> None:
+    def apply_output(self, context: ExecutionContext, skill_output: dict[str, Any]) -> None:
         """Map skill output back to context according to output_mapping."""
         if self.transform:
             skill_output = self.transform(skill_output)
@@ -106,7 +108,7 @@ class CompositionStep:
             value = skill_output.get(src_key) if isinstance(skill_output, dict) else skill_output
             self._set_nested(context.data, dest_path, value)
 
-    def _get_nested(self, data: Dict, path: str) -> Any:
+    def _get_nested(self, data: dict, path: str) -> Any:
         """Get nested value using dot notation."""
         keys = path.split(".")
         value = data
@@ -117,7 +119,7 @@ class CompositionStep:
                 return None
         return value
 
-    def _set_nested(self, data: Dict, path: str, value: Any) -> None:
+    def _set_nested(self, data: dict, path: str, value: Any) -> None:
         """Set nested value using dot notation."""
         keys = path.split(".")
         current = data
@@ -133,10 +135,10 @@ class CompositionPlan:
     """A complete composition plan with execution steps."""
 
     name: str
-    steps: List[CompositionStep]
+    steps: list[CompositionStep]
     pattern: CompositionPattern = CompositionPattern.SEQUENTIAL
-    error_handler: Optional[Callable[[ExecutionContext], None]] = None
-    timeout: Optional[float] = None
+    error_handler: Callable[[ExecutionContext], None] | None = None
+    timeout: float | None = None
     max_retries: int = 0
 
     def add_step(self, step: CompositionStep) -> None:
@@ -152,7 +154,7 @@ class SkillComposer:
         self.registry = registry
         self.logger = logger.bind(component="skill_composer")
 
-    async def compose(self, plan: CompositionPlan, initial_data: Dict[str, Any]) -> CompositionResult:
+    async def compose(self, plan: CompositionPlan, initial_data: dict[str, Any]) -> CompositionResult:
         """Execute a skill composition plan."""
         from datetime import datetime
 
@@ -312,7 +314,7 @@ class SkillComposer:
         """Execute step and return boolean result."""
         return await self._execute_step(step, context)
 
-    async def _execute_skill_on_surface(self, skill: SkillMetadata, plugin, input_data: Dict) -> Dict[str, Any]:
+    async def _execute_skill_on_surface(self, skill: SkillMetadata, plugin, input_data: dict) -> dict[str, Any]:
         """Execute a skill using the specified surface plugin."""
         self.logger.debug("Executing skill on surface", skill=skill.name, surface=plugin.name)
 
@@ -365,11 +367,11 @@ _skill_result
                     context["surfaces"][surface_name] = surf_plugin
 
             result = await plugin.execute(execution_code, context)
-            return cast(Dict[str, Any], result)
+            return cast(dict[str, Any], result)
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def create_pipeline(self, steps: List[CompositionStep], name: str = "pipeline") -> CompositionPlan:
+    def create_pipeline(self, steps: list[CompositionStep], name: str = "pipeline") -> CompositionPlan:
         """Create a sequential pipeline composition."""
         return CompositionPlan(
             name=name,
@@ -377,7 +379,7 @@ _skill_result
             pattern=CompositionPattern.PIPELINE,
         )
 
-    def create_parallel(self, steps: List[CompositionStep], name: str = "parallel") -> CompositionPlan:
+    def create_parallel(self, steps: list[CompositionStep], name: str = "parallel") -> CompositionPlan:
         """Create a parallel composition."""
         return CompositionPlan(
             name=name,
@@ -385,7 +387,7 @@ _skill_result
             pattern=CompositionPattern.PARALLEL,
         )
 
-    def suggest_composition(self, source_skill_id: str, goal_description: str) -> List[CompositionPlan]:
+    def suggest_composition(self, source_skill_id: str, goal_description: str) -> list[CompositionPlan]:
         """Suggest composition plans based on goal."""
         # This would use the recommendation engine
         suggestions = []
@@ -415,16 +417,16 @@ class CompositionResult:
 
     success: bool
     context: ExecutionContext
-    error: Optional[str] = None
+    error: str | None = None
     steps_executed: int = 0
-    parallel_results: Optional[List[Any]] = None
-    duration_ms: Optional[float] = None
+    parallel_results: list[Any] | None = None
+    duration_ms: float | None = None
 
     def get_output(self) -> Any:
         """Get the final output value."""
         return self.context.get_final_output()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "success": self.success,
             "error": self.error,

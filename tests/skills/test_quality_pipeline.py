@@ -1,8 +1,9 @@
 """Tests for skill quality pipeline module."""
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock
+
+import pytest
 
 from em_cubed.skills.quality_pipeline import SkillQualityPipeline
 

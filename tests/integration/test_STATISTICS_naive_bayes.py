@@ -11,7 +11,6 @@ Bottom-up: exponential taylor series → gaussian pdf → training → predictio
 
 import math
 
-
 # ============================================================
 # Function-under-test extracted from SKILL.md implementations
 # ============================================================
@@ -216,7 +215,7 @@ class TestNaiveBayesTrain:
         """Basic training with two distinct classes."""
         features = [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]]
         labels = ["A", "A", "B", "B"]
-        priors, likelihoods = naive_bayes_train(features, labels)
+        priors, _likelihoods = naive_bayes_train(features, labels)
         assert "A" in priors
         assert "B" in priors
 
@@ -346,7 +345,7 @@ class TestEdgeCases:
         """All features identical across classes should still train."""
         features = [[5.0, 5.0], [5.0, 5.0], [5.0, 5.0], [5.0, 5.0]]
         labels = ["A", "A", "B", "B"]
-        priors, likelihoods = naive_bayes_train(features, labels)
+        _priors, likelihoods = naive_bayes_train(features, labels)
         _, variances_a = likelihoods["A"]
         # Variance = 0 + 1e-6, sigma = sqrt(1e-6)
         assert variances_a[0] == 1e-6

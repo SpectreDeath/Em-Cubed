@@ -7,8 +7,8 @@ Bottom-up: validated matrix → stationary distribution → chain classification
 """
 
 import math
-import pytest
 
+import pytest
 
 # ============================================================
 # Shared math extras

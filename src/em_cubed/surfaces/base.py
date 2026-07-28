@@ -5,8 +5,10 @@ import os
 import threading
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Dict, Optional
+from typing import Any
+
 import structlog
+
 from ..plugin import SurfacePlugin
 
 logger = structlog.get_logger()
@@ -43,13 +45,11 @@ def _make_daemon_executor(max_workers: int = 1) -> ThreadPoolExecutor:
 class SurfaceTimeoutError(Exception):
     """Raised when a surface operation times out."""
 
-    pass
-
 
 class SurfaceBase(SurfacePlugin, ABC):
     """Base class for all execution surfaces with timeout support."""
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         """Initialize surface with optional timeout.
 
         Args:
@@ -66,11 +66,9 @@ class SurfaceBase(SurfacePlugin, ABC):
 
     def initialize(self) -> None:
         """Initialize the surface. Subclasses can override this."""
-        pass
 
     def shutdown(self) -> None:
         """Shutdown the surface. Subclasses can override this."""
-        pass
 
     def __del__(self):
         """Clean up executor on deletion."""
@@ -95,7 +93,7 @@ class SurfaceBase(SurfacePlugin, ABC):
         if self._concurrency_semaphore is not None:
             self._concurrency_semaphore.release()
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute code with timeout and concurrency slot protection.
 
         Fulfills the SurfacePlugin abstract execute() interface by delegating
@@ -103,7 +101,7 @@ class SurfaceBase(SurfacePlugin, ABC):
         """
         return await self.execute_with_timeout(code, context)
 
-    async def execute_with_timeout(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute_with_timeout(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute code with timeout protection.
 
         Args:
@@ -121,13 +119,13 @@ class SurfaceBase(SurfacePlugin, ABC):
         try:
             result = await asyncio.wait_for(self._execute_impl(code, context), timeout=self.timeout)
             return result
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("Surface execution timed out", timeout=self.timeout)
             return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
         finally:
             self._release_execution_slot()
 
-    def execute_sync(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute_sync(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Synchronous version of execute for use in non-async contexts."""
         try:
             try:
@@ -146,7 +144,7 @@ class SurfaceBase(SurfacePlugin, ABC):
             return {"status": "error", "message": str(e)}
 
     @abstractmethod
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute code - implemented by subclasses.
 
         Args:
@@ -156,7 +154,6 @@ class SurfaceBase(SurfacePlugin, ABC):
         Returns:
             Dict with status, value/error message
         """
-        pass
 
     @abstractmethod
     async def health(self) -> bool:
@@ -165,10 +162,9 @@ class SurfaceBase(SurfacePlugin, ABC):
         Returns:
             True if surface is operational
         """
-        pass
 
     @abstractmethod
-    def extract_tags(self, source: Optional[str]) -> list:
+    def extract_tags(self, source: str | None) -> list:
         """Extract relevant tags from source code.
 
         Args:
@@ -177,4 +173,3 @@ class SurfaceBase(SurfacePlugin, ABC):
         Returns:
             List of tag strings
         """
-        pass

@@ -1,7 +1,7 @@
 """Test fixtures and utilities for em_cubed tests."""
 
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Any
 
 import pytest
 
@@ -11,7 +11,7 @@ from em_cubed.plugin import SurfacePlugin
 class TestSurfacePlugin(SurfacePlugin):
     """Test implementation of SurfacePlugin for unit tests."""
 
-    def __init__(self, name: str = "test", available: bool = True, timeout: Optional[float] = None):
+    def __init__(self, name: str = "test", available: bool = True, timeout: float | None = None):
         super().__init__(timeout)
         self._name = name
         self._available = available
@@ -24,10 +24,10 @@ class TestSurfacePlugin(SurfacePlugin):
     def available(self) -> bool:
         return self._available
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         return {"status": "ok", "value": f"test result for {code}"}
 
-    def extract_tags(self, source: Optional[str]) -> list:
+    def extract_tags(self, source: str | None) -> list:
         return ["test"]
 
     async def health(self) -> bool:

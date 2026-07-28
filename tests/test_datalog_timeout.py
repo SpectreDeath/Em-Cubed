@@ -1,6 +1,7 @@
 """Datalog surface timeout test."""
 
 import pytest
+
 from em_cubed.surfaces import DatalogSurface
 
 pytestmark = pytest.mark.asyncio

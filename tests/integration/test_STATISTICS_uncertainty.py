@@ -1,5 +1,5 @@
-import random
 import math
+import random
 
 
 def _normal_sample(mean, std, n):

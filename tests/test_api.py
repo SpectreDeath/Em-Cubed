@@ -1,6 +1,8 @@
-import pytest
 import json
+
+import pytest
 from fastapi.testclient import TestClient
+
 from api.main import app
 
 
@@ -244,6 +246,7 @@ class TestAPI:
         # Set API key env var and reload the app to pick it up
         monkeypatch.setenv("EM_CUBED_API_KEY", "test-secret-key")
         import importlib
+
         import api.main
 
         importlib.reload(api.main)
@@ -269,6 +272,7 @@ class TestAPI:
         # Ensure env var is not set and reload app
         monkeypatch.delenv("EM_CUBED_API_KEY", raising=False)
         import importlib
+
         import api.main as main_mod
 
         importlib.reload(main_mod)

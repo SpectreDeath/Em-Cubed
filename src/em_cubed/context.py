@@ -7,8 +7,10 @@ for data moving between different execution surfaces (Python, Prolog, Hy, Z3, Da
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, TypeVar, Callable
+from typing import Any, TypeVar
+
 import structlog
 
 logger = structlog.get_logger()
@@ -44,7 +46,7 @@ class TypeRegistry:
     """Registry of type definitions for cross-surface conversion."""
 
     def __init__(self):
-        self._types: Dict[str, TypeDefinition] = {}
+        self._types: dict[str, TypeDefinition] = {}
         self._initialize_basic_types()
 
     def _initialize_basic_types(self):
@@ -126,13 +128,13 @@ class TypeRegistry:
                 datalog_predicate="str",
                 to_python=lambda x: str(x),
                 from_python=lambda x: x,
-                to_prolog=lambda x: f'"{str(x)}"',
+                to_prolog=lambda x: f'"{x!s}"',
                 from_prolog=lambda x: x.strip('"'),
-                to_hy=lambda x: f'"{str(x)}"',
+                to_hy=lambda x: f'"{x!s}"',
                 from_hy=lambda x: x.strip('"'),
                 to_z3=lambda x: str(x),
                 from_z3=lambda x: str(x),
-                to_datalog=lambda x: f'"{str(x)}"',
+                to_datalog=lambda x: f'"{x!s}"',
                 from_datalog=lambda x: x.strip('"'),
             )
         )
@@ -186,11 +188,11 @@ class TypeRegistry:
         self._types[type_def.name] = type_def
         logger.debug("Registered type", type_name=type_def.name)
 
-    def get_type(self, name: str) -> Optional[TypeDefinition]:
+    def get_type(self, name: str) -> TypeDefinition | None:
         """Get a type definition by name."""
         return self._types.get(name)
 
-    def list_types(self) -> List[str]:
+    def list_types(self) -> list[str]:
         """List all registered type names."""
         return list(self._types.keys())
 
@@ -202,7 +204,7 @@ class TypeConverter:
         self.registry = type_registry
         self.logger = logger.bind(component="type_converter")
 
-    def convert_to_surface(self, value: Any, surface: str, type_hint: Optional[str] = None) -> Any:
+    def convert_to_surface(self, value: Any, surface: str, type_hint: str | None = None) -> Any:
         """Convert a Python value to surface-specific representation.
 
         Args:
@@ -244,7 +246,7 @@ class TypeConverter:
             # Return original value as fallback
             return value
 
-    def convert_from_surface(self, value: Any, surface: str, type_hint: Optional[str] = None) -> Any:
+    def convert_from_surface(self, value: Any, surface: str, type_hint: str | None = None) -> Any:
         """Convert a surface-specific value to Python representation.
 
         Args:
@@ -313,8 +315,8 @@ class TypeConverter:
 
 
 # Global type system instances
-_type_registry: Optional[TypeRegistry] = None
-_type_converter: Optional[TypeConverter] = None
+_type_registry: TypeRegistry | None = None
+_type_converter: TypeConverter | None = None
 
 
 def get_type_registry() -> TypeRegistry:

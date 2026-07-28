@@ -4,8 +4,9 @@ This package contains the various execution surfaces (Python, Prolog, Hy, Z3, Da
 with graceful handling of missing optional dependencies.
 """
 
-from .base import SurfaceBase
 from typing import Optional as _Optional  # noqa: F401
+
+from .base import SurfaceBase
 
 # Surface classes with graceful handling of missing dependencies
 PrologSurface = None  # type: _Optional[type]
@@ -113,7 +114,8 @@ except (ImportError, Exception):
     SurfaceMorphism = None  # type: ignore[assignment,misc]
 
 try:
-    from .functor import OntologyMonad as _OntologyMonad, SurfaceFunctor as _SurfaceFunctor
+    from .functor import OntologyMonad as _OntologyMonad
+    from .functor import SurfaceFunctor as _SurfaceFunctor
 
     SurfaceFunctor = _SurfaceFunctor  # type: ignore[assignment,misc]
     OntologyMonad = _OntologyMonad  # type: ignore[assignment,misc]
@@ -122,20 +124,20 @@ except (ImportError, Exception):
     OntologyMonad = None  # type: ignore[assignment,misc]
 
 __all__ = [
-    "SurfaceBase",
-    "PrologSurface",
-    "HySurface",
-    "PythonSurface",
-    "Z3Surface",
-    "DatalogSurface",
-    "JanusSurface",
-    "LLMSurface",
-    "SQLiteSurface",
-    "QuickJSSurface",
-    "WASMSurface",
-    "KanrenSurface",
     "ClingoSurface",
-    "SurfaceMorphism",
-    "SurfaceFunctor",
+    "DatalogSurface",
+    "HySurface",
+    "JanusSurface",
+    "KanrenSurface",
+    "LLMSurface",
     "OntologyMonad",
+    "PrologSurface",
+    "PythonSurface",
+    "QuickJSSurface",
+    "SQLiteSurface",
+    "SurfaceBase",
+    "SurfaceFunctor",
+    "SurfaceMorphism",
+    "WASMSurface",
+    "Z3Surface",
 ]

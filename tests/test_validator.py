@@ -1,10 +1,11 @@
 """Tests for the skill validator module."""
 
-import pytest
 from unittest.mock import Mock
 
-from src.em_cubed.skills.validator import SkillValidator, ValidationSeverity, ValidationIssue, ValidationResult
+import pytest
+
 from src.em_cubed.skills.metadata import SkillMetadata
+from src.em_cubed.skills.validator import SkillValidator, ValidationIssue, ValidationResult, ValidationSeverity
 
 
 class TestValidationSeverity:

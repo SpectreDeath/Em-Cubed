@@ -1,9 +1,9 @@
 """Plugin discovery mechanisms for the PluginManager."""
 
 import importlib.util
-import structlog
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Type
+
+import structlog
 
 logger = structlog.get_logger()
 
@@ -15,10 +15,10 @@ class PluginDiscovery:
     LAZY_SURFACES: frozenset = frozenset({"z3", "datalog"})
 
     def __init__(self):
-        self.discovered_plugins: Dict[str, Type] = {}
-        self.lazy_classes: Dict[str, Type] = {}
+        self.discovered_plugins: dict[str, type] = {}
+        self.lazy_classes: dict[str, type] = {}
 
-    def discover_builtin_surfaces(self) -> Tuple[Dict[str, Type], Dict[str, Type]]:
+    def discover_builtin_surfaces(self) -> tuple[dict[str, type], dict[str, type]]:
         """
         Discover built-in surfaces.
 
@@ -64,7 +64,7 @@ class PluginDiscovery:
 
         return eager_surfaces, lazy_surfaces
 
-    def discover_entry_point_plugins(self) -> Dict[str, Type]:
+    def discover_entry_point_plugins(self) -> dict[str, type]:
         """
         Discover plugins via setuptools entry points.
 
@@ -110,7 +110,7 @@ class PluginDiscovery:
 
         return plugins
 
-    def discover_directory_plugins(self, plugin_dir: Optional[Path] = None) -> Dict[str, Type]:
+    def discover_directory_plugins(self, plugin_dir: Path | None = None) -> dict[str, type]:
         """
         Discover plugins by scanning a directory.
 
@@ -121,7 +121,7 @@ class PluginDiscovery:
             Dictionary mapping plugin names to classes
         """
         plugin_dir = plugin_dir or Path("plugins")
-        plugins: Dict[str, Type] = {}
+        plugins: dict[str, type] = {}
 
         if not plugin_dir.exists():
             logger.debug("Plugin directory does not exist", directory=str(plugin_dir))
@@ -169,12 +169,12 @@ class PluginDiscovery:
         return plugins
 
     def discover_all_plugins(
-        self, plugin_dir: Optional[Path] = None
-    ) -> Tuple[
-        Dict[str, Type],  # eager surfaces
-        Dict[str, Type],  # lazy surfaces
-        Dict[str, Type],  # entry point surfaces
-        Dict[str, Type],  # directory surfaces
+        self, plugin_dir: Path | None = None
+    ) -> tuple[
+        dict[str, type],  # eager surfaces
+        dict[str, type],  # lazy surfaces
+        dict[str, type],  # entry point surfaces
+        dict[str, type],  # directory surfaces
     ]:
         """
         Discover plugins from all sources.

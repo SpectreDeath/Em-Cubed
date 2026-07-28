@@ -5,7 +5,8 @@ import asyncio
 import importlib.util
 import os
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, Any, Optional, List
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -32,7 +33,7 @@ class DatalogSurface(SurfaceBase):
     def available(self) -> bool:
         return self._check_availability()
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         # Use a dedicated executor so timeouts can be handled
         # by replacing the executor (abandoning the stuck thread)
@@ -44,7 +45,7 @@ class DatalogSurface(SurfaceBase):
         )
         self._rejected_executions = 0
         # Per-instance cache: isolated between instances and test runs.
-        self._execution_cache: Dict[str, Any] = {}
+        self._execution_cache: dict[str, Any] = {}
         self._cache_max_entries = int(os.getenv("EM_CUBED_DATALOG_CACHE_MAX_ENTRIES", "256"))
         logger.info("DatalogSurface initialized", available=self.available, timeout=self.timeout)
 
@@ -66,7 +67,7 @@ class DatalogSurface(SurfaceBase):
         return available
 
     @staticmethod
-    def extract_tags(source: Optional[str]) -> List[str]:
+    def extract_tags(source: str | None) -> list[str]:
         """Extract predicate names from Datalog source.
 
         Looks for:
@@ -108,19 +109,19 @@ class DatalogSurface(SurfaceBase):
 
         return list(predicates)
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute Datalog code safely on executor thread with timeout shield."""
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(self._executor, self._run_code, code, context)
         try:
             return await asyncio.shield(future)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
             self._executor = ThreadPoolExecutor(max_workers=1)
             raise
 
-    def _validate_code(self, code: str) -> Optional[str]:
+    def _validate_code(self, code: str) -> str | None:
         try:
             tree = ast.parse(code)
         except SyntaxError as exc:
@@ -135,7 +136,7 @@ class DatalogSurface(SurfaceBase):
                 return f"Statement not allowed in Datalog surface: {node.__class__.__name__}"
         return None
 
-    def _run_code(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _run_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run code synchronously in the executor thread."""
         logger.info("Executing Datalog code", code_length=len(code), has_context=context is not None)
 
@@ -146,7 +147,7 @@ class DatalogSurface(SurfaceBase):
             serialized_ctx = json.dumps(context, sort_keys=True) if context else ""
         except TypeError:
             serialized_ctx = str(context)
-        cache_key = hashlib.sha256(f"{code}:{serialized_ctx}".encode("utf-8")).hexdigest()
+        cache_key = hashlib.sha256(f"{code}:{serialized_ctx}".encode()).hexdigest()
         if cache_key in self._execution_cache:
             logger.info("Datalog execution cache hit", hash=cache_key)
             return self._execution_cache[cache_key]
@@ -162,7 +163,7 @@ class DatalogSurface(SurfaceBase):
         try:
             from pyDatalog import pyDatalog as pd
 
-            namespace: Dict[str, Any] = {
+            namespace: dict[str, Any] = {
                 "__builtins__": {
                     "abs": abs,
                     "float": float,

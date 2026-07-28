@@ -5,19 +5,20 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any, cast
-import structlog
-import requests
+from typing import Any, cast
 
-from .registry import SkillRegistry
+import requests
+import structlog
+
 from .metadata import (
-    SkillMetadata,
-    InputOutputSchema,
-    SkillCapability,
     CompatibilityRange,
+    InputOutputSchema,
     QualityThresholds,
     RuntimeMetrics,
+    SkillCapability,
+    SkillMetadata,
 )
+from .registry import SkillRegistry
 
 logger = structlog.get_logger()
 
@@ -25,7 +26,7 @@ logger = structlog.get_logger()
 class RemoteSkillRegistry:
     """Handles discovery and synchronization with remote skill registries."""
 
-    def __init__(self, local_registry: SkillRegistry, cache_dir: Optional[Path] = None):
+    def __init__(self, local_registry: SkillRegistry, cache_dir: Path | None = None):
         """Initialize remote registry handler.
 
         Args:
@@ -42,8 +43,8 @@ class RemoteSkillRegistry:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         # Registry configuration
-        self._registries: Dict[str, Dict[str, Any]] = {}
-        self._last_sync: Dict[str, float] = {}
+        self._registries: dict[str, dict[str, Any]] = {}
+        self._last_sync: dict[str, float] = {}
         self._sync_interval = 300  # 5 minutes default
 
         # Load default registries from environment or config
@@ -63,10 +64,9 @@ class RemoteSkillRegistry:
 
         # Add some default public registries (these would be examples)
         # In practice, these would be configured by the user/administrator
-        pass
 
     def add_registry(
-        self, name: str, url: str, token: Optional[str] = None, sync_interval: int = 300, verify_ssl: bool = True
+        self, name: str, url: str, token: str | None = None, sync_interval: int = 300, verify_ssl: bool = True
     ):
         """Add a remote registry to synchronize with.
 
@@ -117,7 +117,7 @@ class RemoteSkillRegistry:
         name_hash = hashlib.md5(registry_name.encode()).hexdigest()[:8]  # nosec B324
         return self.cache_dir / f"registry_{name_hash}.json"
 
-    def _load_cached_registry(self, registry_name: str) -> Optional[List[Dict[str, Any]]]:
+    def _load_cached_registry(self, registry_name: str) -> list[dict[str, Any]] | None:
         """Load cached registry data if available and not expired."""
         cache_path = self._get_cache_path(registry_name)
         if not cache_path.exists():
@@ -136,12 +136,12 @@ class RemoteSkillRegistry:
             with open(cache_path, encoding="utf-8") as f:
                 data = json.load(f)
                 self.logger.debug("Loaded cached registry data", registry=registry_name, count=len(data))
-                return cast(List[Dict[str, Any]], data)
+                return cast(list[dict[str, Any]], data)
         except Exception as e:
             self.logger.warning("Failed to load cached registry", registry=registry_name, error=str(e))
             return None
 
-    def _save_cached_registry(self, registry_name: str, data: List[Dict[str, Any]]):
+    def _save_cached_registry(self, registry_name: str, data: list[dict[str, Any]]):
         """Save registry data to cache."""
         cache_path = self._get_cache_path(registry_name)
         try:
@@ -151,7 +151,7 @@ class RemoteSkillRegistry:
         except Exception as e:
             self.logger.warning("Failed to save registry cache", registry=registry_name, error=str(e))
 
-    def _fetch_remote_registry(self, registry_name: str) -> Optional[List[Dict[str, Any]]]:
+    def _fetch_remote_registry(self, registry_name: str) -> list[dict[str, Any]] | None:
         """Fetch skill data from a remote registry.
 
         Args:
@@ -185,7 +185,7 @@ class RemoteSkillRegistry:
                     return None
 
                 self.logger.info("Fetched remote registry data", registry=registry_name, count=len(skills_data))
-                return cast(List[Dict[str, Any]], skills_data)
+                return cast(list[dict[str, Any]], skills_data)
             else:
                 self.logger.error(
                     "Failed to fetch remote registry",
@@ -202,7 +202,7 @@ class RemoteSkillRegistry:
             self.logger.error("Unexpected error fetching remote registry", registry=registry_name, error=str(e))
             return None
 
-    def _convert_remote_skill(self, skill_data: Dict[str, Any]) -> Optional[SkillMetadata]:
+    def _convert_remote_skill(self, skill_data: dict[str, Any]) -> SkillMetadata | None:
         """Convert remote skill data to SkillMetadata.
 
         Args:
@@ -348,7 +348,7 @@ class RemoteSkillRegistry:
 
         return True
 
-    def sync_all_registries(self, force: bool = False) -> Dict[str, bool]:
+    def sync_all_registries(self, force: bool = False) -> dict[str, bool]:
         """Synchronize with all configured registries.
 
         Args:
@@ -358,11 +358,11 @@ class RemoteSkillRegistry:
             Dictionary mapping registry names to sync success boolean
         """
         results = {}
-        for registry_name in self._registries.keys():
+        for registry_name in self._registries:
             results[registry_name] = self.sync_registry(registry_name, force=force)
         return results
 
-    def discover_skills(self, query: str, limit: int = 10) -> List[SkillMetadata]:
+    def discover_skills(self, query: str, limit: int = 10) -> list[SkillMetadata]:
         """Discover skills from remote registries matching a query.
 
         Args:
@@ -416,7 +416,7 @@ class RemoteSkillRegistry:
 
         return all_skills[:limit]
 
-    def get_registry_info(self) -> Dict[str, Dict[str, Any]]:
+    def get_registry_info(self) -> dict[str, dict[str, Any]]:
         """Get information about configured registries.
 
         Returns:
@@ -435,16 +435,16 @@ class RemoteSkillRegistry:
 
 
 # Global remote registry manager (singleton pattern)
-_remote_registry_manager: Optional[RemoteSkillRegistry] = None
+_remote_registry_manager: RemoteSkillRegistry | None = None
 
 
-def get_remote_registry_manager() -> Optional[RemoteSkillRegistry]:
+def get_remote_registry_manager() -> RemoteSkillRegistry | None:
     """Get the global remote registry manager instance."""
     global _remote_registry_manager
     return _remote_registry_manager
 
 
-def initialize_remote_registry(local_registry: SkillRegistry, cache_dir: Optional[Path] = None) -> RemoteSkillRegistry:
+def initialize_remote_registry(local_registry: SkillRegistry, cache_dir: Path | None = None) -> RemoteSkillRegistry:
     """Initialize the global remote registry manager.
 
     Args:

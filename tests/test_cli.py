@@ -1,8 +1,9 @@
 """Additional tests for the CLI to improve coverage."""
 
-import pytest
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from em_cubed.cli import main
 
@@ -92,9 +93,8 @@ def test_handle_serve_import_error(capsys):
 
 def test_handle_run_unknown_surface_exits_cleanly(capsys):
     """Test run command with unknown surface exits with SystemExit."""
-    with patch("sys.argv", ["em3", "run", "--surface", "unknown", "--code", "test"]):
-        with pytest.raises(SystemExit):
-            main()
+    with patch("sys.argv", ["em3", "run", "--surface", "unknown", "--code", "test"]), pytest.raises(SystemExit):
+        main()
 
     captured = capsys.readouterr()
     assert "Surface 'unknown' not found" in captured.err
@@ -191,10 +191,9 @@ def test_handle_test_calls_handler_specific(tmp_path):
     skill_file = skill_dir / "SKILL.md"
     skill_file.write_text("---\nname: Test\n---")
 
-    with patch("sys.argv", ["em3", "test", str(skill_dir)]):
-        with patch("em_cubed.cli._handle_test") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with patch("sys.argv", ["em3", "test", str(skill_dir)]), patch("em_cubed.cli._handle_test") as mock_handler:
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()
 

@@ -1,27 +1,28 @@
 """Tests for the skill executor module."""
 
-import pytest
-from unittest.mock import Mock, patch
-from pathlib import Path
 import tempfile
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 from src.em_cubed.skills.executor import (
-    SkillExecutor,
     SkillExecutionRequest,
     SkillExecutionResult,
+    SkillExecutor,
     TelemetryProxy,
     get_skill_executor,
     initialize_executor,
 )
-from src.em_cubed.skills.registry import SkillRegistry
 from src.em_cubed.skills.metadata import (
-    SkillMetadata,
-    InputOutputSchema,
-    SkillCapability,
     CompatibilityRange,
+    InputOutputSchema,
     QualityThresholds,
     RuntimeMetrics,
+    SkillCapability,
+    SkillMetadata,
 )
+from src.em_cubed.skills.registry import SkillRegistry
 
 
 class TestSkillExecutor:

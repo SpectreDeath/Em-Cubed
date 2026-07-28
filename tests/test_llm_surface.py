@@ -1,8 +1,10 @@
 """Tests for LLM surface implementation."""
 
 import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+
 from em_cubed.surfaces.llm_surface import LLMSurface
 
 
@@ -70,20 +72,19 @@ async def test_llm_surface_error_when_all_unavailable(llm_surface):
 @pytest.mark.asyncio
 async def test_llm_surface_timeout(llm_surface):
     """Test LLM surface timeout handling."""
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
-        with patch("litellm.acompletion") as mock_completion:
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}), patch("litellm.acompletion") as mock_completion:
 
-            async def delayed_completion(*args, **kwargs):
-                await asyncio.sleep(0.2)
-                mock_response = MagicMock()
-                mock_response.choices = [MagicMock()]
-                mock_response.choices[0].message.content = "Delayed"
-                return mock_response
+        async def delayed_completion(*args, **kwargs):
+            await asyncio.sleep(0.2)
+            mock_response = MagicMock()
+            mock_response.choices = [MagicMock()]
+            mock_response.choices[0].message.content = "Delayed"
+            return mock_response
 
-            mock_completion.side_effect = delayed_completion
-            llm_surface.timeout = 0.05
+        mock_completion.side_effect = delayed_completion
+        llm_surface.timeout = 0.05
 
-            result = await llm_surface.execute("This should timeout")
+        result = await llm_surface.execute("This should timeout")
 
     assert result["status"] == "error"
     assert "timed out" in result["message"]
@@ -92,17 +93,16 @@ async def test_llm_surface_timeout(llm_surface):
 @pytest.mark.asyncio
 async def test_llm_surface_with_context_cloud(llm_surface):
     """Test LLM cloud execution with context dict."""
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}):
-        with patch("litellm.acompletion") as mock_acompletion:
-            mock_resp = MagicMock()
-            mock_resp.choices = [MagicMock()]
-            mock_resp.choices[0].message.content = "Paris"
-            mock_acompletion.return_value = mock_resp
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "test-key"}), patch("litellm.acompletion") as mock_acompletion:
+        mock_resp = MagicMock()
+        mock_resp.choices = [MagicMock()]
+        mock_resp.choices[0].message.content = "Paris"
+        mock_acompletion.return_value = mock_resp
 
-            result = await llm_surface.execute(
-                "What is the capital of France?",
-                context={"model": "gpt-3.5-turbo", "temperature": 0.0},
-            )
+        result = await llm_surface.execute(
+            "What is the capital of France?",
+            context={"model": "gpt-3.5-turbo", "temperature": 0.0},
+        )
 
     assert result["status"] == "ok"
     assert result["value"] == "Paris"

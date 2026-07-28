@@ -5,7 +5,8 @@ import importlib.util
 import os
 import pickle  # nosec B403 - used only for pickle.dumps() picklability probe; never deserializes untrusted data
 from concurrent.futures import ProcessPoolExecutor
-from typing import Dict, Any, Optional
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase, _make_daemon_executor
@@ -13,7 +14,7 @@ from .base import SurfaceBase, _make_daemon_executor
 logger = structlog.get_logger()
 
 
-def _run_asteval_code(code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
     from asteval import Interpreter
 
     aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"])
@@ -80,7 +81,7 @@ class PythonSurface(SurfaceBase):
     def available(self) -> bool:
         return self._check_availability()
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         worker_count = self._worker_count()
         self._executor = _make_daemon_executor(max_workers=worker_count)
@@ -106,7 +107,7 @@ class PythonSurface(SurfaceBase):
         return available
 
     @staticmethod
-    def extract_tags(python_source: Optional[str]) -> list:
+    def extract_tags(python_source: str | None) -> list:
         """Extract function names from Python source as heuristic_tags."""
         if not python_source:
             return []
@@ -115,7 +116,7 @@ class PythonSurface(SurfaceBase):
         fns = re.findall(r"^\s*def\s+([a-zA-Z][a-zA-Z0-9_]*)\s*\(", python_source, re.MULTILINE)
         return list(dict.fromkeys(fns))
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute Python code safely using asteval and executor processes."""
         if not self.available:
             return {"status": "error", "message": f"{self.name} surface not available"}
@@ -124,7 +125,7 @@ class PythonSurface(SurfaceBase):
         future = loop.run_in_executor(executor, _run_asteval_code, code, context)
         try:
             return await asyncio.shield(future)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
             if self._process_executor is not None:
@@ -134,7 +135,7 @@ class PythonSurface(SurfaceBase):
             self._process_executor = ProcessPoolExecutor(max_workers=self._worker_count())
             raise
 
-    def _run_code(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _run_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run asteval code synchronously in the executor thread."""
         logger.info("Executing Python code", code_length=len(code), has_context=context is not None)
 

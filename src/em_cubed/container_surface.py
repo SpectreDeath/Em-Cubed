@@ -3,10 +3,12 @@
 import asyncio
 import json
 import os
-import structlog
 import tempfile
 from pathlib import Path
-from typing import Dict, Any, Optional, List, cast
+from typing import Any, cast
+
+import structlog
+
 from .plugin import SurfacePlugin
 
 logger = structlog.get_logger()
@@ -15,7 +17,7 @@ logger = structlog.get_logger()
 class ContainerizedSurfacePlugin(SurfacePlugin):
     """Surface plugin that executes code in isolated containers."""
 
-    def __init__(self, surface_name: str, timeout: Optional[float] = None):
+    def __init__(self, surface_name: str, timeout: float | None = None):
         """Initialize containerized surface plugin.
 
         Args:
@@ -51,7 +53,7 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
         """Check if surface dependencies are available."""
         return self._docker_available
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute code in isolated container.
 
         Args:
@@ -116,21 +118,21 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
                         result_str = stdout.decode("utf-8").strip()
                         try:
                             result = json.loads(result_str)
-                            return cast(Dict[str, Any], result)
+                            return cast(dict[str, Any], result)
                         except json.JSONDecodeError:
                             return {"status": "error", "message": f"Invalid JSON output from container: {result_str}"}
                     else:
                         error_msg = stderr.decode("utf-8").strip()
                         return {"status": "error", "message": f"Container execution failed: {error_msg}"}
 
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     process.kill()
                     await process.wait()
                     return {"status": "error", "message": f"Container execution timed out after {self.timeout or 30}s"}
 
             except Exception as e:
                 logger.error("Container execution error", error=str(e))
-                return {"status": "error", "message": f"Container execution error: {str(e)}"}
+                return {"status": "error", "message": f"Container execution error: {e!s}"}
 
     async def health(self) -> bool:
         """Check if containerized surface is operational."""
@@ -147,19 +149,19 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, stderr = await process.communicate()
+            _stdout, _stderr = await process.communicate()
             return process.returncode == 0
         except Exception:
             return False
 
-    def extract_tags(self, source: Optional[str]) -> List[str]:
+    def extract_tags(self, source: str | None) -> list[str]:
         """Extract relevant tags from source code.
 
         Delegates to the base surface implementation since tags are
         based on code content, not execution environment.
         """
         # Import the actual surface to reuse its tag extraction
-        from .surfaces import python_surface, prolog_surface, hy_surface, z3_surface, datalog_surface
+        from .surfaces import datalog_surface, hy_surface, prolog_surface, python_surface, z3_surface
 
         surface_map = {
             "python": python_surface.PythonSurface,
@@ -172,12 +174,12 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
         surface_class: Any = surface_map.get(self._surface_name)
         if surface_class:
             surface_instance = surface_class()
-            return cast(List[str], surface_instance.extract_tags(source))
+            return cast(list[str], surface_instance.extract_tags(source))
         return []
 
 
 # Factory function to create containerized surfaces
-def create_containerized_surface(surface_name: str, timeout: Optional[float] = None) -> SurfacePlugin:
+def create_containerized_surface(surface_name: str, timeout: float | None = None) -> SurfacePlugin:
     """Factory function to create containerized surface plugins.
 
     Args:

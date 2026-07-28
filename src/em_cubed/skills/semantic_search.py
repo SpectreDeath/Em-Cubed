@@ -1,11 +1,11 @@
 """Semantic skill search using local vector embeddings."""
 
-import pickle  # nosec B403
 import hashlib
+import pickle  # nosec B403
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-import structlog
+
 import numpy as np
+import structlog
 
 try:
     from sentence_transformers import SentenceTransformer
@@ -14,8 +14,8 @@ try:
 except ImportError:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
 
-from .registry import SkillRegistry
 from .metadata import SkillMetadata
+from .registry import SkillRegistry
 
 logger = structlog.get_logger()
 
@@ -23,7 +23,7 @@ logger = structlog.get_logger()
 class SemanticSkillSearch:
     """Semantic skill search using local vector embeddings."""
 
-    def __init__(self, registry: SkillRegistry, cache_dir: Optional[Path] = None, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, registry: SkillRegistry, cache_dir: Path | None = None, model_name: str = "all-MiniLM-L6-v2"):
         """Initialize semantic search.
 
         Args:
@@ -46,9 +46,9 @@ class SemanticSkillSearch:
         self._initialize_model()
 
         # Cache for skill embeddings and text representations
-        self._skill_embeddings: Dict[str, np.ndarray] = {}
-        self._skill_texts: Dict[str, str] = {}
-        self._last_indexed: Dict[str, float] = {}  # skill_id -> timestamp
+        self._skill_embeddings: dict[str, np.ndarray] = {}
+        self._skill_texts: dict[str, str] = {}
+        self._last_indexed: dict[str, float] = {}  # skill_id -> timestamp
 
         # Index existing skills
         self._reindex_all_skills()
@@ -239,7 +239,7 @@ class SemanticSkillSearch:
         except Exception as e:
             self.logger.error("Failed to generate skill embeddings", error=str(e))
 
-    def search(self, query: str, limit: int = 10) -> List[Tuple[SkillMetadata, float]]:
+    def search(self, query: str, limit: int = 10) -> list[tuple[SkillMetadata, float]]:
         """Search for skills semantically similar to the query.
 
         Args:
@@ -286,7 +286,7 @@ class SemanticSkillSearch:
             self.logger.error("Failed to perform semantic search", error=str(e))
             return []
 
-    def get_similar_skills(self, skill_id: str, limit: int = 5) -> List[Tuple[SkillMetadata, float]]:
+    def get_similar_skills(self, skill_id: str, limit: int = 5) -> list[tuple[SkillMetadata, float]]:
         """Find skills similar to a given skill.
 
         Args:
@@ -309,17 +309,17 @@ class SemanticSkillSearch:
 
 
 # Global semantic search manager (singleton pattern)
-_semantic_search_manager: Optional[SemanticSkillSearch] = None
+_semantic_search_manager: SemanticSkillSearch | None = None
 
 
-def get_semantic_search_manager() -> Optional[SemanticSkillSearch]:
+def get_semantic_search_manager() -> SemanticSkillSearch | None:
     """Get the global semantic search manager instance."""
     global _semantic_search_manager
     return _semantic_search_manager
 
 
 def initialize_semantic_search(
-    registry: SkillRegistry, cache_dir: Optional[Path] = None, model_name: str = "all-MiniLM-L6-v2"
+    registry: SkillRegistry, cache_dir: Path | None = None, model_name: str = "all-MiniLM-L6-v2"
 ) -> SemanticSkillSearch:
     """Initialize the global semantic search manager.
 

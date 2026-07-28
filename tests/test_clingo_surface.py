@@ -1,4 +1,5 @@
 import pytest
+
 from em_cubed.surfaces.clingo_surface import ClingoSurface
 
 

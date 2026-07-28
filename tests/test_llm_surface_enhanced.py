@@ -1,8 +1,10 @@
 """Tests for the LLM surface: cloud, Ollama fallback, streaming, and function calling."""
 
 import asyncio
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+
 from em_cubed.surfaces.llm_surface import LLMSurface
 
 
@@ -97,17 +99,16 @@ async def test_all_unavailable_returns_error(llm_surface):
 @pytest.mark.asyncio
 async def test_cloud_path_non_streaming(llm_surface):
     """Non-streaming cloud call returns the message content."""
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
-        with patch("litellm.acompletion") as mock_acompletion:
-            mock_resp = MagicMock()
-            mock_resp.choices = [MagicMock()]
-            mock_resp.choices[0].message.content = "Paris"
-            mock_acompletion.return_value = mock_resp
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}), patch("litellm.acompletion") as mock_acompletion:
+        mock_resp = MagicMock()
+        mock_resp.choices = [MagicMock()]
+        mock_resp.choices[0].message.content = "Paris"
+        mock_acompletion.return_value = mock_resp
 
-            result = await llm_surface.execute(
-                "Capital of France?",
-                context={"model": "gpt-4o", "temperature": 0.0},
-            )
+        result = await llm_surface.execute(
+            "Capital of France?",
+            context={"model": "gpt-4o", "temperature": 0.0},
+        )
 
     assert result["status"] == "ok"
     assert result["value"] == "Paris"
@@ -118,22 +119,21 @@ async def test_cloud_path_non_streaming(llm_surface):
 @pytest.mark.asyncio
 async def test_cloud_path_streaming(llm_surface):
     """Streaming cloud call concatenates delta content from all chunks."""
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
-        with patch("litellm.acompletion") as mock_acompletion:
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}), patch("litellm.acompletion") as mock_acompletion:
 
-            async def mock_stream(*args, **kwargs):
-                for word in ["Hello", " ", "world"]:
-                    chunk = MagicMock()
-                    chunk.choices = [MagicMock()]
-                    chunk.choices[0].delta.content = word
-                    yield chunk
+        async def mock_stream(*args, **kwargs):
+            for word in ["Hello", " ", "world"]:
+                chunk = MagicMock()
+                chunk.choices = [MagicMock()]
+                chunk.choices[0].delta.content = word
+                yield chunk
 
-            mock_acompletion.return_value = mock_stream()
+        mock_acompletion.return_value = mock_stream()
 
-            result = await llm_surface.execute(
-                "Say hello",
-                context={"stream": True, "max_tokens": 10},
-            )
+        result = await llm_surface.execute(
+            "Say hello",
+            context={"stream": True, "max_tokens": 10},
+        )
 
     assert result["status"] == "ok"
     assert result["value"] == "Hello world"
@@ -158,21 +158,20 @@ async def test_cloud_path_with_tools(llm_surface):
         }
     ]
 
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
-        with patch("litellm.acompletion") as mock_acompletion:
-            mock_resp = MagicMock()
-            mock_resp.choices = [MagicMock()]
-            mock_resp.choices[0].message.content = "It's sunny."
-            mock_acompletion.return_value = mock_resp
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}), patch("litellm.acompletion") as mock_acompletion:
+        mock_resp = MagicMock()
+        mock_resp.choices = [MagicMock()]
+        mock_resp.choices[0].message.content = "It's sunny."
+        mock_acompletion.return_value = mock_resp
 
-            result = await llm_surface.execute(
-                "What's the weather in SF?",
-                context={"tools": tools},
-            )
+        result = await llm_surface.execute(
+            "What's the weather in SF?",
+            context={"tools": tools},
+        )
 
-            # Verify tools were forwarded
-            call_kwargs = mock_acompletion.call_args[1]
-            assert call_kwargs.get("tools") == tools
+        # Verify tools were forwarded
+        call_kwargs = mock_acompletion.call_args[1]
+        assert call_kwargs.get("tools") == tools
 
     assert result["status"] == "ok"
     assert result["value"] == "It's sunny."
@@ -197,17 +196,16 @@ async def test_litellm_error_surfaces_error_status(llm_surface):
 @pytest.mark.asyncio
 async def test_timeout_handling(llm_surface):
     """Execution exceeding the timeout returns a timeout error."""
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
-        with patch("litellm.acompletion") as mock_completion:
+    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}), patch("litellm.acompletion") as mock_completion:
 
-            async def slow(*args, **kwargs):
-                await asyncio.sleep(0.3)
-                return MagicMock()
+        async def slow(*args, **kwargs):
+            await asyncio.sleep(0.3)
+            return MagicMock()
 
-            mock_completion.side_effect = slow
-            llm_surface.timeout = 0.05
+        mock_completion.side_effect = slow
+        llm_surface.timeout = 0.05
 
-            result = await llm_surface.execute("This should timeout")
+        result = await llm_surface.execute("This should timeout")
 
     assert result["status"] == "error"
     assert "timed out" in result["message"]

@@ -4,9 +4,9 @@ Provides standardized benchmarks for measuring skill execution performance,
 resource usage, and quality metrics across different surfaces.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
 import time
+from dataclasses import dataclass, field
+from typing import Any
 
 try:
     import psutil
@@ -15,16 +15,16 @@ try:
 except ImportError:
     psutil = None
     _psutil_available = False
-from pathlib import Path
 import json
 import statistics
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
 
 import structlog
 
-from .registry import SkillRegistry
 from .metadata import SkillMetadata
+from .registry import SkillRegistry
 
 logger = structlog.get_logger()
 
@@ -38,9 +38,9 @@ class BenchmarkConfig:
     timeout: float = 30.0
     memory_limit_mb: float = 512.0
     concurrent_executions: int = 1
-    include_surfaces: List[str] = field(default_factory=list)  # Empty = all available
+    include_surfaces: list[str] = field(default_factory=list)  # Empty = all available
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "warmup_iterations": self.warmup_iterations,
             "measurement_iterations": self.measurement_iterations,
@@ -59,7 +59,7 @@ class BenchmarkResult:
     surface: str
     iterations: int
     timestamp: str
-    config: Dict[str, Any]
+    config: dict[str, Any]
     mean_execution_time: float
     median_execution_time: float
     p95_execution_time: float
@@ -71,9 +71,9 @@ class BenchmarkResult:
     avg_memory_mb: float
     success_rate: float
     error_rate: float
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "skill_id": self.skill_id,
             "surface": self.surface,
@@ -105,9 +105,9 @@ class BenchmarkResult:
         cls,
         skill_id: str,
         surface: str,
-        times: List[float],
-        memory_samples: List[float],
-        errors: List[str],
+        times: list[float],
+        memory_samples: list[float],
+        errors: list[str],
         config: BenchmarkConfig,
     ) -> "BenchmarkResult":
         """Construct result from raw timing data."""
@@ -167,15 +167,15 @@ class BenchmarkResult:
 class SkillBenchmark:
     """Run and record performance benchmarks for skills."""
 
-    def __init__(self, plugin_manager, skill_registry: SkillRegistry, skills_dir: Optional[Path] = None):
+    def __init__(self, plugin_manager, skill_registry: SkillRegistry, skills_dir: Path | None = None):
         self.plugin_manager = plugin_manager
         self.registry = skill_registry
         self.skills_dir: Path = skills_dir or Path("skills")
         self.logger = logger.bind(component="skill_benchmark")
-        self._benchmark_data: Dict[str, List[BenchmarkResult]] = defaultdict(list)
+        self._benchmark_data: dict[str, list[BenchmarkResult]] = defaultdict(list)
 
     async def benchmark_skill(
-        self, skill_id: str, config: Optional[BenchmarkConfig] = None, test_input: Optional[Dict[str, Any]] = None
+        self, skill_id: str, config: BenchmarkConfig | None = None, test_input: dict[str, Any] | None = None
     ) -> BenchmarkResult:
         """Benchmark a single skill across its surfaces."""
         config = config or BenchmarkConfig()
@@ -229,7 +229,7 @@ class SkillBenchmark:
             )
 
     async def _benchmark_surface(
-        self, skill: SkillMetadata, plugin, config: BenchmarkConfig, test_input: Optional[Dict[str, Any]]
+        self, skill: SkillMetadata, plugin, config: BenchmarkConfig, test_input: dict[str, Any] | None
     ) -> BenchmarkResult:
         """Benchmark a skill on a specific surface."""
         assert skill.skill_id is not None, "Skill must have a valid ID"
@@ -246,7 +246,7 @@ class SkillBenchmark:
 
         # Measurement phase
         times = []
-        memory_samples: List[float] = [] if _psutil_available else []
+        memory_samples: list[float] = [] if _psutil_available else []
         errors = []
 
         process = psutil.Process() if _psutil_available else None
@@ -287,9 +287,9 @@ class SkillBenchmark:
             config=config,
         )
 
-    async def _execute_skill_once(self, skill: SkillMetadata, plugin, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_skill_once(self, skill: SkillMetadata, plugin, input_data: dict[str, Any]) -> dict[str, Any]:
         """Execute a skill once using the actual SkillExecutor for realistic execution conditions."""
-        from .executor import SkillExecutor, SkillExecutionRequest
+        from .executor import SkillExecutionRequest, SkillExecutor
 
         if not skill.skill_id:
             return {"status": "error", "message": "Skill ID is missing"}
@@ -321,11 +321,11 @@ class SkillBenchmark:
         except Exception as e:
             return {"status": "error", "message": str(e)}
 
-    def _generate_test_input(self, skill: SkillMetadata) -> Dict[str, Any]:
+    def _generate_test_input(self, skill: SkillMetadata) -> dict[str, Any]:
         """Generate a valid test input based on skill's input schema."""
         if skill.input_schema.properties:
             # Generate from schema properties
-            input_data: Dict[str, Any] = {}
+            input_data: dict[str, Any] = {}
             for prop_name, prop_def in skill.input_schema.properties.items():
                 if prop_def.get("type") == "string":
                     input_data[prop_name] = "test_value"
@@ -342,7 +342,7 @@ class SkillBenchmark:
             return input_data
         return {"input": "test"}
 
-    def get_benchmark_history(self, skill_id: str, surface: Optional[str] = None) -> List[BenchmarkResult]:
+    def get_benchmark_history(self, skill_id: str, surface: str | None = None) -> list[BenchmarkResult]:
         """Get historical benchmark results."""
         if surface:
             return self._benchmark_data.get(f"{skill_id}/{surface}", [])
@@ -353,11 +353,11 @@ class SkillBenchmark:
                 results.extend(v)
         return results
 
-    def get_performance_report(self, skill_ids: Optional[List[str]] = None) -> Dict[str, Any]:
+    def get_performance_report(self, skill_ids: list[str] | None = None) -> dict[str, Any]:
         """Generate a performance comparison report."""
         skills_to_report = skill_ids or list(self.registry._skills.keys())
 
-        report: Dict[str, Any] = {
+        report: dict[str, Any] = {
             "timestamp": datetime.utcnow().isoformat(),
             "skills": {},
         }

@@ -1,6 +1,7 @@
 """Unit tests for Ontological OS CLI Suite (em_cubed.cli_ontology)."""
 
 import os
+
 from em_cubed.cli_ontology import main
 
 

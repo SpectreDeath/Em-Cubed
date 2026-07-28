@@ -5,15 +5,16 @@ and running it on appropriate surfaces with full telemetry and automatic
 type conversion between surfaces.
 """
 
+import asyncio
 import time
 from dataclasses import dataclass
-from typing import Dict, Any, Optional, cast
 from pathlib import Path
-import structlog
-import asyncio
+from typing import Any, cast
 
-from .telemetry import SkillTelemetry, get_telemetry_collector, TraceContext
+import structlog
+
 from .registry import SkillRegistry
+from .telemetry import SkillTelemetry, TraceContext, get_telemetry_collector
 
 logger = structlog.get_logger()
 
@@ -23,10 +24,10 @@ class SkillExecutionRequest:
     """Request to execute a skill."""
 
     skill_id: str
-    input_data: Dict[str, Any]
-    surface: Optional[str] = None  # Override surface choice
-    timeout: Optional[float] = None
-    context: Optional[Dict[str, Any]] = None
+    input_data: dict[str, Any]
+    surface: str | None = None  # Override surface choice
+    timeout: float | None = None
+    context: dict[str, Any] | None = None
 
 
 @dataclass
@@ -36,7 +37,7 @@ class SkillExecutionResult:
     skill_id: str
     success: bool
     output: Any
-    error: Optional[str] = None
+    error: str | None = None
     execution_time_ms: float = 0.0
     surface_used: str = ""
     token_usage: int = 0
@@ -126,9 +127,7 @@ def coerce_data(data: Any, schema: Any) -> Any:
 
     elif target_type == "number":
         try:
-            if isinstance(data, str):
-                return float(data)
-            elif isinstance(data, (float, int)):
+            if isinstance(data, (str, float, int)):
                 return float(data)
         except (ValueError, TypeError):
             pass
@@ -158,9 +157,9 @@ class SkillExecutor:
         self.skills_dir = skills_dir
         self.telemetry = SkillTelemetry(get_telemetry_collector())
         self.logger = logger.bind(component="skill_executor")
-        self._skill_cache: Dict[str, Dict[str, str]] = {}  # skill_id -> {"python": code, "prolog": code, ...}
+        self._skill_cache: dict[str, dict[str, str]] = {}  # skill_id -> {"python": code, "prolog": code, ...}
 
-    def _load_skill_code(self, skill_id: str) -> Dict[str, str]:
+    def _load_skill_code(self, skill_id: str) -> dict[str, str]:
         """Load code blocks for a skill from its SKILL.md file."""
         if skill_id in self._skill_cache:
             return self._skill_cache[skill_id]
@@ -242,7 +241,7 @@ class SkillExecutor:
                     skill_id=skill_id,
                     success=False,
                     output=None,
-                    error=f"Input validation failed: {str(e)}",
+                    error=f"Input validation failed: {e!s}",
                     surface_used=request.surface or (skill.surfaces[0] if skill.surfaces else "python"),
                 )
 
@@ -266,7 +265,7 @@ class SkillExecutor:
                 skill_id=skill_id,
                 success=False,
                 output=None,
-                error=f"Failed to load skill code: {str(e)}",
+                error=f"Failed to load skill code: {e!s}",
                 surface_used=surface_name,
             )
 
@@ -282,9 +281,9 @@ class SkillExecutor:
             )
 
         # Wrap execution with telemetry
-        async def skill_runner(input_data: Dict[str, Any], trace_ctx: TraceContext) -> Dict[str, Any]:
+        async def skill_runner(input_data: dict[str, Any], trace_ctx: TraceContext) -> dict[str, Any]:
             # Initialize shared substrate for this execution
-            substrate: Dict[str, Any] = {}
+            substrate: dict[str, Any] = {}
 
             # Prepare execution context with input
             # Apply type conversion for cross-surface compatibility
@@ -318,7 +317,7 @@ class SkillExecutor:
             result = await plugin.execute(surface_code, context)
             # Apply type conversion for cross-surface compatibility if needed
             # In a full implementation, we would use type hints from skill schemas
-            return cast(Dict[str, Any], result)
+            return cast(dict[str, Any], result)
 
         # Execute with telemetry
         start = time.perf_counter()
@@ -346,7 +345,7 @@ class SkillExecutor:
                     output = coerced_output
                 except Exception as e:
                     success = False
-                    error_msg = f"Output validation failed: {str(e)}"
+                    error_msg = f"Output validation failed: {e!s}"
                     output = None
         except Exception as e:
             elapsed = (time.perf_counter() - start) * 1000
@@ -355,7 +354,7 @@ class SkillExecutor:
             error_msg = str(e)
 
         # Record telemetry
-        from .telemetry import record_skill_execution, SkillTelemetry
+        from .telemetry import SkillTelemetry, record_skill_execution
 
         # Estimate token usage
         token_usage = SkillTelemetry(get_telemetry_collector())._estimate_tokens(
@@ -389,10 +388,10 @@ class SkillExecutor:
 
 
 # Singleton executor
-_global_executor: Optional[SkillExecutor] = None
+_global_executor: SkillExecutor | None = None
 
 
-def get_skill_executor() -> Optional[SkillExecutor]:
+def get_skill_executor() -> SkillExecutor | None:
     """Get global skill executor instance."""
     return _global_executor
 

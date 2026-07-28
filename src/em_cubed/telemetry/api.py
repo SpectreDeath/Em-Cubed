@@ -1,10 +1,11 @@
 """Telemetry API for real-time observability dashboard."""
 
-import time
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any, cast
-import structlog
 import asyncio
+import time
+from datetime import UTC, datetime
+from typing import Any, cast
+
+import structlog
 
 logger = structlog.get_logger()
 
@@ -16,35 +17,35 @@ class TelemetryAPI:
         self.collector = telemetry_collector
         self.logger = logger.bind(component="telemetry_api")
 
-    def get_skill_metrics(self, skill_id: str, window_seconds: int = 3600) -> Dict[str, Any]:
+    def get_skill_metrics(self, skill_id: str, window_seconds: int = 3600) -> dict[str, Any]:
         """Get metrics for a specific skill."""
-        return cast(Dict[str, Any], self.collector.get_skill_metrics(skill_id, window_seconds))
+        return cast(dict[str, Any], self.collector.get_skill_metrics(skill_id, window_seconds))
 
-    def get_overall_stats(self) -> Dict[str, Any]:
+    def get_overall_stats(self) -> dict[str, Any]:
         """Get overall telemetry statistics."""
-        return cast(Dict[str, Any], self.collector.get_overall_stats())
+        return cast(dict[str, Any], self.collector.get_overall_stats())
 
-    def get_recent_executions(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_recent_executions(self, limit: int = 50) -> list[dict[str, Any]]:
         """Get recent skill executions."""
         records = self.collector.get_records(limit)
         return [record.to_dict() for record in records]
 
-    def get_skill_executions(self, skill_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_skill_executions(self, skill_id: str, limit: int = 50) -> list[dict[str, Any]]:
         """Get executions for a specific skill."""
         records = self.collector.get_records()
-        cutoff = datetime.now(timezone.utc).timestamp() - 3600
+        cutoff = datetime.now(UTC).timestamp() - 3600
         relevant = [r for r in records if r.skill_id == skill_id and r.timestamp.timestamp() > cutoff][-limit:]
         return [record.to_dict() for record in relevant]
 
-    def get_available_skills(self) -> List[str]:
+    def get_available_skills(self) -> list[str]:
         """Get list of skills with telemetry data."""
         records = self.collector.get_records()
         if not records:
             return []
-        skill_ids = set(r.skill_id for r in records)
+        skill_ids = {r.skill_id for r in records}
         return list(skill_ids)
 
-    def get_system_health(self) -> Dict[str, Any]:
+    def get_system_health(self) -> dict[str, Any]:
         """Get overall system health metrics."""
         stats = self.get_overall_stats()
         return {
@@ -53,7 +54,7 @@ class TelemetryAPI:
             "success_rate": stats.get("overall_success_rate", 0),
             "unique_skills": stats.get("unique_skills", 0),
             "total_token_usage": stats.get("total_token_usage", 0),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
 
@@ -63,10 +64,10 @@ class WebSocketTelemetryHandler:
     def __init__(self, telemetry_collector):
         self.collector = telemetry_collector
         self.logger = logger.bind(component="websocket_telemetry")
-        self._subscribers: List[Any] = []
+        self._subscribers: list[Any] = []
         self._last_broadcast = time.time()
         self._broadcast_interval = 5.0
-        self._broadcast_task: Optional[asyncio.Task] = None
+        self._broadcast_task: asyncio.Task | None = None
 
     def subscribe(self, websocket):
         """Subscribe a WebSocket client to telemetry updates."""
@@ -107,7 +108,7 @@ class WebSocketTelemetryHandler:
             update_data = {
                 "type": "telemetry_update",
                 "data": {
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "overall_stats": overall_stats,
                     "available_skills": available_skills,
                     "total_executions": overall_stats.get("total_executions", 0),
@@ -134,15 +135,15 @@ class WebSocketTelemetryHandler:
         """Record execution and notify subscribers."""
         self.collector.record_execution(record)
 
-    def _get_available_skills(self) -> List[str]:
+    def _get_available_skills(self) -> list[str]:
         """Get list of skill IDs that have at least one telemetry record."""
         records = self.collector.get_records()
         return list({r.skill_id for r in records})
 
 
 # Global instances
-_telemetry_api: Optional[TelemetryAPI] = None
-_websocket_handler: Optional[WebSocketTelemetryHandler] = None
+_telemetry_api: TelemetryAPI | None = None
+_websocket_handler: WebSocketTelemetryHandler | None = None
 
 
 def initialize_telemetry_api(collector) -> TelemetryAPI:
@@ -153,7 +154,7 @@ def initialize_telemetry_api(collector) -> TelemetryAPI:
     return _telemetry_api
 
 
-def get_telemetry_api() -> Optional[TelemetryAPI]:
+def get_telemetry_api() -> TelemetryAPI | None:
     """Get the global telemetry API instance."""
     return _telemetry_api
 
@@ -166,6 +167,6 @@ def initialize_websocket_handler(collector) -> WebSocketTelemetryHandler:
     return _websocket_handler
 
 
-def get_websocket_handler() -> Optional[WebSocketTelemetryHandler]:
+def get_websocket_handler() -> WebSocketTelemetryHandler | None:
     """Get the global WebSocket handler instance."""
     return _websocket_handler

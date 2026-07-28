@@ -49,9 +49,7 @@ class TruthValue:
         """Evaluate if truth value meets the satisfaction threshold in Omega."""
         if not self.is_boolean:
             return False
-        if self.confidence < min_confidence:
-            return False
-        return True
+        return not self.confidence < min_confidence
 
 
 class SubobjectClassifier:

@@ -1,11 +1,12 @@
 """Plugin system for extensible surface architecture."""
 
-from typing import Dict, Any, Optional, List, Set, cast
+from typing import Any, cast
+
 import structlog
 
+from .container_surface import ContainerizedSurfacePlugin
 from .plugin_discovery import PluginDiscovery
 from .plugin_registry import PluginRegistry
-from .container_surface import ContainerizedSurfacePlugin
 
 logger = structlog.get_logger()
 
@@ -24,11 +25,11 @@ class PluginManager:
     def __init__(self) -> None:
         self.discovery: PluginDiscovery = PluginDiscovery()
         self.registry: PluginRegistry = PluginRegistry()
-        self._lazy_classes: Dict[str, type] = {}
+        self._lazy_classes: dict[str, type] = {}
         # Containerized execution settings
-        self._containerized_surfaces: Set[str] = set()
-        self._containerized_timeouts: Dict[str, Optional[float]] = {}
-        self._containerized_plugins: Dict[str, ContainerizedSurfacePlugin] = {}
+        self._containerized_surfaces: set[str] = set()
+        self._containerized_timeouts: dict[str, float | None] = {}
+        self._containerized_plugins: dict[str, ContainerizedSurfacePlugin] = {}
 
         self._load_plugins()
 
@@ -39,7 +40,7 @@ class PluginManager:
             containerized=list(self._containerized_surfaces),
         )
 
-    def enable_containerized_execution(self, surface_name: str, timeout: Optional[float] = None):
+    def enable_containerized_execution(self, surface_name: str, timeout: float | None = None):
         """Enable containerized execution for a surface.
 
         Args:
@@ -187,11 +188,11 @@ class PluginManager:
         """Register a plugin instance."""
         self.registry.register(name, plugin)
 
-    def list_plugins(self) -> Dict[str, bool]:
+    def list_plugins(self) -> dict[str, bool]:
         """List all plugins and their availability."""
-        return cast(Dict[str, bool], self.registry.list_plugins())
+        return cast(dict[str, bool], self.registry.list_plugins())
 
-    def get_available_surfaces(self) -> List[str]:
+    def get_available_surfaces(self) -> list[str]:
         """Get list of available surface names."""
         available = [name for name, plugin in self.registry.get_plugins().items() if getattr(plugin, "available", True)]
         available.extend(list(self._lazy_classes.keys()))
@@ -202,7 +203,7 @@ class PluginManager:
                 available.append(name)
         return available
 
-    def get_surface_info(self) -> List[Dict[str, Any]]:
+    def get_surface_info(self) -> list[dict[str, Any]]:
         """Get detailed information about all surfaces."""
         info = []
         for name, plugin in self.registry.get_plugins().items():
@@ -223,21 +224,21 @@ class PluginManager:
             )
         return info
 
-    def initialize_all(self) -> Dict[str, bool]:
+    def initialize_all(self) -> dict[str, bool]:
         """Initialize all registered plugins."""
-        return cast(Dict[str, bool], self.registry.initialize_all())
+        return cast(dict[str, bool], self.registry.initialize_all())
 
-    def shutdown_all(self) -> Dict[str, bool]:
+    def shutdown_all(self) -> dict[str, bool]:
         """Shutdown all registered plugins."""
-        return cast(Dict[str, bool], self.registry.shutdown_all())
+        return cast(dict[str, bool], self.registry.shutdown_all())
 
     def get_plugin_count(self) -> int:
         """Get the number of registered plugins."""
         return cast(int, self.registry.get_plugin_count())
 
-    def get_plugin_names(self) -> Set[str]:
+    def get_plugin_names(self) -> set[str]:
         """Get the set of registered plugin names."""
-        return cast(Set[str], self.registry.get_plugin_names())
+        return cast(set[str], self.registry.get_plugin_names())
 
     def get_hybrid_coprocessor(self, timeout: float = 30.0) -> Any:
         """Get an instance of HybridCoprocessor for multi-surface co-execution."""

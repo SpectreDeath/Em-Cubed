@@ -1,15 +1,16 @@
 """Tests for skill testing framework module."""
 
-import pytest
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+
+from em_cubed.skills.metadata import SkillMetadata
 from em_cubed.skills.testing import (
     SkillTestGenerator,
     SkillTestRunner,
     TestCase,
     TestResult,
 )
-from em_cubed.skills.metadata import SkillMetadata
 
 
 class TestCaseCreation:

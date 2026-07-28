@@ -3,16 +3,17 @@
 This module provides end-to-end quality assurance for skills.
 """
 
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from datetime import datetime
+from pathlib import Path
+from typing import Any
+
 import structlog
 
+from .benchmark import BenchmarkConfig, BenchmarkResult, SkillBenchmark
 from .metadata import SkillMetadata
-from .validator import SkillValidator, ValidationResult
 from .registry import SkillRegistry
 from .testing import SkillTestGenerator, SkillTestRunner, TestCase
-from .benchmark import SkillBenchmark, BenchmarkConfig, BenchmarkResult
+from .validator import SkillValidator, ValidationResult
 
 logger = structlog.get_logger()
 
@@ -30,7 +31,7 @@ class SkillQualityPipeline:
         self.benchmark = SkillBenchmark(plugin_manager, self.registry, skills_dir)
         self.logger = logger.bind(component="quality_pipeline")
 
-    async def validate_all_skills(self) -> Dict[str, ValidationResult]:
+    async def validate_all_skills(self) -> dict[str, ValidationResult]:
         """Validate all skills in the skills directory."""
         results = {}
 
@@ -54,7 +55,7 @@ class SkillQualityPipeline:
         self.registry._save_registry()
         return results
 
-    async def test_all_skills(self, generate_tests: bool = True) -> Dict[str, Dict[str, Any]]:
+    async def test_all_skills(self, generate_tests: bool = True) -> dict[str, dict[str, Any]]:
         """Run tests for all skills."""
         results = {}
         import traceback
@@ -98,7 +99,7 @@ class SkillQualityPipeline:
 
         return results
 
-    async def benchmark_all_skills(self, config: Optional[BenchmarkConfig] = None) -> Dict[str, BenchmarkResult]:
+    async def benchmark_all_skills(self, config: BenchmarkConfig | None = None) -> dict[str, BenchmarkResult]:
         """Benchmark all skills."""
         config = config or BenchmarkConfig()
         results = {}
@@ -112,7 +113,7 @@ class SkillQualityPipeline:
 
         return results
 
-    def get_quality_report(self) -> Dict[str, Any]:
+    def get_quality_report(self) -> dict[str, Any]:
         """Generate a comprehensive quality report."""
         skills = self.registry.list_skills()
         total = len(skills)
@@ -144,7 +145,7 @@ class SkillQualityPipeline:
             "registry_stats": self.registry.get_statistics(),
         }
 
-    def _discover_skill_files(self) -> List[Path]:
+    def _discover_skill_files(self) -> list[Path]:
         """Discover all skill files."""
         if not self.skills_dir.exists():
             raise FileNotFoundError(f"Skills directory not found: {self.skills_dir}")
@@ -159,7 +160,7 @@ class SkillQualityPipeline:
         """Extract skill ID from file path."""
         return f"{skill_file.parent.parent.name}/{skill_file.parent.name}"
 
-    def _load_skill_metadata(self, skill_file: Path) -> Optional[SkillMetadata]:
+    def _load_skill_metadata(self, skill_file: Path) -> SkillMetadata | None:
         """Load SkillMetadata from file."""
         from .metadata import SkillMetadata
 
@@ -177,9 +178,9 @@ class SkillQualityPipeline:
             self.logger.error("Failed to load metadata", path=str(skill_file), error=str(e))
             return None
 
-    def _load_existing_tests(self, skill_id: str) -> List[TestCase]:
+    def _load_existing_tests(self, skill_id: str) -> list[TestCase]:
         """Load existing tests from test directory."""
-        tests: List[TestCase] = []
+        tests: list[TestCase] = []
         test_dir = Path("tests") / "skills" / skill_id.replace("/", "_")
         if test_dir.exists():
             for test_file in test_dir.glob("test_*.py"):
@@ -191,7 +192,7 @@ class SkillQualityPipeline:
 # Convenience functions for CLI usage
 
 
-async def run_quality_pipeline(skills_dir: Path, registry_file: Path, plugin_manager=None) -> Dict[str, Any]:
+async def run_quality_pipeline(skills_dir: Path, registry_file: Path, plugin_manager=None) -> dict[str, Any]:
     """Run the complete quality pipeline."""
     pipeline = SkillQualityPipeline(skills_dir, registry_file, plugin_manager)
 

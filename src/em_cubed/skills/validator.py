@@ -5,8 +5,9 @@ surface implementations, and composition readiness.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
 from enum import Enum
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -29,10 +30,10 @@ class ValidationIssue:
     code: str  # Unique issue code (e.g., MISSING_PURPOSE, NO_TESTS)
     message: str
     component: str  # Which part failed (metadata, python, prolog, hy)
-    suggestion: Optional[str] = None
-    line_number: Optional[int] = None
+    suggestion: str | None = None
+    line_number: int | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "severity": self.severity.value,
             "code": self.code,
@@ -49,7 +50,7 @@ class ValidationResult:
 
     skill_id: str
     valid: bool  # Overall pass/fail
-    issues: List[ValidationIssue] = field(default_factory=list)
+    issues: list[ValidationIssue] = field(default_factory=list)
     quality_score: float = 0.0  # 0.0 to 1.0
     validated_at: str = ""  # ISO timestamp
 
@@ -59,8 +60,8 @@ class ValidationResult:
         code: str,
         message: str,
         component: str = "general",
-        suggestion: Optional[str] = None,
-        line_number: Optional[int] = None,
+        suggestion: str | None = None,
+        line_number: int | None = None,
     ) -> None:
         """Add a validation issue."""
         self.issues.append(
@@ -76,11 +77,11 @@ class ValidationResult:
         if severity in (ValidationSeverity.ERROR,):
             self.valid = False
 
-    def get_issues_by_severity(self, severity: ValidationSeverity) -> List[ValidationIssue]:
+    def get_issues_by_severity(self, severity: ValidationSeverity) -> list[ValidationIssue]:
         """Get all issues of a given severity."""
         return [i for i in self.issues if i.severity == severity]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "skill_id": self.skill_id,
             "valid": self.valid,

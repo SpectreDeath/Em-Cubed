@@ -1,7 +1,9 @@
 """Mocked tests for QuickJS surface implementation to increase coverage."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from em_cubed.surfaces.quickjs_surface import QuickJSSurface
 
 

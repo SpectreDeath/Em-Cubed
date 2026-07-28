@@ -7,13 +7,13 @@ Bottom-up: pure algorithmic units → verified against hand-computed baselines.
 """
 
 import math
-import pytest
 
 # ============================================================
 # Function-under-test extracted from SKILL.md implementations
 # ============================================================
-
 from collections import Counter
+
+import pytest
 
 
 def _clean(values):
@@ -69,8 +69,8 @@ def _percentile(sorted_values, pct):
     if n == 1:
         return sorted_values[0]
     rank = (pct / 100.0) * (n - 1)
-    lower = int(math.floor(rank))
-    upper = int(math.ceil(rank))
+    lower = math.floor(rank)
+    upper = math.ceil(rank)
     if lower == upper:
         return sorted_values[lower]
     frac = rank - lower

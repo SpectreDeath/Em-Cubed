@@ -6,7 +6,6 @@ Tests template resolution ({{ tasks.task_id.result.field }}) across task outputs
 
 from __future__ import annotations
 
-
 from em_cubed.workflow.distributed import resolve_template_value
 
 

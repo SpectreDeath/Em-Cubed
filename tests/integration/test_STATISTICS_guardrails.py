@@ -7,8 +7,8 @@ Bottom-up: pure-first-order logic routing → Python numeric gate → hybrid con
 """
 
 import math
-import pytest
 
+import pytest
 
 # ============================================================
 # Extracted deterministic mirrors of Prolog/Python logic
@@ -429,6 +429,6 @@ class TestHybridConstraintConjunction:
         assert n < MIN_N_TABLE[test]
 
     def test_min_n_table_all_at_least_one(self):
-        for test, min_n in MIN_N_TABLE.items():
+        for min_n in MIN_N_TABLE.values():
             assert min_n >= 1
             assert isinstance(min_n, int)

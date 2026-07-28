@@ -1,5 +1,7 @@
-import pytest
 import json
+
+import pytest
+
 from em_cubed.search import search_registry
 
 
@@ -195,7 +197,7 @@ class TestSearchRegistry:
 
     def test_search_registry_hash_update(self, tmp_path):
         """Test that registry hash triggers index update."""
-        from em_cubed.search import search_registry, _get_registry_hash
+        from em_cubed.search import _get_registry_hash, search_registry
 
         registry_file = tmp_path / "registry.json"
         index_dir = tmp_path / "whoosh_index"

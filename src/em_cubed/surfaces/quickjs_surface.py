@@ -1,7 +1,8 @@
 """QuickJS surface integration for executing JavaScript code."""
 
 import importlib.util
-from typing import Dict, Any, Optional, List
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -24,7 +25,7 @@ class QuickJSSurface(SurfaceBase):
     def available(self) -> bool:
         return self._check_availability()
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         logger.info("QuickJSSurface initialized", available=self.available)
 
@@ -35,10 +36,11 @@ class QuickJSSurface(SurfaceBase):
             logger.warning("pyquickjs not available for QuickJS surface")
         return available
 
-    def _run_quickjs(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _run_quickjs(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Synchronous QuickJS execution to run inside the executor thread."""
-        import quickjs
         import json
+
+        import quickjs
 
         # Use a fresh context for each execution
         ctx = quickjs.Context()
@@ -57,7 +59,7 @@ class QuickJSSurface(SurfaceBase):
         result = ctx.eval(code)
         return {"status": "ok", "value": result}
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute JavaScript code in the executor thread."""
         logger.info("Executing JavaScript code", code_length=len(code))
 
@@ -80,7 +82,7 @@ class QuickJSSurface(SurfaceBase):
         """Check if the surface is available."""
         return self.available
 
-    def extract_tags(self, source: Optional[str]) -> List[str]:
+    def extract_tags(self, source: str | None) -> list[str]:
         """Extract function names from JavaScript source."""
         if not source:
             return []

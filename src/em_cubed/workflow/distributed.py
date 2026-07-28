@@ -11,7 +11,8 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -23,7 +24,7 @@ _TMPL_PATTERN = re.compile(
 )
 
 
-def _resolve_path(root: Any, path_str: Optional[str]) -> Any:
+def _resolve_path(root: Any, path_str: str | None) -> Any:
     """Walk a dot-separated path into a nested dict/list."""
     if not path_str or root is None:
         return root
@@ -48,7 +49,7 @@ def _resolve_path(root: Any, path_str: Optional[str]) -> Any:
     return curr
 
 
-def resolve_template_value(val: Any, task_results: Dict[str, Any]) -> Any:
+def resolve_template_value(val: Any, task_results: dict[str, Any]) -> Any:
     """
     Resolve template placeholders like '{{ tasks.task_id.result.field }}' from completed parent task results.
     """
@@ -96,18 +97,18 @@ class DistributedTask:
     task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     workflow_id: str = ""
     skill_id: str = ""
-    input_data: Dict[str, Any] = field(default_factory=dict)
-    dependencies: List[str] = field(default_factory=list)  # Task IDs this depends on
+    input_data: dict[str, Any] = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)  # Task IDs this depends on
     status: TaskStatus = TaskStatus.PENDING
-    result: Optional[Any] = None
-    error: Optional[str] = None
+    result: Any | None = None
+    error: str | None = None
     created_at: float = field(default_factory=time.time)
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    started_at: float | None = None
+    completed_at: float | None = None
     retry_count: int = 0
     max_retries: int = 3
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "task_id": self.task_id,
@@ -126,7 +127,7 @@ class DistributedTask:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DistributedTask":
+    def from_dict(cls, data: dict[str, Any]) -> DistributedTask:
         """Create from dictionary."""
         task = cls(
             task_id=data["task_id"],
@@ -151,10 +152,10 @@ class DistributedExecutor:
 
     def __init__(self):
         self.logger = logger.bind(component="distributed_executor")
-        self._tasks: Dict[str, DistributedTask] = {}
-        self._workflows: Dict[str, List[str]] = {}  # workflow_id -> task_ids
+        self._tasks: dict[str, DistributedTask] = {}
+        self._workflows: dict[str, list[str]] = {}  # workflow_id -> task_ids
 
-    def submit_workflow(self, workflow_id: str, tasks: List[DistributedTask]) -> bool:
+    def submit_workflow(self, workflow_id: str, tasks: list[DistributedTask]) -> bool:
         """Submit a workflow for distributed execution.
 
         Args:
@@ -174,12 +175,12 @@ class DistributedExecutor:
             self.logger.error("Failed to submit workflow", workflow_id=workflow_id, error=str(e))
             return False
 
-    def get_task_status(self, task_id: str) -> Optional[TaskStatus]:
+    def get_task_status(self, task_id: str) -> TaskStatus | None:
         """Get the status of a task."""
         task = self._tasks.get(task_id)
         return task.status if task else None
 
-    def get_workflow_status(self, workflow_id: str) -> Dict[str, Any]:
+    def get_workflow_status(self, workflow_id: str) -> dict[str, Any]:
         """Get the status of a workflow."""
         task_ids = self._workflows.get(workflow_id, [])
         if not task_ids:
@@ -212,7 +213,7 @@ class DistributedExecutor:
             "pending": pending,
         }
 
-    def get_task_result(self, task_id: str) -> Optional[Any]:
+    def get_task_result(self, task_id: str) -> Any | None:
         """Get the result of a completed task."""
         task = self._tasks.get(task_id)
         return task.result if task and task.status == TaskStatus.COMPLETED else None
@@ -231,17 +232,18 @@ class DistributedExecutor:
 
     def shutdown(self) -> None:
         """Shutdown the executor."""
-        pass  # nosec B110 - intentional fallback; caller handles None/False return
+        # nosec B110 - intentional fallback; caller handles None/False return
 
 
-def _execute_distributed_task(task_dict: Dict[str, Any], skills_dir_str: str) -> Dict[str, Any]:
+def _execute_distributed_task(task_dict: dict[str, Any], skills_dir_str: str) -> dict[str, Any]:
     """Independent worker process function that executes a skill task."""
     try:
-        from pathlib import Path
         import asyncio
+        from pathlib import Path
+
         from em_cubed.plugin_manager import PluginManager
+        from em_cubed.skills.executor import SkillExecutionRequest, SkillExecutor
         from em_cubed.skills.registry import SkillRegistry
-        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
 
         # Initialize an isolated event loop for this worker process
         loop = asyncio.new_event_loop()
@@ -287,11 +289,11 @@ class ProcessDistributedExecutor(DistributedExecutor):
         self.skills_dir = skills_dir
         self._max_workers = max_workers
         self._process_executor = ProcessPoolExecutor(max_workers=max_workers)
-        self._futures: Dict[str, Any] = {}
-        self._scheduler_tasks: Dict[str, asyncio.Task] = {}
+        self._futures: dict[str, Any] = {}
+        self._scheduler_tasks: dict[str, asyncio.Task] = {}
         self._callback_lock = threading.Lock()  # Guards _tasks mutations in done-callbacks
 
-    def submit_workflow(self, workflow_id: str, tasks: List[DistributedTask]) -> bool:
+    def submit_workflow(self, workflow_id: str, tasks: list[DistributedTask]) -> bool:
         """Submit a workflow and start scheduling tasks across workers."""
         success = super().submit_workflow(workflow_id, tasks)
         if not success:
@@ -492,16 +494,16 @@ class AdaptiveWorkerPool:
 
 
 # Global distributor instance
-_distributed_executor: Optional[DistributedExecutor] = None
+_distributed_executor: DistributedExecutor | None = None
 
 
-def get_distributed_executor() -> Optional[DistributedExecutor]:
+def get_distributed_executor() -> DistributedExecutor | None:
     """Get the global distributed executor instance."""
     global _distributed_executor
     return _distributed_executor
 
 
-def initialize_distributed_executor(skills_dir: Optional[Path] = None) -> DistributedExecutor:
+def initialize_distributed_executor(skills_dir: Path | None = None) -> DistributedExecutor:
     """Initialize the global distributed executor."""
     global _distributed_executor
     if skills_dir:

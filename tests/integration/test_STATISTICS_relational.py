@@ -7,8 +7,8 @@ Bottom-up: Pearson r → Spearman rho → OLS regression with R² and t-stat.
 """
 
 import math
-import pytest
 
+import pytest
 
 # ============================================================
 # Shared math helpers

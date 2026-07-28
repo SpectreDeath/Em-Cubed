@@ -1,6 +1,7 @@
 """Tests for WASM surface functionality."""
 
 import pytest
+
 from em_cubed.surfaces.wasm_surface import WASMSurface
 
 

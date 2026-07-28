@@ -27,24 +27,24 @@ __version__ = "0.8.0"
 
 # Tiered Public API: Core Skill Engine & Primary Surfaces
 __all__ = [
-    "reindex",
-    "get_skill_metadata",
-    "search_registry",
-    "PythonSurface",
-    "PrologSurface",
-    "Z3Surface",
-    "DatalogSurface",
-    "SQLiteSurface",
-    "HySurface",
-    "QuickJSSurface",
-    "WASMSurface",
     "ClingoSurface",
-    "KanrenSurface",
+    "DatalogSurface",
+    "HySurface",
     "JanusSurface",
-    "SkillRegistry",
+    "KanrenSurface",
+    "PrologSurface",
+    "PythonSurface",
+    "QuickJSSurface",
+    "SQLiteSurface",
     "SkillExecutor",
+    "SkillRegistry",
     "SkillValidator",
+    "WASMSurface",
+    "Z3Surface",
     "__version__",
+    "get_skill_metadata",
+    "reindex",
+    "search_registry",
 ]
 
 # Legacy sub-package mapping for backward-compatible attribute access with DeprecationWarning (PEP 562)

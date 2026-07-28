@@ -7,9 +7,9 @@ and evaluates event-driven reactive rules against active ontology ledgers.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable
 
 from em_cubed.ontology.schema import OntologyTriple
 from em_cubed.ontology.topos import SubobjectClassifier, TruthValue

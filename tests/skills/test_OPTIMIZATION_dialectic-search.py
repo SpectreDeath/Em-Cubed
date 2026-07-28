@@ -1,11 +1,13 @@
 """Tests for dialectic-search skill."""
 
-import pytest
 import math
 from pathlib import Path
-from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
+
+import pytest
+
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
+from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 
 SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "dialectic-search" / "SKILL.md")
 SKILL_ID = "OPTIMIZATION/dialectic-search"
@@ -114,8 +116,7 @@ class TestDialecticSearchSkill:
             for i in range(pop_size):
                 fitness[i] = sphere(population[i])
 
-            if min(fitness) < best_score:
-                best_score = min(fitness)
+            best_score = min(best_score, min(fitness))
 
         assert best_score < 1.0, f"DA sphere result = {best_score}"
 

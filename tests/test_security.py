@@ -1,7 +1,8 @@
 """Security tests to ensure surfaces block dangerous operations."""
 
 import pytest
-from em_cubed.surfaces import PythonSurface, Z3Surface, DatalogSurface
+
+from em_cubed.surfaces import DatalogSurface, PythonSurface, Z3Surface
 
 pytestmark = pytest.mark.asyncio
 

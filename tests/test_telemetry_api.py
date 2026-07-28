@@ -1,11 +1,13 @@
 """Integration tests for telemetry API and WebSocket broadcasting."""
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, Mock
+
+import pytest
+
+from em_cubed.skills.telemetry import ExecutionRecord, TelemetryCollector
 from em_cubed.telemetry.api import TelemetryAPI, WebSocketTelemetryHandler, get_telemetry_api
-from em_cubed.skills.telemetry import TelemetryCollector, ExecutionRecord
 
 
 def test_telemetry_api_get_available_skills():
@@ -19,13 +21,13 @@ def test_telemetry_api_get_available_skills():
     # Add some records
     record1 = ExecutionRecord(
         skill_id="optimization/central-force",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         success=True,
         execution_time_ms=100.0,
     )
     record2 = ExecutionRecord(
         skill_id="optimization/spiral-dynamics",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         success=True,
         execution_time_ms=150.0,
     )
@@ -48,7 +50,7 @@ def test_telemetry_api_get_skill_metrics():
     for i in range(5):
         record = ExecutionRecord(
             skill_id="test/skill",
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             success=i < 4,  # 4 successes, 1 failure
             execution_time_ms=100.0 * (i + 1),
             token_usage=50,
@@ -74,9 +76,7 @@ def test_telemetry_api_system_health():
     assert health["total_executions"] == 0
 
     # Add some data
-    record = ExecutionRecord(
-        skill_id="test/skill", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=100.0
-    )
+    record = ExecutionRecord(skill_id="test/skill", timestamp=datetime.now(UTC), success=True, execution_time_ms=100.0)
     collector.record_execution(record)
 
     health = api.get_system_health()
@@ -115,7 +115,7 @@ async def test_websocket_handler_broadcast():
 
     # Add a record
     record = ExecutionRecord(
-        skill_id="test/broadcast", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=50.0
+        skill_id="test/broadcast", timestamp=datetime.now(UTC), success=True, execution_time_ms=50.0
     )
     collector.record_execution(record)
 
@@ -169,7 +169,7 @@ def test_telemetry_api_recent_executions():
     # Add records
     for i in range(10):
         record = ExecutionRecord(
-            skill_id=f"test/skill-{i}", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=100.0
+            skill_id=f"test/skill-{i}", timestamp=datetime.now(UTC), success=True, execution_time_ms=100.0
         )
         collector.record_execution(record)
 

@@ -1,12 +1,13 @@
 """Integration tests for skill composition and multi-surface execution."""
 
-import pytest
 import asyncio
 from pathlib import Path
 
-from em_cubed.skills.composer import SkillComposer, CompositionPlan, CompositionStep, CompositionPattern
-from em_cubed.skills.registry import SkillRegistry
+import pytest
+
 from em_cubed.plugin_manager import PluginManager
+from em_cubed.skills.composer import CompositionPattern, CompositionPlan, CompositionStep, SkillComposer
+from em_cubed.skills.registry import SkillRegistry
 from em_cubed.skills.validator import SkillValidator
 
 pytestmark = pytest.mark.asyncio
@@ -216,8 +217,8 @@ class TestSkillValidationIntegration:
 
     def test_validate_all_skills(self):
         """Validate all skills in the repository."""
-        from em_cubed.skills.quality_pipeline import SkillQualityPipeline
         from em_cubed.plugin_manager import PluginManager
+        from em_cubed.skills.quality_pipeline import SkillQualityPipeline
 
         skills_dir = Path("skills")
         registry_file = Path("registry.json")
@@ -246,7 +247,7 @@ class TestSkillBenchmarkIntegration:
     @pytest.mark.asyncio
     async def test_benchmark_mock_skill(self, plugin_manager, tmp_path):
         """Benchmark a simple skill."""
-        from em_cubed.skills.benchmark import SkillBenchmark, BenchmarkConfig
+        from em_cubed.skills.benchmark import BenchmarkConfig, SkillBenchmark
         from em_cubed.skills.registry import SkillRegistry
 
         # Create minimal test registry
@@ -347,8 +348,8 @@ class TestEndToEndQualityPipeline:
 
     def test_full_pipeline_smoke(self, tmp_path):
         """Smoke test the full quality pipeline on a minimal skill set."""
-        from em_cubed.skills.quality_pipeline import SkillQualityPipeline
         from em_cubed.plugin_manager import PluginManager
+        from em_cubed.skills.quality_pipeline import SkillQualityPipeline
 
         # Create minimal skills dir
         skills_dir = tmp_path / "skills"
@@ -385,7 +386,7 @@ def execute(input_data):
         # Run validation
         results = asyncio.run(pipeline.validate_all_skills())
         assert len(results) > 0
-        assert list(results.values())[0].valid
+        assert next(iter(results.values())).valid
 
         # Benchmark
         bench_results = asyncio.run(pipeline.benchmark_all_skills())

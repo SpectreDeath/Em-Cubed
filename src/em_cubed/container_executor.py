@@ -5,8 +5,8 @@ import sys
 import traceback
 from pathlib import Path
 
-from em_cubed.skills.executor import SkillExecutor
 from em_cubed.plugin_manager import PluginManager
+from em_cubed.skills.executor import SkillExecutor
 from em_cubed.skills.registry import SkillRegistry
 
 
@@ -76,9 +76,7 @@ def main():
         )
 
     except Exception as e:
-        print(
-            json.dumps({"status": "error", "message": f"Container executor error: {str(e)}\n{traceback.format_exc()}"})
-        )
+        print(json.dumps({"status": "error", "message": f"Container executor error: {e!s}\n{traceback.format_exc()}"}))
         sys.exit(1)
 
 

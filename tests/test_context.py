@@ -1,6 +1,6 @@
 """Additional tests for the context/type system to improve coverage."""
 
-from em_cubed.context import get_type_converter, get_type_registry, TypeDefinition, TypeRegistry, TypeConverter
+from em_cubed.context import TypeConverter, TypeDefinition, TypeRegistry, get_type_converter, get_type_registry
 
 
 def test_type_register_type():
@@ -157,16 +157,15 @@ def test_infer_type_comprehensive():
     assert converter._infer_type("hello") == "string"
     assert converter._infer_type([1, 2, 3]) == "list"
     assert converter._infer_type({"a": 1}) == "dict"
-    assert converter._infer_type(set([1, 2, 3])) == "string"  # Default to string for unknown types
+    assert converter._infer_type({1, 2, 3}) == "string"  # Default to string for unknown types
     assert converter._infer_type(object()) == "string"  # Default to string for unknown types
 
 
 def test_initialize_type_system_idempotent():
     """Test that initialize_type_system can be called multiple times."""
-    from em_cubed.context import initialize_type_system
-
     # Reset globals for clean test
     import em_cubed.context as context_module
+    from em_cubed.context import initialize_type_system
 
     context_module._type_registry = None
     context_module._type_converter = None
@@ -502,7 +501,7 @@ def test_type_converter_logger_initialization():
 
 def test_global_type_system_singleton_behavior():
     """Test that global type system instances behave as singletons."""
-    from em_cubed.context import get_type_registry, get_type_converter, initialize_type_system
+    from em_cubed.context import get_type_converter, get_type_registry, initialize_type_system
 
     # Get instances multiple times
     registry1 = get_type_registry()

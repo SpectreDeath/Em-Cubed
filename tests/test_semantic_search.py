@@ -4,9 +4,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from em_cubed.skills.semantic_search import SemanticSkillSearch
-from em_cubed.skills.registry import SkillRegistry
 from em_cubed.skills.metadata import SkillMetadata
+from em_cubed.skills.registry import SkillRegistry
+from em_cubed.skills.semantic_search import SemanticSkillSearch
 
 
 def test_semantic_search_creation():

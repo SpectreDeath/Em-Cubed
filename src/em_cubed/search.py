@@ -1,26 +1,27 @@
 import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
 
-__all__ = ["search_registry", "get_search_index", "WhooshSearchIndex", "SearchIndexManager"]
+__all__ = ["SearchIndexManager", "WhooshSearchIndex", "get_search_index", "search_registry"]
 
 
 class SearchIndexManager:
     """Manages Whoosh search index with proper state isolation."""
 
-    def __init__(self, index_dir: Optional[Path] = None):
+    def __init__(self, index_dir: Path | None = None):
         self.index_dir = index_dir or Path(".whoosh_index")
-        self._index_hash: Optional[str] = None
-        self._whoosh_index: Optional[WhooshSearchIndex] = None
+        self._index_hash: str | None = None
+        self._whoosh_index: WhooshSearchIndex | None = None
 
 
 class WhooshSearchIndex:
     """Whoosh-based full-text search index for skills."""
 
-    def __init__(self, index_dir: Optional[Path] = None):
+    def __init__(self, index_dir: Path | None = None):
         self.index_dir = index_dir or Path(".whoosh_index")
         self.index_dir.mkdir(exist_ok=True)
         self.ix = None
@@ -30,7 +31,7 @@ class WhooshSearchIndex:
         """Initialize or open the Whoosh index."""
         try:
             from whoosh import index
-            from whoosh.fields import Schema, TEXT, KEYWORD, ID
+            from whoosh.fields import ID, KEYWORD, TEXT, Schema
 
             schema = Schema(
                 name=TEXT(stored=True, field_boost=2.0),
@@ -48,7 +49,7 @@ class WhooshSearchIndex:
             if index.exists_in(str(self.index_dir)):
                 self.ix = index.open_dir(str(self.index_dir))
                 # Check if schema matches
-                if not self.ix.schema == schema:
+                if self.ix.schema != schema:
                     logger.warning("Schema mismatch, recreating index")
                     self.ix = None
 
@@ -59,7 +60,7 @@ class WhooshSearchIndex:
             logger.warning("Whoosh not available, falling back to naive search")
             self.ix = None
 
-    def index_skills(self, registry: List[Dict[str, Any]]):
+    def index_skills(self, registry: list[dict[str, Any]]):
         """Index skills from registry."""
         if not self.ix:
             return
@@ -109,7 +110,7 @@ class WhooshSearchIndex:
             logger.exception("Failed to index skills", error=str(e))
             writer.cancel()
 
-    def search(self, query: str, max_results: int = 10) -> List[Dict[str, Any]]:
+    def search(self, query: str, max_results: int = 10) -> list[dict[str, Any]]:
         """Search the index with enhanced scoring."""
         if not self.ix:
             return []
@@ -188,12 +189,12 @@ class WhooshSearchIndex:
             return []
 
 
-def get_search_index(index_dir: Optional[Path] = None) -> WhooshSearchIndex:
+def get_search_index(index_dir: Path | None = None) -> WhooshSearchIndex:
     """Get or create a search index instance."""
     return WhooshSearchIndex(index_dir)
 
 
-def _get_registry_hash(registry: List[Dict[str, Any]]) -> str:
+def _get_registry_hash(registry: list[dict[str, Any]]) -> str:
     """Get a hash of the registry for change detection."""
     import hashlib
     import json
@@ -204,8 +205,8 @@ def _get_registry_hash(registry: List[Dict[str, Any]]) -> str:
 
 
 def search_registry(
-    query: str, registry_path: Path, max_results: int = 10, use_whoosh: bool = True, index_dir: Optional[Path] = None
-) -> List[Dict[str, Any]]:
+    query: str, registry_path: Path, max_results: int = 10, use_whoosh: bool = True, index_dir: Path | None = None
+) -> list[dict[str, Any]]:
     """Search the skill registry with whoosh or fallback to naive search."""
     logger.info(
         "Searching registry",
@@ -228,7 +229,7 @@ def search_registry(
         with open(registry_path, encoding="utf-8") as f:
             registry = json.load(f)
     except Exception as e:
-        return [{"error": f"Error reading registry: {str(e)}"}]
+        return [{"error": f"Error reading registry: {e!s}"}]
 
     # Try whoosh search first if enabled
     if use_whoosh:
@@ -267,7 +268,7 @@ def search_registry(
     return _naive_search_registry(query, registry, max_results)
 
 
-def _naive_search_registry(query: str, registry: List[Dict[str, Any]], max_results: int = 10) -> List[Dict[str, Any]]:
+def _naive_search_registry(query: str, registry: list[dict[str, Any]], max_results: int = 10) -> list[dict[str, Any]]:
     """Fallback naive search implementation."""
     logger.info("Using naive search fallback")
 

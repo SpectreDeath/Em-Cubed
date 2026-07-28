@@ -1,6 +1,6 @@
 """Pure relational logic surface via MiniKanren (kanren package)."""
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .base import SurfaceBase
 
@@ -31,7 +31,7 @@ class KanrenSurface(SurfaceBase):
         return importlib.util.find_spec("kanren") is not None
 
     @staticmethod
-    def extract_tags(source: Optional[str]) -> list:
+    def extract_tags(source: str | None) -> list:
         if not source:
             return []
 
@@ -48,11 +48,11 @@ class KanrenSurface(SurfaceBase):
 
         return list(tags)
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         if not self.available:
             return {"status": "error", "message": "kanren package is not installed"}
 
-        namespace: Dict[str, Any] = {
+        namespace: dict[str, Any] = {
             "var": None,
             "Var": None,
             "run": None,
@@ -68,7 +68,7 @@ class KanrenSurface(SurfaceBase):
         }
 
         try:
-            from kanren import Var, run, Relation, fact, conde, eq, lany, lall, membero
+            from kanren import Relation, Var, conde, eq, fact, lall, lany, membero, run
 
             namespace.update(
                 {
@@ -87,7 +87,7 @@ class KanrenSurface(SurfaceBase):
         except ImportError as exc:
             return {"status": "error", "message": f"kanren import failed: {exc}"}
 
-        exec_globals: Dict[str, Any] = dict(namespace)
+        exec_globals: dict[str, Any] = dict(namespace)
 
         try:
             exec(code, exec_globals)  # noqa: S102  # nosec B102 - kanren namespace pre-populated with allowlisted symbols only

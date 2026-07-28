@@ -5,7 +5,8 @@ import importlib.util
 import os
 import re
 import tempfile
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -30,7 +31,7 @@ class PrologSurface(SurfaceBase):
     def available(self) -> bool:
         return self._check_availability()
 
-    def __init__(self, timeout: Optional[float] = None) -> None:
+    def __init__(self, timeout: float | None = None) -> None:
         super().__init__(timeout)
         self._prolog = None  # Lazy initialization of Prolog interpreter
         logger.info("PrologSurface initialized", available=self.available, timeout=self.timeout)
@@ -42,7 +43,7 @@ class PrologSurface(SurfaceBase):
             logger.warning("PySWIP not available for Prolog surface")
         return available
 
-    def extract_tags(self, prolog_source: Optional[str]) -> List[str]:
+    def extract_tags(self, prolog_source: str | None) -> list[str]:
         """Extract predicate names from Prolog source as logic_tags."""
         if not prolog_source:
             return []
@@ -87,7 +88,7 @@ class PrologSurface(SurfaceBase):
             escaped = str(value).replace("\\", "\\\\").replace("'", "\\'")
             return "'" + escaped + "'"
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute Prolog code - implementation with timeout protection."""
         logger.info("Executing Prolog code", code_length=len(code), has_context=context is not None)
 
@@ -264,7 +265,7 @@ class PrologSurface(SurfaceBase):
 
                 try:
                     result = await asyncio.get_event_loop().run_in_executor(self._executor, execute_query)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     logger.warning("Prolog query timed out", query=processed_code, timeout=self.timeout)
                     return {"status": "error", "message": f"Query execution timed out after {self.timeout}s"}
 

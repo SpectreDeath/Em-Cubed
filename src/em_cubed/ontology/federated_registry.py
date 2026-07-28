@@ -60,6 +60,6 @@ class FederatedOntologyRegistry:
 
         checksums = {node.state_checksum for node in self.nodes.values()}
         if len(checksums) == 1:
-            return True, f"Swarm fully aligned (Checksum: {list(checksums)[0][:8]})"
+            return True, f"Swarm fully aligned (Checksum: {next(iter(checksums))[:8]})"
 
         return False, f"Swarm misalignment detected across {len(checksums)} distinct checksum states"

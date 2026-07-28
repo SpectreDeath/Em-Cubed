@@ -2,15 +2,17 @@
 
 import asyncio
 import time
+
 import pytest
+
+from em_cubed.workflow.checkpoint import initialize_checkpoint_manager
 from em_cubed.workflow.distributed import (
     DistributedExecutor,
     DistributedTask,
-    TaskStatus,
     ProcessDistributedExecutor,
+    TaskStatus,
     initialize_distributed_executor,
 )
-from em_cubed.workflow.checkpoint import initialize_checkpoint_manager
 
 
 def test_distributed_executor_creation():

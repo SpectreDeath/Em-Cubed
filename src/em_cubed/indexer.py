@@ -8,23 +8,24 @@ import json
 import os
 import re
 from pathlib import Path
-import yaml  # type: ignore
-from typing import List, Dict, Any, Optional
+from typing import Any
+
 import structlog
+import yaml  # type: ignore
 
 logger = structlog.get_logger()
 
-__all__ = ["reindex", "get_skill_metadata", "reindex_incremental"]
+__all__ = ["get_skill_metadata", "reindex", "reindex_incremental"]
 
 
-def extract_fenced_block(content: str, lang: str) -> Optional[str]:
+def extract_fenced_block(content: str, lang: str) -> str | None:
     """Extract first fenced code block of a given language tag."""
     pattern = rf"`+{lang}\s*\r?\n(.*?)`+"
     match = re.search(pattern, content, re.DOTALL)
     return match.group(1).strip() if match else None
 
 
-def extract_prolog_tags(prolog_source: Optional[str]) -> List[str]:
+def extract_prolog_tags(prolog_source: str | None) -> list[str]:
     """Extract predicate names from Prolog clause heads as logic_tags."""
     if not prolog_source:
         return []
@@ -38,7 +39,7 @@ def extract_prolog_tags(prolog_source: Optional[str]) -> List[str]:
     return list(dict.fromkeys(h for h in heads if h not in builtins))
 
 
-def extract_hy_tags(hy_source: Optional[str]) -> List[str]:
+def extract_hy_tags(hy_source: str | None) -> list[str]:
     """Extract function names from Hy defn forms as heuristic_tags."""
     if not hy_source:
         return []
@@ -46,7 +47,7 @@ def extract_hy_tags(hy_source: Optional[str]) -> List[str]:
     return list(dict.fromkeys(fns))
 
 
-def get_skill_metadata(file_path: Path, skills_dir: Path) -> Optional[Dict[str, Any]]:
+def get_skill_metadata(file_path: Path, skills_dir: Path) -> dict[str, Any] | None:
     """Extract extended metadata from a SKILL.md file."""
     try:
         with open(file_path, encoding="utf-8-sig") as f:
@@ -218,7 +219,7 @@ def reindex(skills_dir: Path, registry_output: Path) -> None:
     )
 
 
-def _discover_skill_files(skills_dir: Path) -> List[Path]:
+def _discover_skill_files(skills_dir: Path) -> list[Path]:
     """Discover all skill files in the directory."""
     skill_files = []
 

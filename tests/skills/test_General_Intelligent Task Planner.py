@@ -1,10 +1,12 @@
 """Tests for Intelligent Task Planner skill."""
 
-import pytest
 from pathlib import Path
-from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
+
+import pytest
+
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
+from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 
 SKILL_FILE = Path(Path(__file__).parent.parent.parent / "skills" / "General" / "intelligent-task-planner" / "SKILL.md")
 SKILL_ID = "General/intelligent-task-planner"

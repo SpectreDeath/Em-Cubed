@@ -1,6 +1,7 @@
-from pathlib import Path
 import tempfile
-from em_cubed.indexer import reindex, get_skill_metadata
+from pathlib import Path
+
+from em_cubed.indexer import get_skill_metadata, reindex
 
 
 class TestIndexer:

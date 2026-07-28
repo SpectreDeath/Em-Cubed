@@ -4,19 +4,20 @@ This registry extends the basic skill index with quality tracking, performance
 benchmarks, usage analytics, composition relationships, and remote skill discovery.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
-from pathlib import Path
 import json
-import structlog
-from datetime import datetime
-from collections import defaultdict
 import os
-import uuid
 import sqlite3
+import uuid
 from abc import ABC, abstractmethod
+from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Optional
 
-from .metadata import SkillMetadata, RuntimeMetrics
+import structlog
+
+from .metadata import RuntimeMetrics, SkillMetadata
 
 if TYPE_CHECKING:
     from .remote_registry import RemoteSkillRegistry
@@ -38,10 +39,10 @@ class QualityMetrics:
     avg_execution_time: float = 0.0
     avg_token_savings: float = 0.0
     usage_count: int = 0
-    last_validation: Optional[datetime] = None
-    last_execution: Optional[datetime] = None
-    issues: List[Dict[str, Any]] = field(default_factory=list)  # Validation issues
-    benchmarks: Dict[str, float] = field(default_factory=dict)  # performance benchmarks
+    last_validation: datetime | None = None
+    last_execution: datetime | None = None
+    issues: list[dict[str, Any]] = field(default_factory=list)  # Validation issues
+    benchmarks: dict[str, float] = field(default_factory=dict)  # performance benchmarks
 
     def meets_thresholds(self, thresholds) -> bool:
         """Check if metrics meet quality thresholds."""
@@ -51,11 +52,9 @@ class QualityMetrics:
             return False
         if self.success_rate < thresholds.min_success_rate:
             return False
-        if self.avg_execution_time > thresholds.max_execution_time:
-            return False
-        return True
+        return not self.avg_execution_time > thresholds.max_execution_time
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "skill_id": self.skill_id,
             "validation_score": self.validation_score,
@@ -78,10 +77,10 @@ class CompositionEdge:
     source_skill_id: str
     target_skill_id: str
     compatibility_score: float  # 0-1 based on schema compatibility
-    data_transformation: Optional[str] = None  # Transformation needed between skills
-    common_patterns: List[str] = field(default_factory=list)  # Shared use cases
+    data_transformation: str | None = None  # Transformation needed between skills
+    common_patterns: list[str] = field(default_factory=list)  # Shared use cases
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "source": self.source_skill_id,
             "target": self.target_skill_id,
@@ -99,12 +98,12 @@ class SkillRegistry:
         self.registry_file = registry_file
         self.logger = logger.bind(component="skill_registry")
         self.storage = storage or JSONFileRegistryStorage(registry_file)
-        self._skills: Dict[str, SkillMetadata] = {}
-        self._quality_metrics: Dict[str, QualityMetrics] = {}
-        self._composition_graph: Dict[str, List[CompositionEdge]] = defaultdict(list)
+        self._skills: dict[str, SkillMetadata] = {}
+        self._quality_metrics: dict[str, QualityMetrics] = {}
+        self._composition_graph: dict[str, list[CompositionEdge]] = defaultdict(list)
         # Remote registry federation
-        self._remote_registry_manager: Optional[RemoteSkillRegistry] = None
-        self._remote_skill_cache: Dict[str, List[SkillMetadata]] = {}  # Cache for discovered skills
+        self._remote_registry_manager: RemoteSkillRegistry | None = None
+        self._remote_skill_cache: dict[str, list[SkillMetadata]] = {}  # Cache for discovered skills
 
         self._load_registry()
 
@@ -130,7 +129,7 @@ class SkillRegistry:
         self._remote_registry_manager = manager
         self.logger.info("Remote registry manager set for federation")
 
-    def sync_with_remote_registries(self, force: bool = False) -> Dict[str, bool]:
+    def sync_with_remote_registries(self, force: bool = False) -> dict[str, bool]:
         """Synchronize with all configured remote registries.
 
         Args:
@@ -145,7 +144,7 @@ class SkillRegistry:
 
         return self._remote_registry_manager.sync_all_registries(force=force)
 
-    def discover_remote_skills(self, query: str, limit: int = 10) -> List[SkillMetadata]:
+    def discover_remote_skills(self, query: str, limit: int = 10) -> list[SkillMetadata]:
         """Discover skills from remote registries matching a query.
 
         Args:
@@ -174,7 +173,7 @@ class SkillRegistry:
 
         return skills
 
-    def get_remote_registry_info(self) -> Dict[str, Dict[str, Any]]:
+    def get_remote_registry_info(self) -> dict[str, dict[str, Any]]:
         """Get information about configured remote registries.
 
         Returns:
@@ -220,7 +219,7 @@ class SkillRegistry:
         except Exception as e:
             self.logger.error("Failed to load registry", error=str(e))
 
-    def _migrate_skill_entry(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _migrate_skill_entry(self, data: dict[str, Any]) -> dict[str, Any]:
         """Migrate a registry entry to the current schema version."""
         version = data.get("schema_version", 0)
         if version < CURRENT_SCHEMA_VERSION:
@@ -232,9 +231,9 @@ class SkillRegistry:
             data["schema_version"] = CURRENT_SCHEMA_VERSION
         return data
 
-    def _deserialize_metadata(self, data: Dict[str, Any]) -> SkillMetadata:
+    def _deserialize_metadata(self, data: dict[str, Any]) -> SkillMetadata:
         """Deserialize dictionary into SkillMetadata object."""
-        from .metadata import SkillDependency, InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds
+        from .metadata import CompatibilityRange, InputOutputSchema, QualityThresholds, SkillCapability, SkillDependency
 
         # Parse dependencies
         deps = [SkillDependency.from_dict(d) for d in data.get("dependencies", [])]
@@ -298,7 +297,7 @@ class SkillRegistry:
             updated_at=updated_at,
         )
 
-    def get_skill(self, skill_id: str) -> Optional[SkillMetadata]:
+    def get_skill(self, skill_id: str) -> SkillMetadata | None:
         """Retrieve a skill by its ID, with fallback to fuzzy/slugified matching."""
         # 1. Exact match
         if skill_id in self._skills:
@@ -330,8 +329,8 @@ class SkillRegistry:
         return None
 
     def list_skills(
-        self, domain: Optional[str] = None, surface: Optional[str] = None, min_quality: Optional[float] = None
-    ) -> List[SkillMetadata]:
+        self, domain: str | None = None, surface: str | None = None, min_quality: float | None = None
+    ) -> list[SkillMetadata]:
         """List skills with optional filtering."""
         skills = list(self._skills.values())
 
@@ -350,7 +349,7 @@ class SkillRegistry:
 
         return skills
 
-    def get_quality(self, skill_id: str) -> Optional[QualityMetrics]:
+    def get_quality(self, skill_id: str) -> QualityMetrics | None:
         """Get quality metrics for a skill."""
         return self._quality_metrics.get(skill_id)
 
@@ -375,20 +374,20 @@ class SkillRegistry:
         """Add a composition relationship between skills."""
         self._composition_graph[edge.source_skill_id].append(edge)
 
-    def get_compositions(self, skill_id: str) -> List[CompositionEdge]:
+    def get_compositions(self, skill_id: str) -> list[CompositionEdge]:
         """Get all composition edges for a skill (both source and target)."""
         edges = []
         edges.extend(self._composition_graph.get(skill_id, []))
         # Also find edges where this skill is the target
-        for src_id, edge_list in self._composition_graph.items():
+        for edge_list in self._composition_graph.values():
             for edge in edge_list:
                 if edge.target_skill_id == skill_id:
                     edges.append(edge)
         return edges
 
-    def find_compatible_skills(self, skill_id: str, min_score: float = 0.5) -> List[str]:
+    def find_compatible_skills(self, skill_id: str, min_score: float = 0.5) -> list[str]:
         """Find skills that can be composed with the given skill."""
-        compatible: List[str] = []
+        compatible: list[str] = []
         target_skill = self.get_skill(skill_id)
         if not target_skill:
             return compatible
@@ -455,11 +454,11 @@ class SkillRegistry:
             return True
         return False
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get registry statistics."""
         total = len(self._skills)
-        domains: Dict[str, int] = defaultdict(int)
-        surfaces: Dict[str, int] = defaultdict(int)
+        domains: dict[str, int] = defaultdict(int)
+        surfaces: dict[str, int] = defaultdict(int)
         avg_quality = 0.0
 
         for skill in self._skills.values():
@@ -486,19 +485,19 @@ class RegistryStorage(ABC):
     """Abstract base class for registry storage backends."""
 
     @abstractmethod
-    def load_skills(self) -> List[Dict[str, Any]]:
+    def load_skills(self) -> list[dict[str, Any]]:
         """Load all skills from the storage backend."""
-        pass  # nosec B110 - intentional fallback; caller handles None/False return
+        # nosec B110 - intentional fallback; caller handles None/False return
 
     @abstractmethod
-    def save_skills(self, skills: List[Dict[str, Any]]) -> None:
+    def save_skills(self, skills: list[dict[str, Any]]) -> None:
         """Save all skills to the storage backend."""
-        pass  # nosec B110 - intentional fallback; caller handles None/False return
+        # nosec B110 - intentional fallback; caller handles None/False return
 
     @abstractmethod
     def update_skill_metrics(self, skill_id: str, success: bool, execution_time: float, token_usage: int = 0) -> None:
         """Update runtime metrics for a specific skill atomically."""
-        pass  # nosec B110 - intentional fallback; caller handles None/False return
+        # nosec B110 - intentional fallback; caller handles None/False return
 
 
 class JSONFileRegistryStorage(RegistryStorage):
@@ -507,7 +506,7 @@ class JSONFileRegistryStorage(RegistryStorage):
     def __init__(self, registry_file: Path):
         self.registry_file = registry_file
 
-    def load_skills(self) -> List[Dict[str, Any]]:
+    def load_skills(self) -> list[dict[str, Any]]:
         if not self.registry_file.exists():
             return []
         try:
@@ -516,7 +515,7 @@ class JSONFileRegistryStorage(RegistryStorage):
         except Exception:
             return []
 
-    def save_skills(self, skills: List[Dict[str, Any]]) -> None:
+    def save_skills(self, skills: list[dict[str, Any]]) -> None:
         try:
             tmp_file = self.registry_file.with_name(f".{self.registry_file.name}.{uuid.uuid4().hex}.tmp")
             with open(tmp_file, "w", encoding="utf-8") as f:
@@ -564,7 +563,7 @@ class SQLiteRegistryStorage(RegistryStorage):
         except Exception as e:
             logger.error("Failed to initialize SQLite registry database", error=str(e))
 
-    def load_skills(self) -> List[Dict[str, Any]]:
+    def load_skills(self) -> list[dict[str, Any]]:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
@@ -603,7 +602,7 @@ class SQLiteRegistryStorage(RegistryStorage):
             logger.error("Failed to load skills from SQLite registry", error=str(e))
             return []
 
-    def save_skills(self, skills: List[Dict[str, Any]]) -> None:
+    def save_skills(self, skills: list[dict[str, Any]]) -> None:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute("DELETE FROM skills")

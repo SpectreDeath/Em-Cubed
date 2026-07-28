@@ -1,8 +1,10 @@
 """Property-based tests for Python Calculator skill using hypothesis."""
 
-import pytest
-from hypothesis import given, strategies as st
 from pathlib import Path
+
+import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 # Global variable to hold the asteval interpreter with the skill's functions defined
 _aeval = None

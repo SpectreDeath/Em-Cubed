@@ -11,7 +11,8 @@ Execution chain (in priority order):
 from __future__ import annotations
 
 import os
-from typing import Dict, Any, Optional
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -81,10 +82,10 @@ class _OllamaClient:
         prompt: str,
         model: str,
         *,
-        system: Optional[str] = None,
+        system: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 1024,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Call ``POST /api/chat`` (non-streaming).
 
@@ -137,7 +138,7 @@ class LLMSurface(SurfaceBase):
       3. Error    (clear message with actionable guidance)
     """
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         ollama_host = os.getenv("OLLAMA_HOST", _DEFAULT_OLLAMA_HOST)
         self._ollama = _OllamaClient(ollama_host, timeout=self.timeout or 30.0)
@@ -179,7 +180,7 @@ class LLMSurface(SurfaceBase):
         return self._check_availability()
 
     @staticmethod
-    def extract_tags(source: Optional[str]) -> list:  # type: ignore[override]
+    def extract_tags(source: str | None) -> list:  # type: ignore[override]
         """Extract tags — not applicable for raw LLM prompts; metadata defines tags."""
         return []
 
@@ -187,7 +188,7 @@ class LLMSurface(SurfaceBase):
     # Execution entry-point
     # ------------------------------------------------------------------
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         return await self._run_prompt(code, context)
 
     # ------------------------------------------------------------------
@@ -199,7 +200,7 @@ class LLMSurface(SurfaceBase):
         """Return True if any recognised cloud API key is set in the environment."""
         return any(os.getenv(var) for var in _CLOUD_KEY_ENV_VARS)
 
-    async def _run_prompt(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _run_prompt(self, prompt: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Route the prompt through the priority chain."""
         if not self.available:
             return {
@@ -245,7 +246,7 @@ class LLMSurface(SurfaceBase):
     # Path 1: LiteLLM (cloud)
     # ------------------------------------------------------------------
 
-    async def _run_via_litellm(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _run_via_litellm(self, prompt: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute the prompt through LiteLLM using a configured cloud provider."""
         try:
             import litellm
@@ -324,7 +325,7 @@ class LLMSurface(SurfaceBase):
     # Path 2: Ollama (local)
     # ------------------------------------------------------------------
 
-    async def _run_via_ollama(self, prompt: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _run_via_ollama(self, prompt: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute the prompt through a locally-running Ollama server."""
         if not await self._ollama.is_available():
             return {"status": "error", "message": "Ollama server not reachable"}

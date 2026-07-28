@@ -1,7 +1,9 @@
+from typing import Any
+
 import pytest
-from em_cubed.plugin_manager import PluginManager
+
 from em_cubed.plugin import SurfacePlugin
-from typing import Dict, Any, Optional
+from em_cubed.plugin_manager import PluginManager
 
 
 class MockSurface(SurfacePlugin):
@@ -20,18 +22,18 @@ class MockSurface(SurfacePlugin):
     def available(self) -> bool:
         return self._available
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Implementation of execute for mock surface."""
         return {"status": "ok", "value": f"executed: {code}"}
 
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Override execute to provide mock behavior."""
         return await self._execute_impl(code, context)
 
     async def health(self) -> bool:
         return self._available
 
-    def extract_tags(self, source: Optional[str]) -> list:
+    def extract_tags(self, source: str | None) -> list:
         return ["mock"]
 
     def initialize(self) -> None:

@@ -1,6 +1,6 @@
 """Tests for resolve_template_value and _resolve_path in distributed workflow."""
 
-from em_cubed.workflow.distributed import resolve_template_value, _resolve_path
+from em_cubed.workflow.distributed import _resolve_path, resolve_template_value
 
 
 def test_resolve_path_nested_dict():

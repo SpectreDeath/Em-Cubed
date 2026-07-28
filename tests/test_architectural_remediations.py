@@ -1,16 +1,17 @@
 """Tests for architectural and safety remediations."""
 
-import pytest
-import threading
 import tempfile
+import threading
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
+import pytest
+
+from src.em_cubed.skills.executor import SkillExecutionRequest, SkillExecutor
+from src.em_cubed.skills.metadata import InputOutputSchema, SkillMetadata
+from src.em_cubed.skills.registry import SkillRegistry, SQLiteRegistryStorage
 from src.em_cubed.surfaces.base import DaemonThreadPoolExecutor
 from src.em_cubed.surfaces.python_surface import _kill_executor_processes
-from src.em_cubed.skills.registry import SQLiteRegistryStorage, SkillRegistry
-from src.em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
-from src.em_cubed.skills.metadata import SkillMetadata, InputOutputSchema
 
 
 def test_daemon_thread_pool_executor():

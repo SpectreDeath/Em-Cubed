@@ -3,10 +3,11 @@ Integration tests for STATISTICS autoregressive-parameter-estimator.
 """
 
 import math
+
 import pytest
 
 try:
-    import z3  # noqa: F401
+    import z3
 except ImportError:
     z3 = None
 

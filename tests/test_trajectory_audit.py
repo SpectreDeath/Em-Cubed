@@ -1,6 +1,7 @@
 """Unit tests for TrajectoryAuditor and AuditReport."""
 
 from dataclasses import dataclass
+
 from em_cubed.loopy.audit import TrajectoryAuditor
 from em_cubed.loopy.base import BaseLoopySkill
 from em_cubed.loopy.runner import LoopySkillRunner

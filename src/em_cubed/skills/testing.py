@@ -6,10 +6,11 @@ and integration testing for skill composition.
 
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
+from typing import Any
 
 import structlog
+
 from .telemetry import SkillTelemetry, get_telemetry_collector
 
 logger = structlog.get_logger()
@@ -22,13 +23,13 @@ class TestCase:
     name: str
     surface: str  # python, prolog, hy
     code: str
-    expected_output: Optional[Any] = None
-    expected_error: Optional[str] = None
+    expected_output: Any | None = None
+    expected_error: str | None = None
     timeout: float = 10.0
     setup_code: str = ""  # Code to run before test
     teardown_code: str = ""  # Code to run after test
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "surface": self.surface,
@@ -47,11 +48,11 @@ class TestResult:
     skill_id: str
     surface: str
     passed: bool
-    error: Optional[str] = None
-    output: Optional[Any] = None
+    error: str | None = None
+    output: Any | None = None
     duration_ms: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "test_name": self.test_name,
             "skill_id": self.skill_id,
@@ -70,12 +71,13 @@ class SkillTestGenerator:
         self.plugin_manager = plugin_manager
         self.logger = logger.bind(component="test_generator")
 
-    def generate_tests_for_skill(self, skill_path: Path, skill_metadata) -> List[TestCase]:
+    def generate_tests_for_skill(self, skill_path: Path, skill_metadata) -> list[TestCase]:
         """Generate test cases from a SKILL.md file."""
         # Reconstruct a fully-validated SkillMetadata from the file to ensure
         # nested dataclass objects are properly typed (not raw dicts).
-        from .metadata import SkillMetadata
         import yaml
+
+        from .metadata import SkillMetadata
 
         try:
             content = skill_path.read_text(encoding="utf-8-sig")
@@ -87,7 +89,7 @@ class SkillTestGenerator:
         except Exception as e:
             self.logger.warning("Failed to re-parse skill metadata, using provided", error=str(e))
             # Fallback: convert any dict attributes to proper dataclass instances
-            from .metadata import InputOutputSchema, SkillCapability, CompatibilityRange, QualityThresholds
+            from .metadata import CompatibilityRange, InputOutputSchema, QualityThresholds, SkillCapability
 
             if hasattr(skill_metadata, "input_schema") and isinstance(skill_metadata.input_schema, dict):
                 skill_metadata.input_schema = InputOutputSchema.from_dict(skill_metadata.input_schema)
@@ -134,7 +136,7 @@ class SkillTestGenerator:
         self.logger.debug("Generated tests", skill=skill_metadata.name, count=len(tests))
         return tests
 
-    def _extract_test_blocks(self, content: str) -> List[Tuple[str, str]]:
+    def _extract_test_blocks(self, content: str) -> list[tuple[str, str]]:
         """Extract fenced code blocks marked as tests."""
         import re
 
@@ -160,7 +162,7 @@ class SkillTestGenerator:
 
         return blocks
 
-    def _generate_from_implementation(self, skill_metadata, content: str) -> List[TestCase]:
+    def _generate_from_implementation(self, skill_metadata, content: str) -> list[TestCase]:
         """Generate tests by extracting and verifying implementation code."""
         tests = []
 
@@ -190,7 +192,7 @@ except SyntaxError as e:
 
         return tests
 
-    def _generate_schema_tests(self, skill_metadata) -> List[TestCase]:
+    def _generate_schema_tests(self, skill_metadata) -> list[TestCase]:
         """Generate tests that validate input/output schema conformance."""
         tests = []
 
@@ -214,7 +216,7 @@ print("SCHEMA_VALID")
 
         return tests
 
-    def _generate_structure_test(self, skill_metadata) -> Optional[TestCase]:
+    def _generate_structure_test(self, skill_metadata) -> TestCase | None:
         """Generate a test that checks skill structure integrity."""
         test = TestCase(
             name=f"test_{skill_metadata.name.lower().replace(' ', '_')}_structure",
@@ -230,15 +232,15 @@ assert len(metadata['surfaces']) >= 1
         )
         return test
 
-    def _extract_fenced(self, content: str, lang: str) -> Optional[str]:
+    def _extract_fenced(self, content: str, lang: str) -> str | None:
         """Extract fenced code block for a language."""
         pattern = rf"```{lang}\s*\r?\n(.*?)```"
         match = re.search(pattern, content, re.DOTALL)
         return match.group(1).strip() if match else None
 
-    def _generate_sample_from_schema(self, schema) -> Dict[str, Any]:
+    def _generate_sample_from_schema(self, schema) -> dict[str, Any]:
         """Generate a sample instance from a JSON schema."""
-        sample: Dict[str, Any] = {}
+        sample: dict[str, Any] = {}
         for prop_name, prop_def in schema.properties.items():
             prop_type = prop_def.get("type", "string")
             if prop_type == "string":
@@ -263,7 +265,7 @@ class SkillTestRunner:
         self.telemetry = SkillTelemetry(get_telemetry_collector())
         self.logger = logger.bind(component="test_runner")
 
-    async def run_test(self, test: TestCase, context: Optional[Dict] = None) -> TestResult:
+    async def run_test(self, test: TestCase, context: dict | None = None) -> TestResult:
         """Run a single test case."""
         import time
 
@@ -339,7 +341,7 @@ class SkillTestRunner:
                 duration_ms=elapsed,
             )
 
-    async def run_test_suite(self, tests: List[TestCase], skill_id: str) -> Dict[str, Any]:
+    async def run_test_suite(self, tests: list[TestCase], skill_id: str) -> dict[str, Any]:
         """Run a full test suite and return summary."""
         results = []
         passed = 0

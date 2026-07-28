@@ -160,8 +160,9 @@ class EmCubedMCPServer:
     def call_tool(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         """Dispatch tool invocation to core subsystem handler."""
         if name == "em_cubed_search_skills":
-            from em_cubed.search import search_registry
             from pathlib import Path
+
+            from em_cubed.search import search_registry
 
             query = args.get("query", "")
             max_res = args.get("max_results", 10)
@@ -194,17 +195,17 @@ class EmCubedMCPServer:
 
         elif name == "em_cubed_list_surfaces":
             from em_cubed.surfaces import (
-                PythonSurface,
-                PrologSurface,
-                Z3Surface,
-                DatalogSurface,
-                SQLiteSurface,
-                HySurface,
-                QuickJSSurface,
-                WASMSurface,
                 ClingoSurface,
-                KanrenSurface,
+                DatalogSurface,
+                HySurface,
                 JanusSurface,
+                KanrenSurface,
+                PrologSurface,
+                PythonSurface,
+                QuickJSSurface,
+                SQLiteSurface,
+                WASMSurface,
+                Z3Surface,
             )
 
             raw_classes = [
@@ -235,9 +236,10 @@ class EmCubedMCPServer:
         elif name == "em_cubed_execute_skill":
             import asyncio
             from pathlib import Path as _Path
-            from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest, get_skill_executor
-            from em_cubed.skills import SkillRegistry
+
             from em_cubed.plugin_registry import PluginRegistry
+            from em_cubed.skills import SkillRegistry
+            from em_cubed.skills.executor import SkillExecutionRequest, SkillExecutor, get_skill_executor
 
             skills_dir = _Path("skills")
             reg_file = _Path("registry.json")

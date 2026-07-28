@@ -126,7 +126,7 @@ class OWLImporter:
         triples: list[OntologyTriple] = []
         for line in turtle_content.splitlines():
             line = line.strip()
-            if not line or line.startswith("@prefix") or line.startswith("#"):
+            if not line or line.startswith(("@prefix", "#")):
                 continue
 
             parts = line.rstrip(" .").split()

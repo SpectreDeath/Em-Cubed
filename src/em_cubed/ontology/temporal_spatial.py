@@ -6,8 +6,8 @@ and spatial containment reasoning over dynamic entity triples.
 
 from __future__ import annotations
 
-import math
 import logging
+import math
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -27,9 +27,7 @@ class TimeInterval:
         """Check if timestamp falls within valid interval."""
         if timestamp < self.start_time:
             return False
-        if self.end_time and timestamp > self.end_time:
-            return False
-        return True
+        return not (self.end_time and timestamp > self.end_time)
 
 
 @dataclass

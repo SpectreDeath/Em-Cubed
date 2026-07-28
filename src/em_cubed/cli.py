@@ -1,15 +1,17 @@
 """Command-line interface for Em-Cubed."""
 
 import argparse
-import sys
-from pathlib import Path
-import structlog
 import asyncio
 import json
+import sys
+from datetime import UTC
+from pathlib import Path
 
-from em_cubed.indexer import reindex, get_skill_metadata
-from em_cubed.search import search_registry
+import structlog
+
+from em_cubed.indexer import get_skill_metadata, reindex
 from em_cubed.plugin_manager import PluginManager
+from em_cubed.search import search_registry
 
 # Bootstrap initialization for distributed execution and telemetry
 from em_cubed.workflow.checkpoint import initialize_checkpoint_manager
@@ -49,8 +51,8 @@ def _bootstrap_services():
     initialize_telemetry()
 
     # Initialize telemetry API for dashboard endpoints
-    from em_cubed.telemetry.api import initialize_telemetry_api, initialize_websocket_handler
     from em_cubed.skills.telemetry import get_telemetry_collector
+    from em_cubed.telemetry.api import initialize_telemetry_api, initialize_websocket_handler
 
     initialize_telemetry_api(get_telemetry_collector())
     initialize_websocket_handler(get_telemetry_collector())
@@ -324,8 +326,8 @@ def _handle_run(args):
     async def run_async():
         if args.trace:
             # Setup tracing for CLI run
-            from em_cubed.skills.telemetry import initialize_telemetry, TelemetryConfig, ExecutionRecord, TraceContext
-            from datetime import timezone
+
+            from em_cubed.skills.telemetry import ExecutionRecord, TelemetryConfig, TraceContext, initialize_telemetry
 
             initialize_telemetry(TelemetryConfig(log_every_execution=False))
 
@@ -335,9 +337,7 @@ def _handle_run(args):
             # I'll just run it via surface and manually trace it for CLI run if --trace is on
             from datetime import datetime
 
-            record = ExecutionRecord(
-                skill_id="cli_run", timestamp=datetime.now(timezone.utc), success=True, execution_time_ms=0
-            )
+            record = ExecutionRecord(skill_id="cli_run", timestamp=datetime.now(UTC), success=True, execution_time_ms=0)
             trace_ctx = TraceContext(record)
 
             from em_cubed.skills.executor import TelemetryProxy
@@ -445,9 +445,9 @@ async def _handle_quality(args):
 
 async def _handle_test(args):
     """Handle test command."""
-    from em_cubed.skills.testing import SkillTestRunner
     from em_cubed.plugin_manager import PluginManager
     from em_cubed.skills.quality_pipeline import generate_all_skill_tests
+    from em_cubed.skills.testing import SkillTestRunner
 
     skills_dir = Path(args.skills_dir)
     registry_file = Path("registry.json")
@@ -530,10 +530,11 @@ async def _handle_recommend(args):
 
 async def _handle_compose(args):
     """Handle compose command."""
-    from em_cubed.skills.composer import SkillComposer, CompositionPlan, CompositionStep, CompositionPattern
-    from em_cubed.skills.registry import SkillRegistry
-    from em_cubed.plugin_manager import PluginManager
     import json
+
+    from em_cubed.plugin_manager import PluginManager
+    from em_cubed.skills.composer import CompositionPattern, CompositionPlan, CompositionStep, SkillComposer
+    from em_cubed.skills.registry import SkillRegistry
 
     skills_dir = Path("skills")
     registry_file = Path("registry.json")
@@ -782,10 +783,10 @@ async def _handle_workflow(args):
         except json.JSONDecodeError as e:
             print(f"Error parsing initial data JSON: {e}")
             sys.exit(1)
-    from em_cubed.skills.workflow import WorkflowExecutor, WorkflowDefinition, WorkflowStep
-    from em_cubed.skills.registry import SkillRegistry
-    from em_cubed.skills.composer import SkillComposer
     from em_cubed.plugin_manager import PluginManager
+    from em_cubed.skills.composer import SkillComposer
+    from em_cubed.skills.registry import SkillRegistry
+    from em_cubed.skills.workflow import WorkflowDefinition, WorkflowExecutor, WorkflowStep
 
     pm = PluginManager()
     registry = SkillRegistry(Path("skills"), registry_path)
@@ -831,8 +832,8 @@ async def _handle_run_dag(args):
         print(f"Error: Declarative DAG file not found at {dag_path}")
         sys.exit(1)
 
-    from em_cubed.workflow.parser import WorkflowDagParser
     from em_cubed.workflow.distributed import ProcessDistributedExecutor
+    from em_cubed.workflow.parser import WorkflowDagParser
 
     try:
         workflow_id, tasks = WorkflowDagParser.parse_file(dag_path)

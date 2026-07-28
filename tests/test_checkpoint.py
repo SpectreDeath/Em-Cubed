@@ -2,7 +2,8 @@
 
 import tempfile
 from pathlib import Path
-from em_cubed.workflow.checkpoint import CheckpointManager, FileCheckpointStorage, Checkpoint
+
+from em_cubed.workflow.checkpoint import Checkpoint, CheckpointManager, FileCheckpointStorage
 
 
 def test_checkpoint_creation():

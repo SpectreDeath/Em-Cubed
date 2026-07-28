@@ -1,9 +1,10 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 # Try to import surfaces, skip tests if dependencies are missing
 try:
-    from em_cubed.surfaces import PythonSurface, HySurface, Z3Surface, DatalogSurface, JanusSurface, PrologSurface
+    from em_cubed.surfaces import DatalogSurface, HySurface, JanusSurface, PrologSurface, PythonSurface, Z3Surface
 
     _core_surfaces_available = True
     _hy_available = HySurface is not None and HySurface().available

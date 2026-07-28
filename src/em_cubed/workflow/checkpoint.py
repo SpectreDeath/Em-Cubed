@@ -5,10 +5,11 @@ from __future__ import annotations
 import json
 import time
 import uuid
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -23,12 +24,12 @@ class Checkpoint:
     execution_id: str = ""
     timestamp: float = field(default_factory=time.time)
     step_name: str = ""
-    state_data: Dict[str, Any] = field(default_factory=dict)
-    variables: Dict[str, Any] = field(default_factory=dict)
-    context: Dict[str, Any] = field(default_factory=dict)
-    substrate: Dict[str, Any] = field(default_factory=dict)
+    state_data: dict[str, Any] = field(default_factory=dict)
+    variables: dict[str, Any] = field(default_factory=dict)
+    context: dict[str, Any] = field(default_factory=dict)
+    substrate: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "checkpoint_id": self.checkpoint_id,
@@ -43,7 +44,7 @@ class Checkpoint:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Checkpoint":
+    def from_dict(cls, data: dict[str, Any]) -> Checkpoint:
         """Create from dictionary."""
         return cls(
             checkpoint_id=data["checkpoint_id"],
@@ -71,10 +72,9 @@ class CheckpointStorage(ABC):
         Returns:
             True if save successful
         """
-        pass
 
     @abstractmethod
-    def load_checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]:
+    def load_checkpoint(self, checkpoint_id: str) -> Checkpoint | None:
         """Load a checkpoint by ID.
 
         Args:
@@ -83,10 +83,9 @@ class CheckpointStorage(ABC):
         Returns:
             The checkpoint if found, None otherwise
         """
-        pass
 
     @abstractmethod
-    def list_checkpoints(self, workflow_id: Optional[str] = None) -> List[str]:
+    def list_checkpoints(self, workflow_id: str | None = None) -> list[str]:
         """List checkpoint IDs.
 
         Args:
@@ -95,7 +94,6 @@ class CheckpointStorage(ABC):
         Returns:
             List of checkpoint IDs
         """
-        pass
 
     @abstractmethod
     def delete_checkpoint(self, checkpoint_id: str) -> bool:
@@ -107,7 +105,6 @@ class CheckpointStorage(ABC):
         Returns:
             True if deletion successful
         """
-        pass
 
 
 class FileCheckpointStorage(CheckpointStorage):
@@ -143,7 +140,7 @@ class FileCheckpointStorage(CheckpointStorage):
             self.logger.error("Failed to save checkpoint", checkpoint_id=checkpoint.checkpoint_id, error=str(e))
             return False
 
-    def load_checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]:
+    def load_checkpoint(self, checkpoint_id: str) -> Checkpoint | None:
         """Load a checkpoint from file."""
         try:
             checkpoint_path = self._get_checkpoint_path(checkpoint_id)
@@ -159,7 +156,7 @@ class FileCheckpointStorage(CheckpointStorage):
             self.logger.error("Failed to load checkpoint", checkpoint_id=checkpoint_id, error=str(e))
             return None
 
-    def list_checkpoints(self, workflow_id: Optional[str] = None) -> List[str]:
+    def list_checkpoints(self, workflow_id: str | None = None) -> list[str]:
         """List checkpoint IDs."""
         checkpoint_ids = []
         try:
@@ -208,17 +205,17 @@ class CheckpointManager:
         """
         self.storage = storage
         self.logger = logger.bind(component="checkpoint_manager")
-        self._checkpoints: Dict[str, Checkpoint] = {}  # In-memory cache
+        self._checkpoints: dict[str, Checkpoint] = {}  # In-memory cache
 
     def create_checkpoint(
         self,
         workflow_id: str,
         execution_id: str,
         step_name: str,
-        state_data: Optional[Dict[str, Any]] = None,
-        variables: Optional[Dict[str, Any]] = None,
-        context: Optional[Dict[str, Any]] = None,
-        substrate: Optional[Dict[str, Any]] = None,
+        state_data: dict[str, Any] | None = None,
+        variables: dict[str, Any] | None = None,
+        context: dict[str, Any] | None = None,
+        substrate: dict[str, Any] | None = None,
     ) -> str:
         """Create a new checkpoint.
 
@@ -259,7 +256,7 @@ class CheckpointManager:
             self.logger.error("Failed to create checkpoint", workflow_id=workflow_id, step_name=step_name)
             return ""
 
-    def load_checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]:
+    def load_checkpoint(self, checkpoint_id: str) -> Checkpoint | None:
         """Load a checkpoint by ID.
 
         Args:
@@ -279,7 +276,7 @@ class CheckpointManager:
             self._checkpoints[checkpoint_id] = checkpoint
         return checkpoint
 
-    def list_checkpoints(self, workflow_id: Optional[str] = None) -> List[str]:
+    def list_checkpoints(self, workflow_id: str | None = None) -> list[str]:
         """List checkpoint IDs.
 
         Args:
@@ -305,7 +302,7 @@ class CheckpointManager:
         # Delete from storage
         return self.storage.delete_checkpoint(checkpoint_id)
 
-    def get_latest_checkpoint(self, workflow_id: str, execution_id: Optional[str] = None) -> Optional[Checkpoint]:
+    def get_latest_checkpoint(self, workflow_id: str, execution_id: str | None = None) -> Checkpoint | None:
         """Get the latest checkpoint for a workflow.
 
         Args:
@@ -336,16 +333,16 @@ class CheckpointManager:
 
 
 # Global checkpoint manager instance
-_checkpoint_manager: Optional[CheckpointManager] = None
+_checkpoint_manager: CheckpointManager | None = None
 
 
-def get_checkpoint_manager() -> Optional[CheckpointManager]:
+def get_checkpoint_manager() -> CheckpointManager | None:
     """Get the global checkpoint manager instance."""
     global _checkpoint_manager
     return _checkpoint_manager
 
 
-def initialize_checkpoint_manager(storage_dir: Optional[Path] = None) -> CheckpointManager:
+def initialize_checkpoint_manager(storage_dir: Path | None = None) -> CheckpointManager:
     """Initialize the global checkpoint manager.
 
     Args:

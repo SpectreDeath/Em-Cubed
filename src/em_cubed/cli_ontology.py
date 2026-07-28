@@ -14,12 +14,11 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from typing import Sequence
+from collections.abc import Sequence
 
 from em_cubed.ontology.concept_induction import ConceptInductionEngine
 from em_cubed.ontology.elicitation import KnowledgeElicitationPipeline
 from em_cubed.ontology.schema import OntologyTriple
-
 from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier
 from em_cubed.ontology.validator import OntologyLedgerValidator
 from em_cubed.ontology.visualizer import KnowledgeGraphVisualizer

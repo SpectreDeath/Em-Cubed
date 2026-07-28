@@ -1,7 +1,8 @@
 """SQLite surface integration for declarative data querying."""
 
 import sqlite3
-from typing import Dict, Any, Optional, List
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -24,12 +25,12 @@ class SQLiteSurface(SurfaceBase):
     def available(self) -> bool:
         return True  # sqlite3 is part of Python stdlib
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
-        self._sessions: Dict[str, sqlite3.Connection] = {}
+        self._sessions: dict[str, sqlite3.Connection] = {}
         logger.info("SQLiteSurface initialized")
 
-    def _get_connection(self, context: Optional[Dict[str, Any]] = None):
+    def _get_connection(self, context: dict[str, Any] | None = None):
         """Get or create a database connection based on session_id in context."""
         session_id = (context or {}).get("session_id")
         if session_id:
@@ -51,7 +52,7 @@ class SQLiteSurface(SurfaceBase):
                 pass  # nosec B110 - intentional fallback; caller handles None/False return
             del self._sessions[session_id]
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute SQL code on an in-memory database, with optional session persistence."""
         logger.info("Executing SQL code", code_length=len(code))
 
@@ -89,7 +90,7 @@ class SQLiteSurface(SurfaceBase):
         """Check if the surface is available."""
         return True
 
-    def extract_tags(self, source: Optional[str]) -> List[str]:
+    def extract_tags(self, source: str | None) -> list[str]:
         """Extract table names from SQL source."""
         if not source:
             return []

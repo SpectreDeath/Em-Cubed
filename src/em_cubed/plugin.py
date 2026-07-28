@@ -1,9 +1,10 @@
 """Base class for surface plugins."""
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
 import asyncio
 import os
+from abc import ABC, abstractmethod
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -12,38 +13,33 @@ logger = structlog.get_logger()
 class SurfaceTimeoutError(Exception):
     """Raised when a surface operation times out."""
 
-    pass
-
 
 class SurfacePlugin(ABC):
     """Base class for surface plugins."""
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         """Initialize surface plugin with optional timeout.
 
         Args:
             timeout: Optional timeout in seconds for surface operations
         """
         self.timeout = timeout
-        self._executor: Optional[Any] = None  # Thread pool executor for async execution
-        self._substrate: Dict[str, Any] = {}  # Shared data substrate across surfaces
+        self._executor: Any | None = None  # Thread pool executor for async execution
+        self._substrate: dict[str, Any] = {}  # Shared data substrate across surfaces
 
     @property
     @abstractmethod
     def name(self) -> str:
         """Surface name (e.g., 'python', 'prolog')."""
-        pass
 
     @property
     @abstractmethod
     def available(self) -> bool:
         """Check if surface dependencies are available."""
-        pass
 
     @abstractmethod
-    async def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute code on this surface."""
-        pass
 
     @abstractmethod
     async def health(self) -> bool:
@@ -52,10 +48,9 @@ class SurfacePlugin(ABC):
         Returns:
             True if surface is operational
         """
-        pass
 
     @abstractmethod
-    def extract_tags(self, source: Optional[str]) -> List[str]:
+    def extract_tags(self, source: str | None) -> list[str]:
         """Extract relevant tags from source code.
 
         Args:
@@ -64,11 +59,9 @@ class SurfacePlugin(ABC):
         Returns:
             List of tag strings
         """
-        pass
 
     def initialize(self) -> None:
         """Optional initialization hook for plugin setup."""
-        pass
 
     def shutdown(self) -> None:
         """Optional shutdown hook for plugin cleanup."""
@@ -78,15 +71,15 @@ class SurfacePlugin(ABC):
             self._executor = None
 
     @property
-    def substrate(self) -> Dict[str, Any]:
+    def substrate(self) -> dict[str, Any]:
         """Shared data substrate across surfaces."""
         return self._substrate
 
     @substrate.setter
-    def substrate(self, value: Dict[str, Any]) -> None:
+    def substrate(self, value: dict[str, Any]) -> None:
         self._substrate = value
 
-    async def execute_with_timeout(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def execute_with_timeout(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute code with timeout protection.
 
         Args:
@@ -101,6 +94,6 @@ class SurfacePlugin(ABC):
                 self.execute(code, context), timeout=self.timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
             )
             return result
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("Surface execution timed out", timeout=self.timeout)
             return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}

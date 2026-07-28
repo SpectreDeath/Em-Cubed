@@ -2,7 +2,8 @@
 
 import asyncio
 import importlib.util
-from typing import Dict, Any, Optional
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -25,7 +26,7 @@ class Z3Surface(SurfaceBase):
     def available(self) -> bool:
         return self._check_availability()
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         logger.info("Z3Surface initialized", available=self.available, timeout=self.timeout)
 
@@ -37,7 +38,7 @@ class Z3Surface(SurfaceBase):
         return available
 
     @staticmethod
-    def extract_tags(source: Optional[str]) -> list:
+    def extract_tags(source: str | None) -> list:
         """Extract assertion/query identifiers from Z3 source.
 
         Looks for common Z3 patterns like:
@@ -89,7 +90,7 @@ class Z3Surface(SurfaceBase):
 
         return list(tags)
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute Z3 code - implementation with timeout protection."""
         logger.info("Executing Z3 code", code_length=len(code), has_context=context is not None)
 
@@ -98,29 +99,29 @@ class Z3Surface(SurfaceBase):
             return {"status": "error", "message": "z3 not available"}
 
         try:
-            from z3 import (
-                Solver,
-                Optimize,
-                sat,
-                unsat,
-                unknown,
-                Int,
-                Real,
-                Bool,
-                BitVec,
-                Function,
-                Const,
-                And,
-                Or,
-                Not,
-                Xor,
-                Implies,
-                If,
-                Distinct,
-                Sum,
-                Product,
-            )
             from asteval import Interpreter
+            from z3 import (
+                And,
+                BitVec,
+                Bool,
+                Const,
+                Distinct,
+                Function,
+                If,
+                Implies,
+                Int,
+                Not,
+                Optimize,
+                Or,
+                Product,
+                Real,
+                Solver,
+                Sum,
+                Xor,
+                sat,
+                unknown,
+                unsat,
+            )
 
             def execute_code():
                 # Determine if this is an optimization problem based on keywords
@@ -193,7 +194,7 @@ class Z3Surface(SurfaceBase):
 
             return await asyncio.get_event_loop().run_in_executor(self._executor, execute_code)
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("Z3 execution timed out", timeout=self.timeout)
             return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
         except Exception as e:

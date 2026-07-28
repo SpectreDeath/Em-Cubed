@@ -1,6 +1,6 @@
 """Answer Set Programming surface via clingo."""
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .base import SurfaceBase
 
@@ -44,7 +44,7 @@ class ClingoSurface(SurfaceBase):
             return False
 
     @staticmethod
-    def extract_tags(source: Optional[str]) -> list:
+    def extract_tags(source: str | None) -> list:
         if not source:
             return []
 
@@ -57,7 +57,7 @@ class ClingoSurface(SurfaceBase):
                 tags.add(candidate)
         return list(tags)
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         if not self.available:
             return {"status": "error", "message": "clingo package is not installed"}
 
@@ -65,7 +65,7 @@ class ClingoSurface(SurfaceBase):
         import json
 
         serialized_ctx = json.dumps(context, sort_keys=True) if context else ""
-        cache_key = hashlib.sha256(f"{code}:{serialized_ctx}".encode("utf-8")).hexdigest()
+        cache_key = hashlib.sha256(f"{code}:{serialized_ctx}".encode()).hexdigest()
         if cache_key in self._execution_cache:
             return self._execution_cache[cache_key]
 

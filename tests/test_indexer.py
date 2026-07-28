@@ -1,12 +1,14 @@
-import pytest
 import json
+
+import pytest
+
 from em_cubed.indexer import (
+    extract_fenced_block,
+    extract_hy_tags,
+    extract_prolog_tags,
+    get_skill_metadata,
     reindex,
     reindex_incremental,
-    get_skill_metadata,
-    extract_fenced_block,
-    extract_prolog_tags,
-    extract_hy_tags,
 )
 
 
@@ -315,7 +317,6 @@ class TestIncrementalIndexing:
     def setup_method(self):
         """Ensure clean environment before each test."""
         # This test class methods will use a fresh temporary directory per test
-        pass
 
     def test_incremental_add_skill(self, tmp_path):
         """Test that adding a new skill file updates the registry incrementally."""

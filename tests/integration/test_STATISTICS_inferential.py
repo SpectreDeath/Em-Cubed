@@ -8,6 +8,7 @@ Bottom-up: p-value gate → χ² structural + numeric → CI z-contract.
 """
 
 import math
+
 import pytest
 
 

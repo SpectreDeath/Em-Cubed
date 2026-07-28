@@ -2,8 +2,10 @@
 
 import asyncio
 import os
+
 import pytest
-from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
+
+from em_cubed.surfaces import HySurface, PrologSurface, PythonSurface
 
 pytestmark = pytest.mark.asyncio
 

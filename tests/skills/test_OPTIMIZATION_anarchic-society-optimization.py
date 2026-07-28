@@ -1,10 +1,12 @@
 """Tests for anarchic-society-optimization skill."""
 
-import pytest
 from pathlib import Path
-from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
+
+import pytest
+
 from em_cubed.indexer import get_skill_metadata
 from em_cubed.plugin_manager import PluginManager
+from em_cubed.skills.testing import SkillTestGenerator, SkillTestRunner
 
 SKILL_FILE = Path(
     Path(__file__).parent.parent.parent / "skills" / "OPTIMIZATION" / "anarchic-society-optimization" / "SKILL.md"
@@ -214,7 +216,7 @@ class TestASOOptimizerSkill:
     def test_z3_bounds_inline(self):
         """Z3 should accept in-bounds positions and reject out-of-bounds."""
         try:
-            from z3 import Real, Solver, And, sat
+            from z3 import And, Real, Solver, sat
 
             def validate(position, bounds):
                 s = Solver()

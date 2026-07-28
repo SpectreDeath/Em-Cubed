@@ -17,7 +17,8 @@ PrologSurface instead, which has fewer dependencies and is easier to set up.
 
 import asyncio
 import importlib.util
-from typing import Dict, Any, Optional, List
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -40,7 +41,7 @@ class JanusSurface(SurfaceBase):
     def available(self) -> bool:
         return self._check_availability()
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         self._janus = None  # Lazy initialization
         logger.info("JanusSurface initialized", available=self.available, timeout=self.timeout)
@@ -69,7 +70,7 @@ class JanusSurface(SurfaceBase):
             # If we were using janus_swi.heartbeat or similar, we'd stop it here
 
     @staticmethod
-    def extract_tags(source: Optional[str]) -> List[str]:
+    def extract_tags(source: str | None) -> list[str]:
         """Extract predicate names from Prolog source as logic_tags."""
         if not source:
             return []
@@ -81,7 +82,7 @@ class JanusSurface(SurfaceBase):
         builtins = {"not", "is", "true", "fail", "assert", "retract"}
         return list(dict.fromkeys(h for h in heads if h not in builtins))
 
-    async def _execute_impl(self, code: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute Prolog code via Janus - implementation with timeout protection."""
         logger.info("Executing Prolog code via Janus", code_length=len(code), has_context=context is not None)
 
@@ -132,7 +133,7 @@ class JanusSurface(SurfaceBase):
                     result = await asyncio.get_event_loop().run_in_executor(self._executor, execute_query)
                     logger.info("Janus query successful", result=result)
                     return {"status": "ok", "message": "Query executed successfully", "result": result}
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     logger.warning("Janus execution timed out", timeout=self.timeout)
                     return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
                 except Exception as e:

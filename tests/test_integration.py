@@ -1,8 +1,10 @@
-import pytest
 import json
+
+import pytest
+
 from em_cubed.indexer import reindex
 from em_cubed.search import search_registry
-from em_cubed.surfaces import PythonSurface, PrologSurface, HySurface
+from em_cubed.surfaces import HySurface, PrologSurface, PythonSurface
 
 
 # Disable whoosh for integration tests to ensure consistent behavior
@@ -375,8 +377,8 @@ assert len(all_results["result"]) == 2
 
         # 3. Execute via SkillExecutor (not direct surface)
         from em_cubed.plugin_manager import PluginManager
+        from em_cubed.skills.executor import SkillExecutionRequest, SkillExecutor
         from em_cubed.skills.registry import SkillRegistry
-        from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
 
         registry = SkillRegistry(skills_dir, registry_file)
         plugin_manager = PluginManager()

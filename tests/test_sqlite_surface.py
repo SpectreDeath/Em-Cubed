@@ -1,6 +1,7 @@
 """Tests for SQLite surface implementation."""
 
 import pytest
+
 from em_cubed.surfaces.sqlite_surface import SQLiteSurface
 
 
