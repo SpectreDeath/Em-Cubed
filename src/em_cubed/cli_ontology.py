@@ -123,8 +123,8 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         return 0
 
     elif subcommand == "induce":
-        sample = [{"type": args.parent_class, "property": "hasAttribute", "target": "Active"}]
-        expr = ConceptInductionEngine.induce_concept(subclass_name=args.subclass_name, positive_samples=sample)
+        positive_samples = [{"type": args.parent_class, "property": "hasAttribute", "target": "Active"}]
+        expr = ConceptInductionEngine.induce_concept(subclass_name=args.subclass_name, positive_samples=positive_samples)
         print(f"[Concept Induction] Induced DL Expression: {expr.to_dl_syntax()}")
         return 0
 
@@ -172,10 +172,14 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
     elif subcommand == "prove":
         from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
 
-        sample: list[OntologyTriple] = [
+        state_triples: list[OntologyTriple] = [
             OntologyTriple(subject="SubjectA", predicate=str(args.predicates[0]), object="Value1")
         ]
-        commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(args.proposition, sample, list(args.predicates))
+        commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(
+            args.proposition,
+            state_triples,
+            list(args.predicates),
+        )
         print(f"[ZK Attestation] Proof ID: {commitment.proof_id}")
         print(f"  Proposition Hash: {commitment.proposition_hash[:16]}...")
         print(f"  Merkle State Root: {commitment.merkle_state_root[:16]}...")
