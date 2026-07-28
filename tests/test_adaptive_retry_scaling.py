@@ -7,7 +7,6 @@ Tests AdaptiveWorkerPool calculation and DistributedExecutor exponential retries
 from __future__ import annotations
 
 import time
-import pytest
 
 from em_cubed.workflow.distributed import (
     AdaptiveWorkerPool,

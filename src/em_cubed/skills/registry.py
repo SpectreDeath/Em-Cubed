@@ -92,7 +92,7 @@ class CompositionEdge:
 class SkillRegistry:
     """Enhanced skill registry with quality tracking, telemetry, and remote federation."""
 
-    def __init__(self, skills_dir: Path, registry_file: Path, storage: Optional[RegistryStorage] = None):
+    def __init__(self, skills_dir: Path, registry_file: Path, storage: Optional["RegistryStorage"] = None):
         self.skills_dir = skills_dir
         self.registry_file = registry_file
         self.logger = logger.bind(component="skill_registry")

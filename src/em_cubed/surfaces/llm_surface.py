@@ -10,7 +10,6 @@ Execution chain (in priority order):
 
 from __future__ import annotations
 
-import asyncio
 import os
 from typing import Dict, Any, Optional
 import structlog

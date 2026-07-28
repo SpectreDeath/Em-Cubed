@@ -2,17 +2,13 @@
 
 import pytest
 import threading
-import asyncio
 import tempfile
-import sqlite3
-import json
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
-from src.em_cubed.surfaces.base import DaemonThreadPoolExecutor, _make_daemon_executor
-from src.em_cubed.surfaces.python_surface import _kill_executor_processes, PythonSurface
-from src.em_cubed.skills.registry import SQLiteRegistryStorage, JSONFileRegistryStorage, SkillRegistry
+from src.em_cubed.surfaces.base import DaemonThreadPoolExecutor
+from src.em_cubed.surfaces.python_surface import _kill_executor_processes
+from src.em_cubed.skills.registry import SQLiteRegistryStorage, SkillRegistry
 from src.em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
 from src.em_cubed.skills.metadata import SkillMetadata, InputOutputSchema
 
