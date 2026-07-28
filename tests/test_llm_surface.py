@@ -44,11 +44,13 @@ async def test_llm_surface_execute_ollama_fallback(llm_surface):
         # Ensure no cloud keys leak in from the environment during this test
         import em_cubed.surfaces.llm_surface as mod
 
-        with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-            with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
-                with patch.object(llm_surface._ollama, "list_models", new=AsyncMock(return_value=["llama3"])):
-                    with patch.object(llm_surface._ollama, "chat", new=AsyncMock(return_value=ollama_response)):
-                        result = await llm_surface.execute("What is 6 * 7?")
+        with (
+            patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+            patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)),
+            patch.object(llm_surface._ollama, "list_models", new=AsyncMock(return_value=["llama3"])),
+            patch.object(llm_surface._ollama, "chat", new=AsyncMock(return_value=ollama_response)),
+        ):
+            result = await llm_surface.execute("What is 6 * 7?")
 
     assert result["status"] == "ok"
     assert result["value"] == "42"
@@ -60,9 +62,11 @@ async def test_llm_surface_error_when_all_unavailable(llm_surface):
     """Test that a clear error is returned when neither cloud nor Ollama is available."""
     import em_cubed.surfaces.llm_surface as mod
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)):
-            result = await llm_surface.execute("Hello")
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)),
+    ):
+        result = await llm_surface.execute("Hello")
 
     assert result["status"] == "error"
     assert "No LLM backend available" in result["message"]
@@ -122,9 +126,11 @@ async def test_llm_surface_health_with_ollama(llm_surface):
     """Health returns True when Ollama is reachable and no cloud keys are present."""
     import em_cubed.surfaces.llm_surface as mod
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
-            result = await llm_surface.health()
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)),
+    ):
+        result = await llm_surface.health()
     assert result is True
 
 
@@ -133,7 +139,9 @@ async def test_llm_surface_health_when_nothing_available(llm_surface):
     """Health returns False when neither cloud keys nor Ollama are available."""
     import em_cubed.surfaces.llm_surface as mod
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)):
-            result = await llm_surface.health()
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)),
+    ):
+        result = await llm_surface.health()
     assert result is False

@@ -35,15 +35,17 @@ class TestConcurrentExecution:
                 prolog = PrologSurface()
                 if prolog and prolog.available:
                     surfaces.append(prolog)
-        except Exception:
-            pass
+        except (AttributeError, TypeError, ValueError):
+            logger = pytest.importorskip("logging")
+            logger.getLogger(__name__).debug("Prolog surface unavailable during concurrent test")
         try:
             if HySurface is not None:
                 hy = HySurface()
                 if hy and hy.available:
                     surfaces.append(hy)
-        except Exception:
-            pass
+        except (AttributeError, TypeError, ValueError):
+            logger = pytest.importorskip("logging")
+            logger.getLogger(__name__).debug("Hy surface unavailable during concurrent test")
 
         if not surfaces:
             pytest.skip("No surfaces available for concurrency test")

@@ -48,11 +48,13 @@ async def test_ollama_fallback_success(llm_surface):
 
     ollama_ok = {"status": "ok", "value": "Hello from Ollama", "provider": "ollama", "model": "llama3"}
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
-            with patch.object(llm_surface._ollama, "list_models", new=AsyncMock(return_value=["llama3"])):
-                with patch.object(llm_surface._ollama, "chat", new=AsyncMock(return_value=ollama_ok)):
-                    result = await llm_surface.execute("Say hello", context={"model": "llama3"})
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)),
+        patch.object(llm_surface._ollama, "list_models", new=AsyncMock(return_value=["llama3"])),
+        patch.object(llm_surface._ollama, "chat", new=AsyncMock(return_value=ollama_ok)),
+    ):
+        result = await llm_surface.execute("Say hello", context={"model": "llama3"})
 
     assert result["status"] == "ok"
     assert result["value"] == "Hello from Ollama"
@@ -66,14 +68,16 @@ async def test_ollama_model_fallback_to_available(llm_surface):
 
     ollama_ok = {"status": "ok", "value": "Fallback model response", "provider": "ollama", "model": "mistral"}
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
-            with patch.object(llm_surface._ollama, "list_models", new=AsyncMock(return_value=["mistral"])):
-                with patch.object(llm_surface._ollama, "chat", new=AsyncMock(return_value=ollama_ok)) as mock_chat:
-                    result = await llm_surface.execute("Compute 2+2", context={"model": "llama3"})
-                    # The surface should have used "mistral" (first available) not "llama3"
-                    _, call_kwargs = mock_chat.call_args[0], mock_chat.call_args
-                    assert call_kwargs[0][1] == "mistral"
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)),
+        patch.object(llm_surface._ollama, "list_models", new=AsyncMock(return_value=["mistral"])),
+        patch.object(llm_surface._ollama, "chat", new=AsyncMock(return_value=ollama_ok)) as mock_chat,
+    ):
+        result = await llm_surface.execute("Compute 2+2", context={"model": "llama3"})
+        # The surface should have used "mistral" (first available) not "llama3"
+        _, call_kwargs = mock_chat.call_args[0], mock_chat.call_args
+        assert call_kwargs[0][1] == "mistral"
 
     assert result["status"] == "ok"
 
@@ -83,9 +87,11 @@ async def test_all_unavailable_returns_error(llm_surface):
     """Return an actionable error when neither cloud keys nor Ollama is available."""
     import em_cubed.surfaces.llm_surface as mod
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)):
-            result = await llm_surface.execute("Hello")
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)),
+    ):
+        result = await llm_surface.execute("Hello")
 
     assert result["status"] == "error"
     assert "No LLM backend available" in result["message"]
@@ -180,9 +186,11 @@ async def test_cloud_path_with_tools(llm_surface):
 @pytest.mark.asyncio
 async def test_litellm_error_surfaces_error_status(llm_surface):
     """If LiteLLM raises an exception the surface returns a status=error dict."""
-    with patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}):
-        with patch("litellm.acompletion", side_effect=RuntimeError("API down")):
-            result = await llm_surface.execute("Hello")
+    with (
+        patch.dict("os.environ", {"OPENAI_API_KEY": "sk-test"}),
+        patch("litellm.acompletion", side_effect=RuntimeError("API down")),
+    ):
+        result = await llm_surface.execute("Hello")
 
     assert result["status"] == "error"
     assert "API down" in result["message"]
@@ -226,18 +234,22 @@ async def test_health_cloud_key_present(llm_surface):
 async def test_health_ollama_only(llm_surface):
     import em_cubed.surfaces.llm_surface as mod
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)):
-            assert await llm_surface.health() is True
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=True)),
+    ):
+        assert await llm_surface.health() is True
 
 
 @pytest.mark.asyncio
 async def test_health_nothing_available(llm_surface):
     import em_cubed.surfaces.llm_surface as mod
 
-    with patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False):
-        with patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)):
-            assert await llm_surface.health() is False
+    with (
+        patch.object(mod.LLMSurface, "_has_cloud_keys", return_value=False),
+        patch.object(llm_surface._ollama, "is_available", new=AsyncMock(return_value=False)),
+    ):
+        assert await llm_surface.health() is False
 
 
 if __name__ == "__main__":

@@ -93,7 +93,7 @@ class WASMSurface(SurfaceBase):
                 try:
                     binary_data = base64.b64decode(source_stripped)
                     module = wasmtime.Module(engine, binary_data)
-                except Exception:
+                except (ValueError, TypeError):
                     module = wasmtime.Module(engine, wasm_source)
 
             # Extract exported functions
@@ -102,8 +102,8 @@ class WASMSurface(SurfaceBase):
                 try:
                     if hasattr(exp.type, "func") and exp.type.func() is not None:
                         funcs.append(exp.name)
-                except Exception:
-                    pass  # nosec B110 - best-effort export enumeration; non-security-critical
+                except (AttributeError, TypeError, ValueError):
+                    continue  # best-effort export enumeration; non-security-critical
             return funcs
 
         except Exception as e:
@@ -134,8 +134,8 @@ class WASMSurface(SurfaceBase):
                         f"WASM module imports blocked network function '{imp.name}'. "
                         "Network access is disabled in the WASM sandbox."
                     )
-        except Exception:
-            pass  # nosec B110 - best-effort; fail open (log but allow)
+        except (AttributeError, TypeError):
+            logger.debug("Unable to inspect WASM imports for blocked network calls", module_type=type(module).__name__)
         return None
 
     def _run_wasm(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -159,8 +159,8 @@ class WASMSurface(SurfaceBase):
         # Apply instruction-count fuel budget to prevent infinite loops.
         try:
             store.set_fuel(self._fuel_limit)
-        except Exception:
-            pass  # nosec B110 - older wasmtime versions may not support set_fuel; fail open
+        except (AttributeError, TypeError):
+            logger.debug("wasmtime store does not support fuel metering", fuel_limit=self._fuel_limit)
 
         # 1. Compile WASM source
         code_stripped = code.strip()
@@ -170,7 +170,7 @@ class WASMSurface(SurfaceBase):
             try:
                 binary_data = base64.b64decode(code_stripped)
                 module = wasmtime.Module(engine, binary_data)
-            except Exception:
+            except (ValueError, TypeError):
                 module = wasmtime.Module(engine, code_stripped)
 
         # 2. Reject modules that import WASI network socket functions.
@@ -192,8 +192,8 @@ class WASMSurface(SurfaceBase):
             null_path = _os.devnull
             wasi_config.stdout_file = null_path
             wasi_config.stderr_file = null_path
-        except (AttributeError, Exception):
-            pass  # nosec B110 - WasiConfig may not support file redirect on all versions
+        except (AttributeError, TypeError):
+            logger.debug("WASI stdout/stderr redirection is not supported by this wasmtime build")
         store.set_wasi(wasi_config)
 
         # 3. Instantiate the module
@@ -258,7 +258,7 @@ class WASMSurface(SurfaceBase):
                     args.append(float(val))
                 else:
                     args.append(val)
-            except Exception:
+            except (TypeError, ValueError):
                 args.append(val)
 
         # 6. Execute exported function

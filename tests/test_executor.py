@@ -96,14 +96,16 @@ class TestSkillExecutor:
         mock_skill.path = "/fake/path/skill.md"
         mock_registry.get_skill.return_value = mock_skill
 
-        with patch("pathlib.Path.exists", return_value=True):
-            with patch("pathlib.Path.read_text", return_value="```python\nprint('hello')\n```"):
-                result1 = skill_executor._load_skill_code(skill_id)
-                result2 = skill_executor._load_skill_code(skill_id)
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.read_text", return_value="```python\nprint('hello')\n```"),
+        ):
+            result1 = skill_executor._load_skill_code(skill_id)
+            result2 = skill_executor._load_skill_code(skill_id)
 
-                assert result1 == result2
-                assert "python" in result1
-                assert result1["python"] == "print('hello')"
+            assert result1 == result2
+            assert "python" in result1
+            assert result1["python"] == "print('hello')"
 
     def test_load_skill_code_not_found(self, skill_executor, mock_registry):
         """Test loading skill code when file not found."""
@@ -112,9 +114,11 @@ class TestSkillExecutor:
         mock_skill.path = "/fake/path/nonexistent/skill.md"
         mock_registry.get_skill.return_value = mock_skill
 
-        with patch("pathlib.Path.exists", return_value=False):
-            with pytest.raises(FileNotFoundError, match="Skill file not found"):
-                skill_executor._load_skill_code(skill_id)
+        with (
+            patch("pathlib.Path.exists", return_value=False),
+            pytest.raises(FileNotFoundError, match="Skill file not found"),
+        ):
+            skill_executor._load_skill_code(skill_id)
 
     def test_load_skill_code_multiple_blocks(self, skill_executor, mock_registry):
         """Test loading skill code with multiple language blocks."""
@@ -137,16 +141,18 @@ console.log("hello");
 ```
 """
 
-        with patch("pathlib.Path.exists", return_value=True):
-            with patch("pathlib.Path.read_text", return_value=content):
-                result = skill_executor._load_skill_code(skill_id)
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("pathlib.Path.read_text", return_value=content),
+        ):
+            result = skill_executor._load_skill_code(skill_id)
 
-                assert "python" in result
-                assert "prolog" in result
-                assert "javascript" in result
-                assert result["python"] == 'def hello():\n    return "world"'
-                assert result["prolog"] == "hello(world)."
-                assert result["javascript"] == 'console.log("hello");'
+            assert "python" in result
+            assert "prolog" in result
+            assert "javascript" in result
+            assert result["python"] == 'def hello():\n    return "world"'
+            assert result["prolog"] == "hello(world)."
+            assert result["javascript"] == 'console.log("hello");'
 
     def test_execute_skill_not_found(self, skill_executor, mock_registry):
         """Test execution when skill is not found in registry."""

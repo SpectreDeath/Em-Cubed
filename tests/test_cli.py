@@ -69,9 +69,11 @@ def test():
 def test_handle_search_with_error_result(tmp_path, capsys):
     """Test search command when results contain error."""
     # Mock search_registry to return error data
-    with patch("em_cubed.cli.search_registry", return_value=[{"error": "Test error"}]):
-        with patch("sys.argv", ["em3", "search", "test"]):
-            main()  # Should not raise exception, just print error and return
+    with (
+        patch("em_cubed.cli.search_registry", return_value=[{"error": "Test error"}]),
+        patch("sys.argv", ["em3", "search", "test"]),
+    ):
+        main()  # Should not raise exception, just print error and return
 
     captured = capsys.readouterr()
     assert "Error: Test error" in captured.err
@@ -79,12 +81,13 @@ def test_handle_search_with_error_result(tmp_path, capsys):
 
 def test_handle_serve_import_error(capsys):
     """Test serve command when uvicorn is not available."""
-    with patch("sys.argv", ["em3", "serve"]):
-        # Mock the specific import that's causing issues
-        with patch.dict("sys.modules", {"uvicorn": None}):
-            with pytest.raises(SystemExit) as exc_info:
-                main()
-            assert exc_info.value.code == 1
+    with (
+        patch("sys.argv", ["em3", "serve"]),
+        patch.dict("sys.modules", {"uvicorn": None}),
+    ):
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+        assert exc_info.value.code == 1
 
     captured = capsys.readouterr()
     # The error is caught and handled in main() function
@@ -102,37 +105,41 @@ def test_handle_run_unknown_surface_exits_cleanly(capsys):
 
 def test_handle_run_unavailable_surface(capsys):
     """Test run command with unavailable surface."""
-    with patch("sys.argv", ["em3", "run", "--surface", "unavailable_surface", "--code", "test"]):
-        with patch("em_cubed.cli.PluginManager") as mock_pm:
-            mock_instance = MagicMock()
-            mock_instance.get.return_value = MagicMock(available=False)
-            mock_pm.return_value = mock_instance
+    with (
+        patch("sys.argv", ["em3", "run", "--surface", "unavailable_surface", "--code", "test"]),
+        patch("em_cubed.cli.PluginManager") as mock_pm,
+    ):
+        mock_instance = MagicMock()
+        mock_instance.get.return_value = MagicMock(available=False)
+        mock_pm.return_value = mock_instance
 
-            with pytest.raises(SystemExit) as exc_info:
-                main()
-            assert exc_info.value.code == 1
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+        assert exc_info.value.code == 1
 
 
 def test_handle_run_async_path(tmp_path, capsys):
     """Test the async path of run command with tracing."""
-    with patch("sys.argv", ["em3", "run", "--surface", "python", "--code", "1+1", "--trace"]):
-        with patch("em_cubed.cli.PluginManager") as mock_pm:
-            mock_surface = MagicMock()
-            mock_surface.available = True
-            mock_surface.name = "python"
+    with (
+        patch("sys.argv", ["em3", "run", "--surface", "python", "--code", "1+1", "--trace"]),
+        patch("em_cubed.cli.PluginManager") as mock_pm,
+    ):
+        mock_surface = MagicMock()
+        mock_surface.available = True
+        mock_surface.name = "python"
 
-            # Mock the execute method to be an async method
-            async def mock_execute(code, context):
-                return {"status": "ok", "value": 2}
+        # Mock the execute method to be an async method
+        async def mock_execute(code, context):
+            return {"status": "ok", "value": 2}
 
-            mock_surface.execute = mock_execute
+        mock_surface.execute = mock_execute
 
-            mock_pm_instance = MagicMock()
-            mock_pm_instance.get.return_value = mock_surface
-            mock_pm_instance.get_available_surfaces.return_value = ["python"]
-            mock_pm.return_value = mock_pm_instance
+        mock_pm_instance = MagicMock()
+        mock_pm_instance.get.return_value = mock_surface
+        mock_pm_instance.get_available_surfaces.return_value = ["python"]
+        mock_pm.return_value = mock_pm_instance
 
-            main()  # Should not raise exception
+        main()  # Should not raise exception
 
     # Should have executed successfully and printed output
     captured = capsys.readouterr()
@@ -147,10 +154,12 @@ def test_handle_validate_calls_handler(tmp_path):
     skills_dir.mkdir()
     registry_file = tmp_path / "registry.json"
 
-    with patch("sys.argv", ["em3", "validate", "--skills-dir", str(skills_dir), "--registry", str(registry_file)]):
-        with patch("em_cubed.cli._handle_validate") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with (
+        patch("sys.argv", ["em3", "validate", "--skills-dir", str(skills_dir), "--registry", str(registry_file)]),
+        patch("em_cubed.cli._handle_validate") as mock_handler,
+    ):
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()
 
@@ -161,10 +170,12 @@ def test_handle_quality_calls_handler(tmp_path):
     skills_dir.mkdir()
     registry_file = tmp_path / "registry.json"
 
-    with patch("sys.argv", ["em3", "quality", "--skills-dir", str(skills_dir), "--registry", str(registry_file)]):
-        with patch("em_cubed.cli._handle_quality") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with (
+        patch("sys.argv", ["em3", "quality", "--skills-dir", str(skills_dir), "--registry", str(registry_file)]),
+        patch("em_cubed.cli._handle_quality") as mock_handler,
+    ):
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()
 
@@ -174,10 +185,12 @@ def test_handle_test_calls_handler_all(tmp_path):
     skills_dir = tmp_path / "skills"
     skills_dir.mkdir()
 
-    with patch("sys.argv", ["em3", "test", "--skills-dir", str(skills_dir)]):
-        with patch("em_cubed.cli._handle_test") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with (
+        patch("sys.argv", ["em3", "test", "--skills-dir", str(skills_dir)]),
+        patch("em_cubed.cli._handle_test") as mock_handler,
+    ):
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()
 
@@ -200,30 +213,36 @@ def test_handle_test_calls_handler_specific(tmp_path):
 
 def test_handle_recommend_calls_handler():
     """Test that recommend command calls the handler."""
-    with patch("sys.argv", ["em3", "recommend", "test query", "--limit", "3"]):
-        with patch("em_cubed.cli._handle_recommend") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with (
+        patch("sys.argv", ["em3", "recommend", "test query", "--limit", "3"]),
+        patch("em_cubed.cli._handle_recommend") as mock_handler,
+    ):
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()
 
 
 def test_handle_compose_calls_handler_simple():
     """Test that compose command calls handler for simple case."""
-    with patch("sys.argv", ["em3", "compose", "--source", "skill1", "--target", "skill2"]):
-        with patch("em_cubed.cli._handle_compose") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with (
+        patch("sys.argv", ["em3", "compose", "--source", "skill1", "--target", "skill2"]),
+        patch("em_cubed.cli._handle_compose") as mock_handler,
+    ):
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()
 
 
 def test_handle_compose_calls_handler_goal():
     """Test that compose command calls handler for goal-based case."""
-    with patch("sys.argv", ["em3", "compose", "--source", "skill1", "--goal", "test goal"]):
-        with patch("em_cubed.cli._handle_compose") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with (
+        patch("sys.argv", ["em3", "compose", "--source", "skill1", "--goal", "test goal"]),
+        patch("em_cubed.cli._handle_compose") as mock_handler,
+    ):
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()
 
@@ -333,18 +352,20 @@ def test_func():
         main()
 
     # Now test skill-info with the correct skill ID (domain/name slugified)
-    with patch("sys.argv", ["em3", "skill-info", "test/test-skill", "--registry", str(registry_file)]):
-        with patch("em_cubed.cli.get_skill_metadata") as mock_get:
-            mock_get.return_value = {
-                "name": "Test Skill",
-                "domain": "test",
-                "version": "1.0.0",
-                "description": "A test skill",
-                "surfaces": ["python"],
-                "purpose": "Test skill for CLI testing",
-                "path": str(skill_file),
-            }
-            main()
+    with (
+        patch("sys.argv", ["em3", "skill-info", "test/test-skill", "--registry", str(registry_file)]),
+        patch("em_cubed.cli.get_skill_metadata") as mock_get,
+    ):
+        mock_get.return_value = {
+            "name": "Test Skill",
+            "domain": "test",
+            "version": "1.0.0",
+            "description": "A test skill",
+            "surfaces": ["python"],
+            "purpose": "Test skill for CLI testing",
+            "path": str(skill_file),
+        }
+        main()
 
     captured = capsys.readouterr()
     output = captured.out.strip()
@@ -357,9 +378,11 @@ def test_handle_workflow_calls_handler(tmp_path):
     workflow_file = tmp_path / "workflow.json"
     workflow_file.write_text('{"id": "test", "steps": []}')
 
-    with patch("sys.argv", ["em3", "workflow", str(workflow_file)]):
-        with patch("em_cubed.cli._handle_workflow") as mock_handler:
-            mock_handler.return_value = None
-            main()
+    with (
+        patch("sys.argv", ["em3", "workflow", str(workflow_file)]),
+        patch("em_cubed.cli._handle_workflow") as mock_handler,
+    ):
+        mock_handler.return_value = None
+        main()
 
     mock_handler.assert_called_once()

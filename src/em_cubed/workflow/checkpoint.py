@@ -168,9 +168,9 @@ class FileCheckpointStorage(CheckpointStorage):
                             try:
                                 with open(checkpoint_file, "r") as f:
                                     data = json.load(f)
-                                if data.get("workflow_id") == workflow_id:
+                                if data.get("workflow_id") == workflow_id and "checkpoint_id" in data:
                                     checkpoint_ids.append(data["checkpoint_id"])
-                            except Exception:  # nosec B112
+                            except (FileNotFoundError, json.JSONDecodeError, OSError):
                                 # If we can't read the file, skip it
                                 continue
                         else:
@@ -320,10 +320,8 @@ class CheckpointManager:
         checkpoints = []
         for checkpoint_id in checkpoint_ids:
             checkpoint = self.load_checkpoint(checkpoint_id)
-            if checkpoint:
-                # Filter by execution_id if specified
-                if execution_id is None or checkpoint.execution_id == execution_id:
-                    checkpoints.append(checkpoint)
+            if checkpoint and (execution_id is None or checkpoint.execution_id == execution_id):
+                checkpoints.append(checkpoint)
 
         if not checkpoints:
             return None

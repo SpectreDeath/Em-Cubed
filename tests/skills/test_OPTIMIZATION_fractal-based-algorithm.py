@@ -137,7 +137,7 @@ class TestFractalBasedAlgorithmSkill:
         assert inside
 
         # Outside
-        outside = 1.5 < 0 or 1.5 >= 1
+        outside = 1.5 not in [0.0, 1.0]
         assert outside
 
     @pytest.mark.asyncio

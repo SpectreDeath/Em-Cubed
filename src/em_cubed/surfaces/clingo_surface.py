@@ -89,7 +89,7 @@ class ClingoSurface(SurfaceBase):
 
         try:
             control.solve(on_model=_on_model)
-        except Exception as exc:  # noqa: BLE001
+        except RuntimeError as exc:
             return {"status": "error", "message": f"Clingo solve failed: {exc}"}
 
         result_value: Any

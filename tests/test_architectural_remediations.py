@@ -64,7 +64,7 @@ def test_sqlite_registry_storage():
     if db_path.exists():
         try:
             db_path.unlink()
-        except Exception:
+        except FileNotFoundError:
             pass
 
     storage = SQLiteRegistryStorage(db_path)
@@ -117,7 +117,7 @@ def test_sqlite_registry_storage():
         gc.collect()
         try:
             db_path.unlink(missing_ok=True)
-        except Exception:
+        except FileNotFoundError:
             pass
 
 

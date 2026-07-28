@@ -313,7 +313,7 @@ def test_function():
     def test_run_with_missing_skills_dir(self, pipeline):
         """Test running pipeline with non-existent skills directory."""
         pipeline.skills_dir = Path("/nonexistent/path")
-        with pytest.raises(Exception):
+        with pytest.raises(FileNotFoundError):
             list(pipeline._discover_skill_files())
 
     def test_run_with_empty_registry(self, pipeline, tmp_path):

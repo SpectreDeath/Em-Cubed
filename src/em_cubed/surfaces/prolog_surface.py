@@ -306,7 +306,7 @@ class PrologSurface(SurfaceBase):
                             try:
                                 list(prolog.query(f"dynamic({functor}/{arity})"))
                                 prolog.assertz(processed_code)
-                            except Exception as retry_err:
+                            except (AttributeError, TypeError, ValueError) as retry_err:
                                 logger.warning(
                                     "Prolog dynamic declaration + assertz failed",
                                     error=str(retry_err),

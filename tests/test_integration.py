@@ -179,7 +179,15 @@ def test_function():
             # Execute based on surface type
             if surface == "python":
                 python_surface = PythonSurface()
-                result = await python_surface.execute("test_function()", {"test_function": lambda: search_term})
+                current_term = search_term
+
+                def test_function(value=current_term):
+                    return value
+
+                result = await python_surface.execute(
+                    "test_function()",
+                    {"test_function": test_function},
+                )
                 assert result["status"] == "ok"
                 assert result["value"] == search_term
 

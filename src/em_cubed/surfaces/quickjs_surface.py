@@ -52,8 +52,8 @@ class QuickJSSurface(SurfaceBase):
                     try:
                         # Use JS assignment via eval; more compatible than parse_json
                         ctx.eval(f"var {key} = {json.dumps(value)};")
-                    except Exception:
-                        pass  # nosec B110 - skip unencodable context var; outer eval handles errors
+                    except (TypeError, ValueError):
+                        logger.debug("Unable to encode QuickJS context variable", key=key)
 
         # Execute the code
         result = ctx.eval(code)
