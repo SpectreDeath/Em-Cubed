@@ -20,8 +20,10 @@ STATLIB_STYLE_DATASET = {
 
 @pytest.fixture
 def clingo_surface():
+    if ClingoSurface is None:
+        pytest.skip("clingo package is not installed")
     surface = ClingoSurface()
-    if not surface.available:
+    if not surface or not surface.available:
         pytest.skip("clingo package is not installed")
     return surface
 

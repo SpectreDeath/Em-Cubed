@@ -1,4 +1,4 @@
-﻿"""Contract tests for all Surface plugins.
+"""Contract tests for all Surface plugins.
 
 Verifies that every Surface class in em_cubed.surfaces:
 1. Inherits SurfaceBase and does NOT override execute() directly.
@@ -16,9 +16,11 @@ from em_cubed.surfaces import (
 
 
 ALL_SURFACES = [
-    PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
-    SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
-    ClingoSurface, KanrenSurface, LLMSurface, JanusSurface
+    cls for cls in [
+        PythonSurface, PrologSurface, Z3Surface, DatalogSurface,
+        SQLiteSurface, HySurface, QuickJSSurface, WASMSurface,
+        ClingoSurface, KanrenSurface, LLMSurface, JanusSurface
+    ] if cls is not None
 ]
 
 

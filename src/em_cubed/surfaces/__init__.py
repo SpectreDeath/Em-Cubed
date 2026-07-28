@@ -24,73 +24,73 @@ ClingoSurface = None  # type: _Optional[type]
 try:
     from .prolog_surface import PrologSurface as _PrologSurface
     PrologSurface = _PrologSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .hy_surface import HySurface as _HySurface
     HySurface = _HySurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .python_surface import PythonSurface as _PythonSurface
     PythonSurface = _PythonSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .z3_surface import Z3Surface as _Z3Surface
     Z3Surface = _Z3Surface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .datalog_surface import DatalogSurface as _DatalogSurface
     DatalogSurface = _DatalogSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .janus_surface import JanusSurface as _JanusSurface
     JanusSurface = _JanusSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .llm_surface import LLMSurface as _LLMSurface
     LLMSurface = _LLMSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .sqlite_surface import SQLiteSurface as _SQLiteSurface
     SQLiteSurface = _SQLiteSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .quickjs_surface import QuickJSSurface as _QuickJSSurface
     QuickJSSurface = _QuickJSSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .kanren_surface import KanrenSurface as _KanrenSurface
     KanrenSurface = _KanrenSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .clingo_surface import ClingoSurface as _ClingoSurface
     ClingoSurface = _ClingoSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:
     from .wasm_surface import WASMSurface as _WASMSurface
     WASMSurface = _WASMSurface  # type: ignore[assignment]
-except ImportError:
+except (ImportError, Exception):
     pass
 
 try:

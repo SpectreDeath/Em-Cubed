@@ -32,15 +32,17 @@ class TestConcurrentExecution:
         surfaces.append(py)
         # Try Prolog if available
         try:
-            prolog = PrologSurface()
-            if prolog.available:
-                surfaces.append(prolog)
+            if PrologSurface is not None:
+                prolog = PrologSurface()
+                if prolog and prolog.available:
+                    surfaces.append(prolog)
         except Exception:
             pass
         try:
-            hy = HySurface()
-            if hy.available:
-                surfaces.append(hy)
+            if HySurface is not None:
+                hy = HySurface()
+                if hy and hy.available:
+                    surfaces.append(hy)
         except Exception:
             pass
 

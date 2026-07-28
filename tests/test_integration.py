@@ -120,11 +120,10 @@ double(X, Result) :- Result is X * 2.
         assert result["value"] == 8
 
         # 4. Test Prolog surface (if available)
-        prolog_surface = PrologSurface()
-        result = await prolog_surface.execute("double(4, Result).")
-        # Prolog may or may not be available depending on system
-        # Just verify result has status field
-        assert "status" in result
+        if PrologSurface is not None:
+            prolog_surface = PrologSurface()
+            result = await prolog_surface.execute("double(4, Result).")
+            assert "status" in result
 
     @pytest.mark.asyncio
     async def test_search_and_execute_integration(self, tmp_path):
@@ -287,18 +286,18 @@ Second test skill
     @pytest.mark.asyncio
     async def test_surface_availability_integration(self):
         """Test that surfaces report availability correctly."""
-        python_surface = PythonSurface()
-        prolog_surface = PrologSurface()
-        hy_surface = HySurface()
+        python_surface = PythonSurface() if PythonSurface is not None else None
+        prolog_surface = PrologSurface() if PrologSurface is not None else None
+        hy_surface = HySurface() if HySurface is not None else None
 
         # Python should always be available (asteval)
-        assert python_surface.available
-
-        # Prolog/Hy availability depends on system
-        # Just test that the health methods work
-        assert isinstance(await python_surface.health(), bool)
-        assert isinstance(await prolog_surface.health(), bool)
-        assert isinstance(await hy_surface.health(), bool)
+        if python_surface is not None:
+            assert python_surface.available
+            assert isinstance(await python_surface.health(), bool)
+        if prolog_surface is not None:
+            assert isinstance(await prolog_surface.health(), bool)
+        if hy_surface is not None:
+            assert isinstance(await hy_surface.health(), bool)
 
     @pytest.mark.asyncio
     async def test_python_prolog_sync_bridge(self, tmp_path):

@@ -20,8 +20,10 @@ STATLIB_STYLE_DATASET = {
 
 @pytest.fixture
 def kanren_surface():
+    if KanrenSurface is None:
+        pytest.skip("kanren package is not installed")
     surface = KanrenSurface()
-    if not surface.available:
+    if not surface or not surface.available:
         pytest.skip("kanren package is not installed")
     return surface
 
