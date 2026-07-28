@@ -99,6 +99,7 @@ write_impl.py
 scratch/
 logs/
 logs.zip
+.coverage*
 # Auto-generated skill registries — rebuilt by `em3 index skills/ -o registry.json`
 # Never commit these; they change on every index run and every benchmark run.
 registry_agents.json
