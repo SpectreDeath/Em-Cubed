@@ -118,7 +118,7 @@ def __getattr__(name: str) -> Any:
                 stacklevel=2,
             )
             return getattr(mod, name)
-    except Exception:
+    except Exception:  # nosec B110 - intentional fallback for deprecated attribute resolution
         pass
 
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")

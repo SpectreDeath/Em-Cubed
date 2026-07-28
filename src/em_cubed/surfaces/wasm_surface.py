@@ -6,13 +6,19 @@ Security model:
 - Modules importing WASI network sockets are rejected before instantiation.
 """
 
+from __future__ import annotations
+
 import asyncio
 import base64
 import os
 from typing import Any, cast
 
 import structlog
-import wasmtime
+
+try:
+    import wasmtime
+except ImportError:  # pragma: no cover - exercised in environments without wasmtime
+    wasmtime = None  # type: ignore[assignment]
 
 from .base import SurfaceBase
 
@@ -30,7 +36,7 @@ class WASMSurface(SurfaceBase):
         """
         super().__init__(timeout)
         self._wasm_available = self._check_wasm_availability()
-        self._engine: wasmtime.Engine | None = None
+        self._engine: Any | None = None
         # Fuel budget: max instructions the WASM module may execute.
         # Set EM_CUBED_WASM_FUEL env var to tune. Lower = tighter sandbox.
         self._fuel_limit = int(os.getenv("EM_CUBED_WASM_FUEL", "1_000_000"))
@@ -40,12 +46,15 @@ class WASMSurface(SurfaceBase):
 
     def initialize(self) -> None:
         """Initialize the WASM engine with fuel metering enabled."""
-        if self._wasm_available:
+        if self._wasm_available and wasmtime is not None:
             # Enable instruction-count fuel metering to prevent infinite loops.
             config = wasmtime.Config()
             config.consume_fuel = True
             self._engine = wasmtime.Engine(config)
             logger.debug("WASM engine initialized", fuel_limit=self._fuel_limit)
+        else:
+            self._engine = None
+            logger.debug("WASM engine initialization skipped because wasmtime is unavailable")
 
     def shutdown(self) -> None:
         """Shutdown the WASM surface."""
@@ -125,7 +134,7 @@ class WASMSurface(SurfaceBase):
         "sock_bind",
     ]
 
-    def _check_network_imports(self, module: "wasmtime.Module") -> str | None:
+    def _check_network_imports(self, module: Any) -> str | None:
         """Return an error string if the module imports any WASI network functions."""
         try:
             for imp in module.imports:
@@ -140,9 +149,7 @@ class WASMSurface(SurfaceBase):
 
     def _run_wasm(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Synchronous WASM compilation and execution to run inside the thread pool executor."""
-        try:
-            import wasmtime
-        except ImportError:
+        if wasmtime is None:
             return {"status": "error", "message": "WASM runtime (wasmtime) not available"}
 
         # Use initialized (fuel-metered) engine if available; otherwise create a temporary one
@@ -220,9 +227,6 @@ class WASMSurface(SurfaceBase):
 
         if not func:
             return {"status": "error", "message": "No exported function found in WASM module"}
-
-        # 5. Extract input values and map them to arguments
-        import wasmtime
 
         func_val = cast(wasmtime.Func, func)
         func_typed = cast("Any", func_val.type(store))
