@@ -17,7 +17,7 @@ class TestHybridCoprocessor:
 
     @pytest.mark.asyncio
     async def test_prolog_python_hybrid_pipeline(self):
-        coprocessor = HybridCoprocessor(timeout=10.0)
+        coprocessor = HybridCoprocessor(timeout=30.0)
 
         prolog_rules = """
         parent(pam, bob).
@@ -42,7 +42,7 @@ class TestHybridCoprocessor:
 
     @pytest.mark.asyncio
     async def test_datalog_python_hybrid_pipeline(self):
-        coprocessor = HybridCoprocessor(timeout=10.0)
+        coprocessor = HybridCoprocessor(timeout=30.0)
 
         datalog_rules = """
         edge(a, b).

@@ -106,6 +106,18 @@ class PythonSurface(SurfaceBase):
             logger.warning("asteval not available for Python surface")
         return available
 
+    def shutdown(self) -> None:
+        """Shutdown executors."""
+        if hasattr(self, "_executor") and self._executor is not None:
+            self._executor.shutdown(wait=False)
+        if hasattr(self, "_process_executor") and self._process_executor is not None:
+            _kill_executor_processes(self._process_executor)
+            self._process_executor.shutdown(wait=False)
+
+    def __del__(self):
+        """Clean up executors on deletion."""
+        self.shutdown()
+
     @staticmethod
     def extract_tags(python_source: str | None) -> list:
         """Extract function names from Python source as heuristic_tags."""
@@ -121,7 +133,10 @@ class PythonSurface(SurfaceBase):
         if not self.available:
             return {"status": "error", "message": f"{self.name} surface not available"}
         loop = asyncio.get_running_loop()
-        executor = self._process_executor if _is_picklable(context) else self._executor
+        # Use ThreadPoolExecutor for empty contexts to avoid ProcessPoolExecutor overhead.
+        # ProcessPoolExecutor is reserved for non-empty picklable contexts where process
+        # isolation is beneficial.
+        executor = self._process_executor if (_is_picklable(context) and context) else self._executor
         future = loop.run_in_executor(executor, _run_asteval_code, code, context)
         try:
             return await asyncio.shield(future)

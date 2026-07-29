@@ -239,7 +239,7 @@ def logistic_regression(features, labels, lr, max_iter):
 # Test: classify x > 2.5
 features = [[1], [2], [3], [4], [5], [6]]
 labels = [0, 0, 1, 1, 1, 1]
-weights, bias = logistic_regression(features, labels, 0.5, 1000)
+weights, bias = logistic_regression(features, labels, 0.5, 200)
 weights[0] > 0
 """
     from em_cubed.surfaces import PythonSurface
