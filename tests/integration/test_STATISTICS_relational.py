@@ -209,10 +209,10 @@ class TestCalculateCorrelationProfilePearson:
         assert abs(r_xy["r"] - r_yx["r"]) < 1e-12
 
     def test_p_value_decreases_with_stronger_r(self):
-        weak_x = list(range(50))
-        weak_y = [v + 0.5 * ((v % 3) - 1) for v in range(50)]
-        strong_x = list(range(50))
-        strong_y = [2.0 * v + 0.01 for v in range(50)]
+        weak_x = list(range(30))
+        weak_y = [v + 2.0 * math.sin(v) for v in range(30)]
+        strong_x = list(range(30))
+        strong_y = [2.0 * v + 0.5 * math.cos(v) for v in range(30)]
         r_w = calculate_correlation_profile(weak_x, weak_y, method="pearson")
         r_s = calculate_correlation_profile(strong_x, strong_y, method="pearson")
         assert r_s["p_value"] < r_w["p_value"]
