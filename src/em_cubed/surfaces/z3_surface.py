@@ -192,11 +192,13 @@ class Z3Surface(SurfaceBase):
                 logger.info("Z3 execution successful")
                 return {"status": "ok", "value": result_info or "Execution completed"}
 
-            return await asyncio.get_event_loop().run_in_executor(self._executor, execute_code)
-
-        except TimeoutError:
-            logger.warning("Z3 execution timed out", timeout=self.timeout)
-            return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
+            loop = asyncio.get_running_loop()
+            future = loop.run_in_executor(self._executor, execute_code)
+            try:
+                return await asyncio.shield(future)
+            except (TimeoutError, asyncio.CancelledError):
+                logger.warning("Z3 execution timed out", timeout=self.timeout)
+                return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
         except Exception as e:
             logger.exception("Z3 execution failed", error=str(e), code=code)
             return {"status": "error", "message": str(e)}

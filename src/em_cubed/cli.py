@@ -349,9 +349,9 @@ def _handle_run(args):
             context = {"surfaces": proxies, "skill_input": {}, "trace": trace_ctx}
             context["context"] = context  # compatibility
 
-            start = asyncio.get_event_loop().time()
+            start = asyncio.get_running_loop().time()
             result = await surface.execute(code, context)
-            elapsed = (asyncio.get_event_loop().time() - start) * 1000
+            elapsed = (asyncio.get_running_loop().time() - start) * 1000
 
             print(json.dumps(result, indent=2))
 

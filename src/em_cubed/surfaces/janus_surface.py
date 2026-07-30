@@ -129,11 +129,13 @@ class JanusSurface(SurfaceBase):
                 def execute_query():
                     return janus.query_once(query_code)
 
+                loop = asyncio.get_running_loop()
+                future = loop.run_in_executor(self._executor, execute_query)
                 try:
-                    result = await asyncio.get_event_loop().run_in_executor(self._executor, execute_query)
+                    result = await asyncio.shield(future)
                     logger.info("Janus query successful", result=result)
                     return {"status": "ok", "message": "Query executed successfully", "result": result}
-                except TimeoutError:
+                except (TimeoutError, asyncio.CancelledError):
                     logger.warning("Janus execution timed out", timeout=self.timeout)
                     return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
                 except Exception as e:

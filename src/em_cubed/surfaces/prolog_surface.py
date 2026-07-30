@@ -263,9 +263,11 @@ class PrologSurface(SurfaceBase):
                 def execute_query():
                     return list(prolog.query(processed_code))
 
+                loop = asyncio.get_running_loop()
+                future = loop.run_in_executor(self._executor, execute_query)
                 try:
-                    result = await asyncio.get_event_loop().run_in_executor(self._executor, execute_query)
-                except TimeoutError:
+                    result = await asyncio.shield(future)
+                except (TimeoutError, asyncio.CancelledError):
                     logger.warning("Prolog query timed out", query=processed_code, timeout=self.timeout)
                     return {"status": "error", "message": f"Query execution timed out after {self.timeout}s"}
 
