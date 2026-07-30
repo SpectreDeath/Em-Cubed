@@ -59,9 +59,8 @@ class SurfaceBase(SurfacePlugin, ABC):
         self.timeout = timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
         self._executor = _make_daemon_executor(max_workers=1)
         self._concurrency_limit = int(os.getenv("EM_CUBED_SURFACE_MAX_CONCURRENCY", "0"))
-        self._concurrency_semaphore = (
-            asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
-        )
+        self._concurrency_semaphore: asyncio.Semaphore | None = None
+        self._semaphore_loop: asyncio.AbstractEventLoop | None = None
         self._rejected_executions = 0
 
     def initialize(self) -> None:
@@ -75,10 +74,28 @@ class SurfaceBase(SurfacePlugin, ABC):
         if hasattr(self, "_executor"):
             self._executor.shutdown(wait=False)
 
+    def _get_semaphore(self) -> asyncio.Semaphore | None:
+        if self._concurrency_limit <= 0:
+            return None
+        try:
+            current_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return None
+
+        if (
+            self._concurrency_semaphore is None
+            or self._semaphore_loop is not current_loop
+            or self._semaphore_loop.is_closed()
+        ):
+            self._semaphore_loop = current_loop
+            self._concurrency_semaphore = asyncio.Semaphore(self._concurrency_limit)
+        return self._concurrency_semaphore
+
     async def _acquire_execution_slot(self) -> bool:
-        if self._concurrency_semaphore is None:
+        semaphore = self._get_semaphore()
+        if semaphore is None:
             return True
-        if self._concurrency_semaphore.locked():
+        if semaphore.locked():
             self._rejected_executions += 1
             logger.warning(
                 "Surface execution rejected by concurrency limiter",
@@ -86,12 +103,16 @@ class SurfaceBase(SurfacePlugin, ABC):
                 limit=self._concurrency_limit,
             )
             return False
-        await self._concurrency_semaphore.acquire()
+        await semaphore.acquire()
         return True
 
     def _release_execution_slot(self) -> None:
-        if self._concurrency_semaphore is not None:
-            self._concurrency_semaphore.release()
+        semaphore = getattr(self, "_concurrency_semaphore", None)
+        if semaphore is not None:
+            try:
+                semaphore.release()
+            except ValueError:
+                pass
 
     async def execute(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute code with timeout and concurrency slot protection.

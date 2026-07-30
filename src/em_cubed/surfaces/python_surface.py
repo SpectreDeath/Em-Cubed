@@ -87,9 +87,6 @@ class PythonSurface(SurfaceBase):
         self._executor = _make_daemon_executor(max_workers=worker_count)
         self._process_executor = ProcessPoolExecutor(max_workers=worker_count)
         self._concurrency_limit = int(os.getenv("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", str(worker_count)))
-        self._concurrency_semaphore = (
-            asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
-        )
         logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout, workers=worker_count)
 
     @staticmethod
@@ -140,7 +137,7 @@ class PythonSurface(SurfaceBase):
         future = loop.run_in_executor(executor, _run_asteval_code, code, context)
         try:
             return await asyncio.shield(future)
-        except TimeoutError:
+        except (TimeoutError, asyncio.CancelledError):
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
             if self._process_executor is not None:

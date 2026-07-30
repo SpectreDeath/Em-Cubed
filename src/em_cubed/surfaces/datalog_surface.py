@@ -40,9 +40,6 @@ class DatalogSurface(SurfaceBase):
         self._executor = ThreadPoolExecutor(max_workers=1)
         self.max_fact_lines = int(os.getenv("EM_CUBED_DATALOG_MAX_FACT_LINES", "5000"))
         self._concurrency_limit = int(os.getenv("EM_CUBED_DATALOG_MAX_CONCURRENCY", "1"))
-        self._concurrency_semaphore = (
-            asyncio.Semaphore(self._concurrency_limit) if self._concurrency_limit > 0 else None
-        )
         self._rejected_executions = 0
         # Per-instance cache: isolated between instances and test runs.
         self._execution_cache: dict[str, Any] = {}
@@ -115,7 +112,7 @@ class DatalogSurface(SurfaceBase):
         future = loop.run_in_executor(self._executor, self._run_code, code, context)
         try:
             return await asyncio.shield(future)
-        except TimeoutError:
+        except (TimeoutError, asyncio.CancelledError):
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
             self._executor = ThreadPoolExecutor(max_workers=1)
