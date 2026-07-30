@@ -63,18 +63,13 @@ def test_add_property(x, y):
 
 
 @given(
-    a=st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False),
-    b=st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False),
-    c=st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False),
+    x=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
 )
-def test_square_root_property(a, b, c):
+def test_square_root_property(x):
     """Test that the square_root function returns the square root of x for non-negative x."""
-    # We'll test the square_root function with non-negative inputs
     sqrt_func = get_function("square_root")
     if sqrt_func is None:
         pytest.skip("Square root function not found in skill")
-    # Generate non-negative x
-    x = st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False).example()
     result = sqrt_func(x)
     expected = x**0.5
     assert abs(result - expected) < 1e-9
