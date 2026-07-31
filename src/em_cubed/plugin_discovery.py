@@ -78,8 +78,8 @@ class PluginDiscovery:
             try:
                 from importlib.metadata import entry_points
             except ImportError:
-                from importlib_metadata import (
-                    entry_points,  # type: ignore[assignment,no-redef]
+                from importlib_metadata import (  # type: ignore[assignment,no-redef]
+                    entry_points,
                 )
 
             from .plugin import SurfacePlugin

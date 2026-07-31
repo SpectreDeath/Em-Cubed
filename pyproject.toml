@@ -2,6 +2,23 @@
 requires = ["setuptools>=68.0.0", "wheel", "pytest-asyncio>=0.24.0"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "em-cubed"
+version = "0.1.0"
+description = "Polyglot AI Skill Engine & Neuro-Symbolic OS"
+authors = [{name = "Em-Cubed Authors"}]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+[project.optional-dependencies]
+dev = [
+  "ruff",
+  "mypy",
+  "pytest",
+  "pytest-asyncio",
+  "types-PyYAML",
+]
+
 [tool.ruff.lint]
 ignore = [
   "BLE001",  # intentional blind exceptions with nosec B110
