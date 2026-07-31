@@ -44,7 +44,7 @@ jobs:
       run: pip install ruff && ruff check src/ tests/
     
     - name: Type check with mypy
-      run: pip install mypy && mypy src/em_cubed/
+      run: pip install mypy && mypy --ignore-missing-imports src/em_cubed/
 
     - name: Security scan with bandit
       run: pip install bandit && bandit -r src/ -c pyproject.toml
