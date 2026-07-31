@@ -51,7 +51,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -q \
+        pytest --tb=short \
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml \
