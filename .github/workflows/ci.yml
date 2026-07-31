@@ -50,7 +50,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -n auto -q \
+        pytest -q \
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml \
