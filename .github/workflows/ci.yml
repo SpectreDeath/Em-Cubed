@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -50,7 +50,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest -q \
+        pytest -n auto -q \
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml \
