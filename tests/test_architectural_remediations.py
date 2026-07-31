@@ -11,7 +11,6 @@ from src.em_cubed.skills.executor import SkillExecutionRequest, SkillExecutor
 from src.em_cubed.skills.metadata import InputOutputSchema, SkillMetadata
 from src.em_cubed.skills.registry import SkillRegistry, SQLiteRegistryStorage
 from src.em_cubed.surfaces.base import DaemonThreadPoolExecutor
-from src.em_cubed.surfaces.python_surface import _kill_executor_processes
 
 
 def test_daemon_thread_pool_executor():
@@ -38,22 +37,6 @@ def test_daemon_thread_pool_executor():
     assert t.daemon == threading.current_thread().daemon
 
     executor.shutdown()
-
-
-def test_kill_executor_processes():
-    """Verify that _kill_executor_processes terminates all child processes in the pool."""
-    mock_process1 = Mock()
-    mock_process2 = Mock()
-
-    mock_executor = Mock()
-    mock_executor._processes = {mock_process1: 123, mock_process2: 456}
-
-    _kill_executor_processes(mock_executor)
-
-    mock_process1.terminate.assert_called_once()
-    mock_process1.kill.assert_called_once()
-    mock_process2.terminate.assert_called_once()
-    mock_process2.kill.assert_called_once()
 
 
 def test_sqlite_registry_storage():

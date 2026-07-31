@@ -3,8 +3,6 @@
 import asyncio
 import importlib.util
 import os
-import pickle  # nosec B403 - used only for pickle.dumps() picklability probe; never deserializes untrusted data
-from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 
 import structlog
@@ -39,33 +37,6 @@ def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[
     return {"status": "ok", "value": result}
 
 
-def _is_picklable(value: Any) -> bool:
-    try:
-        pickle.dumps(value)
-        return True
-    except Exception:
-        return False
-
-
-def _kill_executor_processes(executor) -> None:
-    """Terminate and kill all child processes in the ProcessPoolExecutor."""
-    if executor is None:
-        return
-    try:
-        processes = getattr(executor, "_processes", None)
-        if processes:
-            for p in list(processes):
-                try:
-                    if hasattr(p, "terminate"):
-                        p.terminate()
-                    if hasattr(p, "kill"):
-                        p.kill()
-                except Exception:
-                    pass  # nosec B110 - intentional fallback; caller handles None/False return
-    except Exception:
-        pass  # nosec B110 - intentional fallback; caller handles None/False return
-
-
 class PythonSurface(SurfaceBase):
     """Handle Python code execution and metadata extraction."""
 
@@ -85,7 +56,6 @@ class PythonSurface(SurfaceBase):
         super().__init__(timeout)
         worker_count = self._worker_count()
         self._executor = _make_daemon_executor(max_workers=worker_count)
-        self._process_executor = ProcessPoolExecutor(max_workers=worker_count)
         self._concurrency_limit = int(os.getenv("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", str(worker_count)))
         logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout, workers=worker_count)
 
@@ -103,18 +73,6 @@ class PythonSurface(SurfaceBase):
             logger.warning("asteval not available for Python surface")
         return available
 
-    def shutdown(self) -> None:
-        """Shutdown executors."""
-        if hasattr(self, "_executor") and self._executor is not None:
-            self._executor.shutdown(wait=False)
-        if hasattr(self, "_process_executor") and self._process_executor is not None:
-            _kill_executor_processes(self._process_executor)
-            self._process_executor.shutdown(wait=False)
-
-    def __del__(self):
-        """Clean up executors on deletion."""
-        self.shutdown()
-
     @staticmethod
     def extract_tags(python_source: str | None) -> list:
         """Extract function names from Python source as heuristic_tags."""
@@ -126,25 +84,14 @@ class PythonSurface(SurfaceBase):
         return list(dict.fromkeys(fns))
 
     async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Execute Python code safely using asteval and executor processes."""
+        """Execute Python code safely using asteval."""
         if not self.available:
             return {"status": "error", "message": f"{self.name} surface not available"}
         loop = asyncio.get_running_loop()
-        # Use ThreadPoolExecutor for empty contexts to avoid ProcessPoolExecutor overhead.
-        # ProcessPoolExecutor is reserved for non-empty picklable contexts where process
-        # isolation is beneficial.
-        executor = self._process_executor if (_is_picklable(context) and context) else self._executor
-        future = loop.run_in_executor(executor, _run_asteval_code, code, context)
+        future = loop.run_in_executor(self._executor, _run_asteval_code, code, context)
         try:
             return await asyncio.shield(future)
         except (TimeoutError, asyncio.CancelledError):
-            if self._executor is not None:
-                self._executor.shutdown(wait=False)
-            if self._process_executor is not None:
-                _kill_executor_processes(self._process_executor)
-                self._process_executor.shutdown(wait=False)
-            self._executor = _make_daemon_executor(max_workers=self._worker_count())
-            self._process_executor = ProcessPoolExecutor(max_workers=self._worker_count())
             raise
 
     def _run_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -158,28 +105,21 @@ class PythonSurface(SurfaceBase):
         try:
             from asteval import Interpreter
 
-            # Create asteval interpreter with safe context
             aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"])
-            # Explicitly remove dangerous names (excluded_symbols alone is not sufficient in asteval 1.x)
             for bad in ["open", "__import__", "eval", "exec", "compile", "__builtins__"]:
                 aeval.symtable.pop(bad, None)
 
-            # Add context variables if provided
             if context:
                 for key, value in context.items():
                     aeval.symtable[key] = value
-                # Also provide the context object itself for compatibility
                 aeval.symtable["context"] = context
 
-            # Execute the code
             result = aeval(code)
             if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
                 result = aeval.symtable["result"]
 
-            # Check for errors
             if aeval.error:
                 if aeval.error and hasattr(aeval.error[0], "msg"):
-                    # asteval ExceptionHolder
                     error_msg = str(aeval.error[0].msg)
                 else:
                     error_msg = str(aeval.error[0]) if aeval.error else "Unknown error"
