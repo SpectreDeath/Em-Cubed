@@ -41,7 +41,7 @@ jobs:
         pip install pyDatalog || echo "pyDatalog non-critical"
     
     - name: Lint with ruff
-      run: ruff check src/ tests/
+      run: pip install ruff && ruff check src/ tests/
     
     - name: Type check with mypy
       run: mypy src/em_cubed/
