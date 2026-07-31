@@ -221,15 +221,8 @@ def reindex(skills_dir: Path, registry_output: Path) -> None:
 
 def _discover_skill_files(skills_dir: Path) -> list[Path]:
     """Discover all skill files in the directory."""
-    skill_files = []
-
     # Look for both SKILL.md and SKILL_*.md files
-    for skill_file in skills_dir.glob("**/SKILL.md"):
-        skill_files.append(skill_file)
-
-    for skill_file in skills_dir.glob("**/SKILL_*.md"):
-        skill_files.append(skill_file)
-
+    skill_files = list(skills_dir.glob("**/SKILL.md")) + list(skills_dir.glob("**/SKILL_*.md"))
     return skill_files
 
 

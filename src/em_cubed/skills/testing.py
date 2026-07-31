@@ -89,7 +89,12 @@ class SkillTestGenerator:
         except Exception as e:
             self.logger.warning("Failed to re-parse skill metadata, using provided", error=str(e))
             # Fallback: convert any dict attributes to proper dataclass instances
-            from .metadata import CompatibilityRange, InputOutputSchema, QualityThresholds, SkillCapability
+            from .metadata import (
+                CompatibilityRange,
+                InputOutputSchema,
+                QualityThresholds,
+                SkillCapability,
+            )
 
             if hasattr(skill_metadata, "input_schema") and isinstance(skill_metadata.input_schema, dict):
                 skill_metadata.input_schema = InputOutputSchema.from_dict(skill_metadata.input_schema)

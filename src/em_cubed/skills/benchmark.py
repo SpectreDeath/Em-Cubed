@@ -18,7 +18,7 @@ except ImportError:
 import json
 import statistics
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import structlog
@@ -112,7 +112,7 @@ class BenchmarkResult:
     ) -> "BenchmarkResult":
         """Construct result from raw timing data."""
         iterations = len(times)
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
 
         if times:
             sorted_times = sorted(times)
@@ -224,7 +224,7 @@ class SkillBenchmark:
                 success_rate=0.0,
                 error_rate=1.0,
                 errors=["No surfaces available"],
-                timestamp=datetime.utcnow().isoformat(),
+                timestamp=datetime.now(timezone.utc).isoformat(),
                 config=config.to_dict(),
             )
 
@@ -246,7 +246,7 @@ class SkillBenchmark:
 
         # Measurement phase
         times = []
-        memory_samples: list[float] = [] if _psutil_available else []
+        memory_samples: list[float] = []
         errors = []
 
         process = psutil.Process() if _psutil_available else None
@@ -358,7 +358,7 @@ class SkillBenchmark:
         skills_to_report = skill_ids or list(self.registry._skills.keys())
 
         report: dict[str, Any] = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "skills": {},
         }
 

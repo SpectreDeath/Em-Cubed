@@ -137,7 +137,10 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         return 0
 
     elif subcommand == "migrate":
-        from em_cubed.ontology.schema_evolution import AutomatedTripleMigrationEngine, SchemaMigrationStep
+        from em_cubed.ontology.schema_evolution import (
+            AutomatedTripleMigrationEngine,
+            SchemaMigrationStep,
+        )
 
         triples = [OntologyTriple(subject="SubjectA", predicate=args.from_pred, object="Value1")]
         steps = [
@@ -153,7 +156,10 @@ def handle_ontology_cli(args: argparse.Namespace) -> int:
         return 0
 
     elif subcommand == "export":
-        from em_cubed.ontology.interoperability import RDFSerializer, SHACLConstraintGenerator
+        from em_cubed.ontology.interoperability import (
+            RDFSerializer,
+            SHACLConstraintGenerator,
+        )
         from em_cubed.ontology.schema import FunctionalPropertyConstraint
 
         triples = [OntologyTriple(subject="ConceptA", predicate="subClassOf", object="ConceptB")]

@@ -239,7 +239,11 @@ class EmCubedMCPServer:
 
             from em_cubed.plugin_registry import PluginRegistry
             from em_cubed.skills import SkillRegistry
-            from em_cubed.skills.executor import SkillExecutionRequest, SkillExecutor, get_skill_executor
+            from em_cubed.skills.executor import (
+                SkillExecutionRequest,
+                SkillExecutor,
+                get_skill_executor,
+            )
 
             skills_dir = _Path("skills")
             reg_file = _Path("registry.json")
@@ -416,7 +420,7 @@ def _handle_request(server: EmCubedMCPServer, request: dict[str, Any]) -> None:
             )
 
     except Exception as exc:
-        logger.exception("MCP request handler error: method=%s, error=%s", method, str(exc))
+        logger.exception("MCP request handler error: method=%s", method)
         _write_response(
             {
                 "jsonrpc": "2.0",

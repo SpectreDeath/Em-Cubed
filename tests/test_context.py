@@ -1,6 +1,12 @@
 """Additional tests for the context/type system to improve coverage."""
 
-from em_cubed.context import TypeConverter, TypeDefinition, TypeRegistry, get_type_converter, get_type_registry
+from em_cubed.context import (
+    TypeConverter,
+    TypeDefinition,
+    TypeRegistry,
+    get_type_converter,
+    get_type_registry,
+)
 
 
 def test_type_register_type():
@@ -501,7 +507,11 @@ def test_type_converter_logger_initialization():
 
 def test_global_type_system_singleton_behavior():
     """Test that global type system instances behave as singletons."""
-    from em_cubed.context import get_type_converter, get_type_registry, initialize_type_system
+    from em_cubed.context import (
+        get_type_converter,
+        get_type_registry,
+        initialize_type_system,
+    )
 
     # Get instances multiple times
     registry1 = get_type_registry()

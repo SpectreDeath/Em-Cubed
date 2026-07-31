@@ -6,7 +6,7 @@ and handles parallel execution of independent steps.
 
 import asyncio
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import structlog
@@ -52,7 +52,7 @@ class WorkflowExecutor:
     async def execute(self, workflow: WorkflowDefinition, initial_data: dict[str, Any]) -> CompositionResult:
         """Execute a DAG workflow."""
         context = ExecutionContext(data=initial_data.copy())
-        context.start_time = datetime.utcnow()
+        context.start_time = datetime.now(timezone.utc)
 
         self.logger.info("Starting workflow execution", workflow=workflow.name, steps=len(workflow.steps))
 
@@ -153,7 +153,7 @@ class WorkflowExecutor:
         tasks = [asyncio.create_task(run_step(step)) for step in workflow.steps]
         await asyncio.gather(*tasks)
 
-        context.end_time = datetime.utcnow()
+        context.end_time = datetime.now(timezone.utc)
         success = len(failed_steps) == 0
 
         return CompositionResult(

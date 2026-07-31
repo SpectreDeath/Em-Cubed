@@ -10,7 +10,7 @@ import asyncio
 import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any, cast
@@ -156,10 +156,8 @@ class SkillComposer:
 
     async def compose(self, plan: CompositionPlan, initial_data: dict[str, Any]) -> CompositionResult:
         """Execute a skill composition plan."""
-        from datetime import datetime
-
         context = ExecutionContext(data=initial_data.copy())
-        context.start_time = datetime.utcnow()
+        context.start_time = datetime.now(timezone.utc)
 
         self.logger.info("Starting composition execution", plan=plan.name, steps=len(plan.steps))
 
@@ -176,11 +174,11 @@ class SkillComposer:
                 self.logger.warning("Unknown composition pattern, using sequential", pattern=plan.pattern.value)
                 result = await self._execute_sequential(plan, context)
 
-            context.end_time = datetime.utcnow()
+            context.end_time = datetime.now(timezone.utc)
             return result
 
         except Exception as e:
-            context.end_time = datetime.utcnow()
+            context.end_time = datetime.now(timezone.utc)
             self.logger.error("Composition execution failed", error=str(e))
             if plan.error_handler:
                 try:

@@ -30,7 +30,10 @@ from em_cubed.ontology.event_stream import (
     StreamEvent,
     StreamProcessingResult,
 )
-from em_cubed.ontology.federated_registry import FederatedOntologyRegistry, SwarmNodeState
+from em_cubed.ontology.federated_registry import (
+    FederatedOntologyRegistry,
+    SwarmNodeState,
+)
 from em_cubed.ontology.graph_rag import GraphPathRAG, SubgraphPath
 from em_cubed.ontology.health_monitor import (
     OntologicalHealthMonitor,

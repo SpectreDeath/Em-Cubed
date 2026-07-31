@@ -11,7 +11,10 @@ from dataclasses import dataclass, field
 
 from em_cubed.ontology.concept_induction import ConceptInductionEngine
 from em_cubed.ontology.elicitation import KnowledgeElicitationPipeline
-from em_cubed.ontology.health_monitor import OntologicalHealthMonitor, OntologyHealthReport
+from em_cubed.ontology.health_monitor import (
+    OntologicalHealthMonitor,
+    OntologyHealthReport,
+)
 from em_cubed.ontology.interoperability import RDFSerializer
 from em_cubed.ontology.schema import OntologyTriple
 from em_cubed.ontology.topos import SubobjectClassifier, TruthValue

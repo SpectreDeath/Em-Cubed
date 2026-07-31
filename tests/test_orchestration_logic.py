@@ -11,7 +11,7 @@ def plugin_manager():
 @pytest.mark.asyncio
 async def test_python_prolog_orchestration_sync(plugin_manager):
     """Test that a Python skill can call Prolog synchronously via the bridge with tracing."""
-    from datetime import datetime
+    from datetime import UTC, datetime
 
     from em_cubed.skills.executor import TelemetryProxy
     from em_cubed.skills.telemetry import ExecutionRecord, TraceContext
@@ -27,7 +27,7 @@ result
     python_surface = plugin_manager.get("python")
 
     # Setup tracing
-    record = ExecutionRecord(skill_id="test_prolog", timestamp=datetime.utcnow(), success=True, execution_time_ms=0)
+    record = ExecutionRecord(skill_id="test_prolog", timestamp=datetime.now(UTC), success=True, execution_time_ms=0)
     trace_ctx = TraceContext(record)
 
     # Prepare context with proxies
@@ -51,7 +51,7 @@ result
 @pytest.mark.asyncio
 async def test_python_hy_orchestration_sync(plugin_manager):
     """Test that a Python skill can call Hy synchronously via the bridge with tracing."""
-    from datetime import datetime
+    from datetime import UTC, datetime
 
     from em_cubed.skills.executor import TelemetryProxy
     from em_cubed.skills.telemetry import ExecutionRecord, TraceContext
@@ -65,7 +65,7 @@ result
     python_surface = plugin_manager.get("python")
 
     # Setup tracing
-    record = ExecutionRecord(skill_id="test_hy", timestamp=datetime.utcnow(), success=True, execution_time_ms=0)
+    record = ExecutionRecord(skill_id="test_hy", timestamp=datetime.now(UTC), success=True, execution_time_ms=0)
     trace_ctx = TraceContext(record)
 
     # Prepare context

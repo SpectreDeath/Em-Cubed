@@ -105,7 +105,7 @@ double(X, Result) :- Result is X * 2.
         registry_file = tmp_path / "registry.json"
         reindex(skills_dir, registry_file)
 
-        with open(registry_file) as f:
+        with open(registry_file) as f:  # noqa: ASYNC230
             registry = json.load(f)
 
         assert len(registry) == 1
@@ -258,7 +258,7 @@ Test registry persistence
 
         # Verify registry exists and has data
         assert registry_file.exists()
-        with open(registry_file) as f:
+        with open(registry_file) as f:  # noqa: ASYNC230
             registry1 = json.load(f)
         assert len(registry1) == 1
 
@@ -285,7 +285,7 @@ Second test skill
         reindex(skills_dir, registry_file)
 
         # Verify both skills are there
-        with open(registry_file) as f:
+        with open(registry_file) as f:  # noqa: ASYNC230
             registry2 = json.load(f)
         assert len(registry2) == 2
 

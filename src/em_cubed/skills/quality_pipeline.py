@@ -3,7 +3,7 @@
 This module provides end-to-end quality assurance for skills.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -47,7 +47,7 @@ class SkillQualityPipeline:
                     qm = self.registry.get_quality(skill_id)
                     if qm:
                         qm.validation_score = result.quality_score
-                        qm.last_validation = datetime.utcnow()
+                        qm.last_validation = datetime.now(timezone.utc)
                         qm.issues = [i.to_dict() for i in result.issues]
             except Exception as e:
                 self.logger.error("Validation failed", skill=skill_file.name, error=str(e))
@@ -136,7 +136,7 @@ class SkillQualityPipeline:
                 quality_distribution["low"] += 1
 
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "total_skills": total,
             "passing_quality": passing,
             "failing_quality": failing,
@@ -149,11 +149,7 @@ class SkillQualityPipeline:
         """Discover all skill files."""
         if not self.skills_dir.exists():
             raise FileNotFoundError(f"Skills directory not found: {self.skills_dir}")
-        skill_files = []
-        for skill_file in self.skills_dir.glob("**/SKILL.md"):
-            skill_files.append(skill_file)
-        for skill_file in self.skills_dir.glob("**/SKILL_*.md"):
-            skill_files.append(skill_file)
+        skill_files = list(self.skills_dir.glob("**/SKILL.md")) + list(self.skills_dir.glob("**/SKILL_*.md"))
         return skill_files
 
     def _extract_skill_id(self, skill_file: Path) -> str:

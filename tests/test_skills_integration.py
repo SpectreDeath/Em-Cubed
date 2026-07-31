@@ -6,7 +6,12 @@ from pathlib import Path
 import pytest
 
 from em_cubed.plugin_manager import PluginManager
-from em_cubed.skills.composer import CompositionPattern, CompositionPlan, CompositionStep, SkillComposer
+from em_cubed.skills.composer import (
+    CompositionPattern,
+    CompositionPlan,
+    CompositionStep,
+    SkillComposer,
+)
 from em_cubed.skills.registry import SkillRegistry
 from em_cubed.skills.validator import SkillValidator
 

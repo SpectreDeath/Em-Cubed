@@ -5,7 +5,12 @@ from unittest.mock import Mock
 import pytest
 
 from src.em_cubed.skills.metadata import SkillMetadata
-from src.em_cubed.skills.validator import SkillValidator, ValidationIssue, ValidationResult, ValidationSeverity
+from src.em_cubed.skills.validator import (
+    SkillValidator,
+    ValidationIssue,
+    ValidationResult,
+    ValidationSeverity,
+)
 
 
 class TestValidationSeverity:

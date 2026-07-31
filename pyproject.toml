@@ -1,3 +1,11 @@
 [build-system]
 requires = ["setuptools>=68.0.0", "wheel", "pytest-asyncio>=0.24.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.ruff.lint]
+ignore = [
+  "BLE001",  # intentional blind exceptions with nosec B110
+  "S110",    # intentional try-except-pass with nosec B110
+  "RUF012",  # intentional mutable class-level defaults
+  "PLW0602", # intentional global accessor pattern
+]

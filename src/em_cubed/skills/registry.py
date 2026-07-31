@@ -11,7 +11,7 @@ import uuid
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -233,7 +233,13 @@ class SkillRegistry:
 
     def _deserialize_metadata(self, data: dict[str, Any]) -> SkillMetadata:
         """Deserialize dictionary into SkillMetadata object."""
-        from .metadata import CompatibilityRange, InputOutputSchema, QualityThresholds, SkillCapability, SkillDependency
+        from .metadata import (
+            CompatibilityRange,
+            InputOutputSchema,
+            QualityThresholds,
+            SkillCapability,
+            SkillDependency,
+        )
 
         # Parse dependencies
         deps = [SkillDependency.from_dict(d) for d in data.get("dependencies", [])]
@@ -654,7 +660,7 @@ class SQLiteRegistryStorage(RegistryStorage):
                     new_success = row["success_count"] + (1 if success else 0)
                     new_time = row["total_execution_time"] + execution_time
                     new_token = row["total_token_usage"] + token_usage
-                    last_exec = datetime.utcnow().isoformat()
+                    last_exec = datetime.now(timezone.utc).isoformat()
 
                     try:
                         skill_data = json.loads(row["data"])

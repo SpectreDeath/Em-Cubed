@@ -161,7 +161,13 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
         based on code content, not execution environment.
         """
         # Import the actual surface to reuse its tag extraction
-        from .surfaces import datalog_surface, hy_surface, prolog_surface, python_surface, z3_surface
+        from .surfaces import (
+            datalog_surface,
+            hy_surface,
+            prolog_surface,
+            python_surface,
+            z3_surface,
+        )
 
         surface_map = {
             "python": python_surface.PythonSurface,

@@ -133,7 +133,10 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         float | int
             Calculated dynamic derived property value.
         """
-        from em_cubed.ontology.advanced_ontology import DerivedPropertyReducer, ReducerType
+        from em_cubed.ontology.advanced_ontology import (
+            DerivedPropertyReducer,
+            ReducerType,
+        )
 
         return DerivedPropertyReducer.compute_reducer(
             triples=getattr(state, "triples", []),
@@ -150,7 +153,10 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         bool
             True if interface contract is valid.
         """
-        from em_cubed.ontology.advanced_ontology import InterfaceImplementation, OntologyInterface
+        from em_cubed.ontology.advanced_ontology import (
+            InterfaceImplementation,
+            OntologyInterface,
+        )
 
         interface = OntologyInterface(name="SkillStateInterface", required_predicates=required_predicates)
         return InterfaceImplementation.validates_interface(
@@ -208,7 +214,10 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         list[tuple[str, float]]
             Matching (subject, distance_km) list.
         """
-        from em_cubed.ontology.temporal_spatial import GeoLocation, SpatialProximityReasoner
+        from em_cubed.ontology.temporal_spatial import (
+            GeoLocation,
+            SpatialProximityReasoner,
+        )
 
         center = GeoLocation(latitude=lat, longitude=lon)
         return SpatialProximityReasoner.find_entities_within_radius(

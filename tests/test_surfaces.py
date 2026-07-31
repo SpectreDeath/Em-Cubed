@@ -4,7 +4,14 @@ import pytest
 
 # Try to import surfaces, skip tests if dependencies are missing
 try:
-    from em_cubed.surfaces import DatalogSurface, HySurface, JanusSurface, PrologSurface, PythonSurface, Z3Surface
+    from em_cubed.surfaces import (
+        DatalogSurface,
+        HySurface,
+        JanusSurface,
+        PrologSurface,
+        PythonSurface,
+        Z3Surface,
+    )
 
     _core_surfaces_available = True
     _hy_available = HySurface is not None and HySurface().available

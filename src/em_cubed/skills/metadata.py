@@ -6,7 +6,7 @@ dependency management, and quality tracking.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -188,7 +188,7 @@ class RuntimeMetrics:
             self.failure_count += 1
         self.total_execution_time += execution_time
         self.total_token_usage += token_usage
-        self.last_executed = datetime.utcnow()
+        self.last_executed = datetime.now(timezone.utc)
         self.execution_history.append(
             {
                 "timestamp": self.last_executed.isoformat(),

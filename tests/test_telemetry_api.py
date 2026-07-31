@@ -7,7 +7,11 @@ from unittest.mock import AsyncMock, Mock
 import pytest
 
 from em_cubed.skills.telemetry import ExecutionRecord, TelemetryCollector
-from em_cubed.telemetry.api import TelemetryAPI, WebSocketTelemetryHandler, get_telemetry_api
+from em_cubed.telemetry.api import (
+    TelemetryAPI,
+    WebSocketTelemetryHandler,
+    get_telemetry_api,
+)
 
 
 def test_telemetry_api_get_available_skills():

@@ -52,7 +52,10 @@ def _bootstrap_services():
 
     # Initialize telemetry API for dashboard endpoints
     from em_cubed.skills.telemetry import get_telemetry_collector
-    from em_cubed.telemetry.api import initialize_telemetry_api, initialize_websocket_handler
+    from em_cubed.telemetry.api import (
+        initialize_telemetry_api,
+        initialize_websocket_handler,
+    )
 
     initialize_telemetry_api(get_telemetry_collector())
     initialize_websocket_handler(get_telemetry_collector())
@@ -327,7 +330,12 @@ def _handle_run(args):
         if args.trace:
             # Setup tracing for CLI run
 
-            from em_cubed.skills.telemetry import ExecutionRecord, TelemetryConfig, TraceContext, initialize_telemetry
+            from em_cubed.skills.telemetry import (
+                ExecutionRecord,
+                TelemetryConfig,
+                TraceContext,
+                initialize_telemetry,
+            )
 
             initialize_telemetry(TelemetryConfig(log_every_execution=False))
 
@@ -533,7 +541,12 @@ async def _handle_compose(args):
     import json
 
     from em_cubed.plugin_manager import PluginManager
-    from em_cubed.skills.composer import CompositionPattern, CompositionPlan, CompositionStep, SkillComposer
+    from em_cubed.skills.composer import (
+        CompositionPattern,
+        CompositionPlan,
+        CompositionStep,
+        SkillComposer,
+    )
     from em_cubed.skills.registry import SkillRegistry
 
     skills_dir = Path("skills")
@@ -572,7 +585,7 @@ async def _handle_compose(args):
                 print(f"   - {step.skill_id}")
 
         if args.output:
-            with open(args.output, "w") as f:
+            with open(args.output, "w") as f:  # noqa: ASYNC230
                 json.dump([p.to_dict() if hasattr(p, "to_dict") else str(p) for p in plans], f, indent=2)
             print(f"\nCompositions saved to {args.output}")
 
@@ -763,7 +776,7 @@ async def _handle_workflow(args):
         print(f"Error: Workflow file not found at {workflow_path}")
         sys.exit(1)
     try:
-        with open(workflow_path, encoding="utf-8") as f:
+        with open(workflow_path, encoding="utf-8") as f:  # noqa: ASYNC230
             if workflow_path.suffix == ".json":
                 wf_data = json.load(f)
             elif workflow_path.suffix in (".yaml", ".yml"):
@@ -786,7 +799,11 @@ async def _handle_workflow(args):
     from em_cubed.plugin_manager import PluginManager
     from em_cubed.skills.composer import SkillComposer
     from em_cubed.skills.registry import SkillRegistry
-    from em_cubed.skills.workflow import WorkflowDefinition, WorkflowExecutor, WorkflowStep
+    from em_cubed.skills.workflow import (
+        WorkflowDefinition,
+        WorkflowExecutor,
+        WorkflowStep,
+    )
 
     pm = PluginManager()
     registry = SkillRegistry(Path("skills"), registry_path)

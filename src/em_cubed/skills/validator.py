@@ -185,14 +185,14 @@ class SkillValidator:
 
     def validate_skill_file(self, file_path, skill_metadata) -> ValidationResult:
         """Perform comprehensive validation on a skill file."""
-        from datetime import datetime
+        from datetime import datetime, timezone
 
         result = ValidationResult(
             skill_id=skill_metadata.skill_id or skill_metadata.name,
             valid=True,
             issues=[],
             quality_score=0.0,
-            validated_at=datetime.utcnow().isoformat(),
+            validated_at=datetime.now(timezone.utc).isoformat(),
         )
 
         # Run all validation checks
