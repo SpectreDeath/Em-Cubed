@@ -17,6 +17,8 @@ dev = [
   "pytest",
   "pytest-asyncio",
   "types-PyYAML",
+  "pygls",
+  "lsprotocol",
 ]
 
 [tool.ruff.lint]
