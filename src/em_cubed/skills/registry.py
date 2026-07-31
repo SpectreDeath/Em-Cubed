@@ -197,7 +197,8 @@ class SkillRegistry:
                 skill_data = self._migrate_skill_entry(skill_data)
                 # Reconstruct SkillMetadata
                 metadata = self._deserialize_metadata(skill_data)
-                assert metadata.skill_id is not None, "Skill ID must be set after deserialization"
+                if metadata.skill_id is None:
+                    raise ValueError("Skill ID must be set after deserialization")
                 self._skills[metadata.skill_id] = metadata
                 # Always initialize quality metrics; populate from data if available
                 metrics_data = skill_data.get("metrics", {})
@@ -429,7 +430,8 @@ class SkillRegistry:
         try:
             registry_data = []
             for skill in self._skills.values():
-                assert skill.skill_id is not None, "Skill ID must be set"
+                if skill.skill_id is None:
+                    raise ValueError("Skill ID must be set")
                 data = skill.to_registry_dict()
                 # Include quality metrics
                 qm = self._quality_metrics.get(skill.skill_id)
@@ -445,7 +447,8 @@ class SkillRegistry:
 
     def add_skill(self, metadata: SkillMetadata) -> None:
         """Add a new skill to the registry."""
-        assert metadata.skill_id is not None, "Skill ID must be set before adding to registry"
+        if metadata.skill_id is None:
+            raise ValueError("Skill ID must be set before adding to registry")
         self._skills[metadata.skill_id] = metadata
         self._quality_metrics[metadata.skill_id] = QualityMetrics(skill_id=metadata.skill_id)
         self._save_registry()
@@ -468,7 +471,8 @@ class SkillRegistry:
         avg_quality = 0.0
 
         for skill in self._skills.values():
-            assert skill.skill_id is not None, "Skill ID must be set"
+            if skill.skill_id is None:
+                raise ValueError("Skill ID must be set")
             domains[skill.domain] += 1
             for surface in skill.surfaces:
                 surfaces[surface] += 1

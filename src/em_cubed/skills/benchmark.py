@@ -232,7 +232,8 @@ class SkillBenchmark:
         self, skill: SkillMetadata, plugin, config: BenchmarkConfig, test_input: dict[str, Any] | None
     ) -> BenchmarkResult:
         """Benchmark a skill on a specific surface."""
-        assert skill.skill_id is not None, "Skill must have a valid ID"
+        if skill.skill_id is None:
+            raise ValueError("Skill must have a valid ID")
         # Prepare test input
         if test_input is None:
             test_input = self._generate_test_input(skill)
@@ -251,19 +252,21 @@ class SkillBenchmark:
 
         process = psutil.Process() if _psutil_available else None
         # Ensure process is not None when psutil is available
-        if _psutil_available:
-            assert process is not None, "psutil.Process() should not be None"
+        if _psutil_available and process is None:
+            raise RuntimeError("psutil.Process() should not be None")
         for i in range(config.measurement_iterations):
             mem_before = None
             if _psutil_available:
-                assert process is not None, "Process should be available when psutil is available"
+                if process is None:
+                    raise RuntimeError("Process should be available when psutil is available")
                 mem_before = process.memory_info().rss / 1024 / 1024  # MB
             start = time.perf_counter()
             try:
                 result = await self._execute_skill_once(skill, plugin, test_input)
                 elapsed = time.perf_counter() - start
                 if _psutil_available and mem_before is not None:
-                    assert process is not None, "Process should be available"
+                    if process is None:
+                        raise RuntimeError("Process should be available")
                     mem_after = process.memory_info().rss / 1024 / 1024
                     memory_samples.append(mem_after - mem_before)
                 times.append(elapsed)
@@ -274,7 +277,8 @@ class SkillBenchmark:
                 times.append(elapsed)
                 errors.append(str(e))
                 if _psutil_available and mem_before is not None:
-                    assert process is not None, "Process should be available"
+                    if process is None:
+                        raise RuntimeError("Process should be available")
                     mem_after = process.memory_info().rss / 1024 / 1024
                     memory_samples.append(mem_after - mem_before)
 

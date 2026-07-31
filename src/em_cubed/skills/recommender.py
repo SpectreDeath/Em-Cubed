@@ -126,7 +126,8 @@ class SkillRecommender:
         results = []
         for score, skill, criteria in scored[:limit]:
             # Ensure skill has a valid ID (filtered earlier, but enforce for type checker)
-            assert skill.skill_id is not None, "Skill ID should not be None at this point"
+            if skill.skill_id is None:
+                raise ValueError("Skill ID should not be None at this point")
             # Find composition opportunities
             comp_opps = self.registry.find_compatible_skills(skill.skill_id)
             qm = self.registry.get_quality(skill.skill_id)
@@ -253,7 +254,8 @@ class SkillRecommender:
 
         results = []
         for score, candidate in scored[:limit]:
-            assert candidate.skill_id is not None, "Candidate skill ID should not be None"
+            if candidate.skill_id is None:
+                raise ValueError("Candidate skill ID should not be None")
             qm = self.registry.get_quality(candidate.skill_id)
             results.append(
                 RecommendationResult(
