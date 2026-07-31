@@ -114,7 +114,7 @@ class PythonSurface(SurfaceBase):
     def __del__(self):
         """Clean up executors on deletion."""
         self.shutdown()
-
+executor = self._process_executor if _is_picklable(context) else self._executor
     @staticmethod
     def extract_tags(python_source: str | None) -> list:
         """Extract function names from Python source as heuristic_tags."""
