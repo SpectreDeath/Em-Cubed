@@ -60,7 +60,6 @@ async def test_python_hy_orchestration_sync(plugin_manager):
 
     from datetime import UTC, datetime
 
-
     from em_cubed.skills.executor import TelemetryProxy
     from em_cubed.skills.telemetry import ExecutionRecord, TraceContext
 
