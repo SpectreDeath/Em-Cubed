@@ -21,9 +21,20 @@ _prolog_shared_executor = _make_daemon_executor(max_workers=1)
 _prolog_instance = None
 
 
+def _attach_prolog_thread():
+    """Attach the current worker thread as a SWI-Prolog engine thread if needed."""
+    try:
+        from pyswip.core import PL_thread_attach_engine, PL_thread_self
+        if PL_thread_self() < 0:
+            PL_thread_attach_engine(None)
+    except Exception:
+        pass
+
+
 def _get_shared_prolog():
     global _prolog_instance
     with _prolog_lock:
+        _attach_prolog_thread()
         if _prolog_instance is None:
             from pyswip import Prolog
 
@@ -110,15 +121,15 @@ class PrologSurface(SurfaceBase):
             return {"status": "error", "message": "PySWIP not available"}
 
         loop = asyncio.get_running_loop()
-        future = loop.run_in_executor(_prolog_shared_executor, self._run_prolog_code, code, context)
         try:
-            return await asyncio.shield(future)
+            return await loop.run_in_executor(_prolog_shared_executor, self._run_prolog_code, code, context)
         except (TimeoutError, asyncio.CancelledError):
             logger.warning("Prolog query timed out", query=code, timeout=self.timeout)
             return {"status": "error", "message": f"Query execution timed out after {self.timeout}s"}
 
     def _run_prolog_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         with _prolog_lock:
+            _attach_prolog_thread()
             try:
                 prolog = self._get_prolog()
                 # Load context as facts if provided
