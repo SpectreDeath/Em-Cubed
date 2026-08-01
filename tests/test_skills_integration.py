@@ -15,8 +15,6 @@ from em_cubed.skills.composer import (
 from em_cubed.skills.registry import SkillRegistry
 from em_cubed.skills.validator import SkillValidator
 
-pytestmark = pytest.mark.asyncio
-
 
 class TestSkillComposition:
     """Test skill composition and orchestration."""
@@ -109,6 +107,7 @@ def skill_b_execute(result):
         """Create skill composer."""
         return SkillComposer(plugin_manager, test_registry)
 
+    @pytest.mark.asyncio
     async def test_sequential_composition(self, composer, test_registry):
         """Test sequential skill composition."""
         # Create pipeline: Skill A -> Skill B
@@ -136,6 +135,7 @@ def skill_b_execute(result):
         assert "general/skill-a" in result.context.skills_used
         assert "general/skill-b" in result.context.skills_used
 
+    @pytest.mark.asyncio
     async def test_parallel_composition(self, composer, test_registry):
         """Test parallel skill execution."""
         # Use Skill A twice with different inputs in parallel
@@ -162,6 +162,7 @@ def skill_b_execute(result):
         outputs = result.context.data["output"]
         assert outputs["general/skill-a"]["value"]["result"] in [6, 14]
 
+    @pytest.mark.asyncio
     async def test_conditional_composition(self, composer, test_registry):
         """Test conditional skill execution."""
 

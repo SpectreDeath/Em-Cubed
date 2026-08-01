@@ -44,6 +44,8 @@ class TestCase:
 class TestResult:
     """Result of a single test."""
 
+    __test__ = False
+
     test_name: str
     skill_id: str
     surface: str

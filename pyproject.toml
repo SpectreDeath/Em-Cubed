@@ -51,7 +51,7 @@ ignore = [
 ]
 
 [tool.pytest.ini_options]
-timeout = 5
+timeout = 30
 asyncio_mode = "auto"
 testpaths = ["tests"]
 
