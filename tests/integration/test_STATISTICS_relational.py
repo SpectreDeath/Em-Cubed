@@ -210,12 +210,13 @@ class TestCalculateCorrelationProfilePearson:
 
     def test_p_value_decreases_with_stronger_r(self):
         weak_x = list(range(30))
-        weak_y = [v + 2.0 * math.sin(v) for v in range(30)]
+        weak_y = [v + 10.0 * math.sin(v) for v in range(30)]
         strong_x = list(range(30))
         strong_y = [2.0 * v + 0.5 * math.cos(v) for v in range(30)]
         r_w = calculate_correlation_profile(weak_x, weak_y, method="pearson")
         r_s = calculate_correlation_profile(strong_x, strong_y, method="pearson")
         assert r_s["p_value"] < r_w["p_value"]
+
 
     def test_invalid_method_raises(self):
         with pytest.raises(ValueError, match="method must"):

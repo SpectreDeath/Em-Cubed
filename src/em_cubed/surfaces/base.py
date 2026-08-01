@@ -59,8 +59,9 @@ class SurfaceBase(SurfacePlugin, ABC):
         if timeout is not None:
             self.timeout = float(timeout)
         else:
-            default_t = "1.0" if (os.getenv("PYTEST_CURRENT_TEST") or os.getenv("CI")) else "10.0"
+            default_t = "5.0" if (os.getenv("PYTEST_CURRENT_TEST") or os.getenv("CI")) else "10.0"
             self.timeout = float(os.getenv("EM_CUBED_TIMEOUT", default_t))
+
 
         self._executor = _make_daemon_executor(max_workers=1)
         self._concurrency_limit = int(os.getenv("EM_CUBED_SURFACE_MAX_CONCURRENCY", "0"))

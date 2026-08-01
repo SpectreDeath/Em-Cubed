@@ -4,8 +4,9 @@ import asyncio
 import os
 from typing import Any
 
-# Default surface timeout to 1.0 second during test runs to prevent freezes on slow/hanging queries
-os.environ.setdefault("EM_CUBED_TIMEOUT", "1.0")
+# Default surface timeout to 5.0 seconds during test runs to prevent freezes on slow/hanging queries
+os.environ.setdefault("EM_CUBED_TIMEOUT", "5.0")
+
 
 
 

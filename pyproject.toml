@@ -39,6 +39,7 @@ dev = [
   "types-PyYAML",
   "pygls",
   "lsprotocol",
+  "litellm",
 ]
 
 [tool.ruff.lint]
