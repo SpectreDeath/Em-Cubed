@@ -9,13 +9,22 @@ description = "Polyglot AI Skill Engine & Neuro-Symbolic OS"
 authors = [{name = "Em-Cubed Authors"}]
 requires-python = ">=3.10"
 license = {text = "MIT"}
+dependencies = [
+  "structlog>=23.0.0",
+  "PyYAML>=6.0",
+  "asteval>=0.9.0",
+  "requests>=2.28.0",
+  "httpx>=0.24.0",
+]
 
 [project.optional-dependencies]
 dev = [
+  "structlog>=23.0.0",
   "ruff",
   "mypy",
   "pytest",
   "pytest-asyncio",
+  "pytest-cov",
   "types-PyYAML",
   "pygls",
   "lsprotocol",
