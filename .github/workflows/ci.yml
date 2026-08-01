@@ -53,6 +53,7 @@ jobs:
     - name: Run tests
       env:
         PYTHONPATH: src:.
+        EM_CUBED_TIMEOUT: 1.0
       run: |
         pytest -n auto --tb=short \
           --cov=em_cubed \

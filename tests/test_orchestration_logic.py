@@ -11,10 +11,14 @@ def plugin_manager():
 @pytest.mark.asyncio
 async def test_python_prolog_orchestration_sync(plugin_manager):
     """Test that a Python skill can call Prolog synchronously via the bridge with tracing."""
+    if not plugin_manager.get("prolog").available:
+        pytest.skip("Prolog surface (PySWIP) not available")
+
     from datetime import UTC, datetime
 
     from em_cubed.skills.executor import TelemetryProxy
     from em_cubed.skills.telemetry import ExecutionRecord, TraceContext
+
 
     python_code = """
 prolog = context["surfaces"]["prolog"]
@@ -51,7 +55,11 @@ result
 @pytest.mark.asyncio
 async def test_python_hy_orchestration_sync(plugin_manager):
     """Test that a Python skill can call Hy synchronously via the bridge with tracing."""
+    if not plugin_manager.get("hy").available:
+        pytest.skip("Hy surface not available")
+
     from datetime import UTC, datetime
+
 
     from em_cubed.skills.executor import TelemetryProxy
     from em_cubed.skills.telemetry import ExecutionRecord, TraceContext

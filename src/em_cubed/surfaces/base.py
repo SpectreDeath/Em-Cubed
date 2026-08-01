@@ -56,7 +56,12 @@ class SurfaceBase(SurfacePlugin, ABC):
             timeout: Maximum execution time in seconds.
                     Defaults to EM_CUBED_TIMEOUT env var or 30 seconds.
         """
-        self.timeout = timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
+        if timeout is not None:
+            self.timeout = float(timeout)
+        else:
+            default_t = "1.0" if (os.getenv("PYTEST_CURRENT_TEST") or os.getenv("CI")) else "10.0"
+            self.timeout = float(os.getenv("EM_CUBED_TIMEOUT", default_t))
+
         self._executor = _make_daemon_executor(max_workers=1)
         self._concurrency_limit = int(os.getenv("EM_CUBED_SURFACE_MAX_CONCURRENCY", "0"))
         self._concurrency_semaphore: asyncio.Semaphore | None = None

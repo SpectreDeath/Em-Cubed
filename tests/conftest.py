@@ -1,7 +1,13 @@
 """Test fixtures and utilities for em_cubed tests."""
 
 import asyncio
+import os
 from typing import Any
+
+# Default surface timeout to 1.0 second during test runs to prevent freezes on slow/hanging queries
+os.environ.setdefault("EM_CUBED_TIMEOUT", "1.0")
+
+
 
 import pytest
 

@@ -48,3 +48,10 @@ ignore = [
   "RUF012",  # intentional mutable class-level defaults
   "PLW0602", # intentional global accessor pattern
 ]
+
+[tool.pytest.ini_options]
+timeout = 5
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+
