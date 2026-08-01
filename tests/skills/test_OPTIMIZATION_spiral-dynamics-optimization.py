@@ -157,6 +157,8 @@ class TestSpiralDynamicsOptimizationSkill:
         from em_cubed.surfaces import PrologSurface
 
         surface = PrologSurface()
+        if not surface.available:
+            pytest.skip("Prolog surface not available")
         code = """
 ?- 100 >= 10, 100 =< 200, 0.3 >= 0.01, 0.3 =< 1.0, 4.0 >= 0.5, 4.0 =< 20.0.
 """

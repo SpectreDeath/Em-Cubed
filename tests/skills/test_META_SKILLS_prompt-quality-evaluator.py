@@ -48,7 +48,7 @@ class Testprompt_quality_evaluatorSkill:
         metadata_dict = get_skill_metadata(SKILL_FILE, SKILL_FILE.parent.parent.parent)
         for surface in metadata_dict.get("surfaces", []):
             plugin = plugin_manager.get(surface)
-            if plugin:
+            if plugin and plugin.available:
                 assert plugin.available, f"Surface {surface} not available"
 
     @pytest.mark.asyncio

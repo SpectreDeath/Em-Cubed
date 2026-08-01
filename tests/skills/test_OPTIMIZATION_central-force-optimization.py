@@ -150,6 +150,8 @@ class TestCentralForceOptimizationSkill:
         from em_cubed.surfaces import PrologSurface
 
         surface = PrologSurface()
+        if not surface.available:
+            pytest.skip("Prolog surface not available")
         code = """
 ?- 30 >= 4, 30 =< 100, 0.1 >= 0.01, 0.1 =< 2.0, 0.1 >= 0.01, 0.1 =< 2.0.
 """

@@ -31,6 +31,8 @@ valid_quorum(Votes, Nodes) :-
     from em_cubed.surfaces import PrologSurface
 
     surface = PrologSurface()
+    if not surface.available:
+        pytest.skip("Prolog surface not available")
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
 
@@ -48,5 +50,7 @@ async def test_consensus_hy_scoring():
     from em_cubed.surfaces import HySurface
 
     surface = HySurface()
+    if not surface.available:
+        pytest.skip("Hy surface not available")
     result = await surface.execute(code, {})
     assert result["status"] == "ok"

@@ -20,6 +20,8 @@ logger = structlog.get_logger()
 class TestCase:
     """A single test case extracted from SKILL.md or generated."""
 
+    __test__ = False
+
     name: str
     surface: str  # python, prolog, hy
     code: str

@@ -146,6 +146,8 @@ class TestFractalBasedAlgorithmSkill:
         from em_cubed.surfaces import PrologSurface
 
         surface = PrologSurface()
+        if not surface.available:
+            pytest.skip("Prolog surface not available")
         code = """
 ?- 50 >= 4, 50 =< 200, 60 >= 10, 60 =< 100, 30 >= 10, 30 =< 100, 0.8 >= 0.0, 0.8 =< 1.0, 10 >= 5, 10 =< 20.
 """

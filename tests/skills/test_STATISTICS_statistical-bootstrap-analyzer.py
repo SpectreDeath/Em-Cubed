@@ -39,5 +39,7 @@ valid_bootstrap(NObs, NBoot) :-
     from em_cubed.surfaces import PrologSurface
 
     surface = PrologSurface()
+    if not surface.available:
+        pytest.skip("Prolog surface not available")
     result = await surface.execute(code, {})
     assert result["status"] == "ok"

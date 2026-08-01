@@ -158,6 +158,8 @@ class TestChaosOptimizationSkill:
         from em_cubed.surfaces import PrologSurface
 
         surface = PrologSurface()
+        if not surface.available:
+            pytest.skip("Prolog surface not available")
         code = """
 ?- 30 >= 4, 30 =< 200, 40 >= 10, 40 =< 100, 60 >= 10, 60 =< 200, 0.8 >= 0.0, 0.8 =< 1.0.
 """

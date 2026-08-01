@@ -135,6 +135,8 @@ class TestDialecticSearchSkill:
         from em_cubed.surfaces import PrologSurface
 
         surface = PrologSurface()
+        if not surface.available:
+            pytest.skip("Prolog surface not available")
         code = """
 ?- 50 >= 4, 50 =< 200, 3 >= 1, 3 =< 10, 5 >= 5, 10 =< 50.
 """

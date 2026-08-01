@@ -85,6 +85,8 @@ result == sat
     from em_cubed.surfaces import Z3Surface
 
     surface = Z3Surface()
+    if not surface.available:
+        pytest.skip("Z3 surface not available")
     result = await surface.execute(code, {})
     assert result["status"] == "ok"
     assert result["value"]["status"] == "sat"
