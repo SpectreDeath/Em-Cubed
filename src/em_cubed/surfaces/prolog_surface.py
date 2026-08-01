@@ -28,7 +28,7 @@ def _attach_prolog_thread():
         if PL_thread_self() < 0:
             PL_thread_attach_engine(None)
     except Exception:
-        pass
+        pass  # nosec B110
 
 
 def _get_shared_prolog():
