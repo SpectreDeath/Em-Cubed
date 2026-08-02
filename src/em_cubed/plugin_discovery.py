@@ -1,11 +1,66 @@
 """Plugin discovery mechanisms for the PluginManager."""
 
 import importlib.util
+import sys
+import threading
 from pathlib import Path
 
 import structlog
 
 logger = structlog.get_logger()
+
+
+def _entry_points_with_timeout(group: str, timeout: float = 5.0):
+    """Run entry_points(group=...) in a daemon thread with a timeout.
+
+    importlib.metadata.entry_points() can be extremely slow on Windows
+    because it scans every installed distribution. We bound that cost.
+    """
+    result: list = []
+    exc: list = []
+
+    def target():
+        try:
+            try:
+                from importlib.metadata import entry_points
+            except ImportError:
+                from importlib_metadata import entry_points  # type: ignore[assignment]
+            eps = entry_points(group=group)
+            result.extend(eps)
+        except Exception as e:
+            exc.append(e)
+
+    t = threading.Thread(target=target, daemon=True)
+    t.start()
+    t.join(timeout)
+
+    if t.is_alive():
+        logger.debug("entry_points discovery timed out after %ss", timeout)
+        return []
+    if exc:
+        raise exc[0]
+    return result
+
+
+_ENTRY_POINT_CACHE: dict[str, dict[str, type]] = {}
+
+
+def get_cached_entry_points(group: str) -> dict[str, type]:
+    """Get cached entry points for a group, computing them once per process."""
+    from .plugin import SurfacePlugin
+
+    if group not in _ENTRY_POINT_CACHE:
+        plugins: dict[str, type] = {}
+        discovered_eps = _entry_points_with_timeout(group)
+        for ep in discovered_eps:
+            try:
+                plugin_class = ep.load()
+                if issubclass(plugin_class, SurfacePlugin):
+                    plugins[ep.name] = plugin_class
+            except Exception:
+                pass
+        _ENTRY_POINT_CACHE[group] = plugins
+    return _ENTRY_POINT_CACHE[group]
 
 
 class PluginDiscovery:
@@ -17,6 +72,7 @@ class PluginDiscovery:
     def __init__(self):
         self.discovered_plugins: dict[str, type] = {}
         self.lazy_classes: dict[str, type] = {}
+        self._entry_point_cache: dict[str, type] | None = None
 
     def discover_builtin_surfaces(self) -> tuple[dict[str, type], dict[str, type]]:
         """
@@ -71,45 +127,24 @@ class PluginDiscovery:
         Returns:
             Dictionary mapping plugin names to classes
         """
-        plugins = {}
+        if self._entry_point_cache is not None:
+            return self._entry_point_cache
 
         try:
-            # Try Python 3.8+ importlib.metadata, fallback to importlib_metadata
-            try:
-                from importlib.metadata import entry_points
-            except ImportError:
-                from importlib_metadata import (  # type: ignore[assignment,no-redef]
-                    entry_points,
-                )
-
-            from .plugin import SurfacePlugin
-
             entry_point_group = "em_cubed.surfaces"
-            discovered_eps = entry_points(group=entry_point_group)
-
-            for ep in discovered_eps:
-                try:
-                    plugin_class = ep.load()
-                    # Verify it's a SurfacePlugin subclass
-                    if issubclass(plugin_class, SurfacePlugin):
-                        plugins[ep.name] = plugin_class
-                    else:
-                        logger.warning(
-                            "Entry point does not inherit from SurfacePlugin",
-                            entry_point=ep.name,
-                            class_name=plugin_class.__name__,
-                        )
-                except Exception as e:
-                    logger.warning("Failed to load plugin from entry point", entry_point=ep.name, error=str(e))
+            plugins = get_cached_entry_points(entry_point_group)
 
             if plugins:
                 logger.info("Entry point plugins discovered", count=len(plugins))
 
         except ImportError:
             logger.debug("importlib.metadata not available, skipping entry point discovery")
+            plugins = {}
         except Exception as e:
             logger.warning("Failed to discover entry point plugins", error=str(e))
+            plugins = {}
 
+        self._entry_point_cache = plugins
         return plugins
 
     def discover_directory_plugins(self, plugin_dir: Path | None = None) -> dict[str, type]:
