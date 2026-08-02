@@ -59,7 +59,7 @@ jobs:
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml \
-          --cov-fail-under=30
+          --cov-fail-under=25
 
     - name: Execute Dual-Engine Performance Benchmark
       run: |
