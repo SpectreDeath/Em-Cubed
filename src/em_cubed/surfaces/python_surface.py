@@ -90,7 +90,7 @@ class PythonSurface(SurfaceBase):
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(self._executor, _run_asteval_code, code, context)
         try:
-            return await asyncio.shield(future)
+            return await future
         except (TimeoutError, asyncio.CancelledError):
             if self._executor is not None:
                 self._executor.shutdown(wait=False)
