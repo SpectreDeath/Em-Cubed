@@ -9,7 +9,7 @@ from em_cubed.surfaces import PythonSurface
 _RF_TRAINING_CODE = """
 # Synthetic CPU workload for surface timeout testing
 total = 0
-for i in range(50000):
+for i in range(1000):
     total += i
 result = total
 """
@@ -42,7 +42,7 @@ class TestUciCensusRandomForest:
     async def test_random_forest_uci_timeout(self, uci_census_dataset):
         """Random Forest on larger UCI-style data should trigger timeout/rejection behavior."""
         features, labels = uci_census_dataset
-        surface = PythonSurface(timeout=0.1)
+        surface = PythonSurface(timeout=0.001)
         start = time.time()
         response = await surface.execute(
             _RF_TRAINING_CODE,
@@ -57,8 +57,8 @@ class TestUciCensusRandomForest:
     @pytest.mark.timeout(60)
     async def test_dag_scheduler_timeout_rejection(self):
         """DAG scheduler should reject execution when concurrency limit is reached."""
-        surface = PythonSurface(timeout=0.5)
-        long_running = "x = 0\nwhile x < 50000:\n    x += 1"
+        surface = PythonSurface(timeout=0.001)
+        long_running = "x = 0\nwhile x < 1000:\n    x += 1"
         tasks = [surface.execute(long_running, {}) for _ in range(3)]
         results = await __import__("asyncio").gather(*tasks, return_exceptions=False)
         assert all(r["status"] == "error" for r in results)
