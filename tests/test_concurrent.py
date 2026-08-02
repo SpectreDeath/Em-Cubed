@@ -68,10 +68,10 @@ class TestConcurrentExecution:
 
     async def test_concurrent_timeout_behavior(self):
         """Concurrent timeouts should not deadlock."""
-        surface = PythonSurface(timeout=0.001)
+        surface = PythonSurface(timeout=0.01)
         # Use a CPU-intensive loop that will exceed the timeout
         # (imports are blocked by asteval, so we use a tight loop)
-        long_running_code = "i = 0\nwhile i < 100000:\n    i += 1"
+        long_running_code = "i = 0\nwhile i < 1000000:\n    i += 1"
         tasks = [surface.execute(long_running_code, {}) for _ in range(3)]
         results = await asyncio.gather(*tasks, return_exceptions=False)
 
