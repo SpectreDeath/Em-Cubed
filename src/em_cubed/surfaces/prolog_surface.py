@@ -16,7 +16,7 @@ logger = structlog.get_logger()
 
 # Global lock & shared single-worker executor for PySWIP C FFI calls.
 # SWI-Prolog C engine is not thread-safe for concurrent FFI access across multiple threads.
-_prolog_lock = threading.Lock()
+_prolog_lock = threading.RLock()
 _prolog_shared_executor = _make_daemon_executor(max_workers=1)
 _prolog_instance = None
 
