@@ -204,10 +204,13 @@ def test_boundary_type_coercion():
 @pytest.mark.asyncio
 async def test_logic_surfaces_caching():
     """Verify that Prolog, Clingo, and Datalog execution surfaces correctly cache compiles/runs."""
-    # 1. Prolog Caching
     from src.em_cubed.surfaces.prolog_surface import PrologSurface
 
     prolog_surface = PrologSurface()
+    if not prolog_surface.available:
+        pytest.skip("Prolog surface not available")
+
+    # 1. Prolog Caching
     # Clear cache for deterministic test state
     PrologSurface._consulted_hashes.clear()
 
