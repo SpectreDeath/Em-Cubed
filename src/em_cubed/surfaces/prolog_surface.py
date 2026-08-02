@@ -65,11 +65,15 @@ class PrologSurface(SurfaceBase):
         logger.info("PrologSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
-        """Check if PySWIP is available."""
-        available = importlib.util.find_spec("pyswip") is not None
-        if not available:
-            logger.warning("PySWIP not available for Prolog surface")
-        return available
+        """Check if PySWIP is available and importable."""
+        if importlib.util.find_spec("pyswip") is None:
+            return False
+        try:
+            import pyswip  # noqa: F401
+            return True
+        except Exception as e:
+            logger.warning("PySWIP import failed", error=str(e))
+            return False
 
     def extract_tags(self, prolog_source: str | None) -> list[str]:
         """Extract predicate names from Prolog source as logic_tags."""

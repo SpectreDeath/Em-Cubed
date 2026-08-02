@@ -57,11 +57,15 @@ class DatalogSurface(SurfaceBase):
         logger.debug("DatalogSurface execution cache cleared")
 
     def _check_availability(self) -> bool:
-        """Check if pyDatalog is available."""
-        available = importlib.util.find_spec("pyDatalog") is not None
-        if not available:
-            logger.warning("pyDatalog not available for Datalog surface")
-        return available
+        """Check if pyDatalog is available and importable."""
+        if importlib.util.find_spec("pyDatalog") is None:
+            return False
+        try:
+            import pyDatalog  # noqa: F401
+            return True
+        except Exception as e:
+            logger.warning("pyDatalog import failed", error=str(e))
+            return False
 
     @staticmethod
     def extract_tags(source: str | None) -> list[str]:
