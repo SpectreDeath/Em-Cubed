@@ -31,7 +31,7 @@ def _cleanup_prolog():
                 if PL_thread_self() >= 0:
                     PL_thread_destroy_engine()
             except Exception:
-                pass
+                logger.debug("Failed to destroy PySWIP engine during cleanup")
             _prolog_instance = None
 
 
