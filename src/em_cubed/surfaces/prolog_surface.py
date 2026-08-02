@@ -22,22 +22,6 @@ _prolog_shared_executor = _make_daemon_executor(max_workers=1)
 _prolog_instance = None
 
 
-def _cleanup_prolog():
-    global _prolog_instance
-    with _prolog_lock:
-        if _prolog_instance is not None:
-            try:
-                from pyswip.core import PL_thread_destroy_engine, PL_thread_self
-                if PL_thread_self() >= 0:
-                    PL_thread_destroy_engine()
-            except Exception:
-                logger.debug("Failed to destroy PySWIP engine during cleanup")
-            _prolog_instance = None
-
-
-atexit.register(_cleanup_prolog)
-
-
 def _attach_prolog_thread():
     """Attach the current worker thread as a SWI-Prolog engine thread if needed."""
     try:
