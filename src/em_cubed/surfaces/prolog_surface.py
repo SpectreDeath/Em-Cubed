@@ -171,7 +171,7 @@ class PrologSurface(SurfaceBase):
 
                 if stripped_code.startswith("?-"):
                     is_query = True
-                    processed_code = stripped_code[2:].strip()
+                    processed_code = stripped_code[2:].strip().rstrip(".").strip()
                 elif "?-" in stripped_code:
                     parts = stripped_code.split("?-")
                     rule_part = parts[0].strip()
