@@ -56,8 +56,8 @@ def get_cached_entry_points(group: str) -> dict[str, type]:
                 plugin_class = ep.load()
                 if issubclass(plugin_class, SurfacePlugin):
                     plugins[ep.name] = plugin_class
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to load surface plugin entry point", ep_name=getattr(ep, "name", "unknown"), error=str(e))
         _ENTRY_POINT_CACHE[group] = plugins
     return _ENTRY_POINT_CACHE[group]
 
