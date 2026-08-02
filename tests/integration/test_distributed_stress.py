@@ -259,7 +259,7 @@ class TestUciCensusRandomForest:
     async def test_dag_scheduler_timeout_rejection(self):
         """DAG scheduler should reject execution when concurrency limit is reached."""
         surface = PythonSurface(timeout=0.5)
-        long_running = "x = 0\nwhile x < 100000000:\n    x += 1"
+        long_running = "x = 0\nwhile x < 5000000:\n    x += 1"
         tasks = [surface.execute(long_running, {}) for _ in range(3)]
         results = await __import__("asyncio").gather(*tasks, return_exceptions=False)
         assert all(r["status"] == "error" for r in results)

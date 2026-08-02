@@ -89,7 +89,13 @@ class PythonSurface(SurfaceBase):
             return {"status": "error", "message": f"{self.name} surface not available"}
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(self._executor, _run_asteval_code, code, context)
-        return await asyncio.shield(future)
+        try:
+            return await asyncio.shield(future)
+        except (TimeoutError, asyncio.CancelledError):
+            if self._executor is not None:
+                self._executor.shutdown(wait=False)
+            self._executor = _make_daemon_executor(max_workers=self._worker_count())
+            raise
 
     def _run_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run asteval code synchronously in the executor thread."""
