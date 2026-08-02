@@ -1,7 +1,6 @@
 """Prolog surface integration using pyswip."""
 
 import asyncio
-import atexit
 import importlib.util
 import os
 import re
