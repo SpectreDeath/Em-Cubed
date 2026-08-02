@@ -33,7 +33,7 @@ async def test_kanren_statlib_numeric_benchmark(kanren_surface):
     code = """
 from kanren import Var, Relation, fact, run
 
-point = Relation('point')
+point = Relation('statlib_bench_point')
 
 for row in context.get('observations', []):
     fact(point, row['x'], row['y'], row['class'])

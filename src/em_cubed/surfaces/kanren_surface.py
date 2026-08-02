@@ -52,6 +52,14 @@ class KanrenSurface(SurfaceBase):
         if not self.available:
             return {"status": "error", "message": "kanren package is not installed"}
 
+        import asyncio
+        loop = asyncio.get_running_loop()
+        try:
+            return await loop.run_in_executor(None, self._run_kanren_code, code, context)
+        except (TimeoutError, asyncio.CancelledError):
+            return {"status": "error", "message": f"Kanren execution timed out after {self.timeout}s"}
+
+    def _run_kanren_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         namespace: dict[str, Any] = {
             "var": None,
             "Var": None,
