@@ -71,7 +71,7 @@ class TestConcurrentExecution:
         surface = PythonSurface(timeout=0.001)
         # Use a CPU-intensive loop that will exceed the timeout
         # (imports are blocked by asteval, so we use a tight loop)
-        long_running_code = "i = 0\nwhile i < 1000:\n    i += 1"
+        long_running_code = "i = 0\nwhile i < 100000:\n    i += 1"
         tasks = [surface.execute(long_running_code, {}) for _ in range(3)]
         results = await asyncio.gather(*tasks, return_exceptions=False)
 

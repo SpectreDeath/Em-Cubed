@@ -85,6 +85,8 @@ class PrologSurface(SurfaceBase):
 
     def _get_prolog(self):
         """Get or create the Prolog interpreter instance."""
+        if self._prolog is not None:
+            return self._prolog
         return _get_shared_prolog()
 
     def shutdown(self) -> None:
