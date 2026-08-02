@@ -257,12 +257,7 @@ class PrologSurface(SurfaceBase):
                             directive = item.startswith(":-")
                             query_prefix = item.startswith("?-")
                             clean = item.rstrip(".").strip()
-                            if directive:
-                                try:
-                                    list(prolog.query(clean[2:].strip()))
-                                except Exception:
-                                    pass  # nosec B110 - intentional fallback; caller handles None/False return
-                            elif query_prefix:
+                            if directive or query_prefix:
                                 try:
                                     list(prolog.query(clean[2:].strip()))
                                 except Exception:
