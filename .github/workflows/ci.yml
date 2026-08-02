@@ -55,7 +55,7 @@ jobs:
         PYTHONPATH: src:.
         EM_CUBED_TIMEOUT: 30.0
       run: |
-        pytest --tb=short \
+        pytest -n auto --tb=short \
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml \
