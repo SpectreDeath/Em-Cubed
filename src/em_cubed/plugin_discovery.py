@@ -1,7 +1,6 @@
 """Plugin discovery mechanisms for the PluginManager."""
 
 import importlib.util
-import sys
 import threading
 from pathlib import Path
 
