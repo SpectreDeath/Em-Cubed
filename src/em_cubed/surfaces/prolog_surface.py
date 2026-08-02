@@ -259,7 +259,7 @@ class PrologSurface(SurfaceBase):
                             clean = item.rstrip(".").strip()
                             if directive:
                                 try:
-                                    prolog.query(clean[2:].strip())
+                                    list(prolog.query(clean[2:].strip()))
                                 except Exception:
                                     pass  # nosec B110 - intentional fallback; caller handles None/False return
                             elif query_prefix:
