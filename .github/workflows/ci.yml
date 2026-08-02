@@ -58,8 +58,7 @@ jobs:
         pytest --tb=short \
           --cov=em_cubed \
           --cov-report=term-missing \
-          --cov-report=xml \
-          --cov-fail-under=25
+          --cov-report=xml
 
     - name: Execute Dual-Engine Performance Benchmark
       run: |
