@@ -331,7 +331,7 @@ class PrologSurface(SurfaceBase):
                                     elif ch == "," and depth == 1:
                                         arity += 1
                                 try:
-                                    list(prolog.query(f"dynamic({functor}/{arity})"))
+                                    prolog.assertz(f":- dynamic({functor}/{arity})")
                                     prolog.assertz(processed_code)
                                 except (AttributeError, TypeError, ValueError) as retry_err:
                                     logger.warning(
