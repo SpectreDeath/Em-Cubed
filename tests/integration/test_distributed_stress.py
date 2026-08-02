@@ -239,6 +239,7 @@ class TestUciCensusRandomForest:
         return features, labels
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_random_forest_uci_timeout(self, uci_census_dataset):
         """Random Forest on larger UCI-style data should trigger timeout/rejection behavior."""
         features, labels = uci_census_dataset
@@ -254,6 +255,7 @@ class TestUciCensusRandomForest:
         assert elapsed < 30.0
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_dag_scheduler_timeout_rejection(self):
         """DAG scheduler should reject execution when concurrency limit is reached."""
         surface = PythonSurface(timeout=0.5)

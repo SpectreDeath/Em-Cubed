@@ -7,6 +7,7 @@ from em_cubed.surfaces import DatalogSurface
 pytestmark = pytest.mark.asyncio
 
 
+@pytest.mark.timeout(60)
 async def test_datalog_timeout():
     """Test that DatalogSurface respects timeout configuration."""
     surface = DatalogSurface()

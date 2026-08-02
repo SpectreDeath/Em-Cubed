@@ -53,10 +53,9 @@ jobs:
     - name: Run tests
       env:
         PYTHONPATH: src:.
-        EM_CUBED_TIMEOUT: 60.0
+        EM_CUBED_TIMEOUT: 30.0
       run: |
         pytest --tb=short \
-          --timeout=60 \
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml \
