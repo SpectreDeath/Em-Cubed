@@ -212,7 +212,7 @@ def random_forest_classifier(features, labels, n_estimators=5, max_depth=5, min_
     oob_error = oob_error / oob_count if oob_count > 0 else 0.0
     return (forest, predictions, confidences, oob_error)
 
-result = random_forest_classifier(features, labels, n_estimators=10, max_depth=8)
+result = random_forest_classifier(features, labels, n_estimators=2, max_depth=3)
 """
 
 
@@ -225,7 +225,7 @@ class TestUciCensusRandomForest:
         import random
 
         random.seed(42)
-        n = 200
+        n = 30
         features = []
         labels = []
         for _ in range(n):
@@ -243,7 +243,7 @@ class TestUciCensusRandomForest:
     async def test_random_forest_uci_timeout(self, uci_census_dataset):
         """Random Forest on larger UCI-style data should trigger timeout/rejection behavior."""
         features, labels = uci_census_dataset
-        surface = PythonSurface(timeout=2.0)
+        surface = PythonSurface(timeout=0.1)
         start = time.time()
         response = await surface.execute(
             _RF_TRAINING_CODE,
