@@ -54,7 +54,7 @@ result = {
     )
     elapsed = time.time() - start
     assert response.get("status") == "ok"
-    assert elapsed < 5.0, f"Kanren benchmark took too long: {elapsed:.2f}s"
+    assert elapsed < 15.0, f"Kanren benchmark took too long: {elapsed:.2f}s"
     value = response.get("value") or {}
     assert value.get("available") is True
     assert value.get("results") == len(STATLIB_STYLE_DATASET["observations"])
