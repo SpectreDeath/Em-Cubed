@@ -162,14 +162,13 @@ class DatalogSurface(SurfaceBase):
             return {"status": "error", "message": validation_error}
 
         try:
-            from pyDatalog import pyDatalog as pd
-
-            # Ensure thread-local engine logic is initialized for worker thread
             try:
-                if not hasattr(pd.pyEngine.pyEngine, "logic") or pd.pyEngine.pyEngine.logic is None:
-                    pd.pyEngine.Logic()
+                from pyDatalog import pyEngine
+                pyEngine.Logic()
             except Exception as engine_err:
                 logger.warning("pyDatalog thread-local engine init warning", error=str(engine_err))
+
+            from pyDatalog import pyDatalog as pd
 
             namespace: dict[str, Any] = {
                 "__builtins__": {
