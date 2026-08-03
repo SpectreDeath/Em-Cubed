@@ -295,7 +295,7 @@ class PrologSurface(SurfaceBase):
                     if len(result) > 1000:
                         result = result[:1000]  # Truncate for safety
 
-                    logger.debug("Prolog query raw result", query=processed_code, raw_result_repr=repr(result))
+                    logger.info("Prolog query raw result", query=processed_code, raw_result_repr=repr(result))
 
                     # Normalize all Prolog query result bindings to standard Python types
                     if result:
