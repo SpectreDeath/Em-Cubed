@@ -299,6 +299,24 @@ class TestPrologSurfaceMocked:
             assert res3["result"][0]["X"] == 2.0
             assert res3["result"][1]["X"] == 2.0
 
+    def test_run_prolog_code_non_arithmetic_atom_normalization(self):
+        """Test that non-arithmetic queries convert Atom or bytes bindings to clean Python strings."""
+        class DummyAtom:
+            def __str__(self):
+                return "mary"
+
+        from unittest.mock import MagicMock, patch
+        surface = PrologSurface()
+        mock_prolog = MagicMock()
+        mock_prolog.query.return_value = [{"X": DummyAtom()}, {"X": b"mary"}]
+        with patch.object(surface, "_check_availability", return_value=True), patch.object(
+            surface, "_get_prolog", return_value=mock_prolog
+        ):
+            res = surface._run_prolog_code("parent(john, X)")
+            assert res["status"] == "ok"
+            assert res["result"][0]["X"] == "mary"
+            assert res["result"][1]["X"] == "mary"
+
 
 @requires_datalog
 class TestDatalogSurface:

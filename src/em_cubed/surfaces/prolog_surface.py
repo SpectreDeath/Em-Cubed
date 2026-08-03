@@ -297,46 +297,54 @@ class PrologSurface(SurfaceBase):
 
                     logger.debug("Prolog query raw result", query=processed_code, raw_result_repr=repr(result))
 
-                    # Coerce numeric-like bindings to float for arithmetic queries containing 'is'
-                    if (re.search(r"\bis\b", stripped_code) or " is " in processed_code) and result:
+                    # Normalize all Prolog query result bindings to standard Python types
+                    if result:
+                        is_arithmetic = bool(re.search(r"\bis\b", stripped_code) or " is " in processed_code)
 
                         def _normalize_val(v: Any) -> Any:
                             if isinstance(v, bool):
                                 return v
-                            if isinstance(v, Real) and not isinstance(v, bool):
-                                return float(v)
-                            if isinstance(v, (Decimal, Fraction)):
-                                return float(v)
-                            if (
-                                hasattr(v, "__module__")
-                                and getattr(v, "__module__", "").startswith("numpy.")
-                                and hasattr(v, "item")
-                            ):
-                                try:
-                                    return float(v.item())
-                                except (ValueError, TypeError):
-                                    return v
+                            if is_arithmetic:
+                                if isinstance(v, Real) and not isinstance(v, bool):
+                                    return float(v)
+                                if isinstance(v, (Decimal, Fraction)):
+                                    return float(v)
+                                if (
+                                    hasattr(v, "__module__")
+                                    and getattr(v, "__module__", "").startswith("numpy.")
+                                    and hasattr(v, "item")
+                                ):
+                                    try:
+                                        return float(v.item())
+                                    except (ValueError, TypeError):
+                                        return v
                             if isinstance(v, (bytes, bytearray)):
                                 s = v.decode("utf-8", errors="ignore")
-                                try:
-                                    return float(s)
-                                except (ValueError, TypeError):
-                                    return s
+                                if is_arithmetic:
+                                    try:
+                                        return float(s)
+                                    except (ValueError, TypeError):
+                                        pass
+                                return s
                             if isinstance(v, str):
-                                try:
-                                    return float(v)
-                                except (ValueError, TypeError):
-                                    return v
+                                if is_arithmetic:
+                                    try:
+                                        return float(v)
+                                    except (ValueError, TypeError):
+                                        pass
+                                return v
                             if isinstance(v, (list, tuple)):
                                 return [_normalize_val(x) for x in v]
                             if isinstance(v, dict):
                                 return {k: _normalize_val(val) for k, val in v.items()}
-                            try:
-                                s = str(v)
-                                return float(s)
-                            except (ValueError, TypeError):
-                                pass
-                            return v
+                            # Fallback for PySWIP Atom, Variable, Functor or custom terms
+                            s = str(v)
+                            if is_arithmetic:
+                                try:
+                                    return float(s)
+                                except (ValueError, TypeError):
+                                    pass
+                            return s
 
                         normalized_results: list[dict[str, Any]] = []
                         for row in result:
