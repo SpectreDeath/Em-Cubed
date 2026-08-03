@@ -294,10 +294,10 @@ class PrologSurface(SurfaceBase):
 
                     # Coerce integer/string/bytes numeric results to floats for arithmetic queries containing 'is'
                     if (re.search(r"\bis\b", stripped_code) or " is " in processed_code) and result:
-                        normalized_results = []
+                        normalized_results: list[dict[str, Any]] = []
                         for row in result:
                             if isinstance(row, dict):
-                                new_row = {}
+                                new_row: dict[str, Any] = {}
                                 for k, v in row.items():
                                     if isinstance(v, bool):
                                         new_row[k] = v
