@@ -6,6 +6,9 @@ import os
 import re
 import tempfile
 import threading
+from decimal import Decimal
+from fractions import Fraction
+from numbers import Real
 from typing import Any
 
 import structlog
@@ -292,30 +295,53 @@ class PrologSurface(SurfaceBase):
                     if len(result) > 1000:
                         result = result[:1000]  # Truncate for safety
 
-                    # Coerce integer/string/bytes numeric results to floats for arithmetic queries containing 'is'
+                    logger.debug("Prolog query raw result", query=processed_code, raw_result_repr=repr(result))
+
+                    # Coerce numeric-like bindings to float for arithmetic queries containing 'is'
                     if (re.search(r"\bis\b", stripped_code) or " is " in processed_code) and result:
+
+                        def _normalize_val(v: Any) -> Any:
+                            if isinstance(v, bool):
+                                return v
+                            if isinstance(v, Real) and not isinstance(v, bool):
+                                return float(v)
+                            if isinstance(v, (Decimal, Fraction)):
+                                return float(v)
+                            if (
+                                hasattr(v, "__module__")
+                                and getattr(v, "__module__", "").startswith("numpy.")
+                                and hasattr(v, "item")
+                            ):
+                                try:
+                                    return float(v.item())
+                                except (ValueError, TypeError):
+                                    return v
+                            if isinstance(v, (bytes, bytearray)):
+                                s = v.decode("utf-8", errors="ignore")
+                                try:
+                                    return float(s)
+                                except (ValueError, TypeError):
+                                    return s
+                            if isinstance(v, str):
+                                try:
+                                    return float(v)
+                                except (ValueError, TypeError):
+                                    return v
+                            if isinstance(v, (list, tuple)):
+                                return [_normalize_val(x) for x in v]
+                            if isinstance(v, dict):
+                                return {k: _normalize_val(val) for k, val in v.items()}
+                            try:
+                                s = str(v)
+                                return float(s)
+                            except (ValueError, TypeError):
+                                pass
+                            return v
+
                         normalized_results: list[dict[str, Any]] = []
                         for row in result:
                             if isinstance(row, dict):
-                                new_row: dict[str, Any] = {}
-                                for k, v in row.items():
-                                    if isinstance(v, bool):
-                                        new_row[k] = v
-                                    elif isinstance(v, (int, float)):
-                                        new_row[k] = float(v)
-                                    elif isinstance(v, (bytes, bytearray)):
-                                        s = v.decode("utf-8", errors="ignore")
-                                        try:
-                                            new_row[k] = float(s)
-                                        except (ValueError, TypeError):
-                                            new_row[k] = s
-                                    elif isinstance(v, str):
-                                        try:
-                                            new_row[k] = float(v)
-                                        except (ValueError, TypeError):
-                                            new_row[k] = v
-                                    else:
-                                        new_row[k] = v
+                                new_row: dict[str, Any] = {k: _normalize_val(v) for k, v in row.items()}
                                 normalized_results.append(new_row)
                             else:
                                 normalized_results.append(row)
