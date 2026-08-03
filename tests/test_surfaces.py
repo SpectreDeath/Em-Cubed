@@ -271,6 +271,35 @@ grandparent(X, Z) :- parent(X, Y), parent(Y, Z).
         assert await surface.health() is True
 
 
+class TestPrologSurfaceMocked:
+    def test_run_prolog_code_arithmetic_normalization(self):
+        """Test _run_prolog_code directly with mocked Prolog engine to ensure integer results are coerced to floats."""
+        from unittest.mock import MagicMock, patch
+        surface = PrologSurface()
+        mock_prolog = MagicMock()
+        mock_prolog.query.return_value = [{"X": 2}]
+        with patch.object(surface, "_check_availability", return_value=True), patch.object(
+            surface, "_get_prolog", return_value=mock_prolog
+        ):
+            res1 = surface._run_prolog_code("X is 1+1")
+            assert res1["status"] == "ok"
+            assert res1["result"][0]["X"] == 2.0
+            assert isinstance(res1["result"][0]["X"], float)
+            mock_prolog.query.assert_called_with("X is 1+1")
+
+            res2 = surface._run_prolog_code("X is 1+1.")
+            assert res2["status"] == "ok"
+            assert res2["result"][0]["X"] == 2.0
+            assert isinstance(res2["result"][0]["X"], float)
+            mock_prolog.query.assert_called_with("X is 1+1")
+
+            # Test string and bytes coercion
+            mock_prolog.query.return_value = [{"X": "2.0"}, {"X": b"2.0"}]
+            res3 = surface._run_prolog_code("X is 1+1")
+            assert res3["result"][0]["X"] == 2.0
+            assert res3["result"][1]["X"] == 2.0
+
+
 @requires_datalog
 class TestDatalogSurface:
     @pytest.mark.asyncio

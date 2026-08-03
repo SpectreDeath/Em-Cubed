@@ -275,15 +275,9 @@ class PrologSurface(SurfaceBase):
                         return {"status": "ok", "message": "Multi-line Prolog code processed via fallback"}
                 elif stripped_code.endswith("."):
                     head_word = stripped_code.split("(")[0].split(" ")[0].strip().rstrip(".")
-                    if head_word in _IMPURE_BUILTINS:
+                    if head_word in _IMPURE_BUILTINS or re.search(r"\bis\b", stripped_code):
                         is_query = True
                         processed_code = stripped_code.rstrip(".").strip()
-                    elif " is " in stripped_code:
-                        if re.search(r"\d|\+|\-|\*|\/|//", stripped_code):
-                            is_query = True
-                            processed_code = stripped_code.rstrip(".").strip()
-                        else:
-                            processed_code = stripped_code.rstrip(".").strip()
                     else:
                         processed_code = stripped_code.rstrip(".").strip()
                 else:
@@ -297,6 +291,35 @@ class PrologSurface(SurfaceBase):
 
                     if len(result) > 1000:
                         result = result[:1000]  # Truncate for safety
+
+                    # Coerce integer/string/bytes numeric results to floats for arithmetic queries containing 'is'
+                    if (re.search(r"\bis\b", stripped_code) or " is " in processed_code) and result:
+                        normalized_results = []
+                        for row in result:
+                            if isinstance(row, dict):
+                                new_row = {}
+                                for k, v in row.items():
+                                    if isinstance(v, bool):
+                                        new_row[k] = v
+                                    elif isinstance(v, (int, float)):
+                                        new_row[k] = float(v)
+                                    elif isinstance(v, (bytes, bytearray)):
+                                        s = v.decode("utf-8", errors="ignore")
+                                        try:
+                                            new_row[k] = float(s)
+                                        except (ValueError, TypeError):
+                                            new_row[k] = s
+                                    elif isinstance(v, str):
+                                        try:
+                                            new_row[k] = float(v)
+                                        except (ValueError, TypeError):
+                                            new_row[k] = v
+                                    else:
+                                        new_row[k] = v
+                                normalized_results.append(new_row)
+                            else:
+                                normalized_results.append(row)
+                        result = normalized_results
 
                     logger.info("Prolog query successful", result_count=len(result))
                     return {"status": "ok", "message": "Query executed successfully", "result": result}
