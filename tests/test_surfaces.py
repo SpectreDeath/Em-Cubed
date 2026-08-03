@@ -317,6 +317,33 @@ class TestPrologSurfaceMocked:
             assert res["result"][0]["X"] == "mary"
             assert res["result"][1]["X"] == "mary"
 
+    def test_run_prolog_code_permission_error_dynamic_declaration(self):
+        """Test recovery when assertz raises permission_error(modify, static_procedure, ...)."""
+        from unittest.mock import MagicMock, patch
+        surface = PrologSurface()
+        mock_prolog = MagicMock()
+
+        called_dynamic = [False]
+
+        def mock_assertz(clause):
+            if clause == "parent(john, mary)" and not called_dynamic[0]:
+                raise RuntimeError("error(permission_error(modify, static_procedure, /(parent, 2)))")
+
+        def mock_query(q):
+            if q == "dynamic(parent/2)":
+                called_dynamic[0] = True
+            return []
+
+        mock_prolog.assertz = mock_assertz
+        mock_prolog.query = mock_query
+
+        with patch.object(surface, "_check_availability", return_value=True), patch.object(
+            surface, "_get_prolog", return_value=mock_prolog
+        ):
+            res = surface._run_prolog_code("parent(john, mary).")
+            assert res["status"] == "ok"
+            assert called_dynamic[0] is True
+
 
 @requires_datalog
 class TestDatalogSurface:

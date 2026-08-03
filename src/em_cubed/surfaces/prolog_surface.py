@@ -386,18 +386,19 @@ class PrologSurface(SurfaceBase):
                                             break
                                     elif ch == "," and depth == 1:
                                         arity += 1
-                                try:
-                                    prolog.assertz(f":- dynamic({functor}/{arity})")
-                                    prolog.assertz(processed_code)
-                                except (AttributeError, TypeError, ValueError) as retry_err:
-                                    logger.warning(
-                                        "Prolog dynamic declaration + assertz failed",
-                                        error=str(retry_err),
-                                    )
-                                    return {"status": "error", "message": str(retry_err)}
                             else:
-                                logger.warning("Prolog assertion failed", error=err_str)
-                                return {"status": "error", "message": err_str}
+                                functor = head.strip()
+                                arity = 0
+
+                            try:
+                                list(prolog.query(f"dynamic({functor}/{arity})"))
+                                prolog.assertz(processed_code)
+                            except Exception as retry_err:
+                                logger.warning(
+                                    "Prolog dynamic declaration + assertz failed",
+                                    error=str(retry_err),
+                                )
+                                return {"status": "error", "message": str(retry_err)}
                         else:
                             raise
                     logger.info("Prolog assertion successful")
