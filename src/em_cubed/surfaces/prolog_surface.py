@@ -393,7 +393,7 @@ class PrologSurface(SurfaceBase):
                             try:
                                 try:
                                     list(prolog.query(f"abolish({functor}/{arity})"))
-                                except Exception:
+                                except Exception:  # nosec B110
                                     pass
                                 list(prolog.query(f"dynamic({functor}/{arity})"))
                                 prolog.assertz(processed_code)
