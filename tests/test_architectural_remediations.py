@@ -253,7 +253,7 @@ async def test_logic_surfaces_caching():
     clingo_code = "a. b. :- not a."
 
     with (
-        patch("sys.modules", {"clingo": mock_clingo}),
+        patch.dict("sys.modules", {"clingo": mock_clingo}),
         patch.object(clingo_surface, "_check_availability", return_value=True),
         patch.object(ClingoSurface, "_spec_available", new_callable=PropertyMock, return_value=True),
     ):
