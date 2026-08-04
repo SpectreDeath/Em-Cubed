@@ -15,8 +15,9 @@ logger = structlog.get_logger()
 def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
     from asteval import Interpreter
 
-    aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"])
-    for bad in ["open", "__import__", "eval", "exec", "compile", "__builtins__"]:
+    # Keep asteval internals (compile and __builtins__) available — only remove dangerous symbols.
+    aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec"])
+    for bad in ["open", "__import__", "eval", "exec"]:
         aeval.symtable.pop(bad, None)
 
     if context:
@@ -29,9 +30,13 @@ def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[
         result = aeval.symtable["result"]
 
     if aeval.error:
-        error_msg = str(aeval.error[0].msg) if hasattr(aeval.error[0], "msg") else str(aeval.error[0])
-        logger.info("Python execution failed with error", error=error_msg)
-        return {"status": "error", "message": error_msg}
+        # Log full error object for diagnostics
+        try:
+            details = [getattr(e, "msg", repr(e)) for e in aeval.error]
+        except Exception:
+            details = [repr(e) for e in aeval.error]
+        logger.info("Python execution failed with error", errors=details)
+        return {"status": "error", "message": details[0] if details else "asteval error"}
 
     logger.info("Python execution successful")
     return {"status": "ok", "value": result}
@@ -108,8 +113,9 @@ class PythonSurface(SurfaceBase):
         try:
             from asteval import Interpreter
 
-            aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec", "compile", "__builtins__"])
-            for bad in ["open", "__import__", "eval", "exec", "compile", "__builtins__"]:
+            # Keep asteval internals (compile and __builtins__) available — only remove dangerous symbols.
+            aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec"])
+            for bad in ["open", "__import__", "eval", "exec"]:
                 aeval.symtable.pop(bad, None)
 
             if context:
@@ -122,12 +128,13 @@ class PythonSurface(SurfaceBase):
                 result = aeval.symtable["result"]
 
             if aeval.error:
-                if aeval.error and hasattr(aeval.error[0], "msg"):
-                    error_msg = str(aeval.error[0].msg)
-                else:
-                    error_msg = str(aeval.error[0]) if aeval.error else "Unknown error"
-                logger.info("Python execution failed with error", error=error_msg)
-                return {"status": "error", "message": error_msg}
+                # Log full error object for diagnostics
+                try:
+                    details = [getattr(e, "msg", repr(e)) for e in aeval.error]
+                except Exception:
+                    details = [repr(e) for e in aeval.error]
+                logger.info("Python execution failed with error", errors=details)
+                return {"status": "error", "message": details[0] if details else "asteval error"}
 
             logger.info("Python execution successful")
             return {"status": "ok", "value": result}
