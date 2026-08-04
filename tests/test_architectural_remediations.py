@@ -3,7 +3,7 @@
 import tempfile
 import threading
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import pytest
 
@@ -251,10 +251,10 @@ async def test_logic_surfaces_caching():
 
     clingo_code = "a. b. :- not a."
 
-    # Mock clingo module import
     with (
         patch("sys.modules", {"clingo": mock_clingo}),
         patch.object(clingo_surface, "_check_availability", return_value=True),
+        patch.object(clingo_surface, "_spec_available", new_callable=PropertyMock, return_value=True),
     ):
         # Solves once
         res1 = await clingo_surface._execute_impl(clingo_code)

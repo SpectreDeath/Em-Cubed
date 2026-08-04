@@ -13,7 +13,13 @@ class ClingoSurface(SurfaceBase):
     of shown atoms.
     """
 
-    _execution_cache: dict[str, Any] = {}
+    def __init__(self, timeout: float | None = None):
+        super().__init__(timeout)
+        self._execution_cache: dict[str, Any] = {}
+
+    def clear_cache(self) -> None:
+        """Clear the execution cache."""
+        self._execution_cache.clear()
 
     @property
     def name(self) -> str:

@@ -391,6 +391,10 @@ class PrologSurface(SurfaceBase):
                                 arity = 0
 
                             try:
+                                try:
+                                    list(prolog.query(f"abolish({functor}/{arity})"))
+                                except Exception:
+                                    pass
                                 list(prolog.query(f"dynamic({functor}/{arity})"))
                                 prolog.assertz(processed_code)
                             except Exception as retry_err:
