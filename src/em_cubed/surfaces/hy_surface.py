@@ -85,10 +85,12 @@ class HySurface(SurfaceBase):
             code = _fix_hy_cond(code)
 
             # Read and evaluate all forms in the code
+            eval_locals = dict(context) if context else {}
+            eval_globals: dict[str, Any] = {}
             forms = hy.read_many(code)
             result = None
             for form in forms:
-                result = hy.eval(form)
+                result = hy.eval(form, locals=eval_locals, globals=eval_globals)
 
             logger.info("Hy execution successful")
             return {"status": "ok", "value": result}
