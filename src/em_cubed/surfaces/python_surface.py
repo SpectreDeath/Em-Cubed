@@ -12,13 +12,38 @@ from .base import SurfaceBase, _make_daemon_executor
 logger = structlog.get_logger()
 
 
+def _ensure_asteval_builtins(aeval) -> None:
+    """Ensure aeval has a usable __builtins__ mapping and compile available.
+
+    This is defensive: asteval internals expect a mapping under __builtins__ and
+    access to compile for AST handling (f-strings / JoinedStr nodes). We do not
+    expose dangerous names at the top-level symtable (open, __import__, eval, exec).
+    """
+    try:
+        import builtins as _builtins
+
+        # Ensure __builtins__ is a dict (asteval sometimes expects mapping-like behaviour)
+        if "__builtins__" not in aeval.symtable or not isinstance(aeval.symtable["__builtins__"], dict):
+            aeval.symtable["__builtins__"] = getattr(_builtins, "__dict__", _builtins.__dict__).copy()
+
+        # Ensure compile is available internally for asteval
+        if "compile" not in aeval.symtable["__builtins__"]:
+            aeval.symtable["__builtins__"]["compile"] = _builtins.compile
+    except Exception as _e:
+        # Fail-open for diagnostics — we'll still surface errors from aeval.error below.
+        logger.debug("Failed to ensure builtins for asteval", exc=str(_e))
+
+
 def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
     from asteval import Interpreter
 
-    # Keep asteval internals (compile and __builtins__) available — only remove dangerous symbols.
+    # Keep asteval internals available — only remove dangerous top-level names.
     aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec"])
     for bad in ["open", "__import__", "eval", "exec"]:
         aeval.symtable.pop(bad, None)
+
+    # Defensive guarantee for interpreter internals
+    _ensure_asteval_builtins(aeval)
 
     if context:
         for key, value in context.items():
@@ -35,7 +60,16 @@ def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[
             details = [getattr(e, "msg", repr(e)) for e in aeval.error]
         except Exception:
             details = [repr(e) for e in aeval.error]
-        logger.info("Python execution failed with error", errors=details)
+        # Additional snapshot for diagnostics
+        try:
+            snapshot = {
+                "aeval_keys": list(aeval.symtable.keys()),
+                "has_builtins": "__builtins__" in aeval.symtable,
+                "builtins_keys_sample": list(aeval.symtable.get("__builtins__", {}).keys())[:50],
+            }
+        except Exception:
+            snapshot = {}
+        logger.info("Python execution failed with error", errors=details, snapshot=snapshot)
         return {"status": "error", "message": details[0] if details else "asteval error"}
 
     logger.info("Python execution successful")
@@ -113,10 +147,13 @@ class PythonSurface(SurfaceBase):
         try:
             from asteval import Interpreter
 
-            # Keep asteval internals (compile and __builtins__) available — only remove dangerous symbols.
+            # Keep asteval internals available — only remove dangerous top-level names.
             aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec"])
             for bad in ["open", "__import__", "eval", "exec"]:
                 aeval.symtable.pop(bad, None)
+
+            # Defensive guarantee for interpreter internals
+            _ensure_asteval_builtins(aeval)
 
             if context:
                 for key, value in context.items():
@@ -133,7 +170,15 @@ class PythonSurface(SurfaceBase):
                     details = [getattr(e, "msg", repr(e)) for e in aeval.error]
                 except Exception:
                     details = [repr(e) for e in aeval.error]
-                logger.info("Python execution failed with error", errors=details)
+                try:
+                    snapshot = {
+                        "aeval_keys": list(aeval.symtable.keys()),
+                        "has_builtins": "__builtins__" in aeval.symtable,
+                        "builtins_keys_sample": list(aeval.symtable.get("__builtins__", {}).keys())[:50],
+                    }
+                except Exception:
+                    snapshot = {}
+                logger.info("Python execution failed with error", errors=details, snapshot=snapshot)
                 return {"status": "error", "message": details[0] if details else "asteval error"}
 
             logger.info("Python execution successful")
