@@ -90,7 +90,7 @@ class HySurface(SurfaceBase):
             forms = hy.read_many(code)
             result = None
             for form in forms:
-                result = hy.eval(form, locals=eval_locals, globals=eval_globals)
+                result = hy.eval(form, locals=eval_locals, globals=eval_globals, module="__main__")
 
             logger.info("Hy execution successful")
             return {"status": "ok", "value": result}
