@@ -360,36 +360,38 @@ class PrologSurface(SurfaceBase):
                 else:
                     # Assertion mode: fact or rule
                     logger.info("Prolog assert mode detected")
-                    # Attempt assertz; if SWI-Prolog raises permission_error(modify,
-                    # static_procedure) (happens when the predicate exists as a
-                    # statically-compiled clause, e.g. from a previous consult in
-                    # the same global Prolog singleton), declare it dynamic and retry.
+                    import re as _re
+
+                    head = processed_code.split(":-")[0].strip()
+                    m = _re.match(r"([a-z][a-zA-Z0-9_]*)\s*\(", head)
+                    if m:
+                        functor = m.group(1)
+                        inner = head[head.index("(") + 1 :]
+                        depth, arity = 1, 1
+                        for ch in inner:
+                            if ch in "([":
+                                depth += 1
+                            elif ch in ")]":
+                                depth -= 1
+                                if depth == 0:
+                                    break
+                            elif ch == "," and depth == 1:
+                                arity += 1
+                    else:
+                        functor = head.strip()
+                        arity = 0
+
+                    if functor:
+                        try:
+                            list(prolog.query(f"dynamic({functor}/{arity})"))
+                        except Exception:  # nosec B110
+                            pass
+
                     try:
                         prolog.assertz(processed_code)
                     except Exception as first_err:
                         err_str = str(first_err)
-                        if "permission_error" in err_str and "static_procedure" in err_str:
-                            import re as _re
-
-                            head = processed_code.split(":-")[0].strip()
-                            m = _re.match(r"([a-z][a-zA-Z0-9_]*)\s*\(", head)
-                            if m:
-                                functor = m.group(1)
-                                inner = head[head.index("(") + 1 :]
-                                depth, arity = 1, 1
-                                for ch in inner:
-                                    if ch in "([":
-                                        depth += 1
-                                    elif ch in ")]":
-                                        depth -= 1
-                                        if depth == 0:
-                                            break
-                                    elif ch == "," and depth == 1:
-                                        arity += 1
-                            else:
-                                functor = head.strip()
-                                arity = 0
-
+                        if "permission_error" in err_str and "static_procedure" in err_str and functor:
                             try:
                                 try:
                                     list(prolog.query(f"abolish({functor}/{arity})"))

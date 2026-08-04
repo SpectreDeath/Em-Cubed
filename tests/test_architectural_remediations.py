@@ -246,6 +246,7 @@ async def test_logic_surfaces_caching():
 
     # Mock Clingo control and solver
     mock_clingo = Mock()
+    mock_clingo.__spec__ = MagicMock()
     mock_control = Mock()
     mock_clingo.Control.return_value = mock_control
 
