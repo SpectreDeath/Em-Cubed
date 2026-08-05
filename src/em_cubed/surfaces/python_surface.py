@@ -22,16 +22,38 @@ def _ensure_asteval_builtins(aeval) -> None:
     try:
         import builtins as _builtins
 
-        # Ensure __builtins__ is a dict (asteval sometimes expects mapping-like behaviour)
-        if "__builtins__" not in aeval.symtable or not isinstance(aeval.symtable["__builtins__"], dict):
-            aeval.symtable["__builtins__"] = getattr(_builtins, "__dict__", _builtins.__dict__).copy()
+        # Use the builtins mapping as a base (copy to avoid mutating global builtins)
+        base = getattr(_builtins, "__dict__", _builtins.__dict__)
 
-        # Ensure compile is available internally for asteval
-        if "compile" not in aeval.symtable["__builtins__"]:
-            aeval.symtable["__builtins__"]["compile"] = _builtins.compile
+        # Ensure __builtins__ is present and is a dict mapping for asteval internals
+        if "__builtins__" not in aeval.symtable or not isinstance(aeval.symtable["__builtins__"], dict):
+            aeval.symtable["__builtins__"] = base.copy()
+
+        bmap = aeval.symtable["__builtins__"]
+
+        # Ensure critical callables are present and callable. If missing or not callable,
+        # restore them from the real builtins module. This keeps asteval internals working
+        # while not adding these names to the top-level symtable.
+        for name in ("compile", "eval", "exec", "__import__", "open"):
+            try:
+                val = bmap.get(name)
+                if not callable(val):
+                    native = getattr(_builtins, name, None)
+                    if callable(native):
+                        bmap[name] = native
+                    else:
+                        # last resort: set to a simple wrapper that raises if called
+                        bmap[name] = lambda *a, **k: (_raise_missing_builtin(name))
+            except Exception:
+                # Keep going — diagnostics will capture the state if something is wrong.
+                continue
     except Exception as _e:
         # Fail-open for diagnostics — we'll still surface errors from aeval.error below.
         logger.debug("Failed to ensure builtins for asteval", exc=str(_e))
+
+
+def _raise_missing_builtin(name: str):
+    raise RuntimeError(f"builtin {name} is not available in this environment")
 
 
 def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -62,10 +84,18 @@ def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[
             details = [repr(e) for e in aeval.error]
         # Additional snapshot for diagnostics
         try:
+            builtins_snapshot = {}
+            bmap = aeval.symtable.get("__builtins__", {})
+            for name in ("compile", "eval", "exec", "__import__", "open"):
+                builtins_snapshot[name] = {
+                    "present": name in bmap,
+                    "callable": callable(bmap.get(name)),
+                    "repr": repr(bmap.get(name))[:200],
+                }
             snapshot = {
                 "aeval_keys": list(aeval.symtable.keys()),
                 "has_builtins": "__builtins__" in aeval.symtable,
-                "builtins_keys_sample": list(aeval.symtable.get("__builtins__", {}).keys())[:50],
+                "builtins_snapshot": builtins_snapshot,
             }
         except Exception:
             snapshot = {}
@@ -171,10 +201,18 @@ class PythonSurface(SurfaceBase):
                 except Exception:
                     details = [repr(e) for e in aeval.error]
                 try:
+                    builtins_snapshot = {}
+                    bmap = aeval.symtable.get("__builtins__", {})
+                    for name in ("compile", "eval", "exec", "__import__", "open"):
+                        builtins_snapshot[name] = {
+                            "present": name in bmap,
+                            "callable": callable(bmap.get(name)),
+                            "repr": repr(bmap.get(name))[:200],
+                        }
                     snapshot = {
                         "aeval_keys": list(aeval.symtable.keys()),
                         "has_builtins": "__builtins__" in aeval.symtable,
-                        "builtins_keys_sample": list(aeval.symtable.get("__builtins__", {}).keys())[:50],
+                        "builtins_snapshot": builtins_snapshot,
                     }
                 except Exception:
                     snapshot = {}
