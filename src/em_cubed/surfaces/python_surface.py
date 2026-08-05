@@ -85,7 +85,7 @@ def _build_restricted_interpreter(context: dict[str, Any] | None = None) -> Any:
     """Create an asteval Interpreter with dangerous symbols removed.
 
     Strategy (validated against asteval 1.0.9 with ``multiprocessing.spawn``):
-      1. Create a standard ``Interpreter()``.
+      1. Create a standard ``Interpreter()`` with max_loop_iterations limit.
       2. Pop every blocked symbol from the symtable.
       3. Set ``__builtins__`` to an empty dict so internal ``name in __builtins__``
          checks in asteval remain safe (a function value would cause TypeError).
@@ -94,7 +94,9 @@ def _build_restricted_interpreter(context: dict[str, Any] | None = None) -> Any:
     """
     from asteval import Interpreter
 
-    aeval = Interpreter()
+    # Set max_loop_iterations so infinite loops break with MaxLoopError
+    # instead of spinning daemon thread workers indefinitely.
+    aeval = Interpreter(max_loop_iterations=100000)
 
     # Step 1: remove all dangerous symbols.
     for bad in _BLOCKED_SYMBOLS:
