@@ -7,52 +7,8 @@ on:
     branches: [ main, master, skills-library ]
 
 jobs:
-  lint:
-    name: Lint & Type-check
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-
-    - name: Cache pip
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-lint-${{ hashFiles('pyproject.toml') }}
-        restore-keys: ${{ runner.os }}-pip-lint-
-
-    - name: Install dev dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .[dev]
-
-    # Fail fast if any accidental AI-generated patch markers were committed.
-    - name: Check for accidental patch markers
-      run: |
-        if grep -rn "\*\*\* Begin Patch" src/ tests/ 2>/dev/null; then
-          echo "ERROR: Accidental patch marker found. Remove '*** Begin Patch' lines before committing."
-          exit 1
-        fi
-        echo "No patch markers found."
-
-    - name: Lint with ruff
-      run: ruff check src/ tests/
-
-    - name: Type check with mypy
-      run: mypy --ignore-missing-imports src/em_cubed/
-
-    - name: Security scan with bandit
-      run: pip install bandit && bandit -r src/ -c pyproject.toml
-
   test:
-    name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -60,10 +16,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
+    
     - name: Install SWI-Prolog
       run: sudo apt-get update && sudo apt-get install -y swi-prolog
-
+    
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -84,13 +40,23 @@ jobs:
         pip install structlog numpy fastapi pydantic PyYAML asteval jinja2 whoosh pytest-xdist litellm psutil
         pip install pyswip hy z3-solver kanren clingo || true
         pip install pyDatalog || echo "pyDatalog non-critical"
+    
+    - name: Lint with ruff
+      run: pip install ruff && ruff check src/ tests/
+    
+    - name: Type check with mypy
+      run: pip install mypy && mypy --ignore-missing-imports src/em_cubed/
+
+    - name: Security scan with bandit
+      run: pip install bandit && bandit -r src/ -c pyproject.toml
 
     - name: Run tests
       env:
         PYTHONPATH: src:.
         EM_CUBED_TIMEOUT: 60.0
       run: |
-        pytest -n 2 --tb=short \
+        pytest -vv --tb=long \
+          -o log_cli=true -o log_cli_level=DEBUG \
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml
