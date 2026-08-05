@@ -307,7 +307,6 @@ class PythonSurface(SurfaceBase):
         if not self.available:
             return {"status": "error", "message": f"{self.name} surface not available"}
         loop = asyncio.get_running_loop()
-        timeout = self.timeout if self.timeout is not None else 30.0
         return await loop.run_in_executor(
             self._executor,
             _run_asteval_in_thread,
@@ -325,7 +324,6 @@ class PythonSurface(SurfaceBase):
         if not self.available:
             logger.error("Attempted Python execution but asteval not available")
             return {"status": "error", "message": "asteval not available"}
-        timeout = self.timeout if self.timeout is not None else 30.0
         return _run_asteval_in_thread(code, context)
 
     async def health(self) -> bool:
