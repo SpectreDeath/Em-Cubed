@@ -60,19 +60,20 @@ def _ensure_asteval_builtins(aeval) -> None:
                     if callable(native):
                         bmap[name] = native
                     else:
-                        bmap[name] = lambda *a, **k: _raise_missing_builtin(name)
+                        # bind name into default param to avoid late-binding closure pitfall
+                        bmap[name] = (lambda nm: (lambda *a, **k: _raise_missing_builtin(nm)))(name)
             except Exception:
                 native = getattr(_builtins, name, None)
                 if callable(native):
                     bmap[name] = native
                 else:
-                    bmap[name] = lambda *a, **k: _raise_missing_builtin(name)
+                    bmap[name] = (lambda nm: (lambda *a, **k: _raise_missing_builtin(nm)))(name)
 
         problematic = [n for n in ("compile", "eval", "exec", "__import__", "open") if not callable(bmap.get(n))]
         if problematic:
             logger.error("asteval builtins fallback left non-callable entries", problematic=problematic)
             for name in problematic:
-                bmap[name] = lambda *a, **k: _raise_missing_builtin(name)
+                bmap[name] = (lambda nm: (lambda *a, **k: _raise_missing_builtin(nm)))(name)
 
     except Exception as _e:
         logger.exception("Failed to ensure builtins for asteval", error=str(_e))
