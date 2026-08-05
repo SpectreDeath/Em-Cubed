@@ -1,7 +1,38 @@
-"""Python surface integration for executing Python code."""
+"""Python surface integration for executing Python code.
+
+Security model
+--------------
+Code is evaluated inside a restricted asteval Interpreter that uses a
+**pop-then-wrap** strategy to sandbox dangerous builtins:
+
+  1. All symbols in ``_BLOCKED_SYMBOLS`` are removed from the symtable.
+  2. Each is re-installed as a RuntimeError-raising wrapper, so explicit
+     calls produce a controlled ``{"status": "error", ...}`` response.
+
+Thread-based isolation (default, ``execute``)
+     The existing ``ThreadPoolExecutor`` is used for all async evaluations.
+     Timeout is enforced by ``asyncio.wait_for`` at the ``execute_with_timeout``
+     level (advisory — the thread may continue to completion but the caller
+     gets the timeout error immediately).  This is safe for the common case
+     because:
+       - asteval cannot import OS modules (sandbox blocks them).
+       - asteval evaluates pure Python expressions, not shell commands.
+
+Process-based isolation (opt-in, ``run_isolated_eval``)
+     A fresh ``multiprocessing.spawn`` child is used for strong isolation.
+     The child is unconditionally ``terminate()``-d on timeout, guaranteeing
+     no resource leak.  Use this for untrusted/unknown code.
+
+     NOTE: on Windows, spawning from a *thread* (run_in_executor) can hit
+     ``[WinError 6]`` handle-inheritance failures.  ``run_isolated_eval``
+     therefore should be called from the *main thread* or a properly set-up
+     thread context, not from inside ``loop.run_in_executor``.
+"""
 
 import asyncio
 import importlib.util
+import logging
+import multiprocessing
 import os
 from typing import Any
 
@@ -11,99 +42,201 @@ from .base import SurfaceBase, _make_daemon_executor
 
 logger = structlog.get_logger()
 
+# ---------------------------------------------------------------------------
+# Symbols to block inside the asteval sandbox.
+# ---------------------------------------------------------------------------
+_BLOCKED_SYMBOLS: list[str] = [
+    "open",
+    "__import__",
+    "eval",
+    "exec",
+    "compile",
+    "__builtins__",
+    "breakpoint",
+    "input",
+]
 
-def _ensure_asteval_builtins(aeval) -> None:
-    """Ensure aeval has a usable __builtins__ mapping and compile available.
+# Subset of _BLOCKED_SYMBOLS for which we install callable wrappers.
+# "__builtins__" is NOT in this list — it is set to {} (empty dict) so that
+# asteval's internal ``name in symtable["__builtins__"]`` checks don't raise
+# ``TypeError: argument of type 'function' is not iterable``.
+_CALLABLE_BLOCKED: list[str] = [
+    "open",
+    "__import__",
+    "eval",
+    "exec",
+    "compile",
+    "breakpoint",
+    "input",
+]
 
-    This is defensive: asteval internals expect a mapping under __builtins__ and
-    access to compile for AST handling (f-strings / JoinedStr nodes). We do not
-    expose dangerous names at the top-level symtable (open, __import__, eval, exec).
+
+def _missing_builtin_func(name: str) -> Any:
+    """Return a callable that raises RuntimeError when invoked."""
+
+    def _blocked(*args: Any, **kwargs: Any) -> None:
+        raise RuntimeError(f"'{name}' is not available in the sandboxed environment")
+
+    _blocked.__name__ = name
+    return _blocked
+
+
+def _build_restricted_interpreter(context: dict[str, Any] | None = None) -> Any:
+    """Create an asteval Interpreter with dangerous symbols removed.
+
+    Strategy (validated against asteval 1.0.9 with ``multiprocessing.spawn``):
+      1. Create a standard ``Interpreter()``.
+      2. Pop every blocked symbol from the symtable.
+      3. Set ``__builtins__`` to an empty dict so internal ``name in __builtins__``
+         checks in asteval remain safe (a function value would cause TypeError).
+      4. Install RuntimeError-raising wrappers for callable blocked symbols.
+      5. Inject caller-supplied context variables.
     """
-    try:
-        import builtins as _builtins
-
-        # Use the builtins mapping as a base (copy to avoid mutating global builtins)
-        base = getattr(_builtins, "__dict__", _builtins.__dict__)
-
-        # Ensure __builtins__ is present and is a dict mapping for asteval internals
-        if "__builtins__" not in aeval.symtable or not isinstance(aeval.symtable["__builtins__"], dict):
-            aeval.symtable["__builtins__"] = base.copy()
-
-        bmap = aeval.symtable["__builtins__"]
-
-        # Ensure critical callables are present and callable. If missing or not callable,
-        # restore them from the real builtins module. This keeps asteval internals working
-        # while not adding these names to the top-level symtable.
-        for name in ("compile", "eval", "exec", "__import__", "open"):
-            try:
-                val = bmap.get(name)
-                if not callable(val):
-                    native = getattr(_builtins, name, None)
-                    if callable(native):
-                        bmap[name] = native
-                    else:
-                        # last resort: set to a simple wrapper that raises if called
-                        bmap[name] = lambda *a, **k: (_raise_missing_builtin(name))
-            except Exception:
-                # Keep going — diagnostics will capture the state if something is wrong.
-                continue
-    except Exception as _e:
-        # Fail-open for diagnostics — we'll still surface errors from aeval.error below.
-        logger.debug("Failed to ensure builtins for asteval", exc=str(_e))
-
-
-def _raise_missing_builtin(name: str):
-    raise RuntimeError(f"builtin {name} is not available in this environment")
-
-
-def _run_asteval_code(code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
     from asteval import Interpreter
 
-    # Keep asteval internals available — only remove dangerous top-level names.
-    aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec"])
-    for bad in ["open", "__import__", "eval", "exec"]:
+    aeval = Interpreter()
+
+    # Step 1: remove all dangerous symbols.
+    for bad in _BLOCKED_SYMBOLS:
         aeval.symtable.pop(bad, None)
 
-    # Defensive guarantee for interpreter internals
-    _ensure_asteval_builtins(aeval)
+    # Step 2: set __builtins__ to empty dict (not a function!) so asteval's
+    # internal iteration checks don't raise TypeError.
+    aeval.symtable["__builtins__"] = {}
 
+    # Step 3: install blocking wrappers for callable symbols only.
+    for bad in _CALLABLE_BLOCKED:
+        aeval.symtable[bad] = _missing_builtin_func(bad)
+
+    # Step 4: inject context.
     if context:
         for key, value in context.items():
             aeval.symtable[key] = value
         aeval.symtable["context"] = context
 
-    result = aeval(code)
-    if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
-        result = aeval.symtable["result"]
+    return aeval
 
-    if aeval.error:
-        # Log full error object for diagnostics
-        try:
-            details = [getattr(e, "msg", repr(e)) for e in aeval.error]
-        except Exception:
-            details = [repr(e) for e in aeval.error]
-        # Additional snapshot for diagnostics
-        try:
-            builtins_snapshot = {}
-            bmap = aeval.symtable.get("__builtins__", {})
-            for name in ("compile", "eval", "exec", "__import__", "open"):
-                builtins_snapshot[name] = {
-                    "present": name in bmap,
-                    "callable": callable(bmap.get(name)),
-                    "repr": repr(bmap.get(name))[:200],
-                }
-            snapshot = {
-                "aeval_keys": list(aeval.symtable.keys()),
-                "has_builtins": "__builtins__" in aeval.symtable,
-                "builtins_snapshot": builtins_snapshot,
+
+def _run_asteval_in_thread(code: str, context: dict[str, Any] | None) -> dict[str, Any]:
+    """Run restricted asteval evaluation in the current thread.
+
+    Used by ``_execute_impl`` (async path with ThreadPoolExecutor).
+    This is safe because the sandbox blocks all dangerous builtins.
+    """
+    try:
+        aeval = _build_restricted_interpreter(context)
+        result = aeval(code)
+
+        if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
+            result = aeval.symtable["result"]
+
+        if aeval.error:
+            error_msg = (
+                str(aeval.error[0].msg)
+                if hasattr(aeval.error[0], "msg")
+                else str(aeval.error[0])
+            )
+            return {"status": "error", "message": error_msg}
+
+        return {"status": "ok", "value": result}
+
+    except Exception as exc:  # noqa: BLE001
+        return {"status": "error", "message": str(exc)}
+
+
+# ---------------------------------------------------------------------------
+# Per-eval process isolation (opt-in, for untrusted/unknown code).
+# WARNING: on Windows, only call this from the main thread — spawning from
+# a worker thread via run_in_executor causes [WinError 6] handle errors.
+# ---------------------------------------------------------------------------
+
+def _child_eval_runner(
+    code: str,
+    context: dict[str, Any] | None,
+    out_q: "multiprocessing.Queue[dict[str, Any]]",
+) -> None:
+    """Entry point for the isolated child process.
+
+    Must be a module-level function so it is importable by the spawned subprocess.
+    """
+    logging.basicConfig(level=logging.DEBUG)
+    child_logger = logging.getLogger(__name__)
+
+    try:
+        aeval = _build_restricted_interpreter(context)
+
+        # Builtins snapshot — key diagnostic when CI logs "name 'X' is not defined".
+        raw_builtins = aeval.symtable.get("__builtins__")
+        builtins_dict = raw_builtins if isinstance(raw_builtins, dict) else {}
+        snapshot = {
+            name: {
+                "present": name in builtins_dict,
+                "callable": callable(builtins_dict.get(name)),
             }
-        except Exception:
-            snapshot = {}
-        logger.info("Python execution failed with error", errors=details, snapshot=snapshot)
-        return {"status": "error", "message": details[0] if details else "asteval error"}
+            for name in ("compile", "eval", "exec", "__import__", "open")
+        }
+        child_logger.debug(
+            "builtins_snapshot pid=%d snapshot=%s", os.getpid(), snapshot
+        )
 
-    logger.info("Python execution successful")
-    return {"status": "ok", "value": result}
+        result = aeval(code)
+
+        if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
+            result = aeval.symtable["result"]
+
+        if aeval.error:
+            error_msg = (
+                str(aeval.error[0].msg)
+                if hasattr(aeval.error[0], "msg")
+                else str(aeval.error[0])
+            )
+            out_q.put({"status": "error", "message": error_msg})
+            return
+
+        out_q.put({"status": "ok", "value": result})
+
+    except Exception as exc:  # noqa: BLE001
+        out_q.put({"status": "error", "message": str(exc)})
+
+
+def run_isolated_eval(
+    code: str,
+    context: dict[str, Any] | None,
+    timeout: float,
+) -> dict[str, Any]:
+    """Run *code* in a freshly spawned child process with a hard timeout.
+
+    Uses ``multiprocessing.get_context("spawn")`` — the only portable context
+    on Windows and the safest on all platforms (avoids fork+thread deadlocks).
+    The child is unconditionally terminated if still alive after *timeout* seconds.
+
+    .. warning::
+        On Windows, call this only from the **main thread**.  Calling from a
+        worker thread (e.g., via ``loop.run_in_executor``) causes
+        ``[WinError 6] The handle is invalid`` errors during handle inheritance.
+    """
+    ctx = multiprocessing.get_context("spawn")
+    q: multiprocessing.Queue[dict[str, Any]] = ctx.Queue()
+    p = ctx.Process(target=_child_eval_runner, args=(code, context, q))
+    p.start()
+    p.join(timeout)
+
+    if p.is_alive():
+        p.terminate()
+        p.join(2)  # give OS up to 2 s to reap the process
+        if p.is_alive():
+            p.kill()
+            p.join(1)
+        return {"status": "error", "message": f"Execution timed out after {timeout}s"}
+
+    try:
+        return q.get_nowait()
+    except Exception:  # noqa: BLE001
+        exit_code = p.exitcode
+        return {
+            "status": "error",
+            "message": f"No result from child process (exit code: {exit_code})",
+        }
 
 
 class PythonSurface(SurfaceBase):
@@ -115,7 +248,7 @@ class PythonSurface(SurfaceBase):
 
     @property
     def description(self) -> str:
-        return "Safe Python execution with asteval"
+        return "Safe Python execution with asteval (sandboxed builtins)"
 
     @property
     def available(self) -> bool:
@@ -125,8 +258,15 @@ class PythonSurface(SurfaceBase):
         super().__init__(timeout)
         worker_count = self._worker_count()
         self._executor = _make_daemon_executor(max_workers=worker_count)
-        self._concurrency_limit = int(os.getenv("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", str(worker_count)))
-        logger.info("PythonSurface initialized", available=self.available, timeout=self.timeout, workers=worker_count)
+        self._concurrency_limit = int(
+            os.getenv("EM_CUBED_PYTHON_SURFACE_MAX_CONCURRENCY", str(worker_count))
+        )
+        logger.info(
+            "PythonSurface initialized",
+            available=self.available,
+            timeout=self.timeout,
+            workers=worker_count,
+        )
 
     @staticmethod
     def _worker_count() -> int:
@@ -149,82 +289,44 @@ class PythonSurface(SurfaceBase):
             return []
         import re
 
-        fns = re.findall(r"^\s*def\s+([a-zA-Z][a-zA-Z0-9_]*)\s*\(", python_source, re.MULTILINE)
+        fns = re.findall(
+            r"^\s*def\s+([a-zA-Z][a-zA-Z0-9_]*)\s*\(", python_source, re.MULTILINE
+        )
         return list(dict.fromkeys(fns))
 
-    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Execute Python code safely using asteval."""
+    async def _execute_impl(
+        self, code: str, context: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Execute Python code with sandboxed builtins in a thread executor.
+
+        Uses thread-based execution (not process isolation) so that it can be
+        safely called from async contexts on all platforms including Windows.
+        The sandbox is enforced by ``_build_restricted_interpreter`` which
+        removes and wraps all dangerous builtins before execution.
+        """
         if not self.available:
             return {"status": "error", "message": f"{self.name} surface not available"}
         loop = asyncio.get_running_loop()
-        future = loop.run_in_executor(self._executor, _run_asteval_code, code, context)
-        try:
-            return await future
-        except (TimeoutError, asyncio.CancelledError):
-            if self._executor is not None:
-                self._executor.shutdown(wait=False)
-            self._executor = _make_daemon_executor(max_workers=self._worker_count())
-            raise
+        timeout = self.timeout if self.timeout is not None else 30.0
+        return await loop.run_in_executor(
+            self._executor,
+            _run_asteval_in_thread,
+            code,
+            context,
+        )
 
     def _run_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Run asteval code synchronously in the executor thread."""
-        logger.info("Executing Python code", code_length=len(code), has_context=context is not None)
-
+        """Run restricted evaluation synchronously (for non-async callers)."""
+        logger.info(
+            "Executing Python code",
+            code_length=len(code),
+            has_context=context is not None,
+        )
         if not self.available:
             logger.error("Attempted Python execution but asteval not available")
             return {"status": "error", "message": "asteval not available"}
-
-        try:
-            from asteval import Interpreter
-
-            # Keep asteval internals available — only remove dangerous top-level names.
-            aeval = Interpreter(excluded_symbols=["open", "__import__", "eval", "exec"])
-            for bad in ["open", "__import__", "eval", "exec"]:
-                aeval.symtable.pop(bad, None)
-
-            # Defensive guarantee for interpreter internals
-            _ensure_asteval_builtins(aeval)
-
-            if context:
-                for key, value in context.items():
-                    aeval.symtable[key] = value
-                aeval.symtable["context"] = context
-
-            result = aeval(code)
-            if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
-                result = aeval.symtable["result"]
-
-            if aeval.error:
-                # Log full error object for diagnostics
-                try:
-                    details = [getattr(e, "msg", repr(e)) for e in aeval.error]
-                except Exception:
-                    details = [repr(e) for e in aeval.error]
-                try:
-                    builtins_snapshot = {}
-                    bmap = aeval.symtable.get("__builtins__", {})
-                    for name in ("compile", "eval", "exec", "__import__", "open"):
-                        builtins_snapshot[name] = {
-                            "present": name in bmap,
-                            "callable": callable(bmap.get(name)),
-                            "repr": repr(bmap.get(name))[:200],
-                        }
-                    snapshot = {
-                        "aeval_keys": list(aeval.symtable.keys()),
-                        "has_builtins": "__builtins__" in aeval.symtable,
-                        "builtins_snapshot": builtins_snapshot,
-                    }
-                except Exception:
-                    snapshot = {}
-                logger.info("Python execution failed with error", errors=details, snapshot=snapshot)
-                return {"status": "error", "message": details[0] if details else "asteval error"}
-
-            logger.info("Python execution successful")
-            return {"status": "ok", "value": result}
-
-        except Exception as e:
-            logger.exception("Python execution failed", error=str(e), code=code)
-            return {"status": "error", "message": str(e)}
+        timeout = self.timeout if self.timeout is not None else 30.0
+        return _run_asteval_in_thread(code, context)
 
     async def health(self) -> bool:
         """Check if the surface is available."""

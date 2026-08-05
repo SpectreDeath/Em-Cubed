@@ -27,19 +27,29 @@ dependencies = [
 dev = [
   "structlog>=23.0.0",
   "numpy>=1.20.0",
-  "ruff",
-  "mypy",
+  "ruff==0.11.0",
+  "mypy==1.15.0",
   "pytest",
   "pytest-asyncio",
   "pytest-cov",
   "pytest-xdist",
   "pytest-timeout",
+  "psutil",
   "hypothesis",
   "python-dotenv",
   "types-PyYAML",
   "pygls",
   "lsprotocol",
   "litellm",
+]
+
+# Heavy optional deps used only in integration tests — NOT installed in fast CI jobs.
+integration = [
+  "z3-solver",
+  "clingo",
+  "pyswip",
+  "kanren",
+  "pyDatalog",
 ]
 
 [tool.ruff.lint]
@@ -55,5 +65,10 @@ timeout = 60
 timeout_method = "thread"
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = [
+  "unit: fast, self-contained unit tests (no external services or heavy deps)",
+  "integration: tests that require optional heavy deps (z3, clingo, pyswip, etc.)",
+  "slow: tests that are intentionally slow (benchmarks, stress tests)",
+]
 
 

@@ -29,3 +29,15 @@ repos:
       - id: bandit
         args: [-c, pyproject.toml]
         exclude: ^tests/
+
+  # Guard: reject commits that contain accidental AI-generated patch markers.
+  # These appear when AI tools (GitHub Copilot, etc.) accidentally include
+  # "*** Begin Patch" / "*** End Patch" artefacts in the committed source.
+  - repo: local
+    hooks:
+      - id: no-patch-markers
+        name: Block accidental patch markers
+        language: pygrep
+        entry: "\\*\\*\\* Begin Patch"
+        types: [text]
+        pass_filenames: true

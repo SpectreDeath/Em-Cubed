@@ -6,9 +6,59 @@ on:
   pull_request:
     branches: [ main, master, skills-library ]
 
+# ──────────────────────────────────────────────────────────────────────────────
+# Job 1: Lint — runs on every PR and push; installs only dev extras.
+# ──────────────────────────────────────────────────────────────────────────────
 jobs:
-  test:
+  lint:
+    name: Lint & Type-check
     runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-lint-${{ hashFiles('pyproject.toml') }}
+        restore-keys: ${{ runner.os }}-pip-lint-
+
+    - name: Install dev dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev]
+
+    # Fail fast if any accidental AI-generated patch markers were committed.
+    - name: Check for accidental patch markers
+      run: |
+        if grep -rn "\*\*\* Begin Patch" src/ tests/ 2>/dev/null; then
+          echo "ERROR: Accidental patch marker found. Remove '*** Begin Patch' lines before committing."
+          exit 1
+        fi
+        echo "No patch markers found."
+
+    - name: Lint with ruff
+      run: ruff check src/ tests/
+
+    - name: Type check with mypy
+      run: mypy --ignore-missing-imports src/em_cubed/
+
+    - name: Security scan with bandit
+      run: pip install bandit && bandit -r src/ -c pyproject.toml
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Job 2: Unit tests — runs on every PR and push; no heavy optional deps.
+# ──────────────────────────────────────────────────────────────────────────────
+  test-unit:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
@@ -16,10 +66,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Install SWI-Prolog
-      run: sudo apt-get update && sudo apt-get install -y swi-prolog
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -29,37 +76,76 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+        key: ${{ runner.os }}-pip-unit-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
         restore-keys: |
-          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-unit-${{ matrix.python-version }}-
 
-    - name: Install dependencies
+    - name: Install dependencies (core + dev only)
       run: |
         python -m pip install --upgrade pip
         pip install -e .[dev]
-        pip install structlog numpy fastapi pydantic PyYAML asteval jinja2 whoosh pytest-xdist litellm
-        pip install pyswip hy z3-solver kanren clingo || true
-        pip install pyDatalog || echo "pyDatalog non-critical"
-    
-    - name: Lint with ruff
-      run: pip install ruff && ruff check src/ tests/
-    
-    - name: Type check with mypy
-      run: pip install mypy && mypy --ignore-missing-imports src/em_cubed/
+        pip install asteval jinja2 whoosh fastapi pydantic litellm
 
-    - name: Security scan with bandit
-      run: pip install bandit && bandit -r src/ -c pyproject.toml
-
-    - name: Run tests
+    - name: Run unit tests
       env:
         PYTHONPATH: src:.
         EM_CUBED_TIMEOUT: 60.0
       run: |
         pytest -vv --tb=long \
+          -m "not integration" \
           -o log_cli=true -o log_cli_level=DEBUG \
           --cov=em_cubed \
           --cov-report=term-missing \
-          --cov-report=xml
+          --cov-report=xml \
+          --timeout=60
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Job 3: Integration tests — only on main / master; installs heavy deps.
+# ──────────────────────────────────────────────────────────────────────────────
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: test-unit
+    # Only run on pushes to main/master, not on every PR.
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install SWI-Prolog
+      run: sudo apt-get update && sudo apt-get install -y swi-prolog
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-integration-${{ hashFiles('pyproject.toml') }}
+        restore-keys: ${{ runner.os }}-pip-integration-
+
+    - name: Install dependencies (core + dev + integration)
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev,integration]
+        pip install asteval jinja2 whoosh fastapi pydantic litellm
+        pip install hy || echo "hy non-critical"
+        pip install pyDatalog || echo "pyDatalog non-critical"
+
+    - name: Run integration tests
+      env:
+        PYTHONPATH: src:.
+        EM_CUBED_TIMEOUT: 60.0
+      run: |
+        pytest -vv --tb=long \
+          -m "integration" \
+          -o log_cli=true -o log_cli_level=DEBUG \
+          --cov=em_cubed \
+          --cov-report=term-missing \
+          --timeout=120
 
     - name: Execute Dual-Engine Performance Benchmark
       run: |

@@ -38,11 +38,24 @@ class TestPythonSurfaceSecurity:
     async def test_globals_access_blocked(self):
         surface = PythonSurface()
         result = await surface.execute("__builtins__", {})
-        # Should not expose dangerous builtins; may return error or restricted object
+        # Should not expose dangerous builtins; may return error or restricted object.
         assert result["status"] in ("error", "ok")
         if result["status"] == "ok":
-            # If ok, value should not be full builtins dict
-            assert not isinstance(result.get("value"), dict)
+            value = result.get("value")
+            # The sandbox intentionally sets __builtins__ = {} (empty dict) so
+            # asteval's internal "name in __builtins__" checks stay safe.
+            # Accept an empty dict; reject any dict that exposes dangerous symbols.
+            _dangerous = {"open", "__import__", "eval", "exec", "compile", "breakpoint"}
+            if isinstance(value, dict):
+                exposed = _dangerous.intersection(value.keys())
+                assert not exposed, (
+                    f"Dangerous builtins exposed via __builtins__: {exposed}"
+                )
+            else:
+                # Non-dict return is acceptable (None, empty Interpreter object, etc.)
+                assert value is None or not callable(value), (
+                    f"__builtins__ returned an unexpected callable: {value!r}"
+                )
 
 
 class TestZ3SurfaceSecurity:
