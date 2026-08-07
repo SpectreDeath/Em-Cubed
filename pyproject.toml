@@ -71,4 +71,12 @@ markers = [
   "slow: tests that are intentionally slow (benchmarks, stress tests)",
 ]
 
+[tool.coverage.run]
+source = ["src/em_cubed"]
+omit = [
+  "*/site-packages/*",
+  "*/tests/*",
+  "*/dist-packages/*",
+]
+
 
