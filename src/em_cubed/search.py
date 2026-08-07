@@ -236,9 +236,9 @@ def search_registry(
         try:
             search_index = get_search_index(index_dir)
 
-            # Check if we need to update the index
             current_hash = _get_registry_hash(registry)
-            index_hash_file = index_dir / ".registry_hash" if index_dir else Path(".whoosh_index/.registry_hash")
+            target_index_dir: Path = index_dir if index_dir is not None else getattr(search_index, "index_dir", Path(".whoosh_index"))
+            index_hash_file = target_index_dir / ".registry_hash"
 
             # Read existing hash
             existing_hash = None

@@ -172,7 +172,7 @@ class EmCubedMCPServer:
             if not reg_path.exists():
                 reg_path = Path("src/em_cubed/registry.json")
             if reg_path.exists():
-                matches = search_registry(query, registry_path=reg_path, max_results=max_res)
+                matches = search_registry(query, registry_path=reg_path, max_results=max_res, use_whoosh=False)
             else:
                 from em_cubed.skills import SkillRegistry
 
