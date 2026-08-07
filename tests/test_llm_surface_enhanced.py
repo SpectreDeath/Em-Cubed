@@ -1,11 +1,21 @@
 """Tests for the LLM surface: cloud, Ollama fallback, streaming, and function calling."""
 
 import asyncio
+import sys
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from em_cubed.surfaces.llm_surface import LLMSurface
+
+
+@pytest.fixture(autouse=True)
+def mock_litellm_module(monkeypatch):
+    """Ensure litellm is mocked in sys.modules with AsyncMock acompletion."""
+    mock_litellm = MagicMock()
+    mock_litellm.acompletion = AsyncMock()
+    monkeypatch.setitem(sys.modules, "litellm", mock_litellm)
+    return mock_litellm
 
 
 @pytest.fixture
