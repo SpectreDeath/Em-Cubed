@@ -10,6 +10,7 @@ Execution chain (in priority order):
 
 from __future__ import annotations
 
+import importlib.util
 import os
 from typing import Any
 
@@ -150,25 +151,13 @@ class LLMSurface(SurfaceBase):
     # ------------------------------------------------------------------
 
     def _check_availability(self) -> bool:
-        """Return True if litellm is importable (cloud path) OR Ollama is available."""
+        """Return True if litellm is importable (cloud path) OR httpx is present."""
         if self._is_available is not None:
             return self._is_available
-        try:
-            import litellm  # noqa: F401
-
-            self._is_available = True
-            return True
-        except ImportError:
-            pass
-        # Synchronous availability heuristic — just check if httpx is present
-        try:
-            import httpx  # noqa: F401
-
-            self._is_available = True
-            return True
-        except ImportError:
-            self._is_available = False
-            return False
+        has_litellm = importlib.util.find_spec("litellm") is not None
+        has_httpx = importlib.util.find_spec("httpx") is not None
+        self._is_available = has_litellm or has_httpx
+        return self._is_available
 
     @property
     def name(self) -> str:

@@ -92,7 +92,6 @@ class PluginDiscovery:
                 ("python", surfaces.PythonSurface),
                 ("prolog", surfaces.PrologSurface),
                 ("hy", surfaces.HySurface),
-                ("llm", surfaces.LLMSurface),  # LLM surface - lightweight
                 ("sqlite", surfaces.SQLiteSurface),  # stdlib, always available
             ]
 
@@ -103,6 +102,7 @@ class PluginDiscovery:
 
             # Store heavy surfaces for lazy loading
             heavy_surface_mapping = [
+                ("llm", surfaces.LLMSurface),  # heavy dependencies (litellm, openai)
                 ("z3", surfaces.Z3Surface),
                 ("datalog", surfaces.DatalogSurface),
                 ("quickjs", surfaces.QuickJSSurface),  # optional dependency
