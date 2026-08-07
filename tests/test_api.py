@@ -245,49 +245,32 @@ class TestAPI:
             data = response.json()
             assert "is not available" in data["detail"]
 
-    def test_api_key_required_when_configured(self, client, monkeypatch):
+    def test_api_key_required_when_configured(self, monkeypatch):
         """Test that API key is required when EM_CUBED_API_KEY is set."""
-        # Set API key env var and reload the app to pick it up
         monkeypatch.setenv("EM_CUBED_API_KEY", "test-secret-key")
-        import importlib
 
-        import api.main
+        with TestClient(app) as test_client:
+            # Request without API key should be 401
+            response = test_client.get("/health")
+            assert response.status_code == 401
 
-        importlib.reload(api.main)
-        from api.main import app as auth_app
+            # Request with wrong API key should be 401
+            response = test_client.get("/health", headers={"X-API-Key": "wrong-key"})
+            assert response.status_code == 401
 
-        # Create new test client for reloaded app
-        test_client = TestClient(auth_app)
+            # Request with correct API key should succeed
+            response = test_client.get("/health", headers={"X-API-Key": "test-secret-key"})
+            assert response.status_code == 200
 
-        # Request without API key should be 401
-        response = test_client.get("/health")
-        assert response.status_code == 401
-
-        # Request with wrong API key should be 401
-        response = test_client.get("/health", headers={"X-API-Key": "wrong-key"})
-        assert response.status_code == 401
-
-        # Request with correct API key should succeed
-        response = test_client.get("/health", headers={"X-API-Key": "test-secret-key"})
-        assert response.status_code == 200
-
-    def test_api_key_optional_when_not_configured(self, client, monkeypatch):
+    def test_api_key_optional_when_not_configured(self, monkeypatch):
         """Test that API key is optional when EM_CUBED_API_KEY is not set."""
-        # Ensure env var is not set and reload app
         monkeypatch.delenv("EM_CUBED_API_KEY", raising=False)
-        import importlib
 
-        import api.main as main_mod
+        with TestClient(app) as test_client:
+            # Request without key should succeed
+            response = test_client.get("/health")
+            assert response.status_code == 200
 
-        importlib.reload(main_mod)
-        from api.main import app as noauth_app
-
-        test_client = TestClient(noauth_app)
-
-        # Request without key should succeed
-        response = test_client.get("/health")
-        assert response.status_code == 200
-
-        # Request with any key should also succeed (since no key configured, header ignored)
-        response = test_client.get("/health", headers={"X-API-Key": "any-key"})
-        assert response.status_code == 200
+            # Request with any key should also succeed (since no key configured, header ignored)
+            response = test_client.get("/health", headers={"X-API-Key": "any-key"})
+            assert response.status_code == 200
