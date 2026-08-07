@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import asyncio
 import os
-import sys
 import time
+from pathlib import Path
 
 import psutil
 import pytest
@@ -35,13 +35,13 @@ pytestmark = pytest.mark.skipif(not _available, reason="asteval not available")
 def _child_pids_before() -> set[int]:
     """Return PIDs of all current child processes of this test process."""
     try:
-        current_trace = sys.gettrace()
-        sys.settrace(None)
-        try:
-            proc = psutil.Process(os.getpid())
-            return {c.pid for c in proc.children(recursive=False)}
-        finally:
-            sys.settrace(current_trace)
+        pid = os.getpid()
+        children_file = Path(f"/proc/{pid}/task/{pid}/children")
+        if children_file.exists():
+            content = children_file.read_text().strip()
+            return {int(x) for x in content.split()} if content else set()
+        proc = psutil.Process(pid)
+        return {c.pid for c in proc.children(recursive=False)}
     except Exception:
         return set()
 
