@@ -10,7 +10,8 @@ class TestAPI:
     @pytest.fixture
     def client(self):
         """Create a test client for the FastAPI app."""
-        return TestClient(app)
+        with TestClient(app) as c:
+            yield c
 
     @pytest.fixture
     def sample_registry(self, tmp_path, monkeypatch):
