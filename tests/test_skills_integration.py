@@ -218,9 +218,12 @@ def skill_b_execute(result):
         assert "general/skill-b" in suggested_ids
 
 
+@pytest.mark.integration
+@pytest.mark.slow
 class TestSkillValidationIntegration:
     """Integration tests for skill validation."""
 
+    @pytest.mark.timeout(180)
     def test_validate_all_skills(self):
         """Validate all skills in the repository."""
         from em_cubed.plugin_manager import PluginManager

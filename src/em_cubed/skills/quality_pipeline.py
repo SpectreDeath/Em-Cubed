@@ -3,6 +3,7 @@
 This module provides end-to-end quality assurance for skills.
 """
 
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -149,7 +150,11 @@ class SkillQualityPipeline:
         """Discover all skill files."""
         if not self.skills_dir.exists():
             raise FileNotFoundError(f"Skills directory not found: {self.skills_dir}")
-        skill_files = list(self.skills_dir.glob("**/SKILL.md")) + list(self.skills_dir.glob("**/SKILL_*.md"))
+        skill_files: list[Path] = []
+        for root, _, files in os.walk(self.skills_dir):
+            for file in files:
+                if file == "SKILL.md" or (file.startswith("SKILL_") and file.endswith(".md")):
+                    skill_files.append(Path(root) / file)
         return skill_files
 
     def _extract_skill_id(self, skill_file: Path) -> str:
