@@ -30,7 +30,12 @@ def test_mcp_call_list_surfaces():
     assert "z3" in surface_names
 
 
-def test_mcp_call_search_skills():
+def test_mcp_call_search_skills(tmp_path, monkeypatch):
+    from em_cubed.search import WhooshSearchIndex
+
+    monkeypatch.setattr(
+        "em_cubed.search.get_search_index", lambda index_dir=None: WhooshSearchIndex(tmp_path / "whoosh_index")
+    )
     server = EmCubedMCPServer()
     res = server.call_tool("em_cubed_search_skills", {"query": "python"})
     assert "skills" in res
