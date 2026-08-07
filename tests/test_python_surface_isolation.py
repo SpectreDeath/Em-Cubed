@@ -35,8 +35,8 @@ def _child_pids_before() -> set[int]:
     """Return PIDs of all current child processes of this test process."""
     try:
         proc = psutil.Process(os.getpid())
-        return {c.pid for c in proc.children(recursive=True)}
-    except Exception:  # noqa: BLE001
+        return {c.pid for c in proc.children(recursive=False)}
+    except Exception:
         return set()
 
 

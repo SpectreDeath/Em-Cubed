@@ -96,7 +96,7 @@ def _build_restricted_interpreter(context: dict[str, Any] | None = None) -> Any:
 
     # Set max_loop_iterations so infinite loops break with MaxLoopError
     # instead of spinning daemon thread workers indefinitely.
-    aeval = Interpreter(max_loop_iterations=100000)
+    aeval = Interpreter(max_loop_iterations=10000)
 
     # Step 1: remove all dangerous symbols.
     for bad in _BLOCKED_SYMBOLS:
@@ -142,7 +142,7 @@ def _run_asteval_in_thread(code: str, context: dict[str, Any] | None) -> dict[st
 
         return {"status": "ok", "value": result}
 
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return {"status": "error", "message": str(exc)}
 
 
@@ -197,7 +197,7 @@ def _child_eval_runner(
 
         out_q.put({"status": "ok", "value": result})
 
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         out_q.put({"status": "error", "message": str(exc)})
 
 
@@ -233,7 +233,7 @@ def run_isolated_eval(
 
     try:
         return q.get_nowait()
-    except Exception:  # noqa: BLE001
+    except Exception:
         exit_code = p.exitcode
         return {
             "status": "error",
