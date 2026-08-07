@@ -140,6 +140,7 @@ class LLMSurface(SurfaceBase):
 
     def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
+        self._is_available: bool | None = None
         ollama_host = os.getenv("OLLAMA_HOST", _DEFAULT_OLLAMA_HOST)
         self._ollama = _OllamaClient(ollama_host, timeout=self.timeout or 30.0)
         logger.info("LLMSurface initialized", timeout=self.timeout, ollama_host=ollama_host)
@@ -150,9 +151,12 @@ class LLMSurface(SurfaceBase):
 
     def _check_availability(self) -> bool:
         """Return True if litellm is importable (cloud path) OR Ollama is available."""
+        if self._is_available is not None:
+            return self._is_available
         try:
             import litellm  # noqa: F401
 
+            self._is_available = True
             return True
         except ImportError:
             pass
@@ -160,8 +164,10 @@ class LLMSurface(SurfaceBase):
         try:
             import httpx  # noqa: F401
 
+            self._is_available = True
             return True
         except ImportError:
+            self._is_available = False
             return False
 
     @property
