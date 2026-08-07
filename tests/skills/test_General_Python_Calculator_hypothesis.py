@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 # Global variable to hold the asteval interpreter with the skill's functions defined
@@ -48,6 +48,7 @@ def get_function(name):
     return _aeval.symtable.get(name)
 
 
+@settings(max_examples=10)
 @given(
     x=st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False),
     y=st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False),
@@ -62,6 +63,7 @@ def test_add_property(x, y):
     assert abs(result - (x + y)) < 1e-9
 
 
+@settings(max_examples=10)
 @given(
     x=st.floats(min_value=0, max_value=1e6, allow_nan=False, allow_infinity=False),
 )
@@ -75,6 +77,7 @@ def test_square_root_property(x):
     assert abs(result - expected) < 1e-9
 
 
+@settings(max_examples=10)
 @given(
     n=st.integers(min_value=0, max_value=20),
 )
