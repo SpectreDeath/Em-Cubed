@@ -55,8 +55,7 @@ jobs:
         PYTHONPATH: src:.
         EM_CUBED_TIMEOUT: 60.0
       run: |
-        pytest -vv --tb=long \
-          -o log_cli=true -o log_cli_level=DEBUG \
+        pytest -n auto --tb=short \
           --cov=em_cubed \
           --cov-report=term-missing \
           --cov-report=xml
