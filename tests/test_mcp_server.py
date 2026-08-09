@@ -5,7 +5,7 @@ from em_cubed.gateway.mcp_server import EmCubedMCPServer
 
 def test_mcp_server_tools_list():
     server = EmCubedMCPServer()
-    assert len(server.TOOLS) == 11
+    assert len(server.TOOLS) == 12
     tool_names = [t["name"] for t in server.TOOLS]
     assert "em_cubed_validate_triple" in tool_names
     assert "em_cubed_elicit_ontology" in tool_names
@@ -18,6 +18,15 @@ def test_mcp_server_tools_list():
     assert "em_cubed_search_skills" in tool_names
     assert "em_cubed_list_surfaces" in tool_names
     assert "em_cubed_execute_skill" in tool_names
+    assert "em_cubed_server_discover" in tool_names
+
+
+def test_mcp_call_server_discover():
+    server = EmCubedMCPServer()
+    res = server.call_tool("em_cubed_server_discover", {})
+    assert res["spec_version"] == "2026-07-28"
+    assert res["stateless"] is True
+    assert res["capabilities"]["stateless_transport"] is True
 
 
 def test_mcp_call_list_surfaces():

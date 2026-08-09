@@ -155,11 +155,37 @@ class EmCubedMCPServer:
                 "required": ["skill_id"],
             },
         },
+        {
+            "name": "em_cubed_server_discover",
+            "description": "Exposes MCP 2026-07-28 stateless server capabilities, spec version, and routing header requirements.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {},
+            },
+        },
     ]
 
     def call_tool(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         """Dispatch tool invocation to core subsystem handler."""
-        if name == "em_cubed_search_skills":
+        if name == "em_cubed_server_discover" or name == "serverDiscover":
+            return {
+                "spec_version": "2026-07-28",
+                "protocolVersion": "2026-07-28",
+                "stateless": True,
+                "server_info": {"name": "em-cubed", "version": "0.8.0"},
+                "capabilities": {
+                    "stateless_transport": True,
+                    "routing_headers": ["MCP-Method", "MCP-Name"],
+                    "interactive_mode": "input_required",
+                    "tools": len(self.TOOLS),
+                },
+                "_meta": {
+                    "handshake_required": False,
+                    "mcp_session_id_deprecated": True,
+                },
+            }
+
+        elif name == "em_cubed_search_skills":
             from pathlib import Path
 
             from em_cubed.search import search_registry
@@ -357,13 +383,24 @@ def _handle_request(server: EmCubedMCPServer, request: dict[str, Any]) -> None:
                     "jsonrpc": "2.0",
                     "id": req_id,
                     "result": {
-                        "protocolVersion": "2024-11-05",
+                        "protocolVersion": "2026-07-28",
+                        "stateless": True,
                         "serverInfo": {
                             "name": "em-cubed",
                             "version": "0.8.0",
                         },
-                        "capabilities": {"tools": {}},
+                        "capabilities": {"tools": {}, "stateless_transport": True},
                     },
+                }
+            )
+
+        elif method == "serverDiscover":
+            discover_res = server.call_tool("em_cubed_server_discover", {})
+            _write_response(
+                {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "result": discover_res,
                 }
             )
 
