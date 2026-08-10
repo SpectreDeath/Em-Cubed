@@ -29,6 +29,8 @@ venv/
 ENV/
 env/
 .venv
+ADK2.venv/
+.venv313/
 
 # IDE
 .vscode/
@@ -42,6 +44,7 @@ env/
 .pytest_cache/
 .coverage
 coverage.xml
+coverage.json
 htmlcov/
 
 # Distribution / packaging
@@ -110,3 +113,14 @@ scratch_*.py
 test_data.json
 test_workflow.json
 simple_data.json
+
+# Draft config files
+pyproject.toml.new
+
+# Temporary scratch logs
+errorscratchpad.txt
+job_logs.txt
+pytest_debug.txt
+pytest_full*.txt
+pytest_output.txt
+

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=68.0.0", "wheel", "pytest-asyncio>=0.24.0"]
+requires = ["setuptools>=68.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "em-cubed"
-version = "0.1.0"
+version = "0.8.0"
 description = "Polyglot AI Skill Engine & Neuro-Symbolic OS"
 authors = [{name = "Em-Cubed Authors"}]
 requires-python = ">=3.10"
@@ -52,6 +52,10 @@ integration = [
   "pyDatalog",
 ]
 
+docker = [
+  "docker>=7.0.0",
+]
+
 [tool.ruff.lint]
 ignore = [
   "BLE001",  # intentional blind exceptions with nosec B110
@@ -61,6 +65,7 @@ ignore = [
 ]
 
 [tool.pytest.ini_options]
+pythonpath = [".", "src"]
 timeout = 60
 timeout_method = "thread"
 asyncio_mode = "auto"

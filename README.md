@@ -1,4 +1,4 @@
-﻿# Em-Cubed: Polyglot AI Skill Engine & Neuro-Symbolic OS
+# Em-Cubed: Polyglot AI Skill Engine & Neuro-Symbolic OS
 
 [![Tests](https://img.shields.io/badge/tests-passing-brightgreen)](https://github.com/SpectreDeath/Em-Cubed)
 [![Python](https://img.shields.io/badge/python-3.10+-blue)](https://www.python.org/)
@@ -63,6 +63,7 @@ Run logic in the optimal language or solver for the task:
 | `kanren` | Relational logic programming (microKanren) | Symbol-allowlisted namespace |
 | `quickjs` | Safe JavaScript execution | `pyquickjs` sandbox |
 | `janus` | High-performance Python-Prolog bridge | SWI-Janus C-bindings |
+| `container` | Isolated Docker container execution | Docker container sandbox (requires `pip install "em-cubed[docker]"`) |
 
 ### 🔌 MCP Native (Claude Desktop & Cursor)
 Em-Cubed exposes 11 tools over standard JSON-RPC STDIO for instant integration into AI agent IDEs. See [mcp/README.md](mcp/README.md) for configuration setup.

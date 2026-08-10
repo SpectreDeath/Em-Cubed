@@ -5,6 +5,19 @@ All notable changes to Em-Cubed will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] — 2026-08-10
+
+### Added
+- `py.typed` PEP 561 marker — em-cubed is now a fully typed library
+- Python `3.10` added to CI test matrix (was only `3.11`–`3.13`)
+- Container surface documented in README with `[docker]` optional extra
+
+### Fixed
+- `pytest-asyncio` removed from `build-system.requires` (was incorrectly placed; moved to `[dev]` extras where it already existed)
+
+### Changed
+- Version bumped to `0.8.0` to reflect maturity (previously mismatched with CHANGELOG)
+
 ## [Unreleased]
 
 ### Added
