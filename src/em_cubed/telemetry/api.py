@@ -2,10 +2,12 @@
 
 import asyncio
 import time
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, cast
 
 import structlog
+
+UTC = timezone.utc
 
 logger = structlog.get_logger()
 

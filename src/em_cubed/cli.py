@@ -2,10 +2,10 @@
 
 import argparse
 import asyncio
+from datetime import timezone
 import json
-import sys
-from datetime import UTC
 from pathlib import Path
+import sys
 
 import structlog
 
@@ -15,6 +15,8 @@ from em_cubed.search import search_registry
 
 # Bootstrap initialization for distributed execution and telemetry
 from em_cubed.workflow.checkpoint import initialize_checkpoint_manager
+
+UTC = timezone.utc
 
 __all__ = ["main"]
 

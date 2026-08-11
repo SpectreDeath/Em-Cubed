@@ -1,6 +1,6 @@
 """Unit tests for Temporal-Spatial Dynamic Ontology Engine."""
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from em_cubed.ontology.temporal_spatial import (
     GeoLocation,
@@ -10,6 +10,8 @@ from em_cubed.ontology.temporal_spatial import (
     TimeInterval,
     WorldStateTimeline,
 )
+
+UTC = timezone.utc
 
 
 def test_time_interval_validity():

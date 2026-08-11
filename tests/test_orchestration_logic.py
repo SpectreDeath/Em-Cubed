@@ -14,7 +14,9 @@ async def test_python_prolog_orchestration_sync(plugin_manager):
     if not plugin_manager.get("prolog").available:
         pytest.skip("Prolog surface (PySWIP) not available")
 
-    from datetime import UTC, datetime
+    from datetime import datetime, timezone
+
+    UTC = timezone.utc
 
     from em_cubed.skills.executor import TelemetryProxy
     from em_cubed.skills.telemetry import ExecutionRecord, TraceContext
@@ -58,7 +60,9 @@ async def test_python_hy_orchestration_sync(plugin_manager):
     if not plugin_manager.get("hy").available:
         pytest.skip("Hy surface not available")
 
-    from datetime import UTC, datetime
+    from datetime import datetime, timezone
+
+    UTC = timezone.utc
 
     from em_cubed.skills.executor import TelemetryProxy
     from em_cubed.skills.telemetry import ExecutionRecord, TraceContext

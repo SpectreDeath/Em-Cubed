@@ -1,7 +1,7 @@
 """Integration tests for telemetry API and WebSocket broadcasting."""
 
 import asyncio
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock
 
 import pytest
@@ -12,6 +12,8 @@ from em_cubed.telemetry.api import (
     WebSocketTelemetryHandler,
     get_telemetry_api,
 )
+
+UTC = timezone.utc
 
 
 def test_telemetry_api_get_available_skills():
