@@ -8,33 +8,20 @@ surfaces:
 description: Multi-surface SAE reporting threshold tester with Python surface for adverse event count analysis and Z3 surface
   for FDA 21 CFR 312.32 timing constraint verification.
 compatibility: PYTHON
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 # Purpose

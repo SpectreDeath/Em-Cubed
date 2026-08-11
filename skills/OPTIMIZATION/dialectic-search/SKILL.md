@@ -13,33 +13,20 @@ type: Optimization
 category: Philosophy-Based Search
 estimated execution time: 5-20 minutes
 source: community
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 origin: manual
 triggers:

@@ -125,7 +125,7 @@ class ContainerizedSurfacePlugin(SurfacePlugin):
                         error_msg = stderr.decode("utf-8").strip()
                         return {"status": "error", "message": f"Container execution failed: {error_msg}"}
 
-                except TimeoutError:
+                except (asyncio.TimeoutError, TimeoutError):
                     process.kill()
                     await process.wait()
                     return {"status": "error", "message": f"Container execution timed out after {self.timeout or 30}s"}

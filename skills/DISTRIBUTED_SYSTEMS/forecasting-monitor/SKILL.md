@@ -8,33 +8,20 @@ surfaces:
 description: Multi-surface forecasting monitor with Python surface for drift detection and SQLite surface for metric history
   tracking. Supports configurable thresholds and restart policies.
 compatibility: PYTHON
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 # Forecasting Monitor

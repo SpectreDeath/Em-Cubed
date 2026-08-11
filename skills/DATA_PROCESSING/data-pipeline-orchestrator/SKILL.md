@@ -13,33 +13,20 @@ type: Process
 category: Data Engineering Skills
 estimated execution time: 5-15 minutes
 source: community
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 origin: manual
 triggers:

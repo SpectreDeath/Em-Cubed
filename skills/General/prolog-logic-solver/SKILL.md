@@ -13,33 +13,20 @@ triggers:
 - puzzle
 - inference
 compatibility: PROLOG
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 ## Purpose

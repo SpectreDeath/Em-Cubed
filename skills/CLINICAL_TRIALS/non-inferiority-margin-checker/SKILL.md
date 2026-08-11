@@ -8,33 +8,20 @@ surfaces:
 description: Multi-surface non-inferiority margin checker with Python surface for statistical computation and Z3 surface for
   formal constraint verification.
 compatibility: PYTHON
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 # Purpose

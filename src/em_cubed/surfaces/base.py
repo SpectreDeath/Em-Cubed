@@ -146,7 +146,7 @@ class SurfaceBase(SurfacePlugin, ABC):
         try:
             result = await asyncio.wait_for(self._execute_impl(code, context), timeout=self.timeout)
             return result
-        except TimeoutError:
+        except (asyncio.TimeoutError, TimeoutError):
             logger.warning("Surface execution timed out", timeout=self.timeout)
             return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}
         finally:

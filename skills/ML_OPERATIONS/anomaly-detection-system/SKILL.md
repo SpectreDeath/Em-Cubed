@@ -10,33 +10,20 @@ type: Analysis
 category: Monitoring Skills
 estimated execution time: 2-5 minutes
 source: community
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 origin: manual
 triggers:

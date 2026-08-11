@@ -14,33 +14,20 @@ type: Optimization
 category: Evolutionary Skills
 estimated execution time: 15-60 minutes
 source: community
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 origin: manual
 triggers:

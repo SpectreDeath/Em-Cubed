@@ -9,33 +9,20 @@ surfaces:
 description: Distributed DAG execution orchestrator for task dependency resolution, scheduling, and constraint verification
   with Python, Z3, and SQLite surfaces.
 compatibility: PYTHON
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 # DAG Task Scheduler

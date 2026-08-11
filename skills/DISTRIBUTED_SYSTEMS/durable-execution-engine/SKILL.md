@@ -9,33 +9,20 @@ surfaces:
 description: Multi-surface durable execution engine with Python surface for fault-tolerant workflow execution, Z3 surface
   for state transition verification, and SQLite surface for checkpoint persistence. Supports replay and state recovery.
 compatibility: PYTHON
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 # Durable Execution Engine

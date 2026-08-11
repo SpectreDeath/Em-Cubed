@@ -14,33 +14,20 @@ type: Utility
 category: Analytical Skills
 estimated execution time: 1-3 minutes
 source: community
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 origin: manual
 triggers:

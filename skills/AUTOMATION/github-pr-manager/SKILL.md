@@ -25,33 +25,20 @@ quality:
   success_count: 1
   completion_rate: 1.0
   token_savings_avg: 0.0
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 ## Purpose

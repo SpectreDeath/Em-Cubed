@@ -94,6 +94,6 @@ class SurfacePlugin(ABC):
                 self.execute(code, context), timeout=self.timeout or float(os.getenv("EM_CUBED_TIMEOUT", "30"))
             )
             return result
-        except TimeoutError:
+        except (asyncio.TimeoutError, TimeoutError):
             logger.warning("Surface execution timed out", timeout=self.timeout)
             return {"status": "error", "message": f"Execution timed out after {self.timeout}s"}

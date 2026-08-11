@@ -9,33 +9,20 @@ surfaces:
 description: Multi-surface stochastic transmission network with Python surface for graph-based infection simulation, Prolog
   surface for epidemiological rule inference, and SQLite surface for contact tracing and state persistence.
 compatibility: PYTHON
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 ## Purpose

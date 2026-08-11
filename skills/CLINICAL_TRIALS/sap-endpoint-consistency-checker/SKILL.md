@@ -8,33 +8,20 @@ surfaces:
 description: Multi-surface SAP endpoint consistency checker with Python surface for endpoint alignment and Prolog surface
   for registry-protocol rule verification.
 compatibility: PYTHON
-allowed-tools: '- read
-
+allowed-tools:
+  - read
   - write
-
   - edit
-
   - bash
-
   - glob
-
   - grep
-
   - codebase_search
-
   - task
-
   - sequentialthinking_sequentialthinking
-
   - webfetch
-
   - websearch
-
   - question
-
   - suggest
-
-  '
 ---
 
 # Purpose
