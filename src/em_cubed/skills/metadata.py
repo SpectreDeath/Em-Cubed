@@ -516,7 +516,20 @@ class SkillMetadata:
             skill_id=None,  # Computed in __post_init__
             path=file_path_str,
             schema_version=frontmatter.get("schema_version", frontmatter.get("Schema_Version", 1)),
-            tags=tags,  # Use detected tags from code blocks
-            created_at=datetime.fromisoformat(frontmatter["created_at"]) if frontmatter.get("created_at") else None,
-            updated_at=datetime.fromisoformat(frontmatter["updated_at"]) if frontmatter.get("updated_at") else None,
+            created_at=parse_iso_datetime(frontmatter.get("created_at")),
+            updated_at=parse_iso_datetime(frontmatter.get("updated_at")),
         )
+
+
+def parse_iso_datetime(val: Any) -> datetime | None:
+    """Parse ISO datetime string with Python 3.10 'Z' timezone compatibility."""
+    if not val:
+        return None
+    if isinstance(val, datetime):
+        return val
+    if isinstance(val, str):
+        try:
+            return datetime.fromisoformat(val.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            return None
+    return None

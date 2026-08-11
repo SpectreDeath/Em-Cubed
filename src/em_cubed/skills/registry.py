@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 import structlog
 
-from .metadata import RuntimeMetrics, SkillMetadata
+from .metadata import RuntimeMetrics, SkillMetadata, parse_iso_datetime
 
 if TYPE_CHECKING:
     from .remote_registry import RemoteSkillRegistry
@@ -210,9 +210,7 @@ class SkillRegistry:
                     avg_execution_time=metrics_data.get("avg_execution_time", 0.0),
                     avg_token_savings=metrics_data.get("avg_token_savings", 0.0),
                     usage_count=metrics_data.get("applied_count", 0),
-                    last_execution=datetime.fromisoformat(metrics_data["last_executed"])
-                    if metrics_data.get("last_executed")
-                    else None,
+                    last_execution=parse_iso_datetime(metrics_data.get("last_executed")),
                 )
                 self._quality_metrics[metadata.skill_id] = qm
 
@@ -240,6 +238,7 @@ class SkillRegistry:
             QualityThresholds,
             SkillCapability,
             SkillDependency,
+            parse_iso_datetime,
         )
 
         # Parse dependencies
@@ -273,14 +272,12 @@ class SkillRegistry:
             success_count=metrics_data.get("success_count", 0),
             total_execution_time=metrics_data.get("total_execution_time", 0.0),
             total_token_usage=metrics_data.get("total_token_usage", 0),
-            last_executed=datetime.fromisoformat(metrics_data["last_executed"])
-            if metrics_data.get("last_executed")
-            else None,
+            last_executed=parse_iso_datetime(metrics_data.get("last_executed")),
         )
 
         # Parse timestamps
-        created_at = datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None
-        updated_at = datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None
+        created_at = parse_iso_datetime(data.get("created_at"))
+        updated_at = parse_iso_datetime(data.get("updated_at"))
 
         return SkillMetadata(
             name=data["name"],
