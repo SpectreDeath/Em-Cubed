@@ -190,6 +190,39 @@ def test_checkpoint_storage_directly():
         assert loaded is None
 
 
+def test_hypergraph_compaction_and_causal_dag_integration():
+    """Verify state mutations generated during workflow checkpoints append to causal_dag and compact hyperedges."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        storage = FileCheckpointStorage(Path(temp_dir))
+        manager = CheckpointManager(storage)
+
+        # Create a sequence of 3 execution checkpoints
+        cp1 = manager.create_checkpoint("wf_alpha", "exec_999", "step_init")
+        cp2 = manager.create_checkpoint("wf_alpha", "exec_999", "step_process")
+        cp3 = manager.create_checkpoint("wf_alpha", "exec_999", "step_finalize")
+
+        # 1. Causal DAG verification
+        assert manager.causal_dag.verify_integrity() is True
+        nodes = manager.causal_dag.all_nodes()
+        assert len(nodes) == 3
+
+        # Provenance trace for final step
+        latest_node_id = manager._last_checkpoint_node_id["exec_999"]
+        provenance = manager.causal_dag.trace_provenance(latest_node_id)
+        assert len(provenance) == 3
+        assert provenance[-1].payload["step_name"] == "step_finalize"
+        assert provenance[0].payload["step_name"] == "step_init"
+
+        # 2. Hypergraph compaction verification
+        edges = manager.hypergraph_store.all_edges()
+        assert len(edges) >= 1
+        # Consolidated edge should contain shared entities wf_alpha and exec_999
+        consolidated = manager.hypergraph_store.get_edge("consolidated_exec_exec_999")
+        assert consolidated is not None
+        assert "wf_alpha" in consolidated.member_entities
+        assert "exec_999" in consolidated.member_entities
+
+
 if __name__ == "__main__":
     test_checkpoint_creation()
     test_checkpoint_load_save()
@@ -197,4 +230,5 @@ if __name__ == "__main__":
     test_checkpoint_deletion()
     test_get_latest_checkpoint()
     test_checkpoint_storage_directly()
+    test_hypergraph_compaction_and_causal_dag_integration()
     print("All tests passed!")

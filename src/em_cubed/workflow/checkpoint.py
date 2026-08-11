@@ -12,6 +12,13 @@ from typing import Any
 
 import structlog
 
+from em_cubed.hypergraph import (
+    CausalDAG,
+    CompactionPipeline,
+    Hyperedge,
+    HypergraphStore,
+)
+
 logger = structlog.get_logger()
 
 
@@ -194,8 +201,9 @@ class FileCheckpointStorage(CheckpointStorage):
             return False
 
 
+
 class CheckpointManager:
-    """Manages workflow checkpointing and recovery."""
+    """Manages workflow checkpointing, hypergraph context compaction, and causal lineage recovery."""
 
     def __init__(self, storage: CheckpointStorage):
         """Initialize checkpoint manager.
@@ -206,6 +214,9 @@ class CheckpointManager:
         self.storage = storage
         self.logger = logger.bind(component="checkpoint_manager")
         self._checkpoints: dict[str, Checkpoint] = {}  # In-memory cache
+        self.causal_dag = CausalDAG()
+        self.hypergraph_store = HypergraphStore()
+        self._last_checkpoint_node_id: dict[str, str] = {}
 
     def create_checkpoint(
         self,
@@ -217,7 +228,7 @@ class CheckpointManager:
         context: dict[str, Any] | None = None,
         substrate: dict[str, Any] | None = None,
     ) -> str:
-        """Create a new checkpoint.
+        """Create a new checkpoint, record causal DAG node, and compact hyperedges.
 
         Args:
             workflow_id: The workflow ID
@@ -245,11 +256,57 @@ class CheckpointManager:
         if self.storage.save_checkpoint(checkpoint):
             # Cache in memory
             self._checkpoints[checkpoint.checkpoint_id] = checkpoint
+
+            # 1. Record append-only causal DAG mutation event node
+            parent_node_id = self._last_checkpoint_node_id.get(execution_id)
+            parent_ids = [parent_node_id] if parent_node_id else []
+
+            dag_node = self.causal_dag.record_mutation(
+                mutation_type="CHECKPOINT_CREATED",
+                payload={
+                    "checkpoint_id": checkpoint.checkpoint_id,
+                    "workflow_id": workflow_id,
+                    "execution_id": execution_id,
+                    "step_name": step_name,
+                },
+                parent_ids=parent_ids,
+            )
+            self._last_checkpoint_node_id[execution_id] = dag_node.node_id
+
+            # 2. Add N-ary hyperedge representation to store
+            entities = {workflow_id, execution_id, step_name}
+            if variables:
+                for k, v in variables.items():
+                    if isinstance(v, str) and len(v) < 64:
+                        entities.add(f"var_{k}:{v}")
+
+            edge = Hyperedge(
+                edge_id=f"cp_edge_{checkpoint.checkpoint_id[:8]}",
+                member_entities=entities,
+                metadata={
+                    "checkpoint_id": checkpoint.checkpoint_id,
+                    "step_name": step_name,
+                    "workflow_id": workflow_id,
+                    "execution_id": execution_id,
+                },
+            )
+            self.hypergraph_store.add_edge(edge)
+
+            # 3. Apply compaction pipeline (consolidate shared entities and prune subsumed edges)
+            CompactionPipeline.consolidate_shared_entities(
+                store=self.hypergraph_store,
+                shared_entities={workflow_id, execution_id},
+                new_edge_id=f"consolidated_exec_{execution_id[:8]}",
+                new_metadata={"status": "compacted", "last_step": step_name},
+            )
+            CompactionPipeline.prune_subsumed_edges(self.hypergraph_store)
+
             self.logger.info(
-                "Checkpoint created",
+                "Checkpoint created with causal lineage & hypergraph compaction",
                 checkpoint_id=checkpoint.checkpoint_id,
                 workflow_id=workflow_id,
                 step_name=step_name,
+                dag_node_id=dag_node.node_id,
             )
             return checkpoint.checkpoint_id
         else:
