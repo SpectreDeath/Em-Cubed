@@ -6,22 +6,25 @@ Unified execution engine supporting Python, Prolog, Z3, Datalog, Hy, SQLite, Qui
 import warnings
 from typing import Any
 
-from .indexer import get_skill_metadata, reindex
-from .search import search_registry
-from .skills import SkillExecutor, SkillRegistry, SkillValidator
-from .surfaces import (
-    ClingoSurface,
-    DatalogSurface,
-    HySurface,
-    JanusSurface,
-    KanrenSurface,
-    PrologSurface,
-    PythonSurface,
-    QuickJSSurface,
-    SQLiteSurface,
-    WASMSurface,
-    Z3Surface,
-)
+try:
+    from .indexer import get_skill_metadata, reindex
+    from .search import search_registry
+    from .skills import SkillExecutor, SkillRegistry, SkillValidator
+    from .surfaces import (
+        ClingoSurface,
+        DatalogSurface,
+        HySurface,
+        JanusSurface,
+        KanrenSurface,
+        PrologSurface,
+        PythonSurface,
+        QuickJSSurface,
+        SQLiteSurface,
+        WASMSurface,
+        Z3Surface,
+    )
+except ImportError:
+    pass
 
 __version__ = "0.8.0"
 
