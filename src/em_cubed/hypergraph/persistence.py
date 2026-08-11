@@ -1,6 +1,6 @@
 """SQLite Persistent Storage Adapter for Hypergraph Store and Causal DAG."""
 
-json_import = __import__("json")
+import json
 import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
@@ -67,8 +67,8 @@ class SQLiteHypergraphAdapter:
                     """,
                     (
                         edge.edge_id,
-                        json_import.dumps(sorted(list(edge.member_entities))),
-                        json_import.dumps(edge.metadata),
+                        json.dumps(sorted(list(edge.member_entities))),
+                        json.dumps(edge.metadata),
                         edge.created_at,
                     ),
                 )
@@ -82,8 +82,8 @@ class SQLiteHypergraphAdapter:
             for row in rows:
                 edge = Hyperedge(
                     edge_id=row["edge_id"],
-                    member_entities=set(json_import.loads(row["member_entities"])),
-                    metadata=json_import.loads(row["metadata"]),
+                    member_entities=set(json.loads(row["member_entities"])),
+                    metadata=json.loads(row["metadata"]),
                     created_at=row["created_at"],
                 )
                 store.add_edge(edge)
@@ -101,9 +101,9 @@ class SQLiteHypergraphAdapter:
                     """,
                     (
                         node.node_id,
-                        json_import.dumps(node.parent_ids),
+                        json.dumps(node.parent_ids),
                         node.mutation_type,
-                        json_import.dumps(node.payload),
+                        json.dumps(node.payload),
                         node.state_hash,
                         node.timestamp,
                     ),
@@ -118,9 +118,9 @@ class SQLiteHypergraphAdapter:
             for row in rows:
                 node = CausalNode(
                     node_id=row["node_id"],
-                    parent_ids=json_import.loads(row["parent_ids"]),
+                    parent_ids=json.loads(row["parent_ids"]),
                     mutation_type=row["mutation_type"],
-                    payload=json_import.loads(row["payload"]),
+                    payload=json.loads(row["payload"]),
                     state_hash=row["state_hash"],
                     timestamp=row["timestamp"],
                 )

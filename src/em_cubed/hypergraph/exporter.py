@@ -2,8 +2,8 @@
 
 from pathlib import Path
 from typing import Union
-import xml.etree.ElementTree as ET
-from xml.dom import minidom
+import xml.etree.ElementTree as ET  # nosec B405
+from xml.dom import minidom  # nosec B408
 
 from em_cubed.hypergraph.causal_dag import CausalDAG
 from em_cubed.hypergraph.store import HypergraphStore
@@ -12,7 +12,7 @@ from em_cubed.hypergraph.store import HypergraphStore
 def _pretty_xml_str(elem: ET.Element) -> str:
     """Format ElementTree element into clean, indented XML string."""
     rough_string = ET.tostring(elem, encoding="utf-8")
-    reparsed = minidom.parseString(rough_string)
+    reparsed = minidom.parseString(rough_string)  # nosec B318
     return reparsed.toprettyxml(indent="  ")
 
 

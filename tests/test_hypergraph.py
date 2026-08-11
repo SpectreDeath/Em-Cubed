@@ -3,7 +3,6 @@
 import pytest
 from em_cubed.hypergraph import (
     CausalDAG,
-    CausalNode,
     CompactionPipeline,
     Hyperedge,
     HypergraphStore,

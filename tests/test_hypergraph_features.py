@@ -45,8 +45,8 @@ def test_gexf_bipartite_and_clique_export():
 def test_gexf_dag_export():
     """Test GEXF XML export for CausalDAG."""
     dag = CausalDAG()
-    n1 = dag.record_mutation("INIT", {"val": 1}, node_id="n1")
-    n2 = dag.record_mutation("STEP", {"val": 2}, parent_ids=["n1"], node_id="n2")
+    dag.record_mutation("INIT", {"val": 1}, node_id="n1")
+    dag.record_mutation("STEP", {"val": 2}, parent_ids=["n1"], node_id="n2")
 
     with tempfile.TemporaryDirectory() as temp_dir:
         dag_file = Path(temp_dir) / "dag.gexf"

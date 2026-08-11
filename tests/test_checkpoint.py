@@ -197,9 +197,9 @@ def test_hypergraph_compaction_and_causal_dag_integration():
         manager = CheckpointManager(storage)
 
         # Create a sequence of 3 execution checkpoints
-        cp1 = manager.create_checkpoint("wf_alpha", "exec_999", "step_init")
-        cp2 = manager.create_checkpoint("wf_alpha", "exec_999", "step_process")
-        cp3 = manager.create_checkpoint("wf_alpha", "exec_999", "step_finalize")
+        manager.create_checkpoint("wf_alpha", "exec_999", "step_init")
+        manager.create_checkpoint("wf_alpha", "exec_999", "step_process")
+        manager.create_checkpoint("wf_alpha", "exec_999", "step_finalize")
 
         # 1. Causal DAG verification
         assert manager.causal_dag.verify_integrity() is True
