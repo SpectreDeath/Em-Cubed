@@ -118,71 +118,71 @@ class WhooshSearchIndex:
         try:
             from whoosh import qparser, scoring
 
-            # Use BM25 scoring with fuzzy matching
             searcher = self.ix.searcher(weighting=scoring.BM25F())
+            try:
+                # Parse query with fuzzy matching for typos
+                parser = qparser.MultifieldParser(["name", "description", "content", "tags"], self.ix.schema)
+                parser.add_plugin(qparser.FuzzyTermPlugin())
 
-            # Parse query with fuzzy matching for typos
-            parser = qparser.MultifieldParser(["name", "description", "content", "tags"], self.ix.schema)
-            parser.add_plugin(qparser.FuzzyTermPlugin())
+                # Add fuzzy terms for common typos
+                parsed_query = parser.parse(query)
 
-            # Add fuzzy terms for common typos
-            parsed_query = parser.parse(query)
+                results = searcher.search(parsed_query, limit=max_results)
 
-            results = searcher.search(parsed_query, limit=max_results)
+                search_results = []
+                for hit in results:
+                    # Calculate enhanced score
+                    score = hit.score
 
-            search_results = []
-            for hit in results:
-                # Calculate enhanced score
-                score = hit.score
+                    # Boost for exact tag matches
+                    query_lower = query.lower()
+                    tags = hit.get("tags", "")
+                    if isinstance(tags, list):
+                        tags_list = tags
+                    else:
+                        tags_list = tags.split(",") if tags else []
+                    if any(query_lower in tag.lower() for tag in tags_list):
+                        score *= 1.5
 
-                # Boost for exact tag matches
-                query_lower = query.lower()
-                tags = hit.get("tags", "")
-                if isinstance(tags, list):
-                    tags_list = tags
-                else:
-                    tags_list = tags.split(",") if tags else []
-                if any(query_lower in tag.lower() for tag in tags_list):
-                    score *= 1.5
+                    # Boost for surface matches
+                    surfaces = hit.get("surface", "")
+                    if isinstance(surfaces, list):
+                        surfaces_list = surfaces
+                    else:
+                        surfaces_list = surfaces.split(",") if surfaces else []
+                    if any(query_lower in surf.lower() for surf in surfaces_list):
+                        score *= 1.2
 
-                # Boost for surface matches
-                surfaces = hit.get("surface", "")
-                if isinstance(surfaces, list):
-                    surfaces_list = surfaces
-                else:
-                    surfaces_list = surfaces.split(",") if surfaces else []
-                if any(query_lower in surf.lower() for surf in surfaces_list):
-                    score *= 1.2
+                    # Get additional metadata
+                    domain = hit.get("domain", "")
+                    purpose = hit.get("purpose", "")
+                    logic_tags_raw = hit.get("logic_tags", "")
+                    heuristic_tags_raw = hit.get("heuristic_tags", "")
+                    logic_tags_list = (
+                        logic_tags_raw.split(",") if isinstance(logic_tags_raw, str) and logic_tags_raw else []
+                    )
+                    heuristic_tags_list = (
+                        heuristic_tags_raw.split(",") if isinstance(heuristic_tags_raw, str) and heuristic_tags_raw else []
+                    )
 
-                # Get additional metadata
-                domain = hit.get("domain", "")
-                purpose = hit.get("purpose", "")
-                logic_tags_raw = hit.get("logic_tags", "")
-                heuristic_tags_raw = hit.get("heuristic_tags", "")
-                logic_tags_list = (
-                    logic_tags_raw.split(",") if isinstance(logic_tags_raw, str) and logic_tags_raw else []
-                )
-                heuristic_tags_list = (
-                    heuristic_tags_raw.split(",") if isinstance(heuristic_tags_raw, str) and heuristic_tags_raw else []
-                )
+                    search_results.append(
+                        {
+                            "name": hit.get("name"),
+                            "domain": domain,
+                            "purpose": purpose,
+                            "description": hit.get("description"),
+                            "path": hit.get("path"),
+                            "surfaces": surfaces_list,
+                            "logic_tags": logic_tags_list,
+                            "heuristic_tags": heuristic_tags_list,
+                            "tags": tags_list,
+                            "score": score,
+                        }
+                    )
 
-                search_results.append(
-                    {
-                        "name": hit.get("name"),
-                        "domain": domain,
-                        "purpose": purpose,
-                        "description": hit.get("description"),
-                        "path": hit.get("path"),
-                        "surfaces": surfaces_list,
-                        "logic_tags": logic_tags_list,
-                        "heuristic_tags": heuristic_tags_list,
-                        "tags": tags_list,
-                        "score": score,
-                    }
-                )
-
-            searcher.close()
-            return search_results
+                return search_results
+            finally:
+                searcher.close()
 
         except Exception as e:
             logger.exception("Whoosh search failed", error=str(e))
