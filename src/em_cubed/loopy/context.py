@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING, Any, runtime_checkable
 from typing import Protocol
 
 if TYPE_CHECKING:
-    from em_cubed.ontology.schema import OntologyTriple
     from em_cubed.ontology.topos import TruthValue
     from em_cubed.ontology.truthmaker import ExactTruthmaker
 

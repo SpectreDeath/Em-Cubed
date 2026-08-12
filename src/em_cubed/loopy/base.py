@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from typing import Any, Generic, TypeVar
 
 from em_cubed.loopy.context import DefaultSurfaceExecutionContext, SurfaceExecutionContext
-from em_cubed.ontology.topos import SubobjectClassifier, TruthValue
+from em_cubed.ontology.topos import TruthValue
 from em_cubed.ontology.truthmaker import ExactTruthmaker
 from em_cubed.ontology.validator import OntologyLedgerValidator
 

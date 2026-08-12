@@ -5,10 +5,6 @@ This file fills out the previously near-empty tests/test_worker.py.
 
 from __future__ import annotations
 
-from typing import Any
-
-import pytest
-
 from em_cubed.workflow.worker_spec import SkillWorkerSpec
 
 

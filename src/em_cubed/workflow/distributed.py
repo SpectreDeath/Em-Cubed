@@ -15,6 +15,8 @@ from typing import Any
 
 import structlog
 
+from em_cubed.workflow.worker_spec import SkillWorkerSpec
+
 logger = structlog.get_logger()
 
 
@@ -248,12 +250,10 @@ def _execute_distributed_task(
     code directly without touching ``PluginManager``, ``SkillRegistry``, or
     ``SkillExecutor``.  When a plain dict is supplied the legacy path is used.
     """
-    from em_cubed.workflow.worker_spec import SkillWorkerSpec as _Spec
-
     # ------------------------------------------------------------------
     # Fast path: SkillWorkerSpec — no plugin stack required
     # ------------------------------------------------------------------
-    if isinstance(task, _Spec):
+    if isinstance(task, SkillWorkerSpec):
         try:
             import asyncio
 

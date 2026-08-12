@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 from typing import Any
-from unittest.mock import MagicMock, patch
 
-import pytest
-
-from em_cubed.loopy.base import BaseLoopySkill, LoopTrajectory, LoopySkillResult
+from em_cubed.loopy.base import BaseLoopySkill
 from em_cubed.loopy.context import DefaultSurfaceExecutionContext, SurfaceExecutionContext
 
 
@@ -200,7 +197,6 @@ def test_bind_monad_delegates_to_context():
 def test_existing_loopy_skill_regression():
     """Smoke-test that a skill using the default context (real ontology) can be constructed."""
     # This simply checks that the import chain resolves without error.
-    from em_cubed.loopy.base import BaseLoopySkill
     from em_cubed.loopy.context import DefaultSurfaceExecutionContext
 
     skill = _MinimalLoopySkill(max_iterations=1)
