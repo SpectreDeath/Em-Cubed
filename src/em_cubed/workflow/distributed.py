@@ -177,6 +177,24 @@ class DistributedExecutor:
             self.logger.error("Failed to submit workflow", workflow_id=workflow_id, error=str(e))
             return False
 
+    async def execute_workflow(
+        self,
+        workflow_id: str,
+        tasks: list[DistributedTask] | None = None,
+        poll_interval: float = 0.05,
+        timeout: float = 60.0,
+    ) -> dict[str, Any]:
+        """Submit a workflow and wait for execution to complete or fail."""
+        if tasks is not None:
+            self.submit_workflow(workflow_id, tasks)
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            status = self.get_workflow_status(workflow_id)
+            if status.get("status") in ("completed", "failed"):
+                return status
+            await asyncio.sleep(poll_interval)
+        return self.get_workflow_status(workflow_id)
+
     def get_task_status(self, task_id: str) -> TaskStatus | None:
         """Get the status of a task."""
         task = self._tasks.get(task_id)

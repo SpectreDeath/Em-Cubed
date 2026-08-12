@@ -130,3 +130,7 @@ class WorkflowDagParser:
             if visited[tid] == 0:
                 dfs(tid)
 
+
+# Alias for backward compatibility
+DAGParser = WorkflowDagParser
+

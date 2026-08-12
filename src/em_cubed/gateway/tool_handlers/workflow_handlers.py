@@ -18,23 +18,24 @@ def _handle_run_dag(args: dict[str, Any]) -> dict[str, Any]:
     from pathlib import Path
 
     from em_cubed.workflow.distributed import ProcessDistributedExecutor
-    from em_cubed.workflow.parser import DAGParser
+    from em_cubed.workflow.parser import WorkflowDagParser
 
     dag_spec = args.get("dag_spec", {})
-    workflow_id = args.get("workflow_id")
-    parser = DAGParser()
-    workflow = parser.parse(dag_spec)
-    if workflow_id:
-        workflow.workflow_id = workflow_id
+    workflow_id_arg = args.get("workflow_id")
+    workflow_id, tasks = WorkflowDagParser.parse_dict(dag_spec)
+    if workflow_id_arg:
+        workflow_id = workflow_id_arg
+        for t in tasks:
+            t.workflow_id = workflow_id
 
     skills_dir = Path("skills")
     executor = ProcessDistributedExecutor(skills_dir=skills_dir)
 
     async def _run() -> dict[str, Any]:
-        return await executor.execute_workflow(workflow)
+        return await executor.execute_workflow(workflow_id, tasks)
 
     result = asyncio.run(_run())
-    return result if isinstance(result, dict) else {"status": "submitted", "workflow_id": workflow.workflow_id}
+    return result if isinstance(result, dict) else {"status": "submitted", "workflow_id": workflow_id}
 
 
 def _handle_check_dag_status(args: dict[str, Any]) -> dict[str, Any]:
