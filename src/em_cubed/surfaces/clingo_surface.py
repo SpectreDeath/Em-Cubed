@@ -4,7 +4,6 @@ from typing import Any
 
 from .base import SurfaceBase
 
-
 try:
     import clingo  # noqa: F401
     _CLINGO_AVAILABLE = True

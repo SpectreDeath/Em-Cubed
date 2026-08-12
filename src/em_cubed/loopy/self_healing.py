@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Any
+
 import structlog
 
 from em_cubed.plugin_manager import PluginManager

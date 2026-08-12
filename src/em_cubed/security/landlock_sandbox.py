@@ -1,9 +1,8 @@
 """Linux Landlock and Seccomp process-level security isolation manager."""
 
-import os
 import platform
+
 import structlog
-from typing import List, Optional
 
 logger = structlog.get_logger()
 
@@ -11,7 +10,7 @@ logger = structlog.get_logger()
 class LandlockSandbox:
     """Manages low-overhead Linux Landlock filesystem and Seccomp syscall security sandboxing."""
 
-    def __init__(self, allowed_paths: Optional[List[str]] = None, allow_network: bool = False):
+    def __init__(self, allowed_paths: list[str] | None = None, allow_network: bool = False):
         self.allowed_paths = allowed_paths or ["/tmp", "/usr", "/lib", "/lib64"]
         self.allow_network = allow_network
         self.is_supported = self._check_support()

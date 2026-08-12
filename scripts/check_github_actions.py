@@ -3,9 +3,6 @@ import urllib.request
 import json
 
 def get_gh_token():
-    t = os.getenv("GITHUB_TOKEN", os.getenv("GH_TOKEN", ""))
-    if t:
-        return t
     tokens_dir = r"D:\.tokens"
     if os.path.exists(tokens_dir):
         for fname in os.listdir(tokens_dir):
@@ -15,11 +12,12 @@ def get_gh_token():
                     with open(fpath, "r", encoding="utf-8") as f:
                         for line in f:
                             s = line.strip()
-                            if s.startswith("ghp_") or s.startswith("github_pat_"):
+                            if s.startswith("ghp_"):
                                 return s
                 except Exception:
                     pass
-    return ""
+    return os.getenv("GITHUB_TOKEN", os.getenv("GH_TOKEN", ""))
+
 
 
 token = get_gh_token()

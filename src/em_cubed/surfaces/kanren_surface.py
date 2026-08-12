@@ -4,7 +4,6 @@ from typing import Any
 
 from .base import SurfaceBase
 
-
 try:
     import kanren  # noqa: F401
     _KANREN_AVAILABLE = True

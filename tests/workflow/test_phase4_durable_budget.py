@@ -1,7 +1,8 @@
 """Unit tests for Phase 4: Durable execution checkpointing & Budget circuit breaker."""
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
 from em_cubed.telemetry.budget_circuit_breaker import BudgetCircuitBreaker, CircuitState
 from em_cubed.workflow.durable_execution import DurableExecutionManager
 

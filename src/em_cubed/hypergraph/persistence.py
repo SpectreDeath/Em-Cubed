@@ -2,9 +2,9 @@
 
 import json
 import sqlite3
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator, Union
 
 from em_cubed.hypergraph.causal_dag import CausalDAG, CausalNode
 from em_cubed.hypergraph.store import HypergraphStore
@@ -14,7 +14,7 @@ from em_cubed.hypergraph.types import Hyperedge
 class SQLiteHypergraphAdapter:
     """Persistent storage adapter storing Hypergraph stores and Causal DAGs in SQLite."""
 
-    def __init__(self, db_path: Union[str, Path]) -> None:
+    def __init__(self, db_path: str | Path) -> None:
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_tables()
@@ -67,7 +67,7 @@ class SQLiteHypergraphAdapter:
                     """,
                     (
                         edge.edge_id,
-                        json.dumps(sorted(list(edge.member_entities))),
+                        json.dumps(sorted(edge.member_entities)),
                         json.dumps(edge.metadata),
                         edge.created_at,
                     ),

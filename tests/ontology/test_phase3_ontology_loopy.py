@@ -1,7 +1,8 @@
 """Unit tests for Phase 3: Kit Fine Counterfactual Fault Localization & Self-Healing Skill Loop."""
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
 from em_cubed.loopy.self_healing import SelfHealingSkillLoop
 from em_cubed.ontology.schema import OntologyTriple
 from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier

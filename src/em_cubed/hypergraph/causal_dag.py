@@ -1,10 +1,10 @@
 """Append-Only Causal DAG for Auditability and Provenance Tracking."""
 
-from dataclasses import dataclass, field
 import hashlib
 import json
 import time
-from typing import Any, Dict, List, Optional, Set
+from dataclasses import dataclass, field
+from typing import Any
 
 
 @dataclass
@@ -12,9 +12,9 @@ class CausalNode:
     """Represents an atomic state mutation or event in the causal DAG ledger."""
 
     node_id: str
-    parent_ids: List[str] = field(default_factory=list)
+    parent_ids: list[str] = field(default_factory=list)
     mutation_type: str = "GENERIC_MUTATION"
-    payload: Dict[str, Any] = field(default_factory=dict)
+    payload: dict[str, Any] = field(default_factory=dict)
     state_hash: str = ""
     timestamp: float = field(default_factory=time.time)
 
@@ -29,7 +29,7 @@ class CausalNode:
         encoded = json.dumps(canonical, sort_keys=True).encode("utf-8")
         return hashlib.sha256(encoded).hexdigest()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize causal node to dictionary."""
         return {
             "node_id": self.node_id,
@@ -41,7 +41,7 @@ class CausalNode:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "CausalNode":
+    def from_dict(cls, data: dict[str, Any]) -> "CausalNode":
         """Deserialize causal node from dictionary."""
         return cls(
             node_id=data["node_id"],
@@ -57,15 +57,15 @@ class CausalDAG:
     """Append-only Directed Acyclic Graph ledger for event lineage and auditability."""
 
     def __init__(self) -> None:
-        self._nodes: Dict[str, CausalNode] = {}
-        self._children: Dict[str, Set[str]] = {}
+        self._nodes: dict[str, CausalNode] = {}
+        self._children: dict[str, set[str]] = {}
 
     def record_mutation(
         self,
         mutation_type: str,
-        payload: Dict[str, Any],
-        parent_ids: Optional[List[str]] = None,
-        node_id: Optional[str] = None,
+        payload: dict[str, Any],
+        parent_ids: list[str] | None = None,
+        node_id: str | None = None,
     ) -> CausalNode:
         """Append a new mutation event node to the causal ledger."""
         parents = parent_ids or []
@@ -95,7 +95,7 @@ class CausalDAG:
 
         return node
 
-    def get_node(self, node_id: str) -> Optional[CausalNode]:
+    def get_node(self, node_id: str) -> CausalNode | None:
         """Retrieve node by ID."""
         return self._nodes.get(node_id)
 
@@ -109,13 +109,13 @@ class CausalDAG:
                     return False
         return True
 
-    def trace_provenance(self, node_id: str) -> List[CausalNode]:
+    def trace_provenance(self, node_id: str) -> list[CausalNode]:
         """Trace full ancestor chain leading to the specified node in topological order."""
         if node_id not in self._nodes:
             return []
 
-        visited: Set[str] = set()
-        provenance: List[CausalNode] = []
+        visited: set[str] = set()
+        provenance: list[CausalNode] = []
 
         def dfs(curr_id: str) -> None:
             if curr_id in visited:
@@ -129,26 +129,26 @@ class CausalDAG:
         dfs(node_id)
         return provenance
 
-    def get_leaves(self) -> List[CausalNode]:
+    def get_leaves(self) -> list[CausalNode]:
         """Return nodes that have no children (current terminal branches)."""
         all_parent_ids = {pid for n in self._nodes.values() for pid in n.parent_ids}
         return [n for nid, n in self._nodes.items() if nid not in all_parent_ids]
 
-    def all_nodes(self) -> List[CausalNode]:
+    def all_nodes(self) -> list[CausalNode]:
         """Return all recorded causal nodes."""
         return list(self._nodes.values())
 
     def __len__(self) -> int:
         return len(self._nodes)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Serialize causal DAG to dictionary representation."""
         return {
             "nodes": [node.to_dict() for node in self._nodes.values()]
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "CausalDAG":
+    def from_dict(cls, data: dict[str, Any]) -> "CausalDAG":
         """Deserialize causal DAG from dictionary representation."""
         dag = cls()
         for node_data in data.get("nodes", []):

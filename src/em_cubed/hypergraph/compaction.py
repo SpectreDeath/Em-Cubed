@@ -1,7 +1,8 @@
 """Monotonic Compaction and Lifecycle Mutation Logic for Hypergraphs."""
 
 import time
-from typing import Any, Dict, Optional, Set
+from typing import Any
+
 from em_cubed.hypergraph.store import HypergraphStore
 from em_cubed.hypergraph.types import Hyperedge
 
@@ -12,10 +13,10 @@ class CompactionPipeline:
     @staticmethod
     def consolidate_shared_entities(
         store: HypergraphStore,
-        shared_entities: Set[str],
+        shared_entities: set[str],
         new_edge_id: str,
-        new_metadata: Optional[Dict[str, Any]] = None,
-    ) -> Optional[Hyperedge]:
+        new_metadata: dict[str, Any] | None = None,
+    ) -> Hyperedge | None:
         """Consolidate multiple hyperedges sharing an entity set into a single summary hyperedge.
 
         Finds all hyperedges containing all `shared_entities`, merges their member entities and
@@ -25,8 +26,8 @@ class CompactionPipeline:
         if len(matching_edges) <= 1:
             return None
 
-        merged_members: Set[str] = set()
-        merged_metadata: Dict[str, Any] = {}
+        merged_members: set[str] = set()
+        merged_metadata: dict[str, Any] = {}
 
         for edge in matching_edges:
             merged_members.update(edge.member_entities)
@@ -48,15 +49,15 @@ class CompactionPipeline:
     @staticmethod
     def bounded_local_compaction(
         store: HypergraphStore,
-        root_entities: Set[str],
+        root_entities: set[str],
         max_hops: int = 1,
-    ) -> Set[str]:
+    ) -> set[str]:
         """Discover entity IDs reachable within `max_hops` of `root_entities` for bounded local processing."""
-        visited_entities: Set[str] = set(root_entities)
-        frontier: Set[str] = set(root_entities)
+        visited_entities: set[str] = set(root_entities)
+        frontier: set[str] = set(root_entities)
 
         for _ in range(max_hops):
-            next_frontier: Set[str] = set()
+            next_frontier: set[str] = set()
             for entity in frontier:
                 edges = store.get_edges_for_entity(entity)
                 for edge in edges:
@@ -77,7 +78,7 @@ class CompactionPipeline:
         Returns the total number of pruned edges.
         """
         all_edges = store.all_edges()
-        to_remove: Set[str] = set()
+        to_remove: set[str] = set()
 
         for i, edge_a in enumerate(all_edges):
             if edge_a.edge_id in to_remove:

@@ -1,7 +1,8 @@
 """Tests for Polars surface integration."""
 
 import pytest
-from em_cubed.surfaces.polars_surface import PolarsSurface, _POLARS_AVAILABLE
+
+from em_cubed.surfaces.polars_surface import PolarsSurface
 
 
 @pytest.mark.asyncio

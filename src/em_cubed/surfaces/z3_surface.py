@@ -1,7 +1,6 @@
 """Z3 surface integration for SMT solving and optimization."""
 
 import asyncio
-import importlib.util
 from typing import Any
 
 import structlog

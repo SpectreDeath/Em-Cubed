@@ -1,12 +1,13 @@
 """Branchial and Topological Distance Metrics for Hypergraphs and Scenario Trees."""
 
-from typing import Any, Dict, List, Set
+from typing import Any
+
 from em_cubed.hypergraph.causal_dag import CausalDAG
 from em_cubed.hypergraph.store import HypergraphStore
 from em_cubed.hypergraph.types import Hyperedge
 
 
-def jaccard_similarity(set_a: Set[str], set_b: Set[str]) -> float:
+def jaccard_similarity(set_a: set[str], set_b: set[str]) -> float:
     """Calculate Jaccard Index: J(A, B) = |A ∩ B| / |A ∪ B|."""
     if not set_a and not set_b:
         return 1.0
@@ -16,7 +17,7 @@ def jaccard_similarity(set_a: Set[str], set_b: Set[str]) -> float:
     return len(set_a & set_b) / union_len
 
 
-def overlap_coefficient(set_a: Set[str], set_b: Set[str]) -> float:
+def overlap_coefficient(set_a: set[str], set_b: set[str]) -> float:
     """Calculate Overlap Coefficient: Overlap(A, B) = |A ∩ B| / min(|A|, |B|)."""
     if not set_a or not set_b:
         return 0.0
@@ -40,7 +41,7 @@ def store_jaccard_similarity(
     return jaccard_similarity(entities_a, entities_b)
 
 
-def identify_pivot_points(dag_a: CausalDAG, dag_b: CausalDAG) -> List[Dict[str, Any]]:
+def identify_pivot_points(dag_a: CausalDAG, dag_b: CausalDAG) -> list[dict[str, Any]]:
     """Identify exact decision/divergence nodes (pivot points) between two scenario DAG branches.
 
     Compares causal nodes present in both DAG branches and identifies nodes where
@@ -50,14 +51,14 @@ def identify_pivot_points(dag_a: CausalDAG, dag_b: CausalDAG) -> List[Dict[str, 
     nodes_b = {node.node_id: node for node in dag_b.all_nodes()}
 
     common_node_ids = set(nodes_a.keys()) & set(nodes_b.keys())
-    pivot_points: List[Dict[str, Any]] = []
+    pivot_points: list[dict[str, Any]] = []
 
     for nid in common_node_ids:
         node_a = nodes_a[nid]
         node_b = nodes_b[nid]
 
         is_divergent = False
-        reasons: List[str] = []
+        reasons: list[str] = []
 
         if node_a.state_hash != node_b.state_hash:
             is_divergent = True

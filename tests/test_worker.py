@@ -1,6 +1,5 @@
 """Tests for PolyglotWorker process."""
 
-import pytest
 from em_cubed.workflow.worker import PolyglotWorker
 
 

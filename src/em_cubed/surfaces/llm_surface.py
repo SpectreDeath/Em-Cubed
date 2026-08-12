@@ -131,7 +131,6 @@ class _OllamaClient:
 # ---------------------------------------------------------------------------
 
 
-import sys
 
 class LLMSurface(SurfaceBase):
     """Handle LLM prompt execution using LiteLLM for cloud and Ollama for local.

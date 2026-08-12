@@ -1,10 +1,10 @@
 """Distributed worker process for polling and executing multi-surface skills from distributed task queues."""
 
-import time
 import argparse
-import structlog
-from typing import List, Optional
+import time
 from pathlib import Path
+
+import structlog
 
 logger = structlog.get_logger()
 
@@ -12,13 +12,13 @@ logger = structlog.get_logger()
 class PolyglotWorker:
     """Worker process that executes tasks for specified polyglot surfaces."""
 
-    def __init__(self, surfaces: Optional[List[str]] = None, skills_dir: str = "skills", registry_file: str = "registry.json"):
+    def __init__(self, surfaces: list[str] | None = None, skills_dir: str = "skills", registry_file: str = "registry.json"):
         self.surfaces = surfaces or ["python", "prolog", "z3", "duckdb", "polars"]
         self.skills_dir = Path(skills_dir)
         self.registry_file = Path(registry_file)
         self.logger = logger.bind(component="polyglot_worker")
 
-    def run(self, poll_interval: float = 1.0, max_tasks: Optional[int] = None):
+    def run(self, poll_interval: float = 1.0, max_tasks: int | None = None):
         """Start worker polling loop."""
         self.logger.info("Starting PolyglotWorker process", surfaces=self.surfaces, skills_dir=str(self.skills_dir))
         tasks_processed = 0

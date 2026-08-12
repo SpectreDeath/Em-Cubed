@@ -6,6 +6,7 @@ import shutil
 import urllib.request
 from pathlib import Path
 from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -99,7 +100,7 @@ class SkillHub:
         dest_dir = self.skills_dir / "Custom"
         dest_dir.mkdir(parents=True, exist_ok=True)
 
-        if source.startswith("http://") or source.startswith("https://"):
+        if source.startswith(("http://", "https://")):
             filename = target_name or source.split("/")[-1] or "downloaded_skill.md"
             if not filename.endswith(".md"):
                 filename += ".md"

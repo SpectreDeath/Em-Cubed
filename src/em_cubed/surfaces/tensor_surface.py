@@ -2,6 +2,7 @@
 
 import gc
 from typing import Any
+
 import structlog
 from asteval import Interpreter
 

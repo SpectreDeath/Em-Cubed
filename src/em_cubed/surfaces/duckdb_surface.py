@@ -1,7 +1,9 @@
 """DuckDB surface integration for analytical SQL execution and zero-copy memory querying."""
 
 from typing import Any
+
 import structlog
+
 from .base import SurfaceBase
 
 logger = structlog.get_logger()

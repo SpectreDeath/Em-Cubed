@@ -1,6 +1,7 @@
 """Unit tests for Phase 1 surfaces: DuckDB, Julia, Tensor, and Arrow Shared Substrate."""
 
 import pytest
+
 from em_cubed.surfaces import (
     ArrowSharedSubstrate,
     DuckDBSurface,

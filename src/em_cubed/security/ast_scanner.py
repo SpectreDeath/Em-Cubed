@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from typing import List, Optional, Set
 
 
 @dataclass
@@ -25,13 +24,13 @@ class SecurityViolation:
 class ScanReport:
     """Result report of AST security scan."""
     is_safe: bool
-    violations: List[SecurityViolation] = field(default_factory=list)
+    violations: list[SecurityViolation] = field(default_factory=list)
 
 
 class ASTSecurityScanner(ast.NodeVisitor):
     """AST Visitor scanning Python code for unsafe operations."""
 
-    BLOCKED_MODULES: Set[str] = {
+    BLOCKED_MODULES: set[str] = {
         "os",
         "sys",
         "subprocess",
@@ -45,7 +44,7 @@ class ASTSecurityScanner(ast.NodeVisitor):
         "tempfile",
     }
 
-    BLOCKED_FUNCTIONS: Set[str] = {
+    BLOCKED_FUNCTIONS: set[str] = {
         "eval",
         "exec",
         "compile",
@@ -56,9 +55,9 @@ class ASTSecurityScanner(ast.NodeVisitor):
         "delattr",
     }
 
-    def __init__(self, allowed_modules: Optional[Set[str]] = None) -> None:
+    def __init__(self, allowed_modules: set[str] | None = None) -> None:
         self.allowed_modules = allowed_modules or set()
-        self.violations: List[SecurityViolation] = []
+        self.violations: list[SecurityViolation] = []
 
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
@@ -101,21 +100,21 @@ class ASTSecurityScanner(ast.NodeVisitor):
                     )
                 )
         # Check attribute calls (e.g. os.system())
-        elif isinstance(node.func, ast.Attribute):
-            if node.func.attr in {"system", "popen", "spawn", "execve"}:
-                self.violations.append(
-                    SecurityViolation(
-                        line=node.lineno,
-                        column=node.col_offset,
-                        rule="SYSTEM_EXECUTION",
-                        message=f"Forbidden process execution call: '.{node.func.attr}()'",
-                        severity="CRITICAL",
-                    )
+        elif isinstance(node.func, ast.Attribute) and node.func.attr in {"system", "popen", "spawn", "execve"}:
+            self.violations.append(
+                SecurityViolation(
+                    line=node.lineno,
+                    column=node.col_offset,
+                    rule="SYSTEM_EXECUTION",
+                    message=f"Forbidden process execution call: '.{node.func.attr}()'",
+                    severity="CRITICAL",
                 )
+            )
+
         self.generic_visit(node)
 
 
-def scan_python_code(code: str, allowed_modules: Optional[Set[str]] = None) -> ScanReport:
+def scan_python_code(code: str, allowed_modules: set[str] | None = None) -> ScanReport:
     """Scan Python source code and return security audit report.
 
     Args:

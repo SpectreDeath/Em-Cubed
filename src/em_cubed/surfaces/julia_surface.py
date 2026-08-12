@@ -1,10 +1,10 @@
 """Julia surface integration for mathematical, automatic differentiation, and scientific computing skills."""
 
 import asyncio
-import os
 import shutil
 import subprocess
 from typing import Any
+
 import structlog
 
 from .base import SurfaceBase

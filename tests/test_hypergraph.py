@@ -1,6 +1,7 @@
 """Comprehensive unit test suite for Wolfram-inspired Pragmatic Hypergraph module."""
 
 import pytest
+
 from em_cubed.hypergraph import (
     CausalDAG,
     CompactionPipeline,

@@ -7,7 +7,7 @@ to ensure ontological consistency before executing logic surface skills.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -16,16 +16,16 @@ class ValidationReport:
 
     conforms: bool
     violation_count: int
-    violations: List[Dict[str, Any]]
+    violations: list[dict[str, Any]]
 
 
 class SHACLValidator:
     """Validator for checking triple graphs against SHACL constraints."""
 
-    def __init__(self, shape_graph: List[Dict[str, Any]] | None = None):
+    def __init__(self, shape_graph: list[dict[str, Any]] | None = None):
         self.shape_graph = shape_graph or self._default_shapes()
 
-    def _default_shapes(self) -> List[Dict[str, Any]]:
+    def _default_shapes(self) -> list[dict[str, Any]]:
         """Return baseline SHACL shapes for BFO / OntoClean entities."""
         return [
             {
@@ -40,7 +40,7 @@ class SHACLValidator:
             },
         ]
 
-    def validate(self, data_graph: List[Dict[str, Any]]) -> ValidationReport:
+    def validate(self, data_graph: list[dict[str, Any]]) -> ValidationReport:
         """Validate triple graph data against configured SHACL shapes.
 
         Args:
@@ -50,11 +50,11 @@ class SHACLValidator:
         Returns:
             ValidationReport detailing conformance and violations.
         """
-        violations: List[Dict[str, Any]] = []
+        violations: list[dict[str, Any]] = []
 
         # Map predicates present per subject
-        predicates_by_subject: Dict[str, set] = {}
-        types_by_subject: Dict[str, str] = {}
+        predicates_by_subject: dict[str, set] = {}
+        types_by_subject: dict[str, str] = {}
 
         for triple in data_graph:
             subj = triple.get("subject", "")

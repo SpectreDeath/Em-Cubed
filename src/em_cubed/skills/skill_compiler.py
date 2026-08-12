@@ -2,6 +2,7 @@
 
 import re
 from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -88,7 +89,7 @@ input_val = context.get("input_data", "")
 result = f"Processed: {{input_val}}"
 ```"""
             elif s == "z3":
-                block = f"""## Z3 Surface (`z3`)
+                block = """## Z3 Surface (`z3`)
 
 ```z3
 # Auto-generated Z3 constraint solver logic

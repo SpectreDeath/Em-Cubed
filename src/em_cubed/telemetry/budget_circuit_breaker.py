@@ -2,6 +2,7 @@
 
 from enum import Enum
 from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -32,14 +33,13 @@ class BudgetCircuitBreaker:
         """
         self.current_spend_dollars += max(0.0, cost_dollars)
 
-        if self.current_spend_dollars >= self.max_budget_dollars:
-            if self.state != CircuitState.OPEN:
-                self.state = CircuitState.OPEN
-                logger.warning(
-                    "Budget limit reached! Circuit breaker opened.",
-                    spend=self.current_spend_dollars,
-                    limit=self.max_budget_dollars,
-                )
+        if self.current_spend_dollars >= self.max_budget_dollars and self.state != CircuitState.OPEN:
+            self.state = CircuitState.OPEN
+            logger.warning(
+                "Budget limit reached! Circuit breaker opened.",
+                spend=self.current_spend_dollars,
+                limit=self.max_budget_dollars,
+            )
         return self.state
 
     def check_execution_allowed(self, surface_name: str) -> dict[str, Any]:

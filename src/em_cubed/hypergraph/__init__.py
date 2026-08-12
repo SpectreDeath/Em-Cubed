@@ -20,17 +20,17 @@ from em_cubed.hypergraph.store import HypergraphStore
 from em_cubed.hypergraph.types import Hyperedge
 
 __all__ = [
+    "CausalDAG",
+    "CausalNode",
+    "CompactionPipeline",
     "Hyperedge",
     "HypergraphStore",
-    "CompactionPipeline",
-    "CausalNode",
-    "CausalDAG",
     "SQLiteHypergraphAdapter",
-    "export_store_to_gexf",
     "export_dag_to_gexf",
+    "export_store_to_gexf",
+    "hyperedge_jaccard",
+    "identify_pivot_points",
     "jaccard_similarity",
     "overlap_coefficient",
-    "hyperedge_jaccard",
     "store_jaccard_similarity",
-    "identify_pivot_points",
 ]

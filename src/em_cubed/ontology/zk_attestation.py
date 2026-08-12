@@ -14,7 +14,6 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-
 from em_cubed.ontology.schema import OntologyTriple
 from em_cubed.ontology.topos import SubobjectClassifier
 from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier

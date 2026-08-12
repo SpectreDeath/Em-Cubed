@@ -1,8 +1,7 @@
 """GEXF (Graph Exchange XML Format) Exporter for Gephi Visualization."""
 
-from pathlib import Path
-from typing import Union
 import xml.etree.ElementTree as ET  # nosec B405
+from pathlib import Path
 from xml.dom import minidom  # nosec B408
 
 from em_cubed.hypergraph.causal_dag import CausalDAG
@@ -18,7 +17,7 @@ def _pretty_xml_str(elem: ET.Element) -> str:
 
 def export_store_to_gexf(
     store: HypergraphStore,
-    filepath: Union[str, Path],
+    filepath: str | Path,
     mode: str = "bipartite",
 ) -> str:
     """Export HypergraphStore to GEXF 1.2 XML for visual audit in Gephi.
@@ -53,7 +52,7 @@ def export_store_to_gexf(
         # Clique pairwise edges
         added_pairs = set()
         for hyperedge in store.all_edges():
-            members = sorted(list(hyperedge.member_entities))
+            members = sorted(hyperedge.member_entities)
             for i in range(len(members)):
                 for j in range(i + 1, len(members)):
                     pair = (members[i], members[j])
@@ -102,7 +101,7 @@ def export_store_to_gexf(
     return xml_str
 
 
-def export_dag_to_gexf(dag: CausalDAG, filepath: Union[str, Path]) -> str:
+def export_dag_to_gexf(dag: CausalDAG, filepath: str | Path) -> str:
     """Export CausalDAG to GEXF 1.2 XML format for lineage visualization in Gephi."""
     gexf = ET.Element(
         "gexf",

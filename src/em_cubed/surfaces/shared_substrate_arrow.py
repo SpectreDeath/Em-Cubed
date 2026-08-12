@@ -1,14 +1,14 @@
 """PyArrow zero-copy shared memory substrate for high-throughput polyglot data exchange."""
 
-import io
 from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
 
 try:
     import pyarrow as pa
-    import pyarrow.ipc as ipc
+    from pyarrow import ipc
 
     _PYARROW_AVAILABLE = True
 except ImportError:
@@ -53,7 +53,7 @@ class ArrowSharedSubstrate:
             elif isinstance(data, list) and data and isinstance(data[0], dict):
                 arrow_table = pa.Table.from_pylist(data)
             elif hasattr(data, "to_arrow") or hasattr(data, "to_arrow_table"):
-                arrow_table = getattr(data, "to_arrow", getattr(data, "to_arrow_table"))()
+                arrow_table = getattr(data, "to_arrow", data.to_arrow_table)()
             else:
                 arrow_table = pa.Table.from_pydict({"value": [str(data)]})
 

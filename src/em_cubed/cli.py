@@ -2,10 +2,10 @@
 
 import argparse
 import asyncio
-from datetime import timezone
 import json
-from pathlib import Path
 import sys
+from datetime import timezone
+from pathlib import Path
 
 import structlog
 

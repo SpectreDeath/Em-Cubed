@@ -1,10 +1,12 @@
 """Unit tests for Phase 2: Skill Compiler, Skill Hub, Lockfile, and Signatures."""
 
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
 import pytest
-from em_cubed.skills.skill_compiler import SkillCompiler
+
 from em_cubed.skills.hub import SkillHub
+from em_cubed.skills.skill_compiler import SkillCompiler
 
 
 def test_skill_compiler_generate():

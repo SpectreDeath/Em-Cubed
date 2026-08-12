@@ -1,6 +1,5 @@
 """Hy surface integration using hy-lang."""
 
-import importlib.util
 from typing import Any
 
 import structlog

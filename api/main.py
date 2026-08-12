@@ -1,19 +1,24 @@
 """FastAPI application for Em-Cubed skill execution and search."""
+import json
 import os
 from pathlib import Path
-from fastapi import FastAPI, HTTPException, Request
+from typing import Any
+
+import structlog
+from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
-import structlog
 
-from fastapi import Depends, status
-
-from em_cubed.search import search_registry
-from em_cubed.plugin_manager import PluginManager
 from em_cubed import __version__
-from em_cubed.telemetry.api import initialize_telemetry_api, get_telemetry_api, initialize_websocket_handler, get_websocket_handler
+from em_cubed.plugin_manager import PluginManager
+from em_cubed.search import search_registry
 from em_cubed.skills.telemetry import get_telemetry_collector
+from em_cubed.telemetry.api import (
+    get_telemetry_api,
+    get_websocket_handler,
+    initialize_telemetry_api,
+    initialize_websocket_handler,
+)
 
 logger = structlog.get_logger()
 
@@ -57,8 +62,8 @@ class SearchRequest(BaseModel):
 class ExecuteRequest(BaseModel):
     surface: str
     code: str
-    context: Optional[Dict[str, Any]] = None
-    timeout: Optional[float] = None
+    context: dict[str, Any] | None = None
+    timeout: float | None = None
 
 @app.get("/health")
 async def health(api_key: str = Depends(require_api_key)):
@@ -76,7 +81,7 @@ async def search(request: SearchRequest, api_key: str = Depends(require_api_key)
         return {"results": results}
     except Exception as e:
         logger.exception("Search failed", error=str(e), query=request.query)
-        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Search failed: {e!s}")
 
 
 @app.get("/search")
@@ -87,7 +92,7 @@ async def search_get(q: str, top: int = 10, api_key: str = Depends(require_api_k
         return {"results": results}
     except Exception as e:
         logger.exception("Search failed", error=str(e), query=q)
-        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Search failed: {e!s}")
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
@@ -195,7 +200,7 @@ async def execute_code(request: ExecuteRequest, api_key: str = Depends(require_a
         raise
     except Exception as e:
         logger.exception("Execution failed", error=str(e), surface=request.surface, code_length=len(request.code))
-        raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Execution failed: {e!s}")
 
 @app.get("/surfaces")
 async def list_surfaces(api_key: str = Depends(require_api_key)):
@@ -208,8 +213,9 @@ async def list_surfaces(api_key: str = Depends(require_api_key)):
 @app.get("/telemetry/stream")
 async def telemetry_stream(api_key: str = Depends(require_api_key)):
     """Server-Sent Events (SSE) stream endpoint for real-time telemetry updates."""
-    from fastapi.responses import StreamingResponse
     import asyncio
+
+    from fastapi.responses import StreamingResponse
 
     async def event_generator():
         while True:

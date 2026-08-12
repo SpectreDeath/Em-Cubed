@@ -30,7 +30,6 @@ Process-based isolation (opt-in, ``run_isolated_eval``)
 """
 
 import asyncio
-import importlib.util
 import logging
 import multiprocessing
 import os

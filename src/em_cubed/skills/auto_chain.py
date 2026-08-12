@@ -4,7 +4,8 @@ Uses schema matching and semantic search over the SkillRegistry to discover
 and synthesize multi-step workflow pipelines connecting input specs to target goals.
 """
 
-from typing import Any, List, Dict, Optional
+from typing import Any
+
 import structlog
 
 logger = structlog.get_logger()
@@ -17,7 +18,7 @@ class AutoChainer:
         self.registry_path = registry_path
         self.logger = logger.bind(component="auto_chainer")
 
-    def find_chain(self, input_schema: Dict[str, Any], goal_description: str, max_depth: int = 3) -> Dict[str, Any]:
+    def find_chain(self, input_schema: dict[str, Any], goal_description: str, max_depth: int = 3) -> dict[str, Any]:
         """Synthesize a pipeline DAG connecting input fields to the goal description.
 
         Args:
@@ -29,6 +30,7 @@ class AutoChainer:
             Dict containing pipeline steps, execution sequence, surfaces, and estimated compatibility.
         """
         from pathlib import Path
+
         from ..search import search_registry
 
         self.logger.info("Synthesizing skill chain", goal=goal_description, inputs=list(input_schema.keys()))
@@ -45,7 +47,7 @@ class AutoChainer:
             }
 
         # Select top compatible skills to construct pipeline steps
-        selected_steps: List[Dict[str, Any]] = []
+        selected_steps: list[dict[str, Any]] = []
         current_inputs = set(input_schema.keys())
 
         for idx, skill in enumerate(candidates[:max_depth]):

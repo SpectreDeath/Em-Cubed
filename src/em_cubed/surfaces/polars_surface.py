@@ -1,7 +1,9 @@
 """Polars surface integration for high-performance sub-millisecond DataFrame transformations."""
 
 from typing import Any
+
 import structlog
+
 from .base import SurfaceBase
 
 logger = structlog.get_logger()
@@ -65,7 +67,8 @@ class PolarsSurface(SurfaceBase):
 
             # Execute code within restricted globals namespace
             exec_globals = {"pl": pl, "__builtins__": __builtins__}
-            exec(code, exec_globals, loc)
+            exec(code, exec_globals, loc)  # noqa: S102
+
 
             raw_val = loc.get("result")
             if raw_val is None:

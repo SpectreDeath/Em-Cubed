@@ -6,7 +6,8 @@ via Python ctypes and CFFI interface bindings.
 
 import ctypes
 import os
-from typing import Any, List, Optional
+from typing import Any
+
 import structlog
 
 from .base import SurfaceBase
@@ -21,10 +22,10 @@ class RustSurface(SurfaceBase):
     description = "High-performance native compiled Rust execution surface via ctypes/cffi dynamic plugin loading"
     available = True
 
-    def __init__(self, timeout: Optional[float] = None):
+    def __init__(self, timeout: float | None = None):
         super().__init__(timeout=timeout)
 
-    async def _execute_impl(self, code: str, context: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    async def _execute_impl(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Execute Rust logic via native shared library call or ctypes evaluation.
 
         Expected input code format can be:
@@ -40,7 +41,8 @@ class RustSurface(SurfaceBase):
             if "ctypes" in code or "cffi" in code or "CDLL" in code:
                 exec_globals: dict[str, Any] = {"__builtins__": __builtins__, "ctypes": ctypes, "context": ctx}
                 exec_locals: dict[str, Any] = {}
-                exec(code, exec_globals, exec_locals) # nosec B102
+                exec(code, exec_globals, exec_locals)  # noqa: S102
+
                 res = exec_locals.get("result", exec_globals.get("result", None))
                 return {
                     "status": "success",
@@ -81,7 +83,7 @@ class RustSurface(SurfaceBase):
             logger.exception("Rust surface execution failed", error=str(e))
             return {
                 "status": "error",
-                "message": f"Rust execution failed: {str(e)}",
+                "message": f"Rust execution failed: {e!s}",
                 "surface": self.name,
             }
 
@@ -89,7 +91,7 @@ class RustSurface(SurfaceBase):
         """Check if ctypes is available for Rust binary binding."""
         return True
 
-    def extract_tags(self, source: Optional[str]) -> List[str]:
+    def extract_tags(self, source: str | None) -> list[str]:
         """Extract tags from Rust source or interface definition."""
         tags = ["rust", "native", "cffi", "ctypes"]
         if source:

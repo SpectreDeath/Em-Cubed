@@ -1,8 +1,8 @@
 """Unit tests for GEXF exporter and SQLite persistence adapter."""
 
 import tempfile
-from pathlib import Path
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from em_cubed.hypergraph import (
     CausalDAG,
