@@ -79,13 +79,13 @@ class PolarsSurface(SurfaceBase):
                         break
 
             if isinstance(raw_val, pl.DataFrame):
-                val = raw_val.to_dicts()
+                res_val: Any = raw_val.to_dicts()
             elif isinstance(raw_val, pl.Series):
-                val = raw_val.to_list()
+                res_val = raw_val.to_list()
             else:
-                val = raw_val
+                res_val = raw_val
 
-            return {"status": "ok", "value": val}
+            return {"status": "ok", "value": res_val}
 
         except Exception as e:
             logger.exception("Polars execution failed", error=str(e))

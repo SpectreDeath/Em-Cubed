@@ -43,7 +43,7 @@ class QuickJSSurface(SurfaceBase):
                     self._is_available_cache = importlib.util.find_spec("quickjs") is not None
                 except Exception:
                     self._is_available_cache = False
-        return self._is_available_cache
+        return bool(self._is_available_cache)
 
 
 

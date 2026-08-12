@@ -156,9 +156,9 @@ class LLMSurface(SurfaceBase):
     def _check_availability(self) -> bool:
         """Return True if litellm is importable (cloud path) OR httpx is present."""
         if getattr(self, "_is_available", None) is not None:
-            return self._is_available
+            return bool(self._is_available)
         if getattr(self, "_is_available_cache", None) is not None:
-            return self._is_available_cache
+            return bool(self._is_available_cache)
         if "litellm" in sys.modules or "httpx" in sys.modules:
             self._is_available_cache = True
             return True

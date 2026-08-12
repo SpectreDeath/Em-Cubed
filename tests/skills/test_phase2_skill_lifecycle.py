@@ -28,7 +28,7 @@ def test_skill_compiler_generate():
 def test_skill_compiler_z3_verification():
     compiler = SkillCompiler()
     try:
-        import z3
+        import z3  # noqa: F401
         has_z3 = True
     except ImportError:
         has_z3 = False

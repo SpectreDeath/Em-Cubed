@@ -72,7 +72,7 @@ class TestPhase1Hyperedges:
         # Multi-entity intersection lookup
         usa_ukr_edges = store.query_by_intersection({"USA", "UKR"})
         assert len(usa_ukr_edges) == 1
-        assert list(usa_ukr_edges)[0].edge_id == "edge_1"
+        assert next(iter(usa_ukr_edges)).edge_id == "edge_1"
 
         # Metadata query
         military_edges = store.query_by_metadata("type", "military_aid")

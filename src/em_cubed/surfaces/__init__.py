@@ -21,6 +21,13 @@ QuickJSSurface = None  # type: _Optional[type]
 WASMSurface = None  # type: _Optional[type]
 KanrenSurface = None  # type: _Optional[type]
 ClingoSurface = None  # type: _Optional[type]
+DuckDBSurface = None  # type: _Optional[type]
+JuliaSurface = None  # type: _Optional[type]
+TensorSurface = None  # type: _Optional[type]
+ArrowSharedSubstrate = None  # type: _Optional[type]
+PolarsSurface = None  # type: _Optional[type]
+RustSurface = None  # type: _Optional[type]
+
 
 try:
     from .prolog_surface import PrologSurface as _PrologSurface
