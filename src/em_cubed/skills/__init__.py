@@ -26,6 +26,8 @@ from .telemetry import (
     initialize_telemetry,
     record_skill_execution,
 )
+from .skill_compiler import SkillCompiler
+from .hub import SkillHub
 from .validator import SkillValidator, ValidationResult
 
 __all__ = [
@@ -35,10 +37,12 @@ __all__ = [
     "QualityMetrics",
     "RecommendationResult",
     "SkillBenchmark",
+    "SkillCompiler",
     "SkillComposer",
     "SkillExecutionRequest",
     "SkillExecutionResult",
     "SkillExecutor",
+    "SkillHub",
     "SkillMetadata",
     "SkillQualityPipeline",
     "SkillRecommender",
@@ -54,3 +58,4 @@ __all__ = [
     "initialize_telemetry",
     "record_skill_execution",
 ]
+

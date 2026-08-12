@@ -88,6 +88,37 @@ class ExactTruthmakerClassifier:
             ground_explanation=f"Exact Truthmaker: Grounded in {len(wholly_relevant)} wholly relevant triples",
         )
 
+    @staticmethod
+    def locate_counterfactual_fault(
+        proposition: str,
+        expected_predicates: list[str],
+        actual_triples: list[OntologyTriple],
+    ) -> dict[str, Any]:
+        """Locate exact counterfactual sub-state fault (minimal sub-state producing falsemaker).
+
+        Returns:
+            Dict containing 'fault_detected', 'missing_predicates', 'violating_triples', and 'minimal_fault_substate'.
+        """
+        actual_preds = {t.predicate for t in actual_triples}
+        missing_preds = [p for p in expected_predicates if p not in actual_preds]
+
+        violating_triples = [t for t in actual_triples if t.predicate not in expected_predicates]
+
+        fault_detected = len(missing_preds) > 0 or len(violating_triples) > 0
+
+        return {
+            "proposition": proposition,
+            "fault_detected": fault_detected,
+            "missing_predicates": missing_preds,
+            "violating_triples": violating_triples,
+            "minimal_fault_substate": StateFragment(triples=violating_triples),
+            "explanation": (
+                f"Counterfactual fault: missing {missing_preds}, unexpected {len(violating_triples)} triples"
+                if fault_detected
+                else "No counterfactual fault detected"
+            ),
+        }
+
 
 class HyperintensionalEvaluator:
     """Evaluator distinguishing propositions by underlying subject-matter ground."""
@@ -106,3 +137,4 @@ class HyperintensionalEvaluator:
         t2_set = {(t.subject, t.predicate, t.object) for f in tm2.exact_truthmakers for t in f.triples}
 
         return t1_set == t2_set
+

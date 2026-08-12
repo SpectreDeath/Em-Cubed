@@ -107,6 +107,34 @@ except (ImportError, Exception):
     pass
 
 try:
+    from .duckdb_surface import DuckDBSurface as _DuckDBSurface
+
+    DuckDBSurface = _DuckDBSurface  # type: ignore[assignment]
+except (ImportError, Exception):
+    DuckDBSurface = None  # type: ignore[assignment]
+
+try:
+    from .julia_surface import JuliaSurface as _JuliaSurface
+
+    JuliaSurface = _JuliaSurface  # type: ignore[assignment]
+except (ImportError, Exception):
+    JuliaSurface = None  # type: ignore[assignment]
+
+try:
+    from .tensor_surface import TensorSurface as _TensorSurface
+
+    TensorSurface = _TensorSurface  # type: ignore[assignment]
+except (ImportError, Exception):
+    TensorSurface = None  # type: ignore[assignment]
+
+try:
+    from .shared_substrate_arrow import ArrowSharedSubstrate as _ArrowSharedSubstrate
+
+    ArrowSharedSubstrate = _ArrowSharedSubstrate  # type: ignore[assignment]
+except (ImportError, Exception):
+    ArrowSharedSubstrate = None  # type: ignore[assignment]
+
+try:
     from .morphism import SurfaceMorphism as _SurfaceMorphism
 
     SurfaceMorphism = _SurfaceMorphism  # type: ignore[assignment,misc]
@@ -124,10 +152,13 @@ except (ImportError, Exception):
     OntologyMonad = None  # type: ignore[assignment,misc]
 
 __all__ = [
+    "ArrowSharedSubstrate",
     "ClingoSurface",
     "DatalogSurface",
+    "DuckDBSurface",
     "HySurface",
     "JanusSurface",
+    "JuliaSurface",
     "KanrenSurface",
     "LLMSurface",
     "OntologyMonad",
@@ -138,6 +169,8 @@ __all__ = [
     "SurfaceBase",
     "SurfaceFunctor",
     "SurfaceMorphism",
+    "TensorSurface",
     "WASMSurface",
     "Z3Surface",
 ]
+

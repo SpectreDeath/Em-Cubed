@@ -5,7 +5,7 @@
 [![MCP](https://img.shields.io/badge/MCP-Native-purple)](mcp/README.md)
 [![License](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
-**Em-Cubed** is a high-performance **Polyglot AI Skill Engine** and **Neuro-Symbolic Ontological OS**. It enables AI agents, LLMs, and developers to run 148+ reusable skills across 11 execution surfaces (Python, Prolog, Z3, Datalog, Hy, SQLite, QuickJS, WASM, Clingo, Kanren, Janus) with zero-leak sandbox isolation and built-in MCP integration.
+**Em-Cubed** is a high-performance **Polyglot AI Skill Engine** and **Neuro-Symbolic Ontological OS**. It enables AI agents, LLMs, and developers to run 148+ reusable skills across 14 execution surfaces (Python, Prolog, Z3, Datalog, Hy, SQLite, QuickJS, WASM, Clingo, Kanren, Janus, DuckDB, Julia, PyTorch GPU) with zero-copy PyArrow shared memory, AST sandboxing, lockfile verification, and built-in MCP integration.
 
 ---
 
@@ -19,6 +19,9 @@ uvx em-cubed em3 search "optimization"
 
 # Execute a skill directly from the command line
 uvx em-cubed em3 run --surface python --code "result = 2 + 3"
+
+# Synthesize a new skill from natural language prompt specs
+uvx em-cubed em3 generate-skill "Matrix multiplication and ODE solver" --domain OPTIMIZATION
 
 # Launch the Model Context Protocol (MCP) server for Claude Desktop / Cursor
 uvx em-cubed em3-mcp
@@ -42,13 +45,13 @@ em3 index skills/ -o registry.json
 
 ## 🚀 Core Features
 
-### 🧩 148+ Pre-Built Polyglot Skills
+### 🧩 148+ Pre-Built Polyglot Skills & LLM Compiler
 - **Optimization**: Dialectic Search, Chaos Optimization, Fractal-Based Algorithm, Central Force, Spiral Dynamics, CMA-ES, Differential Evolution.
 - **Machine Learning & Analytics**: K-Means Clustering, Logistic Regression, Random Forest, Naive Bayes, Decision Trees, ARMA/ARIMA Time Series.
-- **Distributed Systems**: DAG Task Scheduler, WASM Execution Sandbox, Durable Execution Engine, Observability Dashboard.
-- **Epidemiology & Clinical Trials**: Stochastic Transmission Network, Trial Matching, Genomic Variant Annotation.
+- **Distributed Systems & Loops**: DAG Task Scheduler, Durable Execution Engine, Self-Healing Skill Loop, Budget Circuit Breaker.
+- **LLM Skill Compiler & Hub**: `em3 generate-skill` prompt compilation with Z3 formal SMT verification, `em3 install`, and `em3.lock` lockfile signatures.
 
-### 🌐 11 Polyglot Execution Surfaces
+### 🌐 14 Polyglot Execution Surfaces
 Run logic in the optimal language or solver for the task:
 | Surface | Primary Use Case | Runtime Security |
 |---------|------------------|------------------|
@@ -58,6 +61,9 @@ Run logic in the optimal language or solver for the task:
 | `datalog` | Deductive relational queries, fact indexing | `pyDatalog` thread isolation + FIFO cache |
 | `hy` | Lisp metaprogramming and macro execution | AST cond-rewriter |
 | `sqlite` | SQL relational querying & database ops | In-memory session isolation |
+| `duckdb` | High-speed columnar OLAP SQL transformations | In-memory DuckDB engine |
+| `julia` | Differential equations & automatic differentiation | Julia runtime / `juliacall` |
+| `tensor` | GPU/CUDA hardware acceleration | PyTorch VRAM memory isolation |
 | `wasm` | Sandboxed WebAssembly binary execution | `wasmtime` fuel metering + `/dev/null` WASI |
 | `clingo` | Answer Set Programming (ASP) | Clingo solver |
 | `kanren` | Relational logic programming (microKanren) | Symbol-allowlisted namespace |
@@ -66,12 +72,11 @@ Run logic in the optimal language or solver for the task:
 | `container` | Isolated Docker container execution | Docker container sandbox (requires `pip install "em-cubed[docker]"`) |
 
 ### 🔌 MCP Native (Claude Desktop & Cursor)
-Em-Cubed exposes 11 tools over standard JSON-RPC STDIO for instant integration into AI agent IDEs. See [mcp/README.md](mcp/README.md) for configuration setup.
+Em-Cubed exposes tools over standard JSON-RPC STDIO/SSE for instant integration into AI agent IDEs. See [docs/USER_MANUAL.md](docs/USER_MANUAL.md) for full configuration setup.
 
 ### 🧠 Formal Neuro-Symbolic Ontology OS
-Grounds agent execution in Topos $\Omega$ subobject classifiers, Kit Fine exact truthmakers ($s \Vdash A$), BFO/OntoClean elicitation pipelines, and SHACL shapes. See [docs/ONTOLOGY_OS.md](docs/ONTOLOGY_OS.md) for full formal ontology documentation.
+Grounds agent execution in Topos $\Omega$ subobject classifiers, Kit Fine exact truthmakers ($s \Vdash A$), counterfactual fault localization, BFO/OntoClean elicitation pipelines, and SHACL shapes. See [docs/USER_MANUAL.md](docs/USER_MANUAL.md) for complete user manual.
 
----
 
 ## 📖 Basic Python API Usage
 

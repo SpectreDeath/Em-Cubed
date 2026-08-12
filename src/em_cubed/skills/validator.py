@@ -268,7 +268,7 @@ class SkillValidator:
             )
 
         # Validate surfaces
-        valid_surfaces = {"python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs", "kanren", "clingo"}
+        valid_surfaces = {"python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs", "kanren", "clingo", "duckdb", "julia", "tensor"}
         for surface in skill_metadata.surfaces:
             if surface not in valid_surfaces:
                 result.add_issue(
@@ -299,16 +299,16 @@ class SkillValidator:
 
     def _validate_surface_implementation(self, result: ValidationResult, skill_metadata, surface: str) -> None:
         """Validate a specific surface implementation."""
-        # Placeholder - actual implementation would read SKILL.md and verify code blocks
-        # For now, we check basic naming conventions
-        if surface not in ["python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs", "kanren", "clingo"]:
+        valid_list = ["python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs", "kanren", "clingo", "duckdb", "julia", "tensor"]
+        if surface not in valid_list:
             result.add_issue(
                 severity=ValidationSeverity.ERROR,
                 code="INVALID_SURFACE",
                 message=f"Surface '{surface}' is not a valid surface type",
                 component="metadata",
-                suggestion="Use python, prolog, hy, z3, datalog, sqlite, quickjs, kanren, or clingo",
+                suggestion=f"Use one of: {', '.join(sorted(valid_list))}",
             )
+
 
     def _validate_dependencies(self, result: ValidationResult, skill_metadata) -> None:
         """Validate skill dependencies."""

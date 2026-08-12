@@ -108,6 +108,9 @@ class PluginDiscovery:
                 ("quickjs", surfaces.QuickJSSurface),  # optional dependency
                 ("kanren", surfaces.KanrenSurface),  # optional dependency
                 ("clingo", surfaces.ClingoSurface),  # optional dependency
+                ("duckdb", surfaces.DuckDBSurface),  # optional dependency
+                ("julia", surfaces.JuliaSurface),  # optional dependency
+                ("tensor", surfaces.TensorSurface),  # optional dependency
             ]
 
             for name, surface_class in heavy_surface_mapping:

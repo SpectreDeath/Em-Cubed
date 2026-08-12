@@ -194,8 +194,29 @@ def main():
     )
     run_dag_parser.add_argument("--skills-dir", "-s", default="skills", help="Skills directory (default: skills)")
 
+    # Generate-skill command
+    gen_parser = subparsers.add_parser("generate-skill", help="Synthesize a new skill from prompt specification")
+    gen_parser.add_argument("prompt", help="Natural language description of the skill")
+    gen_parser.add_argument("--name", "-n", help="Skill slug name")
+    gen_parser.add_argument("--domain", "-d", default="General", help="Skill domain category")
+    gen_parser.add_argument("--surfaces", "-s", nargs="+", default=["python"], help="Target execution surfaces")
+    gen_parser.add_argument("--output", "-o", help="Output file path for generated SKILL.md")
+
+    # Install command
+    install_parser = subparsers.add_parser("install", help="Install a skill package from URL or file")
+    install_parser.add_argument("source", help="URL or local path to SKILL.md file")
+    install_parser.add_argument("--name", "-n", help="Target filename")
+
+    # Lock command
+    subparsers.add_parser("lock", help="Generate or refresh em3.lock lockfile")
+
+    # Verify command
+    verify_parser = subparsers.add_parser("verify", help="Verify skill signature against em3.lock")
+    verify_parser.add_argument("skill_path", help="Relative skill path (e.g. Custom/my-skill.md)")
+
     # Ontology command group
     from em_cubed.cli_ontology import build_ontology_parser, handle_ontology_cli
+
 
     build_ontology_parser(subparsers)
 
@@ -232,12 +253,19 @@ def main():
             _handle_trace_view(args)
         elif args.command == "surfaces":
             _handle_surfaces(args)
-        elif args.command == "skill-info":
-            _handle_skill_info(args)
+        elif args.command == "generate-skill":
+            _handle_generate_skill(args)
+        elif args.command == "install":
+            _handle_install_skill(args)
+        elif args.command == "lock":
+            _handle_lock_skills(args)
+        elif args.command == "verify":
+            _handle_verify_skill(args)
         elif args.command == "workflow":
             asyncio.run(_handle_workflow(args))
         elif args.command == "run-dag":
             asyncio.run(_handle_run_dag(args))
+
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
         print(f"Error: {e}", file=sys.stderr)
@@ -633,8 +661,62 @@ def _handle_create_skill(args):
     print(f"Skill ID: {domain}/{safe_name}")
 
 
+def _handle_generate_skill(args):
+    """Handle generate-skill command."""
+    from em_cubed.skills.skill_compiler import SkillCompiler
+
+    compiler = SkillCompiler()
+    result = compiler.compile_skill(
+        prompt=args.prompt,
+        name=args.name,
+        domain=args.domain,
+        surfaces=args.surfaces,
+    )
+
+    out_file = Path(args.output) if args.output else Path("skills") / result["domain"] / result["name"] / "SKILL.md"
+    out_file.parent.mkdir(parents=True, exist_ok=True)
+    out_file.write_text(result["skill_md"], encoding="utf-8")
+
+    print(f"Generated skill '{result['skill_id']}' at: {out_file}")
+
+
+def _handle_install_skill(args):
+    """Handle install command."""
+    from em_cubed.skills.hub import SkillHub
+
+    hub = SkillHub()
+    res = hub.install_skill(args.source, args.name)
+    if res.get("status") == "ok":
+        print(f"Successfully installed skill to: {res['path']}")
+        print(f"SHA-256: {res['sha256']}")
+    else:
+        print(f"Installation failed: {res.get('message')}")
+
+
+def _handle_lock_skills(args):
+    """Handle lock command."""
+    from em_cubed.skills.hub import SkillHub
+
+    hub = SkillHub()
+    res = hub.generate_lockfile()
+    print(f"Generated em3.lock with {res['skill_count']} skills indexed.")
+
+
+def _handle_verify_skill(args):
+    """Handle verify command."""
+    from em_cubed.skills.hub import SkillHub
+
+    hub = SkillHub()
+    res = hub.verify_skill_integrity(args.skill_path)
+    if res.get("valid"):
+        print(f"SUCCESS: Integrity verified for '{args.skill_path}' (SHA-256: {res['sha256']})")
+    else:
+        print(f"FAILURE: Verification failed for '{args.skill_path}': {res.get('reason')}")
+
+
 def _handle_trace_view(args):
     """Handle trace-view command."""
+
     trace_file = Path(args.file)
     if not trace_file.exists():
         print(f"Trace file not found: {trace_file}")
