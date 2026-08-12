@@ -2,7 +2,7 @@
 
 import asyncio
 import shutil
-import subprocess
+import subprocess  # nosec B404
 from typing import Any
 
 import structlog

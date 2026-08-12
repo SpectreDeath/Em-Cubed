@@ -67,7 +67,7 @@ class PolarsSurface(SurfaceBase):
 
             # Execute code within restricted globals namespace
             exec_globals = {"pl": pl, "__builtins__": __builtins__}
-            exec(code, exec_globals, loc)  # noqa: S102
+            exec(code, exec_globals, loc)  # noqa: S102  # nosec B102
 
 
             raw_val = loc.get("result")

@@ -41,7 +41,7 @@ class RustSurface(SurfaceBase):
             if "ctypes" in code or "cffi" in code or "CDLL" in code:
                 exec_globals: dict[str, Any] = {"__builtins__": __builtins__, "ctypes": ctypes, "context": ctx}
                 exec_locals: dict[str, Any] = {}
-                exec(code, exec_globals, exec_locals)  # noqa: S102
+                exec(code, exec_globals, exec_locals)  # noqa: S102  # nosec B102
 
                 res = exec_locals.get("result", exec_globals.get("result", None))
                 return {

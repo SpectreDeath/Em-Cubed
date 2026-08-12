@@ -95,7 +95,7 @@ class TensorSurface(SurfaceBase):
             if _TORCH_AVAILABLE and torch.cuda.is_available():
                 try:
                     torch.cuda.empty_cache()
-                except Exception:
+                except Exception:  # nosec B110
                     pass
             gc.collect()
 
