@@ -1,6 +1,7 @@
 """QuickJS surface integration for executing JavaScript code."""
 
 import importlib.util
+import sys
 from typing import Any
 
 import structlog
@@ -9,8 +10,6 @@ from .base import SurfaceBase
 
 logger = structlog.get_logger()
 
-
-import sys
 
 
 class QuickJSSurface(SurfaceBase):

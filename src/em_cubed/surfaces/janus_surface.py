@@ -17,6 +17,7 @@ PrologSurface instead, which has fewer dependencies and is easier to set up.
 
 import asyncio
 import importlib.util
+import sys
 from typing import Any
 
 import structlog
@@ -25,8 +26,6 @@ from .base import SurfaceBase
 
 logger = structlog.get_logger()
 
-
-import sys
 
 
 class JanusSurface(SurfaceBase):
