@@ -46,6 +46,80 @@ class SurfaceTimeoutError(Exception):
     """Raised when a surface operation times out."""
 
 
+# ---------------------------------------------------------------------------
+# Shared asteval sandbox builder
+# ---------------------------------------------------------------------------
+
+#: Symbols removed from the asteval symtable and replaced with error stubs.
+BLOCKED_SYMBOLS: list[str] = [
+    "open",
+    "__import__",
+    "eval",
+    "exec",
+    "compile",
+    "__builtins__",
+    "breakpoint",
+    "input",
+]
+
+#: Subset of BLOCKED_SYMBOLS that get callable wrapper stubs (not ``{}``).
+CALLABLE_BLOCKED: list[str] = [
+    "open",
+    "__import__",
+    "eval",
+    "exec",
+    "compile",
+    "breakpoint",
+    "input",
+]
+
+
+def _make_blocked_callable(name: str):  # type: ignore[return]
+    """Return a callable that raises RuntimeError when invoked.
+
+    Installed as a replacement for dangerous builtins inside asteval interpreters.
+    """
+    def _blocked(*args, **kwargs):  # type: ignore[return]
+        raise RuntimeError(f"'{name}' is not available in the sandboxed environment")
+    _blocked.__name__ = name
+    return _blocked
+
+
+def make_sandboxed_interpreter(extra_blocked: list[str] | None = None):
+    """Create a restricted ``asteval.Interpreter`` with dangerous builtins removed.
+
+    Parameters
+    ----------
+    extra_blocked:
+        Additional symbol names to block beyond the shared ``BLOCKED_SYMBOLS``
+        list.  Useful for surface-specific restrictions.
+
+    Returns
+    -------
+    asteval.Interpreter | None
+        A sandboxed interpreter, or ``None`` if ``asteval`` is not installed.
+    """
+    try:
+        import asteval  # type: ignore[import-untyped]
+    except ImportError:
+        return None
+
+    interp = asteval.Interpreter()
+    all_blocked = list(BLOCKED_SYMBOLS) + (extra_blocked or [])
+
+    for sym in all_blocked:
+        interp.symtable.pop(sym, None)
+
+    for sym in CALLABLE_BLOCKED + (extra_blocked or []):
+        if sym != "__builtins__":
+            interp.symtable[sym] = _make_blocked_callable(sym)
+
+    # asteval checks ``"__builtins__" in symtable`` — set to {} not a callable.
+    interp.symtable["__builtins__"] = {}
+
+    return interp
+
+
 class SurfaceBase(SurfacePlugin, ABC):
     """Base class for all execution surfaces with timeout support."""
 

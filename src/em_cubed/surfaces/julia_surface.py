@@ -78,7 +78,7 @@ class JuliaSurface(SurfaceBase):
                 try:
                     if hasattr(res, "_jl_raw"):
                         val = str(res)
-                except Exception:
+                except Exception:  # nosec B110
                     pass
 
                 return {"status": "ok", "value": val}
@@ -91,7 +91,7 @@ class JuliaSurface(SurfaceBase):
             loop = asyncio.get_running_loop()
 
             def run_julia_subprocess() -> dict[str, Any]:
-                process = subprocess.run(
+                process = subprocess.run(  # nosec B607 B603
                     ["julia", "-e", code],
                     capture_output=True,
                     text=True,

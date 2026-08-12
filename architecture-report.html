@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Em-Cubed Architecture Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .mermaid { display: flex; justify-content: center; margin: 1.5rem 0; }
+        .card-enter { animation: slideUp 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        .badge-strong { background: linear-gradient(135deg, #10b981, #059669); }
+        .badge-worth { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .badge-speculative { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) { .before-after { grid-template-columns: 1fr; } }
+        .before-box { border-left: 4px solid #ef4444; }
+        .after-box { border-left: 4px solid #10b981; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Em-Cubed Architecture Review</h1>
+                    <p class="text-slate-400 mt-1 text-sm">Deepening opportunities &amp; architectural friction analysis</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-slate-500">Generated</div>
+                    <div class="text-sm text-slate-300 font-mono" id="timestamp"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="bg-slate-900 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                    <div class="text-2xl font-bold text-emerald-400">403</div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">Python Source Files</div>
+                </div>
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                    <div class="text-2xl font-bold text-cyan-400">171</div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">SKILL.md Files</div>
+                </div>
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                    <div class="text-2xl font-bold text-amber-400">16</div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">Execution Surfaces</div>
+                </div>
+                <div class="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                    <div class="text-2xl font-bold text-rose-400">6</div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wider">Critical Candidates</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        <section class="bg-slate-900 rounded-xl border border-slate-800 p-6 card-enter">
+            <h2 class="text-xl font-semibold text-white mb-3">Executive Summary</h2>
+            <p class="text-slate-300 leading-relaxed">The Em-Cubed codebase shows clear signs of rapid feature accretion without proportional structural refactoring. The most acute friction points are: a God-class base that imports 12+ subsystems, a 400-line MCP dispatcher that instantiates every subsystem inline, two competing checkpoint systems, and a surface layer that has grown to 16 implementations without a consistent internal contract.</p>
+        </section>
+        <section class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden card-enter">
+            <div class="bg-gradient-to-r from-rose-900/40 to-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">1. Extract Ontology Dependencies from BaseLoopySkill</h2>
+                    <p class="text-sm text-slate-400 mt-1">src/em_cubed/loopy/base.py — Lines 43-339</p>
+                </div>
+                <span class="badge-strong text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Strong</span>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="before-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-2">Problem</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">BaseLoopySkill is the single worst locality offender. A developer must read 12+ unrelated ontology modules to understand what it means to be a loopy skill. The constructor directly instantiates OntologyLedgerValidator() and 12 methods are hardcoded to call specific ontology classes. There is no interface, no protocol, no dependency injection.</p>
+                    </div>
+                    <div class="after-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">Solution</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">Introduce a SurfaceExecutionContext protocol that provides verify(), induce_concept(), compute_derived_property(), etc. The base class becomes a loop engine that calls context.verify(state) instead of self.verify_topos(state).</p>
+                    </div>
+                </div>
+                <div class="before-after">
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Before (Shallow)</h4>
+                        <div class="mermaid">graph TD
+                            B["BaseLoopySkill"] --> T["ontology/topos.py"]
+                            B --> TM["ontology/truthmaker.py"]
+                            B --> V["ontology/validator.py"]
+                            B --> CI["ontology/concept_induction.py"]
+                            B --> AO["ontology/advanced_ontology.py"]
+                            B --> SE["ontology/schema_evolution.py"]
+                            B --> HM["ontology/health_monitor.py"]
+                            B --> TS["ontology/temporal_spatial.py"]
+                            B --> IO["ontology/interoperability.py"]
+                            B --> ES["ontology/event_stream.py"]
+                            B --> ZK["ontology/zk_attestation.py"]
+                            B --> F["surfaces/functor.py"]
+                            style B fill:#ef4444,stroke:#b91c1c,color:#fff</div>
+                    </div>
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">After (Deep)</h4>
+                        <div class="mermaid">graph TD
+                            B["BaseLoopySkill"] --> Ctx["SurfaceExecutionContext<br/>(protocol)"]
+                            Ctx --> T["ontology/topos.py"]
+                            Ctx --> TM["ontology/truthmaker.py"]
+                            Ctx --> V["ontology/validator.py"]
+                            Ctx --> CI["ontology/concept_induction.py"]
+                            Ctx --> AO["ontology/advanced_ontology.py"]
+                            Ctx --> SE["ontology/schema_evolution.py"]
+                            Ctx --> HM["ontology/health_monitor.py"]
+                            Ctx --> TS["ontology/temporal_spatial.py"]
+                            Ctx --> IO["ontology/interoperability.py"]
+                            Ctx --> ES["ontology/event_stream.py"]
+                            Ctx --> ZK["ontology/zk_attestation.py"]
+                            Ctx --> F["surfaces/functor.py"]
+                            style B fill:#10b981,stroke:#059669,color:#fff
+                            style Ctx fill:#3b82f6,stroke:#2563eb,color:#fff</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Benefits</h3>
+                    <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+                        <li><strong class="text-emerald-400">Locality:</strong> Understanding a loopy skill only requires reading the base class + context interface, not 12 modules.</li>
+                        <li><strong class="text-emerald-400">Leverage:</strong> New ontology backends can be injected without touching the loop engine.</li>
+                        <li><strong class="text-emerald-400">Testability:</strong> The context protocol can be mocked in unit tests; loopy skills no longer need the full ontology stack to test.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Files Involved</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/loopy/base.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/ontology/topos.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/ontology/truthmaker.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/ontology/validator.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/surfaces/functor.py</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden card-enter">
+            <div class="bg-gradient-to-r from-rose-900/40 to-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">2. Decompose MCP call_tool() into a Tool Registry</h2>
+                    <p class="text-sm text-slate-400 mt-1">src/em_cubed/gateway/mcp_server.py — Lines 214-418</p>
+                </div>
+                <span class="badge-strong text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Strong</span>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="before-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-2">Problem</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">The call_tool() method is a 200-line if/elif chain. Each branch imports and instantiates a different subsystem inline. To understand what the MCP server does, you must read 8+ unrelated modules. There is no delegation, no routing table, no plugin architecture for tools.</p>
+                    </div>
+                    <div class="after-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">Solution</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">Introduce a ToolRegistry with register(name, handler) and dispatch(name, args). Each subsystem registers its own tools. The MCP server becomes a thin transport layer.</p>
+                    </div>
+                </div>
+                <div class="before-after">
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Before (Monolithic)</h4>
+                        <div class="mermaid">graph TD
+                            M["EmCubedMCPServer"] --> C{"200-line if/elif chain"}
+                            C --> SR["search_registry"]
+                            C --> SC["SkillCompiler"]
+                            C --> AC["AutoChainer"]
+                            C --> OT["OntologyTriple"]
+                            C --> KE["KnowledgeElicitationPipeline"]
+                            C --> SC2["SubobjectClassifier"]
+                            C --> ET["ExactTruthmakerClassifier"]
+                            C --> ZK["ZeroKnowledgeOntologyAttestor"]
+                            style M fill:#ef4444,stroke:#b91c1c,color:#fff
+                            style C fill:#7f1d1d,stroke:#ef4444,color:#fff</div>
+                    </div>
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">After (Registry Pattern)</h4>
+                        <div class="mermaid">graph TD
+                            M["EmCubedMCPServer"] --> TR["ToolRegistry"]
+                            SR -->|register| TR
+                            SC -->|register| TR
+                            AC -->|register| TR
+                            OT -->|register| TR
+                            KE -->|register| TR
+                            SC2 -->|register| TR
+                            ET -->|register| TR
+                            ZK -->|register| TR
+                            style M fill:#10b981,stroke:#059669,color:#fff
+                            style TR fill:#3b82f6,stroke:#2563eb,color:#fff</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Benefits</h3>
+                    <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+                        <li><strong class="text-emerald-400">Locality:</strong> Each subsystem owns its tool registration; the MCP server only handles transport.</li>
+                        <li><strong class="text-emerald-400">Leverage:</strong> Adding a new MCP tool is a one-line registration, not a modification to a 400-line chain.</li>
+                        <li><strong class="text-emerald-400">Testability:</strong> Tool handlers can be unit-tested independently of the MCP transport layer.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Files Involved</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/gateway/mcp_server.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/gateway/policy_steering.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/skills/auto_chain.py</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden card-enter">
+            <div class="bg-gradient-to-r from-rose-900/40 to-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">3. Unify Competing Checkpoint Systems</h2>
+                    <p class="text-sm text-slate-400 mt-1">workflow/durable_execution.py vs workflow/checkpoint.py</p>
+                </div>
+                <span class="badge-strong text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Strong</span>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="before-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-2">Problem</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">Two separate checkpoint implementations serve the same purpose but have different schemas and APIs. durable_execution.py (97 lines) uses a simple SQLite table. checkpoint.py (417 lines) is a complex system with Checkpoint dataclass, CheckpointStorage ABC, FileCheckpointStorage, CheckpointManager, plus integration with CausalDAG, HypergraphStore, and CompactionPipeline.</p>
+                    </div>
+                    <div class="after-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">Solution</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">Make CheckpointManager the single checkpoint API. Have durable_execution.py delegate to CheckpointManager instead of implementing its own SQLite schema. Extract a CheckpointStorage interface and have both use it.</p>
+                    </div>
+                </div>
+                <div class="before-after">
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Before (Duplicated)</h4>
+                        <div class="mermaid">graph TD
+                            DE["durable_execution.py"] -->|"simple SQLite"| DB1[(workflow_checkpoints)]
+                            CP["checkpoint.py"] -->|"complex ABC"| DB2[(FileCheckpointStorage)]
+                            CP --> CD["CausalDAG"]
+                            CP --> HS["HypergraphStore"]
+                            CP --> COMP["CompactionPipeline"]
+                            style DE fill:#ef4444,stroke:#b91c1c,color:#fff
+                            style CP fill:#ef4444,stroke:#b91c1c,color:#fff</div>
+                    </div>
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">After (Unified)</h4>
+                        <div class="mermaid">graph TD
+                            DE["durable_execution.py"] -->|delegates to| CM["CheckpointManager"]
+                            CP["checkpoint.py"] -->|uses| CM
+                            CM --> CSI["CheckpointStorage<br/>(interface)"]
+                            CSI --> SQL["SQLiteStorage"]
+                            CSI --> FILE["FileStorage"]
+                            CM --> CD["CausalDAG"]
+                            CM --> HS["HypergraphStore"]
+                            style DE fill:#10b981,stroke:#059669,color:#fff
+                            style CM fill:#3b82f6,stroke:#2563eb,color:#fff</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Benefits</h3>
+                    <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+                        <li><strong class="text-emerald-400">Locality:</strong> One checkpoint API to learn; no more guessing which system to use.</li>
+                        <li><strong class="text-emerald-400">Leverage:</strong> CheckpointManager already has the richer feature set (causal DAG, compaction). durable_execution.py gets those features for free.</li>
+                        <li><strong class="text-emerald-400">Testability:</strong> Both paths tested through the same interface; no duplicated test logic.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Files Involved</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/workflow/durable_execution.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/workflow/checkpoint.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/workflow/distributed.py</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden card-enter">
+            <div class="bg-gradient-to-r from-rose-900/40 to-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">4. Create SurfaceFactory to Eliminate Sandbox Duplication</h2>
+                    <p class="text-sm text-slate-400 mt-1">src/em_cubed/surfaces/ — All 16 surface implementations</p>
+                </div>
+                <span class="badge-strong text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Strong</span>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="before-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-2">Problem</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">16 surface files, each reinventing the same restricted interpreter setup. python_surface.py and z3_surface.py both create asteval.Interpreter with different sandboxing strategies. Each duplicates _BLOCKED_SYMBOLS, extract_tags(), and _execute_impl() patterns. No shared abstraction.</p>
+                    </div>
+                    <div class="after-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">Solution</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">Introduce a SurfaceFactory or RestrictedExecutionContext that handles common asteval/sandbox setup, timeout management, and concurrency limiting. Each surface only provides _execute_impl() and extract_tags().</p>
+                    </div>
+                </div>
+                <div class="before-after">
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Before (Duplicated)</h4>
+                        <div class="mermaid">graph TD
+                            PS["python_surface.py"] -->|duplicates| AST["asteval setup"]
+                            ZS["z3_surface.py"] -->|duplicates| AST
+                            PRS["prolog_surface.py"] -->|duplicates| AST
+                            DS["datalog_surface.py"] -->|duplicates| AST
+                            WS["wasm_surface.py"] -->|duplicates| AST
+                            QJS["quickjs_surface.py"] -->|duplicates| AST
+                            KS["kanren_surface.py"] -->|duplicates| AST
+                            CS["clingo_surface.py"] -->|duplicates| AST
+                            style PS fill:#ef4444,stroke:#b91c1c,color:#fff
+                            style ZS fill:#ef4444,stroke:#b91c1c,color:#fff</div>
+                    </div>
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">After (Factory Pattern)</h4>
+                        <div class="mermaid">graph TD
+                            PS["python_surface.py"] -->|uses| SF["SurfaceFactory"]
+                            ZS["z3_surface.py"] -->|uses| SF
+                            PRS["prolog_surface.py"] -->|uses| SF
+                            DS["datalog_surface.py"] -->|uses| SF
+                            WS["wasm_surface.py"] -->|uses| SF
+                            QJS["quickjs_surface.py"] -->|uses| SF
+                            KS["kanren_surface.py"] -->|uses| SF
+                            CS["clingo_surface.py"] -->|uses| SF
+                            SF -->|creates| CTX["RestrictedExecutionContext"]
+                            style SF fill:#3b82f6,stroke:#2563eb,color:#fff
+                            style CTX fill:#10b981,stroke:#059669,color:#fff</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Benefits</h3>
+                    <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+                        <li><strong class="text-emerald-400">Locality:</strong> Sandboxing logic lives in one place; surface files only contain domain-specific execution.</li>
+                        <li><strong class="text-emerald-400">Leverage:</strong> Fixing a security issue in sandboxing applies to all 16 surfaces automatically.</li>
+                        <li><strong class="text-emerald-400">Testability:</strong> The factory can be tested once; surface tests focus on domain logic.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Files Involved</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/surfaces/base.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/surfaces/python_surface.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/surfaces/z3_surface.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/surfaces/prolog_surface.py</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden card-enter">
+            <div class="bg-gradient-to-r from-rose-900/40 to-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">5. Decouple SkillExecutor from Hardcoded Surface List</h2>
+                    <p class="text-sm text-slate-400 mt-1">src/em_cubed/skills/executor.py — Lines 305-311</p>
+                </div>
+                <span class="badge-worth text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Worth Exploring</span>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="before-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-2">Problem</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">The execute() method iterates over a hardcoded list of 8 surface names. Adding a new surface requires modifying the executor, not just registering a plugin.</p>
+                    </div>
+                    <div class="after-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">Solution</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">The executor should ask plugin_manager.get_available_surfaces() and inject whatever is available. New surfaces would work automatically without executor changes.</p>
+                    </div>
+                </div>
+                <div class="before-after">
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Before (Hardcoded)</h4>
+                        <div class="mermaid">graph LR
+                            SE["SkillExecutor"] -->|"hardcoded list"| HL["['python','prolog','hy',<br/>'z3','datalog','sqlite',<br/>'kanren','clingo']"]
+                            HL -->|"missing new surfaces"| BUG["New surfaces invisible<br/>to executor"]
+                            style SE fill:#ef4444,stroke:#b91c1c,color:#fff
+                            style BUG fill:#7f1d1d,stroke:#ef4444,color:#fff</div>
+                    </div>
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">After (Dynamic)</h4>
+                        <div class="mermaid">graph LR
+                            SE["SkillExecutor"] -->|"plugin_manager"| PM["PluginManager"]
+                            PM -->|"get_available_surfaces()"| DYNAMIC["Dynamically discovered<br/>all 16 surfaces"]
+                            DYNAMIC -->|"zero config"| OK["New surfaces work<br/>automatically"]
+                            style SE fill:#10b981,stroke:#059669,color:#fff
+                            style PM fill:#3b82f6,stroke:#2563eb,color:#fff</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Benefits</h3>
+                    <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+                        <li><strong class="text-emerald-400">Locality:</strong> Surface registration happens in one place (plugin manager), not scattered across executors.</li>
+                        <li><strong class="text-emerald-400">Leverage:</strong> Adding a new surface requires zero changes to the executor.</li>
+                        <li><strong class="text-emerald-400">Testability:</strong> Mocking the plugin manager surface list is easier than maintaining a hardcoded list.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Files Involved</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/skills/executor.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/plugin_manager.py</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden card-enter">
+            <div class="bg-gradient-to-r from-rose-900/40 to-slate-900 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-white">6. Isolate _execute_distributed_task from Plugin Stack</h2>
+                    <p class="text-sm text-slate-400 mt-1">src/em_cubed/workflow/distributed.py — Lines 238-281</p>
+                </div>
+                <span class="badge-worth text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Worth Exploring</span>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="before-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-rose-400 uppercase tracking-wider mb-2">Problem</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">_execute_distributed_task is a module-level function that imports PluginManager, SkillRegistry, SkillExecutor, and SkillExecutionRequest inside its body. This function runs in a separate process via ProcessPoolExecutor, yet it re-implements the entire plugin loading and skill resolution stack inline.</p>
+                    </div>
+                    <div class="after-box bg-slate-800/30 rounded-lg p-4">
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">Solution</h3>
+                        <p class="text-slate-300 text-sm leading-relaxed">Pass a serialized skill specification to the worker process instead of re-resolving it from the registry. The worker should receive (skill_id, code_blocks, surface_name, input_data) and execute them without touching PluginManager or SkillRegistry.</p>
+                    </div>
+                </div>
+                <div class="before-after">
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">Before (Coupled)</h4>
+                        <div class="mermaid">graph TD
+                            PE["ProcessPoolExecutor"] -->|spawns| PDT["_execute_distributed_task()"]
+                            PDT -->|"re-imports"| PM["PluginManager"]
+                            PDT -->|"re-imports"| SR["SkillRegistry"]
+                            PDT -->|"re-imports"| SE["SkillExecutor"]
+                            PM -->|"discovers plugins"| FS["filesystem"]
+                            SR -->|"loads registry"| JSON["registry.json"]
+                            style PE fill:#ef4444,stroke:#b91c1c,color:#fff
+                            style PDT fill:#7f1d1d,stroke:#ef4444,color:#fff</div>
+                    </div>
+                    <div class="bg-slate-800/30 rounded-lg p-4">
+                        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 text-center">After (Isolated)</h4>
+                        <div class="mermaid">graph TD
+                            PE["ProcessPoolExecutor"] -->|spawns| PDT["_execute_distributed_task()"]
+                            PDT -->|"receives serialized spec"| SPEC["(skill_id, code_blocks,<br/>surface_name, input_data)"]
+                            SPEC -->|"no registry needed"| EXEC["Execute directly"]
+                            style PE fill:#10b981,stroke:#059669,color:#fff
+                            style SPEC fill:#3b82f6,stroke:#2563eb,color:#fff</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Benefits</h3>
+                    <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+                        <li><strong class="text-emerald-400">Locality:</strong> Worker logic is self-contained; no need to understand the plugin stack to test it.</li>
+                        <li><strong class="text-emerald-400">Leverage:</strong> The worker becomes a pure function of its inputs; easier to reason about and debug.</li>
+                        <li><strong class="text-emerald-400">Testability:</strong> Unit tests can call the worker directly with a fake spec, no ProcessPoolExecutor needed.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-2">Files Involved</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/workflow/distributed.py</span>
+                        <span class="font-mono text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">src/em_cubed/workflow/worker.py</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="bg-slate-900 rounded-xl border border-slate-800 p-6 card-enter">
+            <h2 class="text-xl font-semibold text-white mb-3">Top Recommendation</h2>
+            <p class="text-slate-300 leading-relaxed">Start with Candidate 1: Extract Ontology Dependencies from BaseLoopySkill. It has the highest impact because BaseLoopySkill is the single largest locality/coupling problem in the codebase. Deepening this module immediately improves testability for all loopy skills and establishes a context-protocol pattern that can be reused elsewhere. It also reduces the cognitive load for anyone working on the ontology subsystem, since the base class will no longer be a forced dependency.</p>
+        </section>
+    </main>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>

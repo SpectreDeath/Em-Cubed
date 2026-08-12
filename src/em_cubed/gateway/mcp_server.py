@@ -12,20 +12,23 @@ import logging
 import sys
 from typing import Any
 
-from em_cubed.ontology.elicitation import KnowledgeElicitationPipeline
-from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
-from em_cubed.ontology.schema import OntologyTriple
-from em_cubed.ontology.topos import SubobjectClassifier
-from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier
-from em_cubed.ontology.validator import OntologyLedgerValidator
-from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
-from em_cubed.surfaces.functor import OntologyMonad, SurfaceFunctor
+from em_cubed.gateway.tool_registry import ToolRegistry
+from em_cubed.gateway.tool_handlers import meta_handlers, ontology_handlers, skill_handlers, workflow_handlers
 
 logger = logging.getLogger(__name__)
 
 
 class EmCubedMCPServer:
     """MCP Gateway Server exposing Em-Cubed neuro-symbolic tools."""
+
+    def __init__(self) -> None:
+        self._registry = ToolRegistry()
+        ontology_handlers.register_all(self._registry)
+        skill_handlers.register_all(self._registry)
+        workflow_handlers.register_all(self._registry)
+        meta_handlers.register_all(self._registry)
+        # Inject total tool count into the server_discover handler.
+        meta_handlers.set_tools_count(len(self.TOOLS))
 
     TOOLS = [
         {
@@ -212,210 +215,8 @@ class EmCubedMCPServer:
 
 
     def call_tool(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
-        """Dispatch tool invocation to core subsystem handler."""
-        if name == "em_cubed_server_discover" or name == "serverDiscover":
-            return {
-                "spec_version": "2026-07-28",
-                "protocolVersion": "2026-07-28",
-                "stateless": True,
-                "server_info": {"name": "em-cubed", "version": "0.8.0"},
-                "capabilities": {
-                    "stateless_transport": True,
-                    "routing_headers": ["MCP-Method", "MCP-Name"],
-                    "interactive_mode": "input_required",
-                    "tools": len(self.TOOLS),
-                },
-                "_meta": {
-                    "handshake_required": False,
-                    "mcp_session_id_deprecated": True,
-                },
-            }
-
-        elif name == "em_cubed_search_skills":
-            from pathlib import Path
-
-            from em_cubed.search import search_registry
-
-            query = args.get("query", "")
-            max_res = args.get("max_results", 10)
-            query = args.get("query", "")
-            max_res = args.get("max_results", 10)
-            reg_path = Path("registry.json")
-            if not reg_path.exists():
-                reg_path = Path("src/em_cubed/registry.json")
-            if reg_path.exists():
-                matches = search_registry(query, registry_path=reg_path, max_results=max_res, use_whoosh=False)
-            else:
-                from em_cubed.skills import SkillRegistry
-
-                r = SkillRegistry(Path("skills"), reg_path)
-                matches = [s.to_dict() for s in r.search(query)[:max_res]] if hasattr(r, "search") else []  # type: ignore[attr-defined]
-            return {
-                "query": query,
-                "count": len(matches),
-                "skills": [
-                    {
-                        "skill_id": m.get("skill_id", m.get("name", "")),
-                        "name": m.get("name", ""),
-                        "domain": m.get("domain", ""),
-                        "surfaces": m.get("surfaces", []),
-                        "description": m.get("description", ""),
-                    }
-                    for m in matches
-                ],
-            }
-
-        elif name == "em_cubed_list_surfaces":
-            from em_cubed.surfaces import (
-                ClingoSurface,
-                DatalogSurface,
-                HySurface,
-                JanusSurface,
-                KanrenSurface,
-                PrologSurface,
-                PythonSurface,
-                QuickJSSurface,
-                SQLiteSurface,
-                WASMSurface,
-                Z3Surface,
-            )
-
-            raw_classes = [
-                PythonSurface,
-                PrologSurface,
-                Z3Surface,
-                DatalogSurface,
-                SQLiteSurface,
-                HySurface,
-                QuickJSSurface,
-                WASMSurface,
-                ClingoSurface,
-                KanrenSurface,
-                JanusSurface,
-            ]
-            surfaces = [cls() for cls in raw_classes if cls is not None]
-            return {
-                "surfaces": [
-                    {
-                        "name": s.name,
-                        "description": s.description,
-                        "available": s.available,
-                    }
-                    for s in surfaces
-                ]
-            }
-
-        elif name == "em_cubed_execute_skill":
-            import asyncio
-            from pathlib import Path as _Path
-
-            from em_cubed.plugin_registry import PluginRegistry
-            from em_cubed.skills import SkillRegistry
-            from em_cubed.skills.executor import (
-                SkillExecutionRequest,
-                SkillExecutor,
-                get_skill_executor,
-            )
-
-            skills_dir = _Path("skills")
-            reg_file = _Path("registry.json")
-            reg = SkillRegistry(skills_dir, reg_file)
-            pm = PluginRegistry()
-            executor = get_skill_executor() or SkillExecutor(pm, reg, skills_dir)
-
-            skill_id = args.get("skill_id", "")
-            surface = args.get("surface")
-            input_data = args.get("input_data", {})
-            req = SkillExecutionRequest(skill_id=skill_id, input_data=input_data, surface=surface)
-            res = asyncio.run(executor.execute(req))
-            return {
-                "status": "ok" if res.success else "error",
-                "value": res.output if res.success else res.error,
-                "execution_time": res.execution_time_ms,
-            }
-
-        elif name == "em_cubed_auto_chain":
-            from em_cubed.skills.auto_chain import AutoChainer
-            chainer = AutoChainer()
-            goal = args.get("goal", "")
-            inputs = args.get("inputs", {})
-            return chainer.find_chain(input_schema=inputs, goal_description=goal)
-
-        elif name == "em_cubed_validate_triple":
-
-            triple = OntologyTriple(subject=args["subject"], predicate=args["predicate"], object=args["object"])
-            validator = OntologyLedgerValidator()
-            is_valid, msg = validator.validate_and_commit(triple)
-            return {"valid": is_valid, "message": msg}
-
-        elif name == "em_cubed_elicit_ontology":
-            pipeline = KnowledgeElicitationPipeline()
-            elicitation_report = pipeline.execute_pipeline(
-                executive_prompt=args["prompt"],
-                dsq_texts=["What is the supply risk?"],
-                cq_texts=["Which suppliers provide Folic Acid?"],
-            )
-            formatted_triples = [
-                {"subject": t.subject, "predicate": t.predicate, "object": t.object} for t in elicitation_report.triples
-            ]
-            return {"triples_count": len(elicitation_report.triples), "triples": formatted_triples}
-
-        elif name == "em_cubed_evaluate_topos":
-            truth_val = SubobjectClassifier.evaluate_confidence(float(args["confidence"]))
-            return {
-                "confidence": truth_val.confidence,
-                "modal_type": truth_val.modal_type.value,
-                "satisfied": truth_val.is_satisfied(),
-            }
-
-        elif name == "em_cubed_extract_truthmakers":
-            t = OntologyTriple(subject=args["subject"], predicate="relatesTo", object=args["object"])
-            tm = ExactTruthmakerClassifier.classify_exact_truthmaker(
-                proposition=args["proposition"],
-                state_triples=[t],
-                relevant_predicates=["relatesTo"],
-            )
-            return {
-                "proposition": tm.proposition,
-                "is_satisfied": tm.is_satisfied,
-                "ground_explanation": tm.ground_explanation,
-            }
-
-        elif name == "em_cubed_prove_zkp":
-            t = OntologyTriple(subject=args["subject"], predicate="relatesTo", object=args["object"])
-            commitment = ZeroKnowledgeOntologyAttestor.generate_attestation(
-                proposition=args["proposition"],
-                state_triples=[t],
-                relevant_predicates=["relatesTo"],
-            )
-            return {
-                "proof_id": commitment.proof_id,
-                "proposition_hash": commitment.proposition_hash,
-                "merkle_state_root": commitment.merkle_state_root,
-                "signature": commitment.signature,
-            }
-
-        elif name == "em_cubed_check_health":
-            health_report = OntologicalHealthMonitor.audit_health([])
-            return {"coherence_index": health_report.coherence_index, "health_status": health_report.health_status}
-
-        elif name == "em_cubed_run_monad":
-            t = OntologyTriple(subject=args["subject"], predicate=args["predicate"], object=args["object"])
-            prolog_str = SurfaceFunctor.python_to_prolog([t])
-            z3_str = SurfaceFunctor.prolog_to_z3(prolog_str)
-            monad = OntologyMonad.unit(z3_str)
-            return {"smt_lib": monad.extract(), "trace": monad.trace}
-
-        elif name == "em_cubed_run_geopolitical_sim":
-            return {
-                "scenario": args.get("scenario", "default"),
-                "steps": args.get("steps", 10),
-                "topos_omega_status": "NECESSARY",
-                "epistemic_trust": 0.89,
-                "status": "COMPLETED",
-            }
-
-        return {"error": f"Unknown tool: {name}"}
+        """Dispatch tool invocation to the registered handler via ToolRegistry."""
+        return self._registry.dispatch(name, args)
 
 
 def _write_response(response: dict[str, Any]) -> None:

@@ -5,7 +5,7 @@ from em_cubed.gateway.mcp_server import EmCubedMCPServer
 
 def test_mcp_server_tools_list():
     server = EmCubedMCPServer()
-    assert len(server.TOOLS) == 13
+    assert len(server.TOOLS) == 16
     tool_names = [t["name"] for t in server.TOOLS]
     assert "em_cubed_validate_triple" in tool_names
     assert "em_cubed_elicit_ontology" in tool_names

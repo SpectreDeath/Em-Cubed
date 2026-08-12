@@ -235,8 +235,73 @@ class DistributedExecutor:
         # nosec B110 - intentional fallback; caller handles None/False return
 
 
-def _execute_distributed_task(task_dict: dict[str, Any], skills_dir_str: str) -> dict[str, Any]:
-    """Independent worker process function that executes a skill task."""
+def _execute_distributed_task(
+    task: "SkillWorkerSpec | dict[str, Any]",
+    skills_dir_str: str = "skills",
+) -> dict[str, Any]:
+    """Independent worker-process function that executes a skill task.
+
+    Accepts either a ``SkillWorkerSpec`` (preferred) or the legacy ``task_dict``
+    format for backward compatibility during the transition period.
+
+    When a ``SkillWorkerSpec`` is supplied the worker executes the pre-resolved
+    code directly without touching ``PluginManager``, ``SkillRegistry``, or
+    ``SkillExecutor``.  When a plain dict is supplied the legacy path is used.
+    """
+    from em_cubed.workflow.worker_spec import SkillWorkerSpec as _Spec
+
+    # ------------------------------------------------------------------
+    # Fast path: SkillWorkerSpec — no plugin stack required
+    # ------------------------------------------------------------------
+    if isinstance(task, _Spec):
+        try:
+            import asyncio
+
+            code = task.get_code()
+            if code is None:
+                return {
+                    "success": False,
+                    "output": None,
+                    "error": f"No code for surface '{task.surface_name}' in skill '{task.skill_id}'",
+                    "execution_time_ms": 0.0,
+                }
+
+            # Lightweight surface instantiation — only the requested surface is imported.
+            surface_instance = _get_surface_by_name(task.surface_name)
+            if surface_instance is None:
+                return {
+                    "success": False,
+                    "output": None,
+                    "error": f"Surface '{task.surface_name}' not available in worker process",
+                    "execution_time_ms": 0.0,
+                }
+
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                import time
+                t0 = time.perf_counter()
+                result = loop.run_until_complete(
+                    surface_instance.execute(code, task.input_data)
+                )
+                elapsed_ms = (time.perf_counter() - t0) * 1000
+            finally:
+                loop.close()
+
+            success = result.get("status") == "ok"
+            return {
+                "success": success,
+                "output": result.get("value") if success else None,
+                "error": result.get("message") if not success else None,
+                "execution_time_ms": elapsed_ms,
+            }
+        except Exception as exc:
+            return {"success": False, "output": None, "error": str(exc), "execution_time_ms": 0.0}
+
+    # ------------------------------------------------------------------
+    # Legacy path: plain dict — re-uses the old plugin stack approach
+    # ------------------------------------------------------------------
+    task_dict: dict[str, Any] = task  # type: ignore[assignment]
     try:
         import asyncio
         from pathlib import Path
@@ -245,24 +310,21 @@ def _execute_distributed_task(task_dict: dict[str, Any], skills_dir_str: str) ->
         from em_cubed.skills.executor import SkillExecutionRequest, SkillExecutor
         from em_cubed.skills.registry import SkillRegistry
 
-        # Initialize an isolated event loop for this worker process
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
         skills_dir = Path(skills_dir_str)
         plugin_manager = PluginManager()
 
-        # Load registry dynamically relative to skills_dir or current working dir
         registry_candidates = [
             Path.cwd() / "registry.json",
             skills_dir / "registry.json",
             skills_dir.parent / "registry.json",
         ]
-        registry_file = next((path for path in registry_candidates if path.exists()), skills_dir / "registry.json")
+        registry_file = next((p for p in registry_candidates if p.exists()), skills_dir / "registry.json")
         registry = SkillRegistry(skills_dir, registry_file)
         executor = SkillExecutor(plugin_manager, registry, skills_dir)
 
-        # Construct and dispatch execution request
         request = SkillExecutionRequest(skill_id=task_dict["skill_id"], input_data=task_dict.get("input_data", {}))
 
         async def run():
@@ -277,8 +339,43 @@ def _execute_distributed_task(task_dict: dict[str, Any], skills_dir_str: str) ->
             "error": result.error,
             "execution_time_ms": result.execution_time_ms,
         }
-    except Exception as e:
-        return {"success": False, "output": None, "error": str(e), "execution_time_ms": 0.0}
+    except Exception as exc:
+        return {"success": False, "output": None, "error": str(exc), "execution_time_ms": 0.0}
+
+
+def _get_surface_by_name(name: str):
+    """Lightweight surface factory for the isolated worker path.
+
+    Imports only the requested surface class, not the full PluginManager stack.
+    Returns ``None`` if the surface is unknown or unavailable.
+    """
+    _SURFACE_MAP = {
+        "python": "em_cubed.surfaces.python_surface:PythonSurface",
+        "prolog": "em_cubed.surfaces.prolog_surface:PrologSurface",
+        "z3": "em_cubed.surfaces.z3_surface:Z3Surface",
+        "datalog": "em_cubed.surfaces.datalog_surface:DatalogSurface",
+        "sqlite": "em_cubed.surfaces.sqlite_surface:SQLiteSurface",
+        "hy": "em_cubed.surfaces.hy_surface:HySurface",
+        "kanren": "em_cubed.surfaces.kanren_surface:KanrenSurface",
+        "clingo": "em_cubed.surfaces.clingo_surface:ClingoSurface",
+        "quickjs": "em_cubed.surfaces.quickjs_surface:QuickJSSurface",
+        "wasm": "em_cubed.surfaces.wasm_surface:WASMSurface",
+        "janus": "em_cubed.surfaces.janus_surface:JanusSurface",
+        "polars": "em_cubed.surfaces.polars_surface:PolarsSurface",
+        "duckdb": "em_cubed.surfaces.duckdb_surface:DuckDBSurface",
+    }
+    spec = _SURFACE_MAP.get(name)
+    if spec is None:
+        return None
+    try:
+        module_path, class_name = spec.rsplit(":", 1)
+        import importlib
+        mod = importlib.import_module(module_path)
+        cls = getattr(mod, class_name)
+        instance = cls()
+        return instance if getattr(instance, "available", True) else None
+    except Exception:
+        return None
 
 
 class ProcessDistributedExecutor(DistributedExecutor):

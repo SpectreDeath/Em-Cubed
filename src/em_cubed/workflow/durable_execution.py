@@ -1,97 +1,71 @@
-"""Durable execution & checkpoint recovery engine for resilient workflow execution."""
+"""Durable execution & checkpoint recovery engine for resilient workflow execution.
 
-import json
-import sqlite3
+Delegates persistence to ``SQLiteCheckpointStorage`` (which implements the
+``CheckpointStorage`` ABC) rather than maintaining its own raw SQLite schema.
+The public API (``save_step_checkpoint``, ``get_completed_steps``,
+``clear_workflow_checkpoints``) is unchanged so existing callers are unaffected.
+"""
+
 from pathlib import Path
 from typing import Any
 
 import structlog
 
+from em_cubed.workflow.sqlite_checkpoint_storage import SQLiteCheckpointStorage
+
 logger = structlog.get_logger()
 
 
 class DurableExecutionManager:
-    """Manages workflow execution checkpoints, state persistence, and resume recovery."""
+    """Manages workflow execution checkpoints, state persistence, and resume recovery.
 
-    def __init__(self, db_path: Path | None = None):
-        self.db_path = db_path or Path(".workflow_checkpoints.db")
-        self._init_db()
+    Parameters
+    ----------
+    db_path:
+        Path to the SQLite database.  Defaults to ``.workflow_checkpoints.db``
+        in the current working directory.
+    storage:
+        Optional pre-constructed ``SQLiteCheckpointStorage`` instance.  When
+        supplied *db_path* is ignored.  Useful for injecting a shared storage
+        instance or for testing.
+    """
 
-    def _init_db(self) -> None:
-        """Initialize SQLite database for checkpoint persistence."""
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS workflow_checkpoints (
-                workflow_id TEXT,
-                step_id TEXT,
-                status TEXT,
-                output_json TEXT,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-                PRIMARY KEY (workflow_id, step_id)
-            )
-            """
-        )
-        conn.commit()
-        conn.close()
+    def __init__(
+        self,
+        db_path: Path | None = None,
+        storage: SQLiteCheckpointStorage | None = None,
+    ) -> None:
+        if storage is not None:
+            self._storage = storage
+        else:
+            self._storage = SQLiteCheckpointStorage(db_path)
+        # Expose db_path for backward-compat with any callers that read it.
+        self.db_path = self._storage.db_path
 
     def save_step_checkpoint(
-        self, workflow_id: str, step_id: str, status: str, output: dict[str, Any] | None = None
+        self,
+        workflow_id: str,
+        step_id: str,
+        status: str,
+        output: dict[str, Any] | None = None,
     ) -> bool:
-        """Save a step execution checkpoint."""
-        try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            output_str = json.dumps(output or {})
-            cursor.execute(
-                """
-                INSERT OR REPLACE INTO workflow_checkpoints (workflow_id, step_id, status, output_json)
-                VALUES (?, ?, ?, ?)
-                """,
-                (workflow_id, step_id, status, output_str),
-            )
-            conn.commit()
-            conn.close()
+        """Save a step execution checkpoint.
+
+        Delegates to ``SQLiteCheckpointStorage.save_step()``.
+        """
+        result = self._storage.save_step(
+            workflow_id=workflow_id, step_id=step_id, status=status, output=output
+        )
+        if result:
             logger.info("Saved step checkpoint", workflow_id=workflow_id, step_id=step_id, status=status)
-            return True
-        except Exception as e:
-            logger.exception("Failed to save step checkpoint", workflow_id=workflow_id, step_id=step_id, error=str(e))
-            return False
+        else:
+            logger.error("Failed to save step checkpoint", workflow_id=workflow_id, step_id=step_id)
+        return result
 
     def get_completed_steps(self, workflow_id: str) -> dict[str, dict[str, Any]]:
         """Retrieve completed step checkpoints for a workflow to allow resume recovery."""
-        try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                SELECT step_id, status, output_json FROM workflow_checkpoints
-                WHERE workflow_id = ? AND status = 'completed'
-                """,
-                (workflow_id,),
-            )
-            rows = cursor.fetchall()
-            conn.close()
-
-            completed: dict[str, dict[str, Any]] = {}
-            for step_id, status, output_str in rows:
-                completed[step_id] = {
-                    "status": status,
-                    "output": json.loads(output_str) if output_str else {},
-                }
-            return completed
-        except Exception as e:
-            logger.exception("Failed to get completed step checkpoints", workflow_id=workflow_id, error=str(e))
-            return {}
+        return self._storage.get_completed_steps(workflow_id)
 
     def clear_workflow_checkpoints(self, workflow_id: str) -> None:
         """Clear all stored checkpoints for a given workflow."""
-        try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM workflow_checkpoints WHERE workflow_id = ?", (workflow_id,))
-            conn.commit()
-            conn.close()
-        except Exception as e:
-            logger.warning("Failed to clear checkpoints", workflow_id=workflow_id, error=str(e))
+        self._storage.clear_workflow(workflow_id)

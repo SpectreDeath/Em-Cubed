@@ -9,6 +9,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Generic, TypeVar
 
+from em_cubed.loopy.context import DefaultSurfaceExecutionContext, SurfaceExecutionContext
 from em_cubed.ontology.topos import SubobjectClassifier, TruthValue
 from em_cubed.ontology.truthmaker import ExactTruthmaker
 from em_cubed.ontology.validator import OntologyLedgerValidator
@@ -49,11 +50,21 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         Maximum number of retry iterations allowed before hitting safety limit.
     ledger_validator : OntologyLedgerValidator | None
         Optional validator for ontology-backed state transitions.
+    context : SurfaceExecutionContext | None
+        Ontology execution context. Defaults to ``DefaultSurfaceExecutionContext``
+        which delegates to the full ontology subsystem. Supply a mock or
+        alternative implementation to test the loop engine in isolation.
     """
 
-    def __init__(self, max_iterations: int = 5, ledger_validator: OntologyLedgerValidator | None = None) -> None:
+    def __init__(
+        self,
+        max_iterations: int = 5,
+        ledger_validator: OntologyLedgerValidator | None = None,
+        context: SurfaceExecutionContext | None = None,
+    ) -> None:
         self.max_iterations = max_iterations
         self.ledger_validator = ledger_validator or OntologyLedgerValidator()
+        self._context: SurfaceExecutionContext = context or DefaultSurfaceExecutionContext()
 
     def initialize_state(self, *args: Any, **kwargs: Any) -> T_State:
         """Set up initial skill state variables, code trees, or query environments."""
@@ -88,7 +99,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
             Topos TruthValue object.
         """
         passed, obs = self.verify(state)
-        return SubobjectClassifier.classify_boolean(passed, obs)
+        return self._context.classify_boolean(passed, obs)
 
     def verify_truthmaker(self, state: T_State, proposition: str, relevant_predicates: list[str]) -> ExactTruthmaker:
         """Kit Fine's Truthmaker Sensor: Isolates exact truthmaker (s ⊩ A) and falsemaker.
@@ -98,9 +109,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         ExactTruthmaker
             Exact truthmaker valuation.
         """
-        from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier
-
-        return ExactTruthmakerClassifier.classify_exact_truthmaker(
+        return self._context.classify_exact_truthmaker(
             proposition=proposition,
             state_triples=getattr(state, "triples", []),
             relevant_predicates=relevant_predicates,
@@ -114,10 +123,8 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         DescriptionLogicExpression
             Synthesized DL class expression.
         """
-        from em_cubed.ontology.concept_induction import ConceptInductionEngine
-
         sample = {"type": "LoopyState", "property": "has_state", "target": str(type(state).__name__)}
-        return ConceptInductionEngine.induce_concept(subclass_name=subclass_name, positive_samples=[sample])
+        return self._context.induce_concept(subclass_name=subclass_name, positive_samples=[sample])
 
     def compute_derived_property(
         self,
@@ -133,16 +140,11 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         float | int
             Calculated dynamic derived property value.
         """
-        from em_cubed.ontology.advanced_ontology import (
-            DerivedPropertyReducer,
-            ReducerType,
-        )
-
-        return DerivedPropertyReducer.compute_reducer(
+        return self._context.compute_derived_property(
             triples=getattr(state, "triples", []),
             subject=subject,
             predicate=predicate,
-            reducer_type=ReducerType(reducer_type),
+            reducer_type=reducer_type,
         )
 
     def verify_interface(self, state: T_State, subject: str, required_predicates: list[str]) -> bool:
@@ -153,16 +155,10 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         bool
             True if interface contract is valid.
         """
-        from em_cubed.ontology.advanced_ontology import (
-            InterfaceImplementation,
-            OntologyInterface,
-        )
-
-        interface = OntologyInterface(name="SkillStateInterface", required_predicates=required_predicates)
-        return InterfaceImplementation.validates_interface(
+        return self._context.verify_interface(
             triples=getattr(state, "triples", []),
             subject=subject,
-            interface=interface,
+            required_predicates=required_predicates,
         )
 
     def migrate_state_schema(self, state: T_State, target_version_str: str, steps: list[Any]) -> list[Any]:
@@ -173,9 +169,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         list[OntologyTriple]
             Migrated triples list.
         """
-        from em_cubed.ontology.schema_evolution import AutomatedTripleMigrationEngine
-
-        return AutomatedTripleMigrationEngine.migrate_triples(
+        return self._context.migrate_triples(
             triples=getattr(state, "triples", []),
             steps=steps,
         )
@@ -188,9 +182,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         OntologyHealthReport
             Health metrics report.
         """
-        from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
-
-        return OntologicalHealthMonitor.audit_health(triples=getattr(state, "triples", []))
+        return self._context.audit_health(triples=getattr(state, "triples", []))
 
     def query_temporal_snapshot(self, timeline: Any, timestamp: Any) -> list[Any]:
         """Temporal Snapshot Reasoner: Filters state triples valid at timestamp t.
@@ -200,9 +192,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         list[OntologyTriple]
             Valid base triples list at timestamp t.
         """
-        from em_cubed.ontology.temporal_spatial import TemporalSnapshotQueryEngine
-
-        return TemporalSnapshotQueryEngine.snapshot_at(timeline=timeline, timestamp=timestamp)
+        return self._context.snapshot_at(timeline=timeline, timestamp=timestamp)
 
     def evaluate_spatial_proximity(
         self, timeline: Any, lat: float, lon: float, radius_km: float
@@ -214,14 +204,8 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         list[tuple[str, float]]
             Matching (subject, distance_km) list.
         """
-        from em_cubed.ontology.temporal_spatial import (
-            GeoLocation,
-            SpatialProximityReasoner,
-        )
-
-        center = GeoLocation(latitude=lat, longitude=lon)
-        return SpatialProximityReasoner.find_entities_within_radius(
-            timeline=timeline, center=center, radius_km=radius_km
+        return self._context.find_entities_within_radius(
+            timeline=timeline, lat=lat, lon=lon, radius_km=radius_km
         )
 
     def export_rdf_turtle(self, state: T_State) -> str:
@@ -232,9 +216,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         str
             Serialized Turtle text.
         """
-        from em_cubed.ontology.interoperability import RDFSerializer
-
-        return RDFSerializer.to_turtle(triples=getattr(state, "triples", []))
+        return self._context.to_turtle(triples=getattr(state, "triples", []))
 
     def export_shacl_shapes(self) -> str:
         """W3C SHACL Export: Serializes functional property constraints to SHACL shapes.
@@ -244,9 +226,7 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
         str
             Serialized SHACL shapes Turtle text.
         """
-        from em_cubed.ontology.interoperability import SHACLConstraintGenerator
-
-        return SHACLConstraintGenerator.generate_shacl_shapes(self.ledger_validator.functional_constraints)
+        return self._context.generate_shacl_shapes(self.ledger_validator.functional_constraints)
 
     def extract_result(self, state: T_State) -> T_Result:
         """Extract final output payload from completed state."""
@@ -254,18 +234,13 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
 
     def process_event_stream(self, events: list[Any]) -> Any:
         """Sensor method: Ingest streaming events and evaluate reactive rules."""
-        from em_cubed.ontology.event_stream import OntologyEventStreamProcessor
-
-        processor = OntologyEventStreamProcessor()
-        return processor.process_stream_batch(events)
+        return self._context.process_stream_batch(events)
 
     def generate_zk_attestation(
         self, proposition: str, state_triples: list[Any], relevant_predicates: list[str]
     ) -> Any:
         """Sensor method: Generate zero-knowledge cryptographic commitment over state triples."""
-        from em_cubed.ontology.zk_attestation import ZeroKnowledgeOntologyAttestor
-
-        return ZeroKnowledgeOntologyAttestor.generate_attestation(
+        return self._context.generate_attestation(
             proposition=proposition,
             state_triples=state_triples,
             relevant_predicates=relevant_predicates,
@@ -273,27 +248,15 @@ class BaseLoopySkill(Generic[T_State, T_Result]):
 
     def verify_zk_attestation(self, commitment: Any) -> Any:
         """Sensor method: Verify zero-knowledge cryptographic proof payload."""
-        from em_cubed.ontology.zk_attestation import ZKPAuditor
-
-        return ZKPAuditor.verify_commitment(commitment)
+        return self._context.verify_commitment(commitment)
 
     def apply_surface_functor(self, triples: list[Any], target_surface: str = "prolog") -> str:
         """Sensor method: Apply category-theoretic surface functor mapping."""
-        from em_cubed.surfaces.functor import SurfaceFunctor
-
-        if target_surface.lower() == "prolog":
-            return SurfaceFunctor.python_to_prolog(triples)
-        elif target_surface.lower() == "z3":
-            prolog_str = SurfaceFunctor.python_to_prolog(triples)
-            return SurfaceFunctor.prolog_to_z3(prolog_str)
-        return ""
+        return self._context.apply_functor(triples=triples, target_surface=target_surface)
 
     def bind_monad(self, state: Any, fn: Any) -> Any:
         """Sensor method: Execute monadic bind (>>=) on loopy skill state."""
-        from em_cubed.surfaces.functor import OntologyMonad
-
-        monad = OntologyMonad.unit(state)
-        return monad.bind(fn).extract()
+        return self._context.bind_monad(state=state, fn=fn)
 
     def run(self, *args: Any, **kwargs: Any) -> LoopySkillResult[T_Result]:
         """Execute the core loop engine until guard passes or max_iterations is reached."""
