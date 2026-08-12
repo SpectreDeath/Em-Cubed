@@ -11,6 +11,13 @@ from .base import SurfaceBase
 logger = structlog.get_logger()
 
 
+try:
+    import z3  # noqa: F401
+    _Z3_AVAILABLE = True
+except Exception:
+    _Z3_AVAILABLE = False
+
+
 class Z3Surface(SurfaceBase):
     """Handle Z3 SMT solver execution and metadata extraction."""
 
@@ -24,7 +31,7 @@ class Z3Surface(SurfaceBase):
 
     @property
     def available(self) -> bool:
-        return self._check_availability()
+        return _Z3_AVAILABLE
 
     def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
@@ -32,10 +39,8 @@ class Z3Surface(SurfaceBase):
 
     def _check_availability(self) -> bool:
         """Check if z3 is available."""
-        available = importlib.util.find_spec("z3") is not None
-        if not available:
-            logger.warning("z3 not available for Z3 surface")
-        return available
+        return _Z3_AVAILABLE
+
 
     @staticmethod
     def extract_tags(source: str | None) -> list:

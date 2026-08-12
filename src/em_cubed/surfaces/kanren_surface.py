@@ -5,6 +5,13 @@ from typing import Any
 from .base import SurfaceBase
 
 
+try:
+    import kanren  # noqa: F401
+    _KANREN_AVAILABLE = True
+except Exception:
+    _KANREN_AVAILABLE = False
+
+
 class KanrenSurface(SurfaceBase):
     """Relational / logic-programming surface backed by `kanren`.
 
@@ -23,12 +30,11 @@ class KanrenSurface(SurfaceBase):
 
     @property
     def available(self) -> bool:
-        return self._check_availability()
+        return _KANREN_AVAILABLE
 
     def _check_availability(self) -> bool:
-        import importlib.util
+        return _KANREN_AVAILABLE
 
-        return importlib.util.find_spec("kanren") is not None
 
     @staticmethod
     def extract_tags(source: str | None) -> list:

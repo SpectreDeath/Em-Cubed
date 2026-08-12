@@ -10,6 +10,13 @@ from .base import SurfaceBase
 logger = structlog.get_logger()
 
 
+try:
+    import hy  # noqa: F401
+    _HY_AVAILABLE = True
+except ImportError:
+    _HY_AVAILABLE = False
+
+
 class HySurface(SurfaceBase):
     """Handle Hy code execution and function extraction."""
 
@@ -23,7 +30,7 @@ class HySurface(SurfaceBase):
 
     @property
     def available(self) -> bool:
-        return self._check_availability()
+        return _HY_AVAILABLE
 
     def __init__(self, timeout: float | None = None) -> None:
         super().__init__(timeout)
@@ -31,7 +38,8 @@ class HySurface(SurfaceBase):
 
     def _check_availability(self) -> bool:
         """Check if Hy is available."""
-        return importlib.util.find_spec("hy") is not None
+        return _HY_AVAILABLE
+
 
     @staticmethod
     def extract_tags(hy_source: str | None) -> list[str]:

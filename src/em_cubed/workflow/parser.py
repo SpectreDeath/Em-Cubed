@@ -16,9 +16,19 @@ import yaml
 from em_cubed.workflow.distributed import DistributedTask, TaskStatus
 
 
+class ControlFlowNode:
+    """Base class for dynamic control flow nodes in DAG specifications."""
+    def __init__(self, node_id: str, node_type: str, condition: str | None = None, branches: dict[str, str] | None = None):
+        self.node_id = node_id
+        self.node_type = node_type  # 'if', 'loop_until', 'switch', 'map_reduce'
+        self.condition = condition
+        self.branches = branches or {}
+
+
 class WorkflowDagParser:
     """
     Parser for declarative workflow DAG definitions in YAML or JSON format.
+    Supports standard skill tasks as well as dynamic control flow nodes.
     """
 
     @classmethod
@@ -59,10 +69,22 @@ class WorkflowDagParser:
             if tid in task_map:
                 raise ValueError(f"Duplicate task_id '{tid}' in DAG specification.")
 
+            node_type = item.get("type", "task")
             skill_id = item.get("skill_id", "")
             deps = item.get("dependencies", [])
             input_data = item.get("input_data", {})
             max_retries = item.get("max_retries", 3)
+
+            # Store control flow node metadata in task input_data if control node
+            if node_type in ("if", "loop_until", "switch", "map_reduce"):
+                input_data["_control_flow"] = {
+                    "type": node_type,
+                    "condition": item.get("condition"),
+                    "then_task": item.get("then_task"),
+                    "else_task": item.get("else_task"),
+                    "loop_target": item.get("loop_target"),
+                    "branches": item.get("branches", {}),
+                }
 
             task = DistributedTask(
                 task_id=tid,
@@ -107,3 +129,4 @@ class WorkflowDagParser:
         for tid in task_map:
             if visited[tid] == 0:
                 dfs(tid)
+

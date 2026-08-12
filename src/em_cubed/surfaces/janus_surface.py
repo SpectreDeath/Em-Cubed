@@ -26,6 +26,9 @@ from .base import SurfaceBase
 logger = structlog.get_logger()
 
 
+import sys
+
+
 class JanusSurface(SurfaceBase):
     """Handle Janus/SWI-Prolog bridge integration for advanced Python-Prolog interop."""
 
@@ -44,14 +47,22 @@ class JanusSurface(SurfaceBase):
     def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         self._janus = None  # Lazy initialization
+        self._is_available_cache: bool | None = None
         logger.info("JanusSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
         """Check if Janus/SWI-Prolog is available."""
-        available = importlib.util.find_spec("janus_swi") is not None
-        if not available:
-            logger.warning("janus_swi not available for Janus surface")
-        return available
+        if getattr(self, "_is_available_cache", None) is None:
+            if "janus_swi" in sys.modules:
+                self._is_available_cache = True
+            else:
+                try:
+                    self._is_available_cache = importlib.util.find_spec("janus_swi") is not None
+                except Exception:
+                    self._is_available_cache = False
+        return self._is_available_cache
+
+
 
     def _get_janus(self):
         """Get or create Janus connection."""

@@ -156,6 +156,18 @@ class EmCubedMCPServer:
             },
         },
         {
+            "name": "em_cubed_auto_chain",
+            "description": "Synthesizes an optimal multi-surface skill execution DAG pipeline for a given goal.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "goal": {"type": "string"},
+                    "inputs": {"type": "object"},
+                },
+                "required": ["goal"],
+            },
+        },
+        {
             "name": "em_cubed_server_discover",
             "description": "Exposes MCP 2026-07-28 stateless server capabilities, spec version, and routing header requirements.",
             "inputSchema": {
@@ -163,7 +175,41 @@ class EmCubedMCPServer:
                 "properties": {},
             },
         },
+        {
+            "name": "em_cubed_run_dag",
+            "description": "Parses and executes a declarative YAML/JSON multi-surface workflow DAG pipeline.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "dag_spec": {"type": "object"},
+                    "workflow_id": {"type": "string"},
+                },
+                "required": ["dag_spec"],
+            },
+        },
+        {
+            "name": "em_cubed_check_dag_status",
+            "description": "Polls durable execution status and checkpoint state of a running workflow DAG.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "workflow_id": {"type": "string"},
+                },
+                "required": ["workflow_id"],
+            },
+        },
+        {
+            "name": "em_cubed_lock_skills",
+            "description": "Generates or verifies cryptographic em3.lock lockfile signatures for registered skills.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "verify": {"type": "boolean"},
+                },
+            },
+        },
     ]
+
 
     def call_tool(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         """Dispatch tool invocation to core subsystem handler."""
@@ -288,7 +334,15 @@ class EmCubedMCPServer:
                 "execution_time": res.execution_time_ms,
             }
 
+        elif name == "em_cubed_auto_chain":
+            from em_cubed.skills.auto_chain import AutoChainer
+            chainer = AutoChainer()
+            goal = args.get("goal", "")
+            inputs = args.get("inputs", {})
+            return chainer.find_chain(input_schema=inputs, goal_description=goal)
+
         elif name == "em_cubed_validate_triple":
+
             triple = OntologyTriple(subject=args["subject"], predicate=args["predicate"], object=args["object"])
             validator = OntologyLedgerValidator()
             is_valid, msg = validator.validate_and_commit(triple)

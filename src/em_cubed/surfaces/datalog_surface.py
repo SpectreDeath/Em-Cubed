@@ -14,6 +14,13 @@ from .base import SurfaceBase
 logger = structlog.get_logger()
 
 
+try:
+    import pyDatalog  # noqa: F401
+    _DATALOG_AVAILABLE = True
+except Exception:
+    _DATALOG_AVAILABLE = False
+
+
 class DatalogSurface(SurfaceBase):
     """Handle Datalog code execution and predicate extraction."""
 
@@ -31,7 +38,7 @@ class DatalogSurface(SurfaceBase):
 
     @property
     def available(self) -> bool:
-        return self._check_availability()
+        return _DATALOG_AVAILABLE
 
     def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
@@ -58,14 +65,8 @@ class DatalogSurface(SurfaceBase):
 
     def _check_availability(self) -> bool:
         """Check if pyDatalog is available and importable."""
-        if importlib.util.find_spec("pyDatalog") is None:
-            return False
-        try:
-            import pyDatalog  # noqa: F401
-            return True
-        except Exception as e:
-            logger.warning("pyDatalog import failed", error=str(e))
-            return False
+        return _DATALOG_AVAILABLE
+
 
     @staticmethod
     def extract_tags(source: str | None) -> list[str]:

@@ -5,6 +5,13 @@ from typing import Any
 from .base import SurfaceBase
 
 
+try:
+    import clingo  # noqa: F401
+    _CLINGO_AVAILABLE = True
+except Exception:
+    _CLINGO_AVAILABLE = False
+
+
 class ClingoSurface(SurfaceBase):
     """ASP surface backed by the `clingo` Python package.
 
@@ -31,23 +38,15 @@ class ClingoSurface(SurfaceBase):
 
     @property
     def available(self) -> bool:
-        return self._check_availability()
+        return _CLINGO_AVAILABLE
 
     @property
     def _spec_available(self) -> bool:
-        import importlib.util
-
-        return importlib.util.find_spec("clingo") is not None
+        return _CLINGO_AVAILABLE
 
     def _check_availability(self) -> bool:
-        if not self._spec_available:
-            return False
-        try:
-            import clingo  # noqa: F401
+        return _CLINGO_AVAILABLE
 
-            return True
-        except ImportError:
-            return False
 
     @staticmethod
     def extract_tags(source: str | None) -> list:

@@ -45,8 +45,15 @@ def _get_shared_prolog():
         return _prolog_instance
 
 
+try:
+    import pyswip  # noqa: F401
+    _PROLOG_AVAILABLE = True
+except Exception:
+    _PROLOG_AVAILABLE = False
+
+
 class PrologSurface(SurfaceBase):
-    """Handle Prolog code execution and predicate extraction."""
+    """Handle Prolog code execution and predicate extraction via PySWIP."""
 
     _consulted_hashes: set[str] = set()
 
@@ -56,33 +63,21 @@ class PrologSurface(SurfaceBase):
 
     @property
     def description(self) -> str:
-        return "Prolog execution via PySWIP"
+        return "SWI-Prolog via PySWIP"
 
     @property
     def available(self) -> bool:
-        return self._check_availability()
+        return _PROLOG_AVAILABLE
 
     def __init__(self, timeout: float | None = None) -> None:
         super().__init__(timeout)
         self._prolog = None  # Lazy initialization of Prolog interpreter
-        self._is_available: bool | None = None
+        self._is_available = _PROLOG_AVAILABLE
         logger.info("PrologSurface initialized", available=self.available, timeout=self.timeout)
 
     def _check_availability(self) -> bool:
         """Check if PySWIP is available and importable."""
-        if self._is_available is not None:
-            return self._is_available
-        if importlib.util.find_spec("pyswip") is None:
-            self._is_available = False
-            return False
-        try:
-            import pyswip  # noqa: F401
-            self._is_available = True
-            return True
-        except Exception as e:
-            logger.warning("PySWIP import failed", error=str(e))
-            self._is_available = False
-            return False
+        return _PROLOG_AVAILABLE
 
     def extract_tags(self, prolog_source: str | None) -> list[str]:
         """Extract predicate names from Prolog source as logic_tags."""

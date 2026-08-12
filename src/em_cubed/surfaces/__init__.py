@@ -151,6 +151,20 @@ except (ImportError, Exception):
     SurfaceFunctor = None  # type: ignore[assignment,misc]
     OntologyMonad = None  # type: ignore[assignment,misc]
 
+try:
+    from .polars_surface import PolarsSurface as _PolarsSurface
+
+    PolarsSurface = _PolarsSurface  # type: ignore[assignment]
+except (ImportError, Exception):
+    PolarsSurface = None  # type: ignore[assignment]
+
+try:
+    from .rust_surface import RustSurface as _RustSurface
+
+    RustSurface = _RustSurface  # type: ignore[assignment]
+except (ImportError, Exception):
+    RustSurface = None  # type: ignore[assignment]
+
 __all__ = [
     "ArrowSharedSubstrate",
     "ClingoSurface",
@@ -162,9 +176,11 @@ __all__ = [
     "KanrenSurface",
     "LLMSurface",
     "OntologyMonad",
+    "PolarsSurface",
     "PrologSurface",
     "PythonSurface",
     "QuickJSSurface",
+    "RustSurface",
     "SQLiteSurface",
     "SurfaceBase",
     "SurfaceFunctor",
@@ -173,4 +189,6 @@ __all__ = [
     "WASMSurface",
     "Z3Surface",
 ]
+
+
 

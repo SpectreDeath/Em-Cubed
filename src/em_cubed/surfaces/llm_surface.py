@@ -131,6 +131,8 @@ class _OllamaClient:
 # ---------------------------------------------------------------------------
 
 
+import sys
+
 class LLMSurface(SurfaceBase):
     """Handle LLM prompt execution using LiteLLM for cloud and Ollama for local.
 
@@ -143,6 +145,7 @@ class LLMSurface(SurfaceBase):
     def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
         self._is_available: bool | None = None
+        self._is_available_cache: bool | None = None
         ollama_host = os.getenv("OLLAMA_HOST", _DEFAULT_OLLAMA_HOST)
         self._ollama = _OllamaClient(ollama_host, timeout=self.timeout or 30.0)
         logger.info("LLMSurface initialized", timeout=self.timeout, ollama_host=ollama_host)
@@ -153,18 +156,25 @@ class LLMSurface(SurfaceBase):
 
     def _check_availability(self) -> bool:
         """Return True if litellm is importable (cloud path) OR httpx is present."""
-        if self._is_available is not None:
+        if getattr(self, "_is_available", None) is not None:
             return self._is_available
+        if getattr(self, "_is_available_cache", None) is not None:
+            return self._is_available_cache
+        if "litellm" in sys.modules or "httpx" in sys.modules:
+            self._is_available_cache = True
+            return True
         try:
-            has_litellm = "litellm" in sys.modules or importlib.util.find_spec("litellm") is not None
+            has_litellm = importlib.util.find_spec("litellm") is not None
         except Exception:
-            has_litellm = "litellm" in sys.modules
+            has_litellm = False
         try:
-            has_httpx = "httpx" in sys.modules or importlib.util.find_spec("httpx") is not None
+            has_httpx = importlib.util.find_spec("httpx") is not None
         except Exception:
-            has_httpx = "httpx" in sys.modules
-        self._is_available = has_litellm or has_httpx
-        return self._is_available
+            has_httpx = False
+        self._is_available_cache = has_litellm or has_httpx
+        return self._is_available_cache
+
+
 
     @property
     def name(self) -> str:

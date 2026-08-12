@@ -179,6 +179,8 @@ def main():
     skill_info_parser.add_argument(
         "--registry", "-r", default="registry.json", help="Registry file path (default: registry.json)"
     )
+    skill_info_parser.add_argument("--skills-dir", "-s", default="skills", help="Skills directory (default: skills)")
+
 
     # Workflow command
     workflow_parser = subparsers.add_parser("workflow", help="Execute a DAG-based skill workflow")
@@ -214,7 +216,14 @@ def main():
     verify_parser = subparsers.add_parser("verify", help="Verify skill signature against em3.lock")
     verify_parser.add_argument("skill_path", help="Relative skill path (e.g. Custom/my-skill.md)")
 
+    # Auto-chain command
+    auto_chain_parser = subparsers.add_parser("auto-chain", help="Synthesize a multi-surface skill pipeline from goal description")
+    auto_chain_parser.add_argument("goal", help="Target goal description for the pipeline")
+    auto_chain_parser.add_argument("--registry", "-r", default="registry.json", help="Skill registry path")
+    auto_chain_parser.add_argument("--inputs", "-i", default="{}", help="Input schema JSON string (e.g. '{\"data\": \"csv\"}')")
+
     # Ontology command group
+
     from em_cubed.cli_ontology import build_ontology_parser, handle_ontology_cli
 
 
@@ -253,18 +262,24 @@ def main():
             _handle_trace_view(args)
         elif args.command == "surfaces":
             _handle_surfaces(args)
+        elif args.command == "skill-info":
+            _handle_skill_info(args)
         elif args.command == "generate-skill":
             _handle_generate_skill(args)
+
         elif args.command == "install":
             _handle_install_skill(args)
         elif args.command == "lock":
             _handle_lock_skills(args)
         elif args.command == "verify":
             _handle_verify_skill(args)
+        elif args.command == "auto-chain":
+            _handle_auto_chain(args)
         elif args.command == "workflow":
             asyncio.run(_handle_workflow(args))
         elif args.command == "run-dag":
             asyncio.run(_handle_run_dag(args))
+
 
     except Exception as e:
         logger.exception("CLI command failed", command=args.command, error=str(e))
@@ -815,10 +830,8 @@ def _handle_skill_info(args):
     """Handle skill-info command to display skill metadata."""
     skill_id = args.skill_id
     registry_path = Path(args.registry)
+    skills_dir = Path(getattr(args, "skills_dir", "skills"))
 
-    # Default skills_dir relative to registry or cwd?
-    # Assume skills directory is in default location 'skills'
-    skills_dir = Path("skills")
 
     from em_cubed.skills.registry import SkillRegistry
 
@@ -963,5 +976,34 @@ async def _handle_run_dag(args):
         print(f"Tasks Failed        : {final_status.get('failed')}")
 
 
+def _handle_auto_chain(args):
+    """Handle auto-chain command to synthesize a skill execution pipeline."""
+    from em_cubed.skills.auto_chain import AutoChainer
+
+    try:
+        input_schema = json.loads(args.inputs)
+    except Exception as e:
+        print(f"Error parsing inputs JSON: {e}")
+        sys.exit(1)
+
+    chainer = AutoChainer(registry_path=args.registry)
+    result = chainer.find_chain(input_schema=input_schema, goal_description=args.goal)
+
+    if result.get("status") == "error":
+        print(f"Auto-chain error: {result.get('message')}")
+        sys.exit(1)
+
+    print(f"\nAuto-Chained Pipeline Synthesized for Goal: '{args.goal}'")
+
+    print(f"Estimated Compatibility : {result.get('estimated_compatibility') * 100:.0f}%")
+    print(f"Pipeline Length          : {result.get('pipeline_length')} steps\n")
+    print(f"{'STEP':<6} {'SURFACE':<12} {'SCORE':<8} {'SKILL ID / TITLE'}")
+    print("-" * 6 + " " + "-" * 12 + " " + "-" * 8 + " " + "-" * 40)
+
+    for step in result.get("pipeline", []):
+        print(f"{step['step_index']:<6} {step['surface']:<12} {step['compatibility_score']:<8} {step['title']}")
+
+
 if __name__ == "__main__":
     main()
+

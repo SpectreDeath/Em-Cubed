@@ -203,3 +203,20 @@ async def list_surfaces(api_key: str = Depends(require_api_key)):
     return {
         "surfaces": plugin_manager.get_surface_info()
     }
+
+
+@app.get("/telemetry/stream")
+async def telemetry_stream(api_key: str = Depends(require_api_key)):
+    """Server-Sent Events (SSE) stream endpoint for real-time telemetry updates."""
+    from fastapi.responses import StreamingResponse
+    import asyncio
+
+    async def event_generator():
+        while True:
+            api = get_telemetry_api()
+            if api:
+                stats = api.get_overall_stats()
+                yield f"data: {json.dumps(stats)}\n\n"
+            await asyncio.sleep(2)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")

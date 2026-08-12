@@ -10,6 +10,9 @@ from .base import SurfaceBase
 logger = structlog.get_logger()
 
 
+import sys
+
+
 class QuickJSSurface(SurfaceBase):
     """Handle JavaScript code execution using pyquickjs."""
 
@@ -27,14 +30,22 @@ class QuickJSSurface(SurfaceBase):
 
     def __init__(self, timeout: float | None = None):
         super().__init__(timeout)
+        self._is_available_cache: bool | None = None
         logger.info("QuickJSSurface initialized", available=self.available)
 
     def _check_availability(self) -> bool:
         """Check if pyquickjs is available."""
-        available = importlib.util.find_spec("quickjs") is not None
-        if not available:
-            logger.warning("pyquickjs not available for QuickJS surface")
-        return available
+        if getattr(self, "_is_available_cache", None) is None:
+            if "quickjs" in sys.modules:
+                self._is_available_cache = True
+            else:
+                try:
+                    self._is_available_cache = importlib.util.find_spec("quickjs") is not None
+                except Exception:
+                    self._is_available_cache = False
+        return self._is_available_cache
+
+
 
     def _run_quickjs(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Synchronous QuickJS execution to run inside the executor thread."""

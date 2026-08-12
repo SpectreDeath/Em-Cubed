@@ -241,7 +241,15 @@ def run_isolated_eval(
         }
 
 
+try:
+    import asteval  # noqa: F401
+    _ASTEVAL_AVAILABLE = True
+except Exception:
+    _ASTEVAL_AVAILABLE = False
+
+
 class PythonSurface(SurfaceBase):
+
     """Handle Python code execution and metadata extraction."""
 
     @property
@@ -279,10 +287,8 @@ class PythonSurface(SurfaceBase):
 
     def _check_availability(self) -> bool:
         """Check if asteval is available."""
-        available = importlib.util.find_spec("asteval") is not None
-        if not available:
-            logger.warning("asteval not available for Python surface")
-        return available
+        return _ASTEVAL_AVAILABLE
+
 
     @staticmethod
     def extract_tags(python_source: str | None) -> list:

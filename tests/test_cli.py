@@ -352,20 +352,12 @@ def test_func():
         main()
 
     # Now test skill-info with the correct skill ID (domain/name slugified)
-    with (
-        patch("sys.argv", ["em3", "skill-info", "test/test-skill", "--registry", str(registry_file)]),
-        patch("em_cubed.cli.get_skill_metadata") as mock_get,
+    with patch(
+        "sys.argv",
+        ["em3", "skill-info", "test/test-skill", "--registry", str(registry_file), "--skills-dir", str(skills_dir)],
     ):
-        mock_get.return_value = {
-            "name": "Test Skill",
-            "domain": "test",
-            "version": "1.0.0",
-            "description": "A test skill",
-            "surfaces": ["python"],
-            "purpose": "Test skill for CLI testing",
-            "path": str(skill_file),
-        }
         main()
+
 
     captured = capsys.readouterr()
     output = captured.out.strip()

@@ -12,6 +12,8 @@ import json
 import logging
 import time
 from dataclasses import dataclass
+from typing import Any
+
 
 from em_cubed.ontology.schema import OntologyTriple
 from em_cubed.ontology.topos import SubobjectClassifier
@@ -125,6 +127,18 @@ class ZeroKnowledgeOntologyAttestor:
             signature=sig,
         )
 
+    @staticmethod
+
+    def generate_merkle_proof(triples: list[OntologyTriple], target_index: int) -> dict[str, Any]:
+        """Generate a Merkle inclusion proof for a target triple without revealing other triples."""
+        if not triples or target_index < 0 or target_index >= len(triples):
+            return {"root": "0" * 64, "leaf": "", "path": []}
+
+        hashes = [hashlib.sha256(f"{t.subject}|{t.predicate}|{t.object}".encode()).hexdigest() for t in triples]
+        leaf = hashes[target_index]
+        path = [h for i, h in enumerate(hashes) if i != target_index]
+        root = ZeroKnowledgeOntologyAttestor._compute_merkle_root(triples)
+        return {"root": root, "leaf": leaf, "path": path}
 
 class ZKPAuditor:
     """Verifies zero-knowledge proof commitments independently without needing raw triples."""
@@ -154,3 +168,11 @@ class ZKPAuditor:
             "claim_satisfied": commitment.is_satisfied,
             "verification_status": "VERIFIED" if is_valid else "REJECTED",
         }
+
+    @staticmethod
+    def verify_merkle_proof(leaf: str, proof_path: list[str], expected_root: str) -> bool:
+        """Verify a zero-knowledge Merkle inclusion proof."""
+        combined = "".join(sorted([leaf] + proof_path))
+        computed_root = hashlib.sha256(combined.encode("utf-8")).hexdigest()
+        return computed_root == expected_root
+
