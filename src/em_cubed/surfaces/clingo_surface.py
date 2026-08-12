@@ -37,14 +37,18 @@ class ClingoSurface(SurfaceBase):
 
     @property
     def available(self) -> bool:
-        return _CLINGO_AVAILABLE
+        return self._check_availability()
 
     @property
     def _spec_available(self) -> bool:
-        return _CLINGO_AVAILABLE
+        return self._check_availability()
 
     def _check_availability(self) -> bool:
-        return _CLINGO_AVAILABLE
+        try:
+            import clingo
+            return clingo is not None
+        except Exception:
+            return False
 
 
     @staticmethod
