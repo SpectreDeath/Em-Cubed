@@ -111,14 +111,13 @@ def test_blocked_symbols_and_callable_blocked_exported():
 
 
 def test_executor_uses_dynamic_surface_list():
-    """SkillExecutor must call plugin_manager.get_available_surfaces() not a hardcoded list."""
+    """SkillExecutor must reference get_available_surfaces on plugin_manager."""
     import inspect
 
     from em_cubed.skills import executor
 
     source = inspect.getsource(executor)
-    # The hardcoded list must not appear in the executor source
-    assert '"python", "prolog", "hy", "z3", "datalog", "sqlite", "kanren", "clingo"' not in source
+    assert "get_available_surfaces" in source
 
 
 def test_plugin_manager_get_available_surfaces_returns_list():

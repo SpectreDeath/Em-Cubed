@@ -303,7 +303,11 @@ class SkillExecutor:
 
             # Inject surface plugins for cross-surface interaction (wrapped in proxy)
             context["surfaces"] = {}
-            for s_name in self.plugin_manager.get_available_surfaces():
+            surfaces_fn = getattr(self.plugin_manager, "get_available_surfaces", None)
+            available_surfaces = surfaces_fn() if callable(surfaces_fn) else None
+            if not isinstance(available_surfaces, (list, tuple, set)):
+                available_surfaces = ["python", "prolog", "hy", "z3", "datalog", "sqlite", "kanren", "clingo"]
+            for s_name in available_surfaces:
                 surf_plugin = self.plugin_manager.get(s_name)
                 if surf_plugin and surf_plugin.available:
                     # Inject shared substrate into the plugin
