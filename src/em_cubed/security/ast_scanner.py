@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from typing import List, Set
+from typing import List, Optional, Set
 
 
 @dataclass
