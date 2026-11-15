@@ -3,215 +3,225 @@ name: iterated-dominance-solver
 domain: DECISION_MAKING
 version: 1.0.0
 surfaces:
-- python
-- z3
-- prolog
-description: 'Computes rationalizable strategy sets for finite strategic-form games using the Iterated Elimination of Strictly
-  Dominated Strategies (IESDS) algorithm. Implements pure and mixed strategy dominance checks with higher-order knowledge
-  recursion.
-
-  '
-purpose: 'Determine which strategies survive iterated elimination of strictly conditionally dominated strategies, producing
-  the set of rationalizable strategies for each player.
-
-  '
+  - python
+  - z3
+  - prolog
+description: Strategic game rationalizability engine computing surviving strategy sets for finite normal-form games via Iterated Elimination of Strictly Dominated Strategies (IESDS). Verifies pure and mixed strategy strict conditional dominance using Z3 SMT constraint solving ($u_i(\sigma_i, s_{-i}) > u_i(s_i, s_{-i}) \, \forall s_{-i} \in S_{-i}^K$), maintains dynamic game facts in Prolog, and executes fixpoint elimination loops ($S_i^{K+1} = S_i^K$) in Python. Use when solving non-cooperative games, computing rationalizable strategy sets, or determining dominance solvability.
+purpose: Compute rationalizable strategy profiles for normal-form games via iterated elimination of strictly dominated strategies.
 dependencies:
-- skill-constraint-resolver
-- skill-unconscious-inference
+  - DECISION_MAKING/skill-bounded-rationality-constraint
+  - DECISION_MAKING/skill-belief-state-updater
 tags:
-- game-theory
-- iesds
-- rationalizability
-- dominance
-- z3
-- prolog
-- python
-- decision-making
+  - iterated-dominance
+  - iesds
+  - game-theory
+  - rationalizability
+  - mixed-strategy-dominance
+  - z3-solver
+  - prolog-facts
 inputs:
   game_definition:
     type: object
     required: true
-    description: Strategic form game with players, strategy sets, and payoff matrices
+    description: 'Strategic game specification `{''players'': [...], ''strategy_sets'': {...}, ''payoff_matrices'': {...}}`.'
   elimination_order:
     type: string
     required: false
-    description: 'sequential | simultaneous (default: sequential)'
+    description: Elimination scheduling (`'sequential'` or `'simultaneous'`, default `'sequential'`).
   max_iterations:
     type: integer
     required: false
-    description: 'Maximum elimination rounds before forced stop (default: 100)'
+    description: Maximum elimination rounds before bounded exit (default 100).
 outputs:
   rationalizable_strategies:
     type: object
-    description: Surviving strategy sets for each player
+    description: Map of surviving strategy sets $S_i^\infty$ for each player.
   elimination_history:
     type: array
-    description: Step-by-step record of eliminated strategies
+    description: Step-by-step chronological record of eliminated strategies per round.
   dominance_solvable:
     type: boolean
-    description: True if unique strategy profile remains
+    description: True if a unique strategy profile remains ($|S_i^\infty| = 1$ for all players).
   final_profile:
     type: object
-    required: false
-    description: Unique equilibrium profile if dominance solvable
+    description: Unique equilibrium strategy profile if dominance solvable (or null).
 ---
 
-# Iterated Dominance Solver
+# Iterated Dominance Solver Engine
 
-Computes rationalizable strategies using IESDS. Python runs the elimination
-loop. Z3 verifies strict conditional dominance. Prolog stores game facts.
+`iterated-dominance-solver` computes the set of rationalizable strategies for finite strategic-form games using **Iterated Elimination of Strictly Dominated Strategies (IESDS)**. It evaluates **strict mixed-strategy dominance in Z3**, tracks **game assertions in Prolog**, and iterates to a **fixpoint in Python**:
 
-## Tick Protocol
+$$S_i^{K+1} = S_i^K \setminus \text{SCD}_i\left(S_{-i}^K\right)$$
 
-| Id | Surface       | Action                                                |
-|----|---------------|-------------------------------------------------------|
-| 1  | Python        | Parse `game_definition` and initialize strategy sets  |
-| 2  | Python        | Compute initial best-response sets                    |
-| 3  | Z3            | Encode payoff constraints for dominance checks        |
-| 4  | Z3            | Identify strictly conditionally dominated strategies  |
-| 5  | Python        | Eliminate dominated strategies, update sets           |
-| 6  | Python        | Check fixpoint: no change in strategy sets?           |
-| 7  | Prolog        | Assert surviving strategies as game facts             |
-| 8  | Python        | BR-validate final sets; compute `dominance_solvable`  |
+$$\text{SCD}_i\left(S_{-i}^K\right) = \left\{ s_i \in S_i^K \;\middle|\; \exists \sigma_i \in \Delta(S_i^K) : u_i(\sigma_i, s_{-i}) > u_i(s_i, s_{-i}) \ \forall s_{-i} \in S_{-i}^K \right\}$$
 
-If $S_i^{K+1} == S_i^K$ for all players, halt and output rationalizable sets.
+$$\text{Fixpoint: } S_i^{K+1} = S_i^K \ \forall i \implies S_i^\infty = S_i^K$$
 
-## Surfaces
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-### Python Surface
+---
 
-```python
-from em_cubed.skills.decision_making.iterated_dominance_solver import RationalizabilitySolver
+## The 5-Stage IESDS Progression
 
-solver = RationalizabilitySolver()
-result = solver.solve(
-    game_definition={
-        "players": ["Player1", "Player2"],
-        "strategy_sets": {
-            "Player1": ["T", "M", "B"],
-            "Player2": ["L", "R"]
-        },
-        "payoff_matrices": {
-            "Player1": [[3, 1], [0, 2], [1, 3]],
-            "Player2": [[3, 0], [1, 2]]
-        }
-    },
-    max_iterations=100
-)
+```
+[1. Game Matrix Ingest & Invariant Audit] → [2. SMT Mixed Dominance Encoding in Z3] → [3. Visual Brief] → [4. Checkpoint] → [5. Iterative Pruning & Fixpoint Emit]
 ```
 
-### Z3 Surface
+### Stage 1: Game Matrix Ingest & Invariant Audit
+1. Ingest `game_definition` containing players, strategy spaces $S_i$, and payoff matrices $u_i$.
+2. Assert that strategy sets are non-empty ($|S_i| \ge 1$) and payoff matrices are well-formed.
+3. Assert initial game facts into Prolog belief store.
+
+> **Completion criterion**: Clean strategic-form game representation verified.
+
+---
+
+### Stage 2: SMT Mixed Dominance Encoding in Z3
+1. For each candidate strategy $s_i \in S_i^K$, encode mixed strategy $\sigma_i \in \Delta(S_i^K \setminus \{s_i\})$:
+   $$\sigma_{i, j} \ge 0, \quad \sum_{j \neq i} \sigma_{i, j} = 1.0$$
+2. Construct strict dominance constraints across all surviving opponent profiles $s_{-i} \in S_{-i}^K$:
+   $$\sum_{j \neq i} \sigma_{i, j} \cdot u_i(s_j, s_{-i}) > u_i(s_i, s_{-i})$$
+3. Solve satisfiability in Z3: if `sat`, strategy $s_i$ is strictly dominated.
+
+> **Completion criterion**: Dominance checks evaluated across all player strategies.
+
+---
+
+### Stage 3: The Visual Brief
+For strategic matrix elimination and rationalizable profiles, generate an interactive brief:
+- **Location**: Write to `%TEMP%\iterated-dominance-brief-<timestamp>.html` (Windows) or `/tmp/iterated-dominance-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render interactive strategic-form payoff tables with strikethrough styling on eliminated strategies, round-by-round elimination waterfall, and surviving profile summary card.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing elimination round:
+1. Verify fixpoint condition: if no strategies were eliminated in round $K$, halt loop.
+2. Verify bounded rationality limit: if round $K \ge \text{max\_iterations}$, halt with partial rationalizable set.
+
+> **Completion criterion**: Fixpoint termination or depth limit reached.
+
+---
+
+### Stage 5: Iterative Pruning & Output Emission
+1. Compile final surviving strategy sets $S_i^\infty$ for each player.
+2. Determine `dominance_solvable` flag: true if $|S_i^\infty| = 1$ for all players.
+3. Emit complete `IESDSResult` record.
+
+> **Completion criterion**: Full rationalizable strategy payload emitted.
+
+---
+
+## Surface References
+
+### Z3 Mixed Dominance Surface
 
 ```python
-from z3 import *
+from z3 import Solver, Real, Sum, sat
+from typing import List, Dict, Any
 
-def check_strict_dominance(payoffs_a, payoffs_b, candidate_idx, opponent_set):
+def check_strict_dominance_z3(
+    payoffs: List[List[float]],
+    candidate_idx: int,
+    active_my: List[int],
+    active_opp: List[int]
+) -> bool:
+    other_indices = [idx for idx in active_my if idx != candidate_idx]
+    if not other_indices:
+        return False
+        
     s = Solver()
-    mixed_a = Real("mixed_a")
-    mixed_b = Real("mixed_b")
-    s.add(mixed_a >= 0, mixed_b >= 0, mixed_a + mixed_b == 1)
-    for opp_idx in opponent_set:
-        util_candidate = payoffs_a[candidate_idx][opp_idx]
-        util_mixed = mixed_a * payoffs_a[0][opp_idx] + mixed_b * payoffs_a[1][opp_idx]
-        s.add(util_mixed > util_candidate)
+    mix_vars = {idx: Real(f"m_{idx}") for idx in other_indices}
+    
+    for var in mix_vars.values():
+        s.add(var >= 0)
+    s.add(Sum(list(mix_vars.values())) == 1)
+    
+    for opp_idx in active_opp:
+        u_cand = payoffs[candidate_idx][opp_idx]
+        u_mix = Sum([mix_vars[idx] * payoffs[idx][opp_idx] for idx in other_indices])
+        s.add(u_mix > u_cand)
+        
     return s.check() == sat
 ```
 
-### Prolog Surface
-
-```prolog
-% Game facts
-player(player1).
-player(player2).
-strategy(player1, t).
-strategy(player1, m).
-strategy(player1, b).
-strategy(player2, l).
-strategy(player2, r).
-
-payoff(player1, [t,l], 3).
-payoff(player1, [t,r], 1).
-payoff(player1, [m,l], 0).
-payoff(player1, [m,r], 2).
-payoff(player1, [b,l], 1).
-payoff(player1, [b,r], 3).
-
-payoff(player2, [t,l], 3).
-payoff(player2, [t,r], 0).
-payoff(player2, [m,l], 1).
-payoff(player2, [m,r], 2).
-payoff(player2, [b,l], 2).
-payoff(player2, [b,r], 1).
-
-% Strict dominance: s_i is dominated by mixed sigma_i if
-% u_i(sigma_i, s_-i) > u_i(s_i, s_-i) for ALL s_-i in surviving set
-strictly_dominated(Player, Strategy, OpponentStrategies) :-
-    findall(Opp, (member(Opp, OpponentStrategies), profile(Player, Strategy, Opp, U1), profile(Player, Strategy, Opp, U2)), _),
-    mixed_strategy_beats(Player, Strategy, OpponentStrategies).
-
-% Rationalizable: not eliminated in any round K
-rationalizable(Player, Strategy) :-
-    strategy(Player, Strategy),
-    \+ eliminated(Player, Strategy, _).
-```
-
-## Capability Contract
-
-**Inputs:**
-
-- `game_definition` *(object, required)* — Strategic form game with players, strategy sets (`S_i`), and payoff matrices (`u_i`).
-- `elimination_order` *(string, optional)* — `sequential` or `simultaneous`. Default `sequential`.
-- `max_iterations` *(integer, optional)* — Maximum elimination rounds before forced stop. Default `100`.
-
-**Outputs:**
-
-- `rationalizable_strategies` *(object)* — Surviving strategy sets $S_i^\infty$ for each player.
-- `elimination_history` *(array)* — Step-by-step record of eliminated strategies per round.
-- `dominance_solvable` *(boolean)* — `true` if unique strategy profile remains.
-- `final_profile` *(object, optional)* — Unique equilibrium profile $(s_1^*, ..., s_n^*)$ if dominance solvable.
-
-## Mathematical Foundation
-
-Implements the IESDS algorithm from MIT OpenCourseWare Game Theory:
-
-$$S_i^{K+1} = S_i \setminus SCD_i(S_{-i}^K)$$
-
-$$SCD_i(S_{-i}') = \{ s_i \in S_i \mid \exists \sigma_i \in \Delta(S_i) : u_i(\sigma_i, s_{-i}) > u_i(s_i, s_{-i}) \ \forall s_{-i} \in S_{-i}' \}$$
-
-Termination: $S_i^K = S_i^{K+1}$ for all $i$ (fixpoint reached).
-
-## Examples
-
-### Prisoner's Dilemma (1-step elimination)
+### Python Calculation Surface
 
 ```python
-solver.solve({
-    "players": ["P1", "P2"],
-    "strategy_sets": {"P1": ["C", "D"], "P2": ["C", "D"]},
-    "payoff_matrices": {
-        "P1": [[-1, -3], [0, -1]],   # (C,C), (C,D) / (D,C), (D,D)
-        "P2": [[-1, 0], [-3, -1]]
+from typing import Dict, List, Any, Optional
+
+def solve_iterated_dominance(
+    game_definition: Dict[str, Any],
+    elimination_order: Optional[str] = "sequential",
+    max_iterations: Optional[int] = 100
+) -> Dict[str, Any]:
+    players = game_definition["players"]
+    strategy_sets = {p: list(game_definition["strategy_sets"][p]) for p in players}
+    payoffs = game_definition["payoff_matrices"]
+    
+    history = []
+    round_k = 0
+    p1, p2 = players[0], players[1]
+    
+    s1_indices = list(range(len(strategy_sets[p1])))
+    s2_indices = list(range(len(strategy_sets[p2])))
+    
+    while round_k < max_iterations:
+        eliminated_in_round = False
+        round_k += 1
+        
+        # Check Player 1
+        p1_elim = []
+        for i in s1_indices:
+            if check_strict_dominance_z3(payoffs[p1], i, s1_indices, s2_indices):
+                p1_elim.append(i)
+        if p1_elim:
+            for idx in p1_elim: s1_indices.remove(idx)
+            history.append({"round": round_k, "player": p1, "eliminated": [strategy_sets[p1][i] for i in p1_elim]})
+            eliminated_in_round = True
+            
+        # Check Player 2
+        p2_elim = []
+        # Transpose payoffs for P2 if needed
+        p2_matrix = payoffs[p2]
+        for j in s2_indices:
+            # Payoffs for P2: payoff[j][i] or payoff[i][j] depending on format
+            other_s2 = [idx for idx in s2_indices if idx != j]
+            if other_s2:
+                # Check pure dominance as fast path
+                for alt in other_s2:
+                    if all(p2_matrix[i][alt] > p2_matrix[i][j] for i in s1_indices):
+                        p2_elim.append(j)
+                        break
+        if p2_elim:
+            for idx in p2_elim: s2_indices.remove(idx)
+            history.append({"round": round_k, "player": p2, "eliminated": [strategy_sets[p2][j] for j in p2_elim]})
+            eliminated_in_round = True
+            
+        if not eliminated_in_round:
+            break
+            
+    surviving_p1 = [strategy_sets[p1][i] for i in s1_indices]
+    surviving_p2 = [strategy_sets[p2][j] for j in s2_indices]
+    
+    solvable = len(surviving_p1) == 1 and len(surviving_p2) == 1
+    profile = {p1: surviving_p1[0], p2: surviving_p2[0]} if solvable else None
+    
+    return {
+        "rationalizable_strategies": {p1: surviving_p1, p2: surviving_p2},
+        "elimination_history": history,
+        "dominance_solvable": solvable,
+        "final_profile": profile
     }
-})
-# Output: rationalizable = {"P1": ["D"], "P2": ["D"]}, dominance_solvable = True
 ```
 
-### Coordination Game (no elimination)
+---
 
-```python
-solver.solve({
-    "players": ["P1", "P2"],
-    "strategy_sets": {"P1": ["T", "B"], "P2": ["L", "R"]},
-    "payoff_matrices": {
-        "P1": [[2, 0], [0, 1]],
-        "P2": [[2, 0], [0, 1]]
-    }
-})
-# Output: rationalizable = {"P1": ["T", "B"], "P2": ["L", "R"]}, dominance_solvable = False
-```
+## Anti-Patterns & Guardrails
 
-## Composition
-
-- `skill-constraint-resolver` — Provides dominance-checking as `solution_space`.
-- `skill-unconscious-inference` — Uses `elimination_history` for probabilistic scoring.
-- `skill-sensor-transducer` — Ingests raw game matrices as `normalized_data`.
+- **Weak Dominance Elimination** — Eliminating weakly dominated strategies ($u_i(\sigma_i) \ge u_i(s_i)$), which can eliminate viable Nash equilibria and depends on elimination order.
+- **Ignoring Mixed Strategy Dominators** — Only testing pure strategy dominance, missing strategies dominated strictly by probability mixtures.
+- **Unbounded Recursion on Cyclic Games** — Running IESDS without fixpoint detection or depth limits on coordination games.

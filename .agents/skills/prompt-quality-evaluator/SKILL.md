@@ -471,5 +471,5 @@ The original `.kilo/agents/prompt-quality-evaluator.agent.md` is a single-surfac
 ## References
 
 - [vscode-chat-customizations-evaluation](https://github.com/microsoft/vscode-chat-customizations-evaluation) — Source evaluation patterns
-- [Multi-Surface Skill Pattern](../docs/MULTI_SURFACE.md) — em-cubed architecture guide
+- [Multi-Surface Skill Pattern](../../../docs/MULTI_SURFACE.md) — em-cubed architecture guide
 - [Custom agents in VS Code](https://code.visualstudio.com/docs/copilot/customization/custom-agents) — Agent file format

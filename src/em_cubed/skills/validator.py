@@ -100,6 +100,29 @@ class SkillValidator:
     # Required frontmatter fields for a minimal valid skill
     REQUIRED_FIELDS = {"name", "Domain"}
 
+    # Canonical supported execution surfaces across Em-Cubed plugins
+    VALID_SURFACES = frozenset(
+        {
+            "python",
+            "prolog",
+            "hy",
+            "z3",
+            "datalog",
+            "sqlite",
+            "quickjs",
+            "kanren",
+            "clingo",
+            "duckdb",
+            "julia",
+            "tensor",
+            "llm",
+            "polars",
+            "rust",
+            "wasm",
+            "janus",
+        }
+    )
+
     # Default fallback values (will be overridden by manifest)
     DEFAULT_MIN_PURPOSE_LENGTH = 10
     DEFAULT_MIN_DESCRIPTION_LENGTH = 20
@@ -268,7 +291,7 @@ class SkillValidator:
             )
 
         # Validate surfaces
-        valid_surfaces = {"python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs", "kanren", "clingo", "duckdb", "julia", "tensor"}
+        valid_surfaces = self.VALID_SURFACES
         for surface in skill_metadata.surfaces:
             if surface not in valid_surfaces:
                 result.add_issue(
@@ -299,7 +322,7 @@ class SkillValidator:
 
     def _validate_surface_implementation(self, result: ValidationResult, skill_metadata, surface: str) -> None:
         """Validate a specific surface implementation."""
-        valid_list = ["python", "prolog", "hy", "z3", "datalog", "sqlite", "quickjs", "kanren", "clingo", "duckdb", "julia", "tensor"]
+        valid_list = self.VALID_SURFACES
         if surface not in valid_list:
             result.add_issue(
                 severity=ValidationSeverity.ERROR,

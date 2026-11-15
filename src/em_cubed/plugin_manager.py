@@ -244,4 +244,5 @@ class PluginManager:
         """Get an instance of HybridCoprocessor for multi-surface co-execution."""
         from .surfaces.hybrid_coprocessor import HybridCoprocessor
 
-        return HybridCoprocessor(timeout=timeout)
+        return HybridCoprocessor(timeout=timeout, plugin_manager=self)
+

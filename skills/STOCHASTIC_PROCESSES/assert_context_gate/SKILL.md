@@ -1,58 +1,114 @@
 ---
 name: assert_context_gate
 domain: STOCHASTIC_PROCESSES
-version: "1.0.0"
-surfaces: [prolog]
-description: |
-  Symbolic guard that evaluates whether a stochastic transition
-  should be permitted under the current agent context.  Used to
-  resolve ambiguous tokens or actions where environment state
-  disambiguates which branch of the transition matrix is valid.
-compatibility: PROLOG
-allowed-tools: |
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+version: 1.0.0
+surfaces:
+  - prolog
+  - python
+description: Symbolic context-gating engine evaluating whether candidate stochastic state transitions should be permitted under the agent's current working memory and operational state. Extends standard Markov chains into controlled Markov processes where transition probabilities depend on agent context $P(s' \mid s, \text{context})$, verifying agent capabilities, resource budgets, recency loop penalties, and target safety in Prolog. Use when disambiguating stochastic branches, preventing cyclic loops, or enforcing policy constraints during Markov graph traversal.
+purpose: Evaluate and enforce symbolic context gates on Markov state transitions using Prolog first-order logic and working-memory context.
+dependencies:
+  - STOCHASTIC_PROCESSES/generate_transition_matrix
+tags:
+  - context-gate
+  - controlled-markov-chain
+  - symbolic-guard
+  - capability-gating
+  - loop-prevention
+  - prolog-reasoning
+inputs:
+  from_state:
+    type: string
+    required: true
+    description: Source state of the proposed transition.
+  to_state:
+    type: string
+    required: true
+    description: Candidate target state of the proposed transition.
+  agent_state:
+    type: object
+    required: true
+    description: 'Agent working memory snapshot `{capability: str, resource_level: int, recent_transitions: [...], safe_targets: [...]}`.'
+outputs:
+  allowed:
+    type: boolean
+    description: True if all four symbolic gates (capability, resource, recency, safety) pass.
+  blocks:
+    type: array
+    description: List of gate violation identifiers if blocked (e.g. `['no_capability', 'insufficient_resource']`).
+  gate_breakdown:
+    type: object
+    description: Detailed status of each evaluated gate component.
 ---
 
-# Assert Context Gate
+# Assert Context Gate Engine
 
-## Purpose
-Implement first-order logic rules to determine whether a proposed stochastic transition (or next-token prediction) is valid under the current agent context. Resolves ambiguity in Markov chain traversal where the transition matrix alone is insufficient to decide if a transition should be allowed.
+`assert_context_gate` extends classical memoryless Markov chains $P(s_{t+1} \mid s_t)$ into **controlled stochastic processes** where transitions are mediated by the agent's internal working-memory belief state $P(s_{t+1} \mid s_t, \text{context})$. It enforces **first-order logic constraints in Prolog** across four gating dimensions:
 
-## Connection to Veritasium Concepts
-- **Context-gated state transitions**: Unlike simple Markov chains where the chain's future depends only on the current state, an M³ agent's state includes working memory. A context gate adds an extra dimension: P(s' | s, context) ≠ P(s' | s).
-- **Disambiguation**: When two states share a common prefix n-gram or are reachable from the same node, the context gate selects the valid one.
-- **Markov property with side information**: The gate effectively defines a "controlled" Markov chain where the control signal is drawn from the agent's belief state.
+$$\text{Gate}(\text{From}, \text{To}) = \text{Capability}(\text{To}) \land \text{Resource}(\text{To}) \land \neg \text{RecentLoop}(\text{From}, \text{To}) \land \text{SafeTarget}(\text{To})$$
 
-## Description
-Pure symbolic skill. Rules encode:
-1. **Agent capability gate**: Can the agent actually execute the next action in its current state?
-2. **Resource gate**: Does the agent have sufficient remaining tokens/budget/credits for the proposed transition?
-3. **Memory consistency gate**: Has the agent already traversed this transition recently (recent-visit penalty)?
-4. **Safety gate**: Is the target state known-safe (no infinite loops or dead-ends)?
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-### Being State-Dependent, Not Memoryless
-% The M³ agent's context is a belief store, not the chain state.
-% assert_context_gate reads from the agent's working memory:
-%
-% ?- agent_context(current_task, Task), safe_transition(From, To, Task)
-% This extends the Markov chain into a "controlled" Markov chain where the control signal is drawn from the agent's belief state.
-%
-% The executable predicate below keeps the same decision shape while returning
-% a structured Result value for downstream orchestration.
+---
 
-## Prolog Surface (prelude.pl)
+## The 5-Stage Context Gate Progression
+
+```
+[1. Working Memory Ingest & State Audit] → [2. Prolog Fact Synthesis] → [3. Visual Brief] → [4. Checkpoint] → [5. Gating Decision & Belief Emit]
+```
+
+### Stage 1: Working Memory Ingest & State Audit
+1. Ingest `from_state`, `to_state`, and `agent_state` dictionary.
+2. Assert that `capability` and `resource_level` fields are defined.
+3. Validate recent transition history buffer.
+
+> **Completion criterion**: Clean agent state context payload verified.
+
+---
+
+### Stage 2: Prolog Fact Synthesis & Assertion
+1. Synthesize dynamic Prolog facts from working memory:
+   - `capability_permits(Cap, Action)`
+   - `resource_context(Level)`
+   - `recent_transition(From, To)`
+   - `safe_target(To)`
+2. Query Prolog gate engine for structural admissibility.
+
+> **Completion criterion**: Dynamic facts asserted into belief store.
+
+---
+
+### Stage 3: The Visual Brief
+For controlled Markov decisions and policy gating, generate an interactive brief:
+- **Location**: Write to `%TEMP%\context-gate-brief-<timestamp>.html` (Windows) or `/tmp/context-gate-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render state transition decision tree with active/blocked paths, 4-gate status checklist (Capability, Budget, Loop, Safety), and transition cost breakdown.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing gating permission:
+1. Inspect loop detection: if $(\text{From}, \text{To})$ was traversed within the last 3 steps, flag `recent_loop` block.
+2. Verify resource balance: ensure remaining budget $\ge \text{Cost}(\text{To})$.
+
+> **Completion criterion**: Loop prevention and budget bounds evaluated.
+
+---
+
+### Stage 5: Gating Decision & Belief Emission
+1. Compile composite `allowed` boolean flag and list of `blocks`.
+2. Format full diagnostic gate breakdown.
+3. Emit complete `GateResult` record.
+
+> **Completion criterion**: Full gating result record emitted.
+
+---
+
+## Surface References
+
+### Prolog Gate Surface
 
 ```prolog
 :- module(context_gate, [
@@ -63,204 +119,91 @@ Pure symbolic skill. Rules encode:
     safe_target/1
 ]).
 
-% ============================================================
-% 1. Agent capability matrix
-%    Dynamically asserted by Python orchestration layer.
-%    e.g., assertz(capability_permits(nlp_predict, generate_token)).
-% ============================================================
 :- dynamic capability_permits/2.
-:- dynamic resource_sufficient/2.
-:- dynamic recently_visited/2.
+:- dynamic resource_context/1.
+:- dynamic recent_transition/2.
 :- dynamic safe_target/1.
-
-% Default capability table (extended at runtime)
-capability_permits(nlp_predict, generate_token).
-capability_permits(nlp_predict, end_sequence).
-capability_permits(walk, follow_link).
-capability_permits(walk, teleport).
-capability_permits(optimize, take_step).
-
-% ============================================================
-% 2. Resource sufficiency gate
-%    Resource levels are source-of-truth from agent state.
-%    Returns sufficient if the transition cost < available resource.
-% ============================================================
-resource_sufficient(ResourceLevel, _) :-
-    ResourceLevel > 0.
-
-% Override for high-cost transitions
-resource_sufficient(ResourceLevel, Transition) :-
-    transition_cost(Transition, Cost),
-    ResourceLevel >= Cost.
 
 transition_cost(follow_link, 1).
 transition_cost(teleport, 3).
 transition_cost(generate_token, 1).
 transition_cost(take_step, 5).
 
-% ============================================================
-% 3. Recency penalty (prevents tight loops)
-% ============================================================
+resource_sufficient(ResourceLevel, Action) :-
+    transition_cost(Action, Cost),
+    ResourceLevel >= Cost.
+resource_sufficient(ResourceLevel, _) :-
+    ResourceLevel > 0.
+
 recently_visited(From, To) :-
-    % A transition is "recent" if it was traversed in the last 3 steps
-    last_transitions(RecentList),
-    length(RecentList, Len),
-    Len >= 3,
-    member(transition(From, To), RecentList).
-
-% Keep last 5 transitions in working memory
-last_transitions(List) :-
     findall(transition(A, B), recent_transition(A, B), All),
-    length(All, Len),
-    ( Len > 5 -> length(Prefix, 5), append(Prefix, _, All) ; All = List ).
+    member(transition(From, To), All).
 
-% ============================================================
-% 4. Safety gate
-% ============================================================
-safe_target(To) :-
-    \+ dead_end(To).
+safe_target(To) :- \+ dead_end(To).
 
-% ============================================================
-% 5. Main gate predicate
-% ============================================================
 assert_valid_transition(From, To, Result) :-
-    ( capability_permits(_, To)
-    -> CapResult = ok
-    ;   CapResult = blocked(no_capability)
-    ),
-    ( resource_sufficient(_, To)
-    -> ResResult = ok
-    ;   ResResult = blocked(insufficient_resource)
-    ),
-    ( \+ recently_visited(From, To)
-    -> RecResult = ok
-    ;   RecResult = blocked(recent_loop)
-    ),
-    ( safe_target(To)
-    -> SafeResult = ok
-    ;   SafeResult = blocked(unsafe_target)
-    ),
+    ( capability_permits(_, To) -> CapResult = ok ; CapResult = blocked(no_capability) ),
+    ( (resource_context(R), resource_sufficient(R, To)) -> ResResult = ok ; ResResult = blocked(insufficient_resource) ),
+    ( \+ recently_visited(From, To) -> RecResult = ok ; RecResult = blocked(recent_loop) ),
+    ( safe_target(To) -> SafeResult = ok ; SafeResult = blocked(unsafe_target) ),
     ( CapResult = ok, ResResult = ok, RecResult = ok, SafeResult = ok
     -> Result = allowed
-    ;   Result = blocked(CapResult, ResResult, RecResult, SafeResult)
+    ; Result = blocked([CapResult, ResResult, RecResult, SafeResult])
     ).
-
-% ============================================================
-% 6. Python bridge for context injection
-% ============================================================
-:- meta_predicate call_python(+, +, -).
 ```
 
-## Python Surface (executor.py)
+### Python Calculation Surface
 
 ```python
-"""
-assert_context_gate
-=====================
-Bridge between Prolog symbolic context gates and the M³ agent's
-working memory.  Reads agent state, asserts Prolog facts, and
-queries gate permits.
-"""
+from typing import Dict, List, Any, Tuple
 
-from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
-
-
-@dataclass(frozen=True)
-class GateResult:
-    from_state: str
-    to_state: str
-    allowed: bool
-    blocks: Tuple[str, ...]
-
-    def to_dict(self):
-        return {
-            "from_state": self.from_state,
-            "to_state": self.to_state,
-            "allowed": self.allowed,
-            "blocks": list(self.blocks),
+def evaluate_context_gate(from_state: str, to_state: str, agent_state: Dict[str, Any]) -> Dict[str, Any]:
+    cap = agent_state.get("capability", "default")
+    res_level = int(agent_state.get("resource_level", 0))
+    recent = agent_state.get("recent_transitions", [])
+    safe_targets = agent_state.get("safe_targets", [])
+    
+    blocks = []
+    
+    # 1. Capability gate
+    allowed_caps = {"generate_token", "follow_link", "teleport", "take_step", "default"}
+    if cap not in allowed_caps and to_state not in allowed_caps:
+        blocks.append("no_capability")
+        
+    # 2. Resource sufficiency gate
+    cost_map = {"follow_link": 1, "teleport": 3, "generate_token": 1, "take_step": 5}
+    cost = cost_map.get(to_state, 1)
+    if res_level < cost:
+        blocks.append("insufficient_resource")
+        
+    # 3. Recency loop penalty (last 3 transitions)
+    last_3 = recent[-3:] if len(recent) >= 3 else recent
+    if any(f == from_state and t == to_state for f, t in last_3):
+        blocks.append("recent_loop")
+        
+    # 4. Safety gate
+    if safe_targets and to_state not in safe_targets:
+        blocks.append("unsafe_target")
+        
+    is_allowed = len(blocks) == 0
+    return {
+        "from_state": from_state,
+        "to_state": to_state,
+        "allowed": is_allowed,
+        "blocks": blocks,
+        "gate_breakdown": {
+            "capability_ok": "no_capability" not in blocks,
+            "resource_ok": "insufficient_resource" not in blocks,
+            "recency_ok": "recent_loop" not in blocks,
+            "safety_ok": "unsafe_target" not in blocks
         }
-
-
-def build_context_facts(agent_state: dict) -> List[str]:
-    """Synthesize Prolog fact assertions from agent working memory.
-
-    Parameters
-    ----------
-    agent_state : dict
-        M³ agent's current working memory snapshot.  Expected keys:
-          - "capability": str
-          - "resource_level": int
-          - "recent_transitions": list of (from, to) tuples
-          - "safe_targets": list of str or None
-
-    Returns
-    -------
-    list of str
-        Prolog fact strings to assert into the belief store.
-    """
-    facts: List[str] = []
-
-    if "capability" in agent_state:
-        facts.append(
-            f"capability_permits({agent_state['capability']}, CURRENT_ACTION)."
-        )
-
-    if "resource_level" in agent_state:
-        res = agent_state["resource_level"]
-        facts.append(f"resource_context({res}).")
-
-    if "recent_transitions" in agent_state:
-        for i, (f, t) in enumerate(agent_state["recent_transitions"][-5:]):
-            facts.append(f"recent_transition({f}, {t}).")
-
-    if "safe_targets" in agent_state and agent_state["safe_targets"]:
-        for t in agent_state["safe_targets"]:
-            facts.append(f"safe_target({t}).")
-
-    return facts
+    }
 ```
 
-## Inputs
+---
 
-| name | type | description |
-|---|---|---|
-| from_state | str | Source state of proposed transition |
-| to_state | str | Target state of proposed transition |
-| agent_state | dict | M³ agent working-memory snapshot |
-| agent_context | dict | Agent's current context (capabilities, resources, history) |
+## Anti-Patterns & Guardrails
 
-## Outputs
-
-| name | type | description |
-|---|---|---|
-| allowed | bool | True if all gates pass |
-| blocks | tuple[str] | List of gate names that blocked the transition |
-
-## Gate Categories
-
-| Gate | Block Label | Resolution |
-|---|---|---|
-| Agent capability | no_capability | Agent cannot perform To action |
-| Resource sufficiency | insufficient_resource | Insufficient budget/tokens |
-| Recency penalty | recent_loop | Transition recently traversed |
-| Safety | unsafe_target | Target flagged as dead-end or unsafe |
-
-## State Updates
-```
-belief_assert(capability_permits(Cap, Action))
-belief_assert(recent_transition(From, To))
-belief_add(context_gate_result(From, To, Result, Blocks))
-```
-
-## Error Handling
-| Error | Condition |
-|---|---|
-| unbound_capability | No capability_permits fact for current action |
-| unbound_resource | resource_context not asserted |
-
-## Security
-- Pure Prolog reasoning. No I/O.
-- `agent_state` is not logged; only gating decisions are recorded.
+- **Unchecked Cyclic Looping** — Allowing stochastic walks to bounce indefinitely between two states without recency memory tracking.
+- **Resource Depletion Bypass** — Permitting high-cost transitions (e.g. teleportation) when agent token budget is exhausted ($R \le 0$).
+- **Dead-End Trapping** — Routing to terminal dead-end states when safe alternative branches exist.

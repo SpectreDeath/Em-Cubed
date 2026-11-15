@@ -69,3 +69,77 @@ def test_text_loop_miner():
     assert loops[0].name == "RefundLoop"
     assert "WHEN" in loops[0].trigger.upper()
     assert len(loops[0].action_sequence) > 0
+
+
+class SlowLoopSkill(BaseLoopySkill[int, str]):
+    def initialize_state(self, *args, **kwargs) -> int:
+        return 0
+
+    def mutate(self, state: int, iteration: int) -> tuple[int, str]:
+        import time
+
+        time.sleep(0.5)
+        return state + 1, "slept"
+
+    def verify(self, state: int) -> tuple[bool, str]:
+        return False, "Not done"
+
+    def extract_result(self, state: int) -> str:
+        return "slow"
+
+
+class CrashingSkill(BaseLoopySkill[int, str]):
+    def initialize_state(self, *args, **kwargs) -> int:
+        return 0
+
+    def mutate(self, state: int, iteration: int) -> tuple[int, str]:
+        raise RuntimeError("Fatal simulator explosion")
+
+    def verify(self, state: int) -> tuple[bool, str]:
+        return False, "err"
+
+    def extract_result(self, state: int) -> str:
+        return "err"
+
+
+def test_loopy_skill_timeout_enforcement():
+    skill = SlowLoopSkill(max_iterations=10)
+    res = LoopySkillRunner.execute(skill, timeout=0.1)
+
+    assert res.success is False
+    assert res.error_message is not None
+    assert "timed out" in res.error_message.lower()
+    assert len(res.trajectory) == 1
+    assert res.trajectory[0].action_taken == "execution_timeout_guard"
+
+
+def test_loopy_skill_exception_containment():
+    skill = CrashingSkill(max_iterations=5)
+    res = LoopySkillRunner.execute(skill)
+
+    assert res.success is False
+    assert res.error_message is not None
+    assert "Fatal simulator explosion" in res.error_message
+    assert len(res.trajectory) == 1
+    assert res.trajectory[0].action_taken == "exception_containment"
+
+
+def test_loopy_skill_execute_with_audit_and_evolution():
+    from em_cubed.loopy.evolution import SkillEvolutionEngine
+
+    skill = MockAutoFixerSkill(max_iterations=5)
+    engine = SkillEvolutionEngine()
+
+    res, report = LoopySkillRunner.execute_with_audit(
+        skill,
+        initial_code="def foo(): pass",
+        evolution_engine=engine,
+    )
+
+    assert res.success is True
+    assert report.skill_name == "MockAutoFixerSkill"
+    assert report.success is True
+    assert len(report.proof_annotations) == 2
+    assert len(engine.history) == 1
+    assert engine.history[0].skill_name == "MockAutoFixerSkill"
+

@@ -344,7 +344,8 @@ class SkillTelemetry:
             output_str = json.dumps(result)
             # Rough estimate: 1 token ~= 4 characters
             return (len(input_str) + len(output_str)) // 4
-        except Exception:
+        except Exception as e:
+            self.logger.debug("Failed to estimate token usage", error=str(e))
             return 0
 
     def estimate_cost(self, token_usage: int, surface: str = "python") -> float:

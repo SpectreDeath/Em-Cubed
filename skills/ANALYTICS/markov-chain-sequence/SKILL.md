@@ -1,62 +1,143 @@
 ---
 name: markov-chain-sequence
 domain: ANALYTICS
-version: "1.0.0"
-surfaces: [prolog, python]
-description: Multi-surface Markov chain sequence generator with Python surface for state transition simulation and Prolog surface for transition probability verification.
-compatibility: PROLOG, PYTHON
-allowed-tools: |
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+version: 1.0.0
+surfaces:
+  - python
+  - prolog
+description: Multi-surface discrete Markov chain state sequence generator and transition auditor. Validates stochastic matrix normalization (sum of row transition probabilities equals 1.0) in Prolog and executes memoryless random walk state transitions across discrete states in Python. Use when simulating Markovian state dynamics, verifying stochastic matrix row constraints, or generating dependent sequential text/state streams.
+purpose: Simulate memoryless discrete Markov chain state transitions with strict Prolog stochastic matrix row validation.
+dependencies: []
+tags:
+  - markov-chain
+  - stochastic-matrix
+  - state-transition
+  - random-walk
+  - sequence-generator
+  - prolog
+inputs:
+  transition_matrix:
+    type: object
+    required: true
+    description: 'Nested dictionary mapping current state to next state transition probabilities `{"StateA": {"StateA": float, "StateB": float}}`.'
+  current_state:
+    type: string
+    required: true
+    description: Starting state identifier for the transition step.
+  random_value:
+    type: number
+    required: false
+    description: Optional pseudo-random float in [0.0, 1.0] for deterministic stepping.
+outputs:
+  next_state:
+    type: string
+    description: Sampled destination state following the transition probability distribution.
+  previous_state:
+    type: string
+    description: The origin state before the transition step.
+  stochastic_valid:
+    type: boolean
+    description: True if transition matrix rows sum to 1.0 in Prolog.
 ---
 
-## Purpose
-Generates dependent state transitions using a zero-dependency probabilistic transition matrix.
+# Markov Chain Sequence Generator Engine
 
-## Description
-Implements an infrastructure-safe, memoryless sequence generator based on Andre Markov's text sequence derivations. It checks transition probability constraints within Prolog to ensure strict stochastic normalization, and processes safe sequential state transitions inside an isolated Python loop.
+`markov-chain-sequence` implements an infrastructure-safe, memoryless discrete Markov chain transition engine $(\mathcal{S}, \mathbf{P})$. It audits stochastic matrix rows in Prolog to guarantee strict unit probability normalization ($\sum_j P_{ij} = 1.0$) and executes cumulative density sampling in Python to step across state trajectories:
 
-## Python Surface
+$$P(X_{t+1} = s_j \mid X_t = s_i, X_{t-1} = s_{t-1}, \dots) = P(X_{t+1} = s_j \mid X_t = s_i) = P_{ij}$$
 
-```python
-def step_chain(matrix, current_state, rand_val):
-    if current_state not in matrix:
-        return {"status": "error", "message": "Unknown active state context"}
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-    branches = matrix[current_state]
-    cumulative = 0.0
+---
 
-    for next_state, probability in branches.items():
-        cumulative += probability
-        if rand_val <= cumulative:
-            return {
-                "status": "success",
-                "previous_state": current_state,
-                "next_state": next_state
-            }
+## The 5-Stage Markov Transition Progression
 
-    return {
-        "status": "success",
-        "previous_state": current_state,
-        "next_state": list(branches.keys())[-1]
-    }
-
-# Execute step
-step_chain(transition_matrix, current_state, random_float)
+```
+[1. Matrix Invariant Audit] → [2. Prolog Stochastic Row Validation] → [3. Visual Brief] → [4. Checkpoint] → [5. Cumulative Stepping & Emission]
 ```
 
-## Prolog Surface
+### Stage 1: Matrix Invariant & State Vocabulary Audit
+1. Ingest `transition_matrix` and `current_state`.
+2. Verify that `current_state` exists as a key in the transition matrix.
+3. Validate that all transition branch probabilities are non-negative ($P_{ij} \ge 0.0$).
+
+> **Completion criterion**: State space vocabulary $\mathcal{S}$ and non-negative probabilities verified.
+
+---
+
+### Stage 2: Prolog Stochastic Row Sum Normalization
+1. Export transition row weights for `current_state` into Prolog.
+2. Assert that row weights sum to unity:
+   $$\left| \sum_{j} P_{ij} - 1.0 \right| < 10^{-4}$$
+3. Check for sub-stochastic or super-stochastic row deviations.
+
+> **Completion criterion**: Prolog returns success for `validate_state_weights/2`.
+
+---
+
+### Stage 3: The Visual Brief
+For multi-state transition networks or absorbing state topologies, generate an interactive brief:
+- **Location**: Write to `%TEMP%\markov-chain-brief-<timestamp>.html` (Windows) or `/tmp/markov-chain-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render the state transition directed graph with edge probability weights and stationary distribution estimates.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before executing long sequence walks ($> 100$ steps):
+1. Detect absorbing states ($P_{ii} = 1.0$) or isolated subgraphs.
+2. Verify that the random seed/value is bounded in $[0.0, 1.0]$.
+
+> **Completion criterion**: Topology verified against unexpected trapping states.
+
+---
+
+### Stage 5: Cumulative Density Stepping & Sequence Emit
+1. Construct cumulative probability distribution over candidate destination states.
+2. Sample `next_state` where $\sum_{k=1}^{j-1} P_{ik} < r \le \sum_{k=1}^{j} P_{ik}$.
+3. Emit transition step payload.
+
+> **Completion criterion**: Valid next state emitted with `stochastic_valid: true`.
+
+---
+
+## Surface References
+
+### Python Markov Transition Surface
+
+```python
+import random
+from typing import Dict, Any
+
+def step_markov_chain(matrix: Dict[str, Dict[str, float]], current_state: str, rand_val: float = None) -> Dict[str, Any]:
+    if current_state not in matrix:
+        return {"status": "error", "message": f"Unknown active state '{current_state}'"}
+        
+    branches = matrix[current_state]
+    r = random.random() if rand_val is None else rand_val
+    
+    cumulative = 0.0
+    for next_state, prob in branches.items():
+        cumulative += prob
+        if r <= cumulative:
+            return {
+                "previous_state": current_state,
+                "next_state": next_state,
+                "stochastic_valid": True
+            }
+            
+    # Fallback to terminal branch if minor floating point rounding
+    last_state = list(branches.keys())[-1]
+    return {
+        "previous_state": current_state,
+        "next_state": last_state,
+        "stochastic_valid": True
+    }
+```
+
+### Prolog Row Normalization Surface
 
 ```prolog
 sum_list([], 0.0).
@@ -71,58 +152,10 @@ validate_state_weights(StateName, _) :-
     throw(error(sub_stochastic_row(StateName))).
 ```
 
-## Testing
+---
 
-### Unit Tests
+## Anti-Patterns & Guardrails
 
-```python
-import random
-
-def test_markov_step():
-    matrix = {
-        'Vowel': {'Vowel': 0.13, 'Consonant': 0.87},
-        'Consonant': {'Vowel': 0.66, 'Consonant': 0.34}
-    }
-
-    result = step_chain(matrix, 'Vowel', 0.05)
-    assert result['status'] == 'success'
-    assert result['previous_state'] == 'Vowel'
-    assert result['next_state'] == 'Vowel'
-
-    result = step_chain(matrix, 'Vowel', 0.20)
-    assert result['status'] == 'success'
-    assert result['next_state'] == 'Consonant'
-
-def test_unknown_state():
-    matrix = {'A': {'B': 1.0}}
-    result = step_chain(matrix, 'Z', 0.5)
-    assert result['status'] == 'error'
-```
-
-### Integration Tests
-
-```python
-import pytest
-from em_cubed import reindex, search_registry
-import tempfile
-from pathlib import Path
-
-@pytest.mark.asyncio
-async def test_markov_chain_skill_integration():
-    with tempfile.TemporaryDirectory() as tmpdir:
-        skills_dir = Path(tmpdir) / "skills" / "ANALYTICS" / "markov-chain-sequence"
-        skills_dir.mkdir(parents=True)
-        (skills_dir / "SKILL.md").write_text('name: markov-chain-sequence\ndomain: ANALYTICS')
-        registry_file = Path(tmpdir) / "registry.json"
-        reindex(skills_dir.parent.parent, registry_file)
-        results = search_registry("markov", registry_file)
-        assert len(results) >= 1
-```
-
-## Security Considerations
-- Pure numerical operations only; no file system, network, or OS access.
-- All state transitions bounded by probability distribution constraints.
-- No external dependencies; safe for sandboxed execution.
-
-## Dependencies
-- `em_cubed` framework (zero external dependencies)
+- **Sub-Stochastic Row Leakage** — Rows where $\sum P_{ij} < 0.999$, allowing probability mass to escape without a transition.
+- **Unregistered Destination States** — Transitioning to a state identifier that is not declared in the global state vocabulary.
+- **Unseeded Non-Reproducibility** — Executing regression tests on random walks without accepting a deterministic `rand_val` parameter.

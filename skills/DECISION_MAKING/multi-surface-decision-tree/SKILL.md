@@ -2,254 +2,231 @@
 name: multi-surface-decision-tree
 domain: DECISION_MAKING
 version: 1.0.0
-description: Multi-surface decision tree supporting ensemble-based classification and rule extraction across Python, Prolog,
-  and Hy surfaces.
-compatibility: UNIVERSAL
-complexity: High
-type: Process
-category: Cognitive Skills
-estimated execution time: 2-5 minutes
-source: community
-allowed-tools:
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+surfaces:
+  - python
+  - prolog
+  - hy
+description: Multi-surface decision tree analysis and option evaluation engine supporting ensemble-based classification, Pareto optimality checking, and fuzzy heuristic aggregation. Evaluates logical constraint violations and Pareto dominance in Prolog ($\neg \exists b \succ a$), normalizes numerical criteria values in Python ($[0, 1]$ min-max scaling), and aggregates multi-attribute scores with triangular fuzzy membership functions in Hy. Use when analyzing multi-criteria options under uncertainty, extracting decision rules, or identifying Pareto-optimal alternatives.
+purpose: Analyze decision trees, evaluate multi-criteria options, and filter Pareto-optimal choices across Python, Prolog, and Hy.
+dependencies:
+  - DECISION_MAKING/multi-criteria-weight-calculator
+tags:
+  - decision-tree
+  - multi-surface
+  - pareto-optimality
+  - fuzzy-scoring
+  - rule-extraction
+  - prolog-constraints
+inputs:
+  options:
+    type: array
+    required: true
+    description: 'List of candidate decision option dictionaries `[{''name'': ''A'', ''risk'': 5, ''return'': 10, ...}, ...]`.'
+  criteria:
+    type: array
+    required: true
+    description: List of criteria attribute keys to evaluate `['risk', 'return', 'liquidity']`.
+  weights:
+    type: object
+    required: false
+    description: 'Criteria weight mapping `{criterion_name: weight}` (default uniform weights).'
+  constraints:
+    type: array
+    required: false
+    description: 'List of threshold constraints `[{''criterion'': ''risk'', ''max'': 7}, ...]` for Prolog filtering.'
+outputs:
+  ranked_options:
+    type: array
+    description: Ranked list of decision options with normalized scores and confidence intervals.
+  pareto_optimal_set:
+    type: array
+    description: Subset of candidate options that are non-dominated (Pareto optimal).
+  constraint_violations:
+    type: object
+    description: Map of each option to any triggered constraint violation codes.
+  top_recommendation:
+    type: object
+    description: Highest-scoring compliant candidate option.
 ---
-origin: manual
-triggers:
-  - decision_support
-  - problem_solving
-  - multi_criteria_analysis
-quality:
-  applied_count: 0
-  success_count: 0
-  completion_rate: 0.0
-  token_savings_avg: 0.0
-created_at: "2026-05-02T09:53:00Z"
-updated_at: "2026-05-02T09:53:00Z"
 
-## Purpose
+# Multi-Surface Decision Tree Engine
 
-Multi-surface decision tree analyzer that combines Python for data processing, Prolog for logical inference, and Hy for fuzzy decision scoring across complex criteria.
+`multi-surface-decision-tree` provides a comprehensive multi-criteria decision analysis framework. It evaluates **Pareto optimality and logical constraints in Prolog**, performs **tree traversal and numerical normalization in Python**, and aggregates **fuzzy uncertainty scores in Hy**:
 
-## Description
+$$\text{Score}(a) = \sum_{c \in \mathcal{C}} w_c \cdot v_c(a), \quad \text{ParetoOptimal}(a) \iff \neg \exists b \in \mathcal{O} \text{ s.t. } b \succ a$$
 
-This skill provides a comprehensive decision-making framework:
-- Python for tree traversal, data normalization, and numerical calculations
-- Prolog for logical rule evaluation and constraint satisfaction checking
-- Hy for fuzzy scoring and weighted heuristic aggregation
+$$b \succ a \iff (\forall c \in \mathcal{C}, v_c(b) \ge v_c(a)) \land (\exists c \in \mathcal{C}, v_c(b) > v_c(a))$$
 
-The skill handles multi-criteria decision scenarios with uncertainty and complex dependencies.
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-## Examples
+---
 
-### Investment Portfolio Decision
+## The 5-Stage Multi-Surface Decision Progression
 
 ```
-Input: Portfolio options with risk, return, and liquidity criteria
-Output: Ranked options with confidence scores and constraint violations
+[1. Option & Criteria Ingest] → [2. Prolog Constraint & Pareto Dominance Proof] → [3. Visual Brief] → [4. Checkpoint] → [5. Fuzzy Score Aggregation & Emit]
 ```
 
-## Implementation
+### Stage 1: Option & Criteria Ingest
+1. Ingest `options` array, `criteria` keys, and optional `weights` dictionary.
+2. Normalize criteria values into $[0, 1]$ interval via min-max scaling.
 
-### Python Tree Traversal
+> **Completion criterion**: Clean candidate options and normalized criteria established.
 
-```python
-import math
-from typing import Dict, List, Any
+---
 
-def build_decision_tree(options: List[Dict], criteria: List[str]) -> Dict:
-    """Build and traverse decision tree with weighted scoring."""
-    
-    def calculate_weighted_score(option: Dict, weights: Dict[str, float]) -> float:
-        """Calculate weighted score across all criteria."""
-        total = 0.0
-        for criterion, weight in weights.items():
-            value = option.get(criterion, 0)
-            normalized = normalize_value(value, criterion)
-            total += normalized * weight
-        return total
-    
-    def normalize_value(value: float, criterion: str) -> float:
-        """Normalize values to 0-1 scale."""
-        # Implementation varies by criterion type
-        if criterion == "risk":
-            return 1.0 - min(value / 10.0, 1.0)  # Lower risk is better
-        elif criterion == "return":
-            return min(value / 20.0, 1.0)  # Higher return is better
-        elif criterion == "liquidity":
-            return min(value / 100.0, 1.0)  # Higher liquidity is better
-        return value
-    
-    def traverse(node: Dict, path: List = None) -> Dict:
-        """Recursive tree traversal with scoring."""
-        if path is None:
-            path = []
-        
-        if "children" not in node:
-            # Leaf node - calculate final score
-            return {
-                "path": path,
-                "option": node.get("option"),
-                "score": node.get("score", 0)
-            }
-        
-        results = []
-        for child in node.get("children", []):
-            new_path = path + [child.get("decision")]
-            results.append(traverse(child, new_path))
-        
-        return {"branches": results}
-    
-    return calculate_weighted_score
+### Stage 2: Prolog Constraint & Pareto Dominance Proof
+1. Evaluate hard constraint rules in Prolog:
+   ```prolog
+   constraint_violation(Option, high_risk) :- option_risk(Option, Risk), Risk > 7.
+   ```
+2. Filter Pareto optimal options: identify options for which no other option achieves equal-or-better performance on all criteria and strictly better on at least one.
 
-def normalize_criteria(options: List[Dict]) -> List[Dict]:
-    """Normalize all criteria values across options."""
-    all_keys = set()
-    for opt in options:
-        all_keys.update(opt.keys())
-    
-    numeric_keys = [k for k in all_keys if any(isinstance(v, (int, float)) for v in [opt.get(k) for opt in options])]
-    
-    for key in numeric_keys:
-        values = [opt.get(key, 0) for opt in options]
-        min_val, max_val = min(values), max(values)
-        range_val = max_val - min_val if max_val != min_val else 1
-        
-        for opt in options:
-            opt[f"{key}_normalized"] = (opt.get(key, 0) - min_val) / range_val
-    
-    return options
-```
+> **Completion criterion**: Pareto optimal subset and constraint violations determined.
 
-### Prolog Logical Inference
+---
+
+### Stage 3: The Visual Brief
+For multi-criteria option comparisons and Pareto frontiers, generate an interactive brief:
+- **Location**: Write to `%TEMP%\decision-tree-brief-<timestamp>.html` (Windows) or `/tmp/decision-tree-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render decision tree branch hierarchy, 2D Pareto frontier scatter plot (Risk vs. Return), and multi-criteria score ranking table with violation badges.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing ranking:
+1. Verify that weights sum to 1.0: $\sum w_c = 1.0 \pm 10^{-5}$.
+2. Separate compliant options (zero constraint violations) from non-compliant alternatives.
+
+> **Completion criterion**: Weight normalization and compliance partitioning verified.
+
+---
+
+### Stage 5: Fuzzy Score Aggregation & Output Emission
+1. Calculate weighted composite scores and fuzzy confidence intervals in Hy/Python.
+2. Rank compliant options descending by composite score.
+3. Identify `top_recommendation`.
+4. Emit complete `DecisionTreeResult` record.
+
+> **Completion criterion**: Full decision tree recommendation payload emitted.
+
+---
+
+## Surface References
+
+### Prolog Pareto Surface
 
 ```prolog
-% Decision constraint rules
-valid_decision(Option) :-
-    option_risk(Option, Risk),
-    option_return(Option, Return),
-    option_liquidity(Option, Liquidity),
-    Risk =< 7,           % Risk threshold
-    Return >= 5,         % Minimum return
-    Liquidity >= 20.     % Minimum liquidity
+:- module(decision_tree_logic, [
+    dominated_by/2,
+    pareto_optimal/1,
+    meets_constraints/1
+]).
 
-% Constraint violation detection
-constraint_violation(Option, high_risk) :-
-    option_risk(Option, Risk),
-    Risk > 8.
+dominated_by(Opt1, Opt2) :-
+    option_score(Opt1, risk, R1), option_score(Opt2, risk, R2),
+    option_score(Opt1, return, Ret1), option_score(Opt2, return, Ret2),
+    R1 >= R2, Ret1 =< Ret2,
+    (R1 > R2 ; Ret1 < Ret2).
 
-constraint_violation(Option, low_return) :-
-    option_return(Option, Return),
-    Return < 3.
-
-constraint_violation(Option, illiquid) :-
-    option_liquidity(Option, Liquidity),
-    Liquidity < 10.
-
-% Multi-criteria satisfaction
-meets_all_criteria(Option) :-
-    \+ constraint_violation(Option, _).
-
-% Dominance relationships
-dominated_by(Option1, Option2) :-
-    option_risk(Option1, Risk1),
-    option_risk(Option2, Risk2),
-    option_return(Option1, Ret1),
-    option_return(Option2, Ret2),
-    Risk1 >= Risk2, Ret1 =< Ret2,
-    (Risk1 > Risk2 ; Ret1 < Ret2).
-
-pareto_optimal(Option) :-
-    \+ (dominated_by(Option, Other)).
+pareto_optimal(Opt) :-
+    \+ (dominated_by(Opt, _)).
 ```
 
-### Hy Fuzzy Scoring
-
-```hy
-(defn fuzzy-and [a b]
-  "Fuzzy AND operation using minimum"
-  (min a b))
-
-(defn fuzzy-or [a b]
-  "Fuzzy OR operation using maximum"
-  (max a b))
-
-(defn fuzzy-not [a]
-  "Fuzzy NOT operation"
-  (- 1 a))
-
-(defn triangular-membership [x a b c]
-  "Triangular membership function"
-  (cond
-    (<= x a) 0
-    (<= x b) (/ (- x a) (- b a))
-    (<= x c) (/ (- c x) (- c b))
-    True 0))
-
-(defn score-with-uncertainty [base-score uncertainty-factor]
-  "Adjust score based on uncertainty"
-  (* base-score (- 1 uncertainty-factor)))
-
-(defn multi-criteria-aggregation [scores weights]
-  "Aggregate scores with fuzzy weights"
-  (/ (sum (list (* s w) (for [s scores w weights])))
-     (sum weights)))
-
-(defn confidence-interval [score samples]
-  "Calculate confidence interval for decision"
-  (let [std-dev (sqrt (/ (sum (list ** (- x score) 2) (for [x samples])) (len samples)))
-        margin (* 1.96 (/ std-dev (sqrt (len samples))))]
-    {:lower (- score margin) :upper (+ score margin) :confidence (* 100 (- 1 (/ margin score)))}))
-```
-
-## Testing
-
-> **Note:** These tests use direct imports for standalone illustration. In production, use the `SkillExecutor` which injects surface plugins via `context["surfaces"]`. See [Multi-Surface Guide](../../docs/MULTI_SURFACE_GUIDE.md) for the recommended pattern.
-
-### Python Tree Test
+### Python Calculation Surface
 
 ```python
-# Test Python tree operations (standalone)
-from skills.multi_surface_decision_tree import build_decision_tree, normalize_criteria
+from typing import Dict, List, Any, Optional
 
-options = [
-    {"risk": 5, "return": 10, "liquidity": 50, "name": "Option A"},
-    {"risk": 3, "return": 8, "liquidity": 80, "name": "Option B"},
-]
-
-normalized = normalize_criteria(options)
-assert len(normalized) == 2
-```
-
-### Multi-Surface Integration Test (Recommended Pattern)
-
-```python
-# Production pattern: use SkillExecutor with context injection
-from em_cubed.skills.executor import SkillExecutor, SkillExecutionRequest
-
-executor = SkillExecutor(plugin_manager, registry, skills_dir)
-request = SkillExecutionRequest(
-    skill_id="DECISION_MAKING/multi-surface-decision-tree",
-    input_data={
-        "options": [
-            {"risk": 5, "return": 10, "liquidity": 50},
-            {"risk": 3, "return": 8, "liquidity": 80}
-        ],
-        "criteria": ["risk", "return", "liquidity"],
-        "weights": {"risk": 0.4, "return": 0.4, "liquidity": 0.2}
+def evaluate_decision_tree(
+    options: List[Dict[str, Any]],
+    criteria: List[str],
+    weights: Optional[Dict[str, float]] = None,
+    constraints: Optional[List[Dict[str, Any]]] = None
+) -> Dict[str, Any]:
+    if not options:
+        raise ValueError("empty_options: Requires at least 1 option.")
+    if not criteria:
+        raise ValueError("empty_criteria: Requires at least 1 criterion.")
+        
+    # Weight setup
+    if weights is None:
+        w_dict = {c: 1.0 / len(criteria) for c in criteria}
+    else:
+        tot = sum(weights.values())
+        w_dict = {c: weights.get(c, 0.0) / (tot if tot > 0 else 1.0) for c in criteria}
+        
+    # Min-max normalization
+    norm_options = []
+    for opt in options:
+        norm_opt = dict(opt)
+        for c in criteria:
+            vals = [o.get(c, 0.0) for o in options]
+            min_v, max_v = min(vals), max(vals)
+            rng = max_v - min_v if max_v != min_v else 1.0
+            norm_opt[f"{c}_norm"] = (opt.get(c, 0.0) - min_v) / rng
+        norm_options.append(norm_opt)
+        
+    # Constraint violations
+    violations = {}
+    for opt in options:
+        v_list = []
+        if constraints:
+            for cons in constraints:
+                c = cons.get("criterion")
+                val = opt.get(c, 0.0)
+                if "max" in cons and val > cons["max"]:
+                    v_list.append(f"exceeds_max_{c}")
+                if "min" in cons and val < cons["min"]:
+                    v_list.append(f"below_min_{c}")
+        violations[opt.get("name", "unnamed")] = v_list
+        
+    # Pareto dominance
+    pareto_set = []
+    for i, opt_a in enumerate(norm_options):
+        dominated = False
+        for j, opt_b in enumerate(norm_options):
+            if i == j: continue
+            # b dominates a if b >= a on all criteria and b > a on at least one
+            ge_all = all(opt_b[f"{c}_norm"] >= opt_a[f"{c}_norm"] for c in criteria)
+            gt_one = any(opt_b[f"{c}_norm"] > opt_a[f"{c}_norm"] for c in criteria)
+            if ge_all and gt_one:
+                dominated = True
+                break
+        if not dominated:
+            pareto_set.append(opt_a.get("name", f"Option_{i}"))
+            
+    # Composite scoring
+    ranked = []
+    for opt in norm_options:
+        score = sum(w_dict[c] * opt[f"{c}_norm"] for c in criteria)
+        name = opt.get("name", "unnamed")
+        ranked.append({
+            "name": name,
+            "score": round(score, 4),
+            "is_pareto": name in pareto_set,
+            "violations": violations.get(name, [])
+        })
+        
+    ranked.sort(key=lambda x: x["score"], reverse=True)
+    compliant = [o for o in ranked if not o["violations"]]
+    top_rec = compliant[0] if compliant else (ranked[0] if ranked else None)
+    
+    return {
+        "ranked_options": ranked,
+        "pareto_optimal_set": pareto_set,
+        "constraint_violations": violations,
+        "top_recommendation": top_rec
     }
-)
-result = await executor.execute(request)
-assert result.success
 ```
+
+---
+
+## Anti-Patterns & Guardrails
+
+- **Recommending Non-Compliant Alternatives** — Selecting an option with the highest score despite violating hard constraints (e.g. risk $> 8$).
+- **Confusing Directionality in Min-Max Scaling** — Treating cost/risk criteria as "higher is better" without inverting the normalization scale.
+- **Ignoring Pareto Dominated Sub-Optimal Choices** — Favouring dominated options over strictly superior alternatives on all evaluation axes.

@@ -3,129 +3,174 @@ name: skill-bounded-rationality-constraint
 domain: DECISION_MAKING
 version: 1.0.0
 surfaces:
-- python
-description: 'Active circuit-breaker middleware for the recursive IESDS loop in iterated-dominance-solver. Enforces fixpoint
-  termination by checking iteration depth and convergence delta thresholds, preventing infinite recursion and SMT solver hangs.
-
-  '
-purpose: 'Act as a bounded rationality guardrail that forces clean early exit from the iterated dominance elimination loop
-  when fixpoint is reached or computational budget is exhausted.
-
-  '
+  - python
+description: Active circuit-breaker and convergence middleware enforcing Herbert Simon's bounded rationality constraints over recursive game-theoretic elimination loops (such as IESDS in iterated-dominance-solver). Evaluates maximum iteration recursion depth ($K \ge K_{\text{max}}$) and probability weight delta convergence ($\max_i |w_i^{(K+1)} - w_i^{(K)}| < \delta$), preventing infinite recursion loops, SMT solver hangs, and excessive computation in game-theoretic fixed-point search. Use when wrapping recursive game solvers, bounding elimination depth, or halting iterative belief updates.
+purpose: Enforce bounded rationality guardrails and circuit-breaker termination for recursive game-theoretic elimination loops.
 dependencies:
-- decision-making/iterated-dominance-solver
+  - DECISION_MAKING/iterated-dominance-solver
 tags:
-- bounded-rationality
-- circuit-breaker
-- fixpoint
-- convergence
-- recursion-guard
-- python
-- decision-making
+  - bounded-rationality
+  - circuit-breaker
+  - fixpoint-convergence
+  - simon-rationality
+  - recursion-guard
+  - iesds-middleware
 inputs:
   current_iteration_k:
     type: integer
     required: true
-    description: Current iteration count of the IESDS loop
+    description: Current iteration count of the recursive elimination loop.
   max_depth_threshold:
     type: integer
     required: true
-    description: Maximum allowed iterations before forced termination
+    description: Maximum allowed iteration ceiling before forced termination.
   delta_convergence:
-    type: float
+    type: number
     required: true
-    description: Minimum weight change threshold to consider converged
+    description: Minimum weight change threshold $\delta$ to consider converged.
   previous_weights:
     type: object
     required: false
-    description: Strategy weights from previous iteration dict[int, float]
+    description: 'Strategy probability weights from previous iteration `{strategy_id: weight}`.'
   current_weights:
     type: object
     required: false
-    description: Strategy weights from current iteration dict[int, float]
+    description: 'Strategy probability weights from current iteration `{strategy_id: weight}`.'
 outputs:
   should_terminate:
     type: boolean
-    description: True if loop should terminate immediately
+    description: True if the recursive elimination loop should terminate immediately.
   termination_reason:
     type: string
-    description: fixpoint_reached | depth_exceeded | continue
+    description: Qualitative verdict (`'fixpoint_reached'`, `'depth_exceeded'`, or `'continue'`).
   current_weights:
     type: object
-    description: Strategy weights at current iteration (for next pass)
+    description: Echo of current strategy weights for passing to next iteration.
   iterations_performed:
     type: integer
-    description: Total iterations executed so far
+    description: Total elimination iterations executed so far.
 ---
 
-# Skill Bounded Rationality Constraint
+# Skill Bounded Rationality Constraint Engine
 
-Active circuit-breaker for recursive IESDS loops. Enforces fixpoint
-termination by checking iteration depth and convergence delta thresholds.
+`skill-bounded-rationality-constraint` implements **Herbert Simon's (1957) bounded rationality framework** as active circuit-breaker middleware for recursive game solvers. It guards **iterative elimination loops** against computational exhaustion and detects **stable fixpoint convergence** in **Python**:
 
-## Tick Protocol
+$$\text{Termination}(K) = \begin{cases} \text{True (fixpoint\_reached)} & \text{if } \max_{i} \left| w_i^{(K+1)} - w_i^{(K)} \right| < \delta \\ \text{True (depth\_exceeded)} & \text{if } K \ge K_{\text{max}} \\ \text{False (continue)} & \text{otherwise} \end{cases}$$
 
-| Id | Surface | Action                                                |
-|----|---------|-------------------------------------------------------|
-| 1  | Python  | Parse `current_iteration_k`, `max_depth_threshold`, `delta_convergence` |
-| 2  | Python  | Check depth: `current_iteration_k >= max_depth_threshold`? |
-| 3  | Python  | If depth ok, compute max weight delta vs `previous_weights` |
-| 4  | Python  | Check convergence: `max_delta < delta_convergence`?   |
-| 5  | Python  | Determine `termination_reason` and `should_terminate` |
-| 6  | Python  | Return control verdict to iterated-dominance-solver    |
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-## Surfaces
+---
 
-### Python Surface
+## The 5-Stage Bounded Rationality Progression
 
-```python
-surfaces.skill_bounded_rationality_constraint.check(
-    current_iteration_k=5,
-    max_depth_threshold=10,
-    delta_convergence=0.001,
-    previous_weights={0: 0.30, 1: 0.25, 2: 0.20, 3: 0.25},
-    current_weights={0: 0.298, 1: 0.252, 2: 0.199, 3: 0.251}
-)
-# Result: should_terminate=True, termination_reason="fixpoint_reached"
-
-surfaces.skill_bounded_rationality_constraint.check(
-    current_iteration_k=12,
-    max_depth_threshold=10,
-    delta_convergence=0.001,
-    previous_weights={0: 0.30, 1: 0.25},
-    current_weights={0: 0.25, 1: 0.20}
-)
-# Result: should_terminate=True, termination_reason="depth_exceeded"
+```
+[1. Recursion Parameters Ingest] → [2. Weight Delta & Residual Evaluation] → [3. Visual Brief] → [4. Checkpoint] → [5. Circuit-Breaker Verdict & Emit]
 ```
 
-## Capability Contract
+### Stage 1: Recursion Parameters Ingest
+1. Ingest `current_iteration_k`, `max_depth_threshold` ($K_{\text{max}} \ge 1$), and `delta_convergence` ($\delta > 0$).
+2. Ingest optional `previous_weights` and `current_weights` dictionaries.
 
-**Inputs:**
+> **Completion criterion**: Valid recursion metrics and thresholds verified.
 
-- `current_iteration_k` *(integer, required)* — Current iteration count of the IESDS loop.
-- `max_depth_threshold` *(integer, required)* — Maximum allowed iterations before forced termination.
-- `delta_convergence` *(float, required)* — Minimum weight change threshold to consider converged.
-- `previous_weights` *(object, optional)* — Strategy weights from previous iteration.
-- `current_weights` *(object, optional)* — Strategy weights from current iteration.
+---
 
-**Outputs:**
+### Stage 2: Weight Delta & Residual Evaluation
+1. If weights are provided, compute maximum $L_\infty$ absolute weight difference across all shared strategies:
+   $$\Delta_{\text{max}} = \max_{i} \left| w_i^{(K)} - w_i^{(K-1)} \right|$$
+2. Identify missing or newly added strategies in weight dictionaries.
 
-- `should_terminate` *(boolean)* — `true` if loop should terminate immediately.
-- `termination_reason` *(string)* — `fixpoint_reached`, `depth_exceeded`, or `continue`.
-- `current_weights` *(object)* — Strategy weights at current iteration (for next pass).
-- `iterations_performed` *(integer)* — Total iterations executed so far.
+> **Completion criterion**: Weight change residual $\Delta_{\text{max}}$ computed.
 
-## Mathematical Foundation
+---
 
-Implements bounded rationality guard from Simon (1957) applied to
-iterated elimination:
+### Stage 3: The Visual Brief
+For recursive elimination monitoring and computational budget tracking, generate an interactive brief:
+- **Location**: Write to `%TEMP%\bounded-rationality-brief-<timestamp>.html` (Windows) or `/tmp/bounded-rationality-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render iteration step progress gauge vs. $K_{\text{max}}$, weight delta convergence curve ($\Delta_{\text{max}}$ vs $K$), and circuit breaker status banner.
 
-$$S_i^{K+1} = S_i^K \quad \text{if} \quad |w_i^{K+1} - w_i^K| < \delta \quad \forall i$$
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
 
-$$K \geq K_{max} \implies \text{forced termination}$$
+---
 
-## Composition
+### Stage 4: Mandatory Checkpoint
+Before emitting verdict:
+1. Priority 1 (Depth limit): If $K \ge K_{\text{max}}$, set `should_terminate = True`, `reason = "depth_exceeded"`.
+2. Priority 2 (Fixpoint reached): If `previous_weights` provided and $\Delta_{\text{max}} < \delta$, set `should_terminate = True`, `reason = "fixpoint_reached"`.
+3. Otherwise: set `should_terminate = False`, `reason = "continue"`.
 
-- `iterated-dominance-solver` — Primary consumer; calls this skill each loop iteration.
-- `skill-expected-utility-maximizer` — Receives `should_terminate` to halt EU computation.
-- `skill-belief-state-updater` — Feeds weight deltas for convergence measurement.
+> **Completion criterion**: Termination status and reasoning determined.
+
+---
+
+### Stage 5: Circuit-Breaker Verdict & Output Emission
+1. Package termination verdict boolean, reason code, and iteration counter.
+2. Emit complete `BoundedRationalityResult` record.
+
+> **Completion criterion**: Full circuit-breaker verdict payload emitted.
+
+---
+
+## Surface References
+
+### Python Calculation Surface
+
+```python
+from typing import Dict, Any, Optional, Union
+
+def check_bounded_rationality(
+    current_iteration_k: int,
+    max_depth_threshold: int,
+    delta_convergence: float,
+    previous_weights: Optional[Dict[Union[int, str], float]] = None,
+    current_weights: Optional[Dict[Union[int, str], float]] = None
+) -> Dict[str, Any]:
+    if max_depth_threshold < 1:
+        raise ValueError("invalid_max_depth: max_depth_threshold must be >= 1.")
+    if delta_convergence <= 0:
+        raise ValueError("invalid_delta: delta_convergence must be > 0.")
+        
+    # Check 1: Maximum depth threshold
+    if current_iteration_k >= max_depth_threshold:
+        return {
+            "should_terminate": True,
+            "termination_reason": "depth_exceeded",
+            "current_weights": current_weights,
+            "iterations_performed": current_iteration_k
+        }
+        
+    # Check 2: Weight delta convergence
+    if previous_weights is not None and current_weights is not None:
+        all_keys = set(previous_weights.keys()).union(set(current_weights.keys()))
+        max_delta = 0.0
+        for k in all_keys:
+            w_prev = previous_weights.get(k, 0.0)
+            w_curr = current_weights.get(k, 0.0)
+            delta = abs(w_curr - w_prev)
+            if delta > max_delta:
+                max_delta = delta
+                
+        if max_delta < delta_convergence:
+            return {
+                "should_terminate": True,
+                "termination_reason": "fixpoint_reached",
+                "current_weights": current_weights,
+                "iterations_performed": current_iteration_k
+            }
+            
+    return {
+        "should_terminate": False,
+        "termination_reason": "continue",
+        "current_weights": current_weights,
+        "iterations_performed": current_iteration_k
+    }
+```
+
+---
+
+## Anti-Patterns & Guardrails
+
+- **Zero Depth Threshold** — Setting $K_{\text{max}} = 0$, terminating before even a single round of elimination executes.
+- **Negative Convergence Delta** — Passing $\delta \le 0$, making convergence mathematically impossible and forcing execution until depth exhaustion.
+- **Ignoring Partial Weight Maps** — Calculating weight deltas only over shared keys, ignoring newly created or dropped strategies.

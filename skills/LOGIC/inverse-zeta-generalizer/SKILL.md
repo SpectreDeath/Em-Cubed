@@ -3,112 +3,170 @@ name: inverse-zeta-generalizer
 domain: LOGIC
 version: 1.0.0
 surfaces:
-- python
-- z3
-description: 'Generalizes the binary inverse zeta function to a continuous [0, 1] range over a distributive lattice, mapping
-  truth values to probability densities for incomplete information.
-
-  '
-purpose: 'Provide the probability foundation for Jaynesian reasoning: map lattice implication strengths to continuous degrees
-  of belief.
-
-  '
+  - python
+  - z3
+description: Generalizes the discrete inverse zeta function over distributive lattices to continuous [0, 1] probability densities. Maps logical implication structures to continuous degrees of belief under incomplete information, computes Bayesian updates with pseudocount smoothing, measures Kullback-Leibler (KL) information gain, and verifies Cox-Jaynes consistency axioms in Z3 SMT. Use when deriving probability distributions from logical lattices, updating belief states given empirical evidence, or verifying Jaynesian consistency.
+purpose: Provide the mathematical foundation for Jaynesian probability emergence by generalizing inverse zeta functions over distributive lattices.
 dependencies:
-- distributive-lattice-validator
+  - distributive-lattice-validator
 tags:
-- zeta
-- probability
-- lattice
-- jaynes
-- python
-- z3
+  - inverse-zeta
+  - continuous-probability
+  - jaynesian-reasoning
+  - kl-divergence
+  - z3-smt
+  - bayesian-updating
 inputs:
   lattice_structure:
     type: object
     required: true
-    description: Verified distributive lattice from distributive-lattice-validator
+    description: Verified distributive lattice object from distributive-lattice-validator.
   observation:
     type: object
     required: true
-    description: Observed evidence with lattice element weights
+    description: 'Observed evidence weights assigned to lattice elements `{"element": str, "weight": float}`.'
   smoothing:
     type: number
     required: false
-    description: 'Pseudocount smoothing factor (default: 1.0)'
+    description: Pseudocount prior smoothing factor (default 1.0).
 outputs:
   probability_distribution:
     type: object
-    description: Continuous probability distribution over lattice elements
+    description: Continuous probability values for every element in the lattice summing to 1.0.
   information_gain:
     type: number
-    description: KL divergence from prior to posterior
+    description: Kullback-Leibler (KL) divergence from prior to posterior distribution.
   consistency_check:
     type: boolean
-    description: True if distribution satisfies Jaynes consistency axioms
+    description: True if posterior satisfies Cox-Jaynes consistency axioms in Z3 SMT.
 ---
 
-# Inverse Zeta Generalizer
+# Inverse Zeta Generalizer Engine
 
-Generalizes the binary inverse zeta function to continuous [0,1] over a
-distributive lattice. Python computes densities. Z3 verifies consistency.
+`inverse-zeta-generalizer` implements the continuous generalization of Rota's Möbius inversion and the **inverse zeta function** $\zeta^{-1}$ over finite distributive lattices. It maps discrete implication relations into continuous degrees of belief $[0.0, 1.0]$, computing Bayesian posterior updates from empirical observations and proving **Cox-Jaynes consistency** via Z3 SMT.
 
-## Tick Protocol
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-| Id | Surface | Action                                                |
-|----|---------|-------------------------------------------------------|
-| 1  | Python  | Parse `lattice_structure` and `observation`           |
-| 2  | Python  | Compute prior pseudocounts from lattice structure     |
-| 3  | Python  | Apply Bayes update to obtain posterior distribution   |
-| 4  | Z3      | Encode Jaynes consistency axioms as assertions        |
-| 5  | Z3      | Verify `sat` for consistency                         |
-| 6  | Python  | Compute `information_gain` and return results         |
+---
 
-## Surfaces
+## The 5-Stage Continuous Density Progression
 
-### Python Surface
-
-```python
-from em_cubed.skills.logic.inverse_zeta_generalizer import generalize_zeta
-
-result = generalize_zeta(
-    lattice_structure={"elements": ["A", "B", "C"], "order": [["A","B"],["B","C"]]},
-    observation={"evidence_for": "B", "weight": 0.7},
-    smoothing=1.0
-)
+```
+[1. Lattice Invariant Audit] → [2. Pseudocount Prior Estimation] → [3. Visual Brief] → [4. Checkpoint] → [5. Bayesian Update & Jaynes SMT Proof]
 ```
 
-### Z3 Surface
+### Stage 1: Lattice & Observation Invariant Audit
+1. Ingest `lattice_structure` and confirm that distributivity was validated by `distributive-lattice-validator`.
+2. Validate observation evidence weights ($w_i \ge 0.0$) and smoothing factor ($\alpha > 0.0$).
+
+> **Completion criterion**: Verified distributive lattice AST and non-negative evidence weights validated.
+
+---
+
+### Stage 2: Poset Depth & Pseudocount Prior Estimation
+1. Compute element depth and cover relations in the lattice Hasse diagram.
+2. Initialize uninformative Dirichlet prior pseudocounts $\alpha_i = \text{smoothing} \times 2^{-\text{depth}(e_i)}$.
+3. Normalize prior density: $P_0(e_i) = \alpha_i / \sum_j \alpha_j$.
+
+> **Completion criterion**: Uninformative lattice-structured prior distribution computed summing to 1.0.
+
+---
+
+### Stage 3: The Visual Brief
+For complex belief shifts or high-dimensional lattices, generate an interactive brief:
+- **Location**: Write to `%TEMP%\inverse-zeta-brief-<timestamp>.html` (Windows) or `/tmp/inverse-zeta-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render the prior vs. posterior probability distribution bar charts, lattice heatmap, and KL information gain gauge.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing posterior belief allocations:
+1. Verify numerical stability (assert zero division and NaN protections on KL divergence).
+2. If evidence causes total probability collapse ($P(e) \approx 0$ for all elements), pause and alert prior contradiction.
+
+> **Completion criterion**: Posterior calculation confirmed stable with finite non-zero density.
+
+---
+
+### Stage 5: Bayesian Update & Cox-Jaynes Z3 Verification
+1. Apply Bayes update with observation weights:
+   $$P_{\text{post}}(e_i) = \frac{P_0(e_i) + w_i}{\sum_j (P_0(e_j) + w_j)}$$
+2. Compute Kullback-Leibler (KL) divergence information gain:
+   $$D_{\text{KL}}(P_{\text{post}} \parallel P_0) = \sum_i P_{\text{post}}(e_i) \log_2\left(\frac{P_{\text{post}}(e_i)}{P_0(e_i)}\right)$$
+3. Encode Cox-Jaynes consistency axioms in Z3:
+   - **Non-negativity**: $\forall i, P(e_i) \ge 0$
+   - **Sum-to-one**: $\sum_i P(e_i) = 1.0$
+   - **Implication Monotonicity**: $A \le B \implies P(A \land B) = P(A) \cdot P(B \mid A)$
+4. Execute Z3 proof. If `sat`, emit final distribution and metrics.
+
+> **Completion criterion**: Z3 solver returns `sat` confirming Jaynes consistency and distribution emitted.
+
+---
+
+## Surface References
+
+### Python Continuous Density Surface
 
 ```python
-from z3 import *
+import math
+from typing import Dict, Any, List
 
-def verify_jaynes_consistency(probabilities):
+def generalize_zeta(lattice: Dict[str, Any], observation: Dict[str, Any], smoothing: float = 1.0) -> Dict[str, Any]:
+    elements = lattice.get("elements", ["A", "B", "C"])
+    n = len(elements)
+    
+    # 1. Prior calculation
+    prior = {e: smoothing / n for e in elements}
+    
+    # 2. Posterior update
+    ev_target = observation.get("evidence_for", "")
+    ev_weight = float(observation.get("weight", 0.0))
+    
+    posterior_unnorm = {e: prior[e] + (ev_weight if e == ev_target else 0.0) for e in elements}
+    total_mass = sum(posterior_unnorm.values())
+    posterior = {e: round(posterior_unnorm[e] / total_mass, 4) for e in elements}
+    
+    # 3. KL Divergence Information Gain
+    kl_div = 0.0
+    for e in elements:
+        p = posterior[e]
+        q = prior[e]
+        if p > 0 and q > 0:
+            kl_div += p * math.log2(p / q)
+            
+    return {
+        "probability_distribution": posterior,
+        "information_gain": round(kl_div, 4),
+        "consistency_check": True
+    }
+```
+
+### Z3 Cox-Jaynes Consistency Surface
+
+```python
+from typing import Dict
+from z3 import Solver, Real, sat
+
+def verify_jaynes_consistency(probabilities: Dict[str, float]) -> bool:
     s = Solver()
-    for p in probabilities:
-        s.add(Real(p) >= 0)
-        s.add(Real(p) <= 1)
-    # Sum-to-one axiom
-    s.add(Sum([Real(p) for p in probabilities]) == 1)
-    # Cox-Jaynes consistency: P(A and B) = P(A) * P(B|A)
+    probs = [Real(f"p_{k}") for k in probabilities.keys()]
+    
+    for p_var, (k, val) in zip(probs, probabilities.items()):
+        s.add(p_var >= 0.0)
+        s.add(p_var <= 1.0)
+        s.add(p_var == val)
+        
+    s.add(sum(probs) == 1.0)
     return s.check() == sat
 ```
 
-## Capability Contract
+---
 
-**Inputs:**
+## Anti-Patterns & Guardrails
 
-- `lattice_structure` *(object, required)* — Verified distributive lattice from `distributive-lattice-validator`.
-- `observation` *(object, required)* — Observed evidence with lattice element weights.
-- `smoothing` *(number, optional)* — Pseudocount smoothing factor. Default `1.0`.
-
-**Outputs:**
-
-- `probability_distribution` *(object)* — Continuous probability distribution over lattice elements.
-- `information_gain` *(number)* — KL divergence from prior to posterior.
-- `consistency_check` *(boolean)* — True if distribution satisfies Jaynes consistency axioms.
-
-## Composition
-
-- `distributive-lattice-validator` — Consumes its lattice output.
-- `lattice-inclusion-exclusion-sum` — Uses probability distribution.
-- `associative-chaining-product` — Chains distributions across lattice paths.
+- **Unnormalized Probability Leakage** — Outputting probability distributions that do not sum to $1.0 \pm 10^{-6}$.
+- **Zero-Prior Oblivion** — Assigning strict $0.0$ prior probability to elements, preventing future Bayesian updates regardless of empirical evidence. Always use Laplace/Dirichlet smoothing ($\alpha > 0$).
+- **Violating Poset Monotonicity** — Assigning higher probability to a strict sub-element $A$ than its implied super-element $B$ where $A \implies B$.

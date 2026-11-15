@@ -40,5 +40,15 @@ skill_categories:
   - STOCHASTIC_PROCESSES
   - TIME_SERIES
   - WORLD_MODELS
+  - ONTOLOGY
+  - META_ENGINEERING
+  - META_SKILLS
+  - LLM_PROCESSING
+  - EXAMPLES
+  - General
+  - Harness
+  - Logic and Reasoning
+  - TECHNICAL_ANALYSIS
+  - Testing
   - DESIGN_SYSTEMS
   - CLINICAL_TRIALS

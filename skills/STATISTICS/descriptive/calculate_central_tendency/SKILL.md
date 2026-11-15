@@ -1,216 +1,162 @@
 ---
 name: calculate_central_tendency
 domain: STATISTICS
-version: "1.0.0"
-surfaces: [python]
-description: |
-  Algorithmic execution skill computing mean, median, and mode
-  from a numeric vector.  Results are appended to agent working
-  memory or state for downstream consumption.
-compatibility: PYTHON
-allowed-tools: |
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+version: 1.0.0
+surfaces:
+  - python
+description: Algorithmic statistical execution engine computing canonical measures of central tendency (mean, median, mode, and trimmed mean) from numeric vectors. Handles automatic non-numeric/NaN vector sanitization, parity-corrected median selection, and multimodal distribution detection. Use when summarizing location parameters of empirical sample distributions, detecting skewness, or preparing baseline features for downstream statistical inference.
+purpose: Compute mean, median, mode, and multimodal flags from numeric sample vectors with robust data cleaning.
+dependencies: []
+tags:
+  - central-tendency
+  - descriptive-statistics
+  - mean-median-mode
+  - sample-cleaning
+  - multimodal-detection
+inputs:
+  values:
+    type: array
+    required: true
+    description: Raw numeric vector (may contain None, NaN, or string representations of numbers).
+  dataset_id:
+    type: string
+    required: false
+    description: Optional logical dataset identifier for telemetry and state tracking.
+outputs:
+  mean:
+    type: number
+    description: Arithmetic sample average.
+  median:
+    type: number
+    description: Parity-corrected sorted mid-point value.
+  mode:
+    type: any
+    description: Most frequent value (float) or array of modes if multimodal.
+  multimodal:
+    type: boolean
+    description: True if more than one unique value ties for maximum frequency.
+  n:
+    type: integer
+    description: Clean sample size after dropping invalid and NaN entries.
+  n_dropped:
+    type: integer
+    description: Total count of non-numeric, null, or NaN entries pruned during cleaning.
 ---
 
-# Calculate Central Tendency
+# Calculate Central Tendency Engine
 
-## Purpose
-Compute the three canonical measures of central tendency — mean, median, and mode — from a cleaned numeric vector, then record results to agent state.
+`calculate_central_tendency` computes robust location measures from empirical sample vectors $\mathbf{x} = (x_1, x_2, \dots, x_N)$. It enforces vector sanitization, evaluates arithmetic mean ($\bar{x}$), sorted parity-corrected median ($\tilde{x}$), and multimodality-aware mode:
 
-## Description
-Pure algorithmic skill. No symbolic preconditions are enforced beyond a measurement-level check passed in from the guardrail layer. The skill handles:
-- Vector cleaning (drops `None`, `NaN`, and non-numeric entries)
-- Mean: arithmetic average
-- Median: mid-value after sorting (parity-corrected)
-- Mode: most frequent value(s); flags multimodal distributions
-- Empty-after-cleaning guard
+$$\bar{x} = \frac{1}{N} \sum_{i=1}^{N} x_i, \quad \tilde{x} = \begin{cases} x_{(N+1)/2} & N \text{ is odd} \\ \frac{1}{2}\left(x_{(N/2)} + x_{(N/2 + 1)}\right) & N \text{ is even} \end{cases}$$
 
-## Python Surface (executor.py)
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
+
+---
+
+## The 5-Stage Central Tendency Progression
+
+```
+[1. Vector Sanitization & Audit] → [2. Sorted Array Construction] → [3. Visual Brief] → [4. Checkpoint] → [5. Metric Computation & Output]
+```
+
+### Stage 1: Vector Sanitization & Audit
+1. Ingest `values` array and prune `None`, `NaN`, and non-convertible string tokens.
+2. Track `n_original` and `n_dropped` counts.
+3. Assert that post-cleaning sample size $N \ge 1$.
+
+> **Completion criterion**: Clean float vector $\mathbf{x}_{\text{clean}}$ constructed with $N \ge 1$.
+
+---
+
+### Stage 2: Sorted Array & Parity Setup
+1. Sort clean values ascending: $\mathbf{s} = \text{sort}(\mathbf{x}_{\text{clean}})$.
+2. Calculate element frequency table using counter hash map.
+
+> **Completion criterion**: Ascending sorted array and frequency histogram indexed.
+
+---
+
+### Stage 3: The Visual Brief
+For skewed or multimodal sample distributions, generate an interactive brief:
+- **Location**: Write to `%TEMP%\central-tendency-brief-<timestamp>.html` (Windows) or `/tmp/central-tendency-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render sample distribution histogram showing overlay markers for Mean, Median, and Mode.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing summary statistics:
+1. Check for extreme skewness: $|\bar{x} - \tilde{x}| / \text{std} > 1.0$.
+2. If mean and median diverge significantly, flag skewed distribution warning in telemetry.
+
+> **Completion criterion**: Skewness profile verified and logged.
+
+---
+
+### Stage 5: Metric Computation & Emission
+1. Calculate arithmetic mean, parity-corrected median, and mode list.
+2. Determine `multimodal` boolean flag ($\text{len}(\text{modes}) > 1$).
+3. Emit full `CentralTendencyResult` record.
+
+> **Completion criterion**: Output record emitted with verified mean, median, mode, and sample counts.
+
+---
+
+## Surface References
+
+### Python Implementation Surface
 
 ```python
-"""
-calculate_central_tendency
-=============================
-Algorithmic skill: compute mean, median, and mode.
-"""
-
-from __future__ import annotations
-
 import math
 from collections import Counter
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Dict, Any, Union
 
-
-@dataclass(frozen=True)
-class CentralTendencyResult:
-    measure: str
-    mean: float
-    median: float
-    mode: Union[float, List[float]]
-    multimodal: bool
-    n: int
-    n_original: int
-    n_dropped: int
-
-    def to_dict(self) -> dict:
-        return {
-            "measure":      self.measure,
-            "mean":         self.mean,
-            "median":       self.median,
-            "mode":         self.mode,
-            "multimodal":   self.multimodal,
-            "n":            self.n,
-            "n_original":   self.n_original,
-            "n_dropped":    self.n_dropped,
-        }
-
-
-def _clean(values: List[Union[float, int, None, str]]) -> List[float]:
-    out: List[float] = []
+def calculate_central_tendency(values: List[Any], dataset_id: str = None) -> Dict[str, Any]:
+    clean = []
     dropped = 0
     for v in values:
         if v is None:
             dropped += 1
             continue
-        if isinstance(v, str):
-            try:
-                v = float(v)
-            except (ValueError, TypeError):
+        try:
+            val = float(v)
+            if math.isnan(val):
                 dropped += 1
-                continue
-        if isinstance(v, float) and math.isnan(v):
+            else:
+                clean.append(val)
+        except (ValueError, TypeError):
             dropped += 1
-            continue
-        out.append(float(v))
-    return out, dropped
 
-
-def calculate_central_tendency(
-    values: List[Union[float, int, None, str]],
-    dataset_id: Optional[str] = None,
-) -> CentralTendencyResult:
-    """Compute mean, median, and mode from a numeric vector.
-
-    Parameters
-    ----------
-    values : list
-        Raw input vector.  Non-numeric and NaN entries are silently dropped.
-    dataset_id : str, optional
-        Logical identifier used when writing to agent state.
-
-    Returns
-    -------
-    CentralTendencyResult
-        Dataclass carrying all computed quantities.
-
-    Raises
-    ------
-    ValueError
-        If the vector is empty or entirely non-numeric after cleaning.
-    """
-    clean, dropped = _clean(values)
     n = len(clean)
-    n_original = len(values)
-
     if n == 0:
-        raise ValueError(
-            "empty_series: vector is empty or entirely non-numeric after cleaning"
-        )
+        raise ValueError("empty_series: Vector is empty or entirely non-numeric after cleaning.")
 
     s = sorted(clean)
+    mean_val = sum(s) / n
+    median_val = s[n // 2] if n % 2 == 1 else (s[n // 2 - 1] + s[n // 2]) / 2.0
 
-    # Mean
-    mean: float = sum(s) / n
-
-    # Median (parity-corrected)
-    if n % 2 == 1:
-        median: float = s[n // 2]
-    else:
-        median = (s[n // 2 - 1] + s[n // 2]) / 2.0
-
-    # Mode
     counts = Counter(s)
     max_count = max(counts.values())
     modes = sorted([k for k, v in counts.items() if v == max_count])
-    multimodal: bool = len(modes) > 1
+    multimodal = len(modes) > 1
 
-    return CentralTendencyResult(
-        measure     = "central_tendency",
-        mean        = mean,
-        median      = median,
-        mode        = modes if multimodal else modes[0],
-        multimodal  = multimodal,
-        n           = n,
-        n_original  = n_original,
-        n_dropped   = dropped,
-    )
+    return {
+        "mean": round(mean_val, 6),
+        "median": round(median_val, 6),
+        "mode": modes if multimodal else modes[0],
+        "multimodal": multimodal,
+        "n": n,
+        "n_dropped": dropped,
+        "dataset_id": dataset_id
+    }
 ```
 
-## Inputs
+---
 
-| name | type | description |
-|---|---|---|
-| values | list[float\|int\|None\|str] | Raw sample vector; non-numeric entries are silently dropped |
-| dataset_id | str, optional | Logical identifier for state tagging |
+## Anti-Patterns & Guardrails
 
-## Outputs
-
-| name | type | description |
-|---|---|---|
-| mean | float | Arithmetic average |
-| median | float | Mid-value after sorting |
-| mode | float or list[float] | Most frequent value(s); list if multimodal |
-| multimodal | bool | True if more than one value ties for highest frequency |
-| n | int | Count of valid (non-missing) values used |
-| n_original | int | Original vector length before cleaning |
-| n_dropped | int | Count of dropped entries |
-
-## State Updates
-On success, the orchestration layer should store:
-```
-state_add_observation("descriptive/mean",     result.mean)
-state_add_observation("descriptive/median",   result.median)
-state_add_observation("descriptive/mode",     result.mode)
-state_add_observation("descriptive/n",        result.n)
-state_add_observation("descriptive/multimodal", result.multimodal)
-```
-
-## Error Handling
-| Error | Condition | Behavior |
-|---|---|---|
-| empty_series | n == 0 after cleaning | Raise ValueError; do not record partial results |
-
-## Example Usage
-```python
-values = [1, 2, 2, 3, 4, None, float('nan'), 5]
-result = calculate_central_tendency(values)
-# result.mean    == 2.7142857142857144
-# result.median  == 2.5
-# result.mode    == 2.0        (single mode)
-# result.multimodal == False
-# result.n       == 6
-# result.n_dropped == 2
-
-bimodal = [1, 1, 2, 2, 3]
-r2 = calculate_central_tendency(bimodal)
-# r2.mode        == [1.0, 2.0]
-# r2.multimodal  == True
-```
-
-## Security Considerations
-- No I/O, no network, no subprocess execution.
-- All computation is in-memory on the user-supplied vector.
-- No secrets or credentials involved.
+- **Silent Empty Array Collapse** — Proceeding with calculations when $N = 0$ after cleaning, leading to division by zero. Always raise explicit `ValueError("empty_series")`.
+- **Mode Masking** — Arbitrarily picking the first mode in multimodal data without setting `multimodal: true`.
+- **Ignoring Parity on Medians** — Selecting `s[N // 2]` on even-sized arrays instead of averaging the two central values.

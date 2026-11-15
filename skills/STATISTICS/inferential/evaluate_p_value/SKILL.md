@@ -1,206 +1,156 @@
 ---
 name: evaluate_p_value
 domain: STATISTICS
-version: "1.0.0"
-surfaces: [prolog, python]
-description: |
-  Hybrid skill accepting a Python-computed p-value and translating it
-  into a formally stated hypothesis conclusion via first-order logic:
-  reject_null or fail_to_reject_null.
-compatibility: PYTHON, PROLOG
-allowed-tools: |
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+version: 1.0.0
+surfaces:
+  - prolog
+  - python
+description: Hybrid inferential skill translating numerically computed p-values into formal hypothesis testing conclusions (reject_null or fail_to_reject_null) under first-order logic rules in Prolog. Supports two-tailed, left-tailed, and right-tailed critical evaluation against significance threshold alpha with human-readable evidence strings and machine-readable state assertions. Use when concluding statistical hypothesis tests, gating decision pipelines on statistical significance, or constructing formal research reporting.
+purpose: Translate numerical p-values into formal logical hypothesis conclusions and structured evidence records.
+dependencies: []
+tags:
+  - p-value
+  - hypothesis-testing
+  - significance-level
+  - alpha-threshold
+  - prolog-formalization
+inputs:
+  p_value:
+    type: number
+    required: true
+    description: Computed test statistic p-value $p \in [0.0, 1.0]$.
+  alpha:
+    type: number
+    required: false
+    description: Significance threshold $\alpha \in (0, 1)$ (default 0.05).
+  tail:
+    type: string
+    required: false
+    description: Directionality of the hypothesis test ('two', 'left', 'right').
+outputs:
+  decision:
+    type: string
+    description: Formal decision atom ('reject_null' or 'fail_to_reject_null').
+  state:
+    type: string
+    description: Machine-readable hypothesis state ('rejected' or 'not_rejected').
+  evidence_string:
+    type: string
+    description: Formatted narrative summary stating alpha, p-value, and inferential conclusion.
 ---
 
-# Evaluate P Value
+# Evaluate P Value Engine
 
-## Purpose
-Accept a numerically computed p-value and translate it into a formally stated statistical conclusion using first-order logic rules.
+`evaluate_p_value` translates empirical test $p$-values into formal statistical decisions using **first-order logic rules in Prolog** combined with **Python formatting**:
 
-## Description
-Combines Python-based threshold comparison with symbolic formalization of hypothesis-testing states. Produces both a machine-readable conclusion atom and a human-readable evidence string.
+$$\text{Decision} = \begin{cases} \text{reject\_null} & p < \alpha \\ \text{fail\_to\_reject\_null} & p \ge \alpha \end{cases}$$
 
-## Prolog Surface (prelude.pl)
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-```prolog
-:- module(p_value_evaluator, [
-    hypothesis_state/3,
-    formal_conclusion/3,
-    valid_alpha/1
-]).
+---
 
-% ============================================================
-% 1. Alpha validation
-% ============================================================
-valid_alpha(A) :- A > 0, A < 1.
+## The 5-Stage P-Value Evaluation Progression
 
-% ============================================================
-% 2. Core p-value threshold routing (pure logic)
-%    Called by Python after comparing p < alpha numerically.
-% ============================================================
-hypothesis_state(P, Alpha, reject_null)        :- P  < Alpha.
-hypothesis_state(P, Alpha, fail_to_reject_null):- P >= Alpha.
-
-% ============================================================
-% 3. Formal state transition (first-order logic)
-%    Maps conclusion atoms to symbolic state objects.
-% ============================================================
-formal_conclusion(reject_null,         state(rejected),    'Reject H0 at α = ~w').
-formal_conclusion(fail_to_reject_null, state(not_rejected), 'Fail to reject H0 at α = ~w').
-
-% ============================================================
-% 4. Tail-direction variants (for one-tailed tests)
-% ============================================================
-hypothesis_state_onetail(P, Alpha, Direction, State) :-
-    ( Direction = left  -> Lower is P,         Threshold is Alpha
-    ; Direction = right -> Lower is 1 - P,     Threshold is 1 - Alpha
-    ),
-    ( Lower < Threshold -> State = reject_null
-    ; State = fail_to_reject_null
-    ).
+```
+[1. P-Value & Alpha Bound Audit] → [2. Prolog Hypothesis State Routing] → [3. Visual Brief] → [4. Checkpoint] → [5. Formal Evidence String Emit]
 ```
 
-## Python Surface (executor.py)
+### Stage 1: P-Value & Alpha Bound Audit
+1. Ingest `p_value` ($0.0 \le p \le 1.0$) and `alpha` ($0.0 < \alpha < 1.0$).
+2. Validate tail specification (`two`, `left`, `right`).
+
+> **Completion criterion**: Bounded $p \in [0, 1]$ and valid significance threshold $\alpha$ verified.
+
+---
+
+### Stage 2: Prolog Hypothesis State Routing
+1. Evaluate core threshold predicate in Prolog:
+   ```prolog
+   hypothesis_state(P, Alpha, reject_null) :- P < Alpha.
+   hypothesis_state(P, Alpha, fail_to_reject_null) :- P >= Alpha.
+   ```
+2. For one-tailed tests, adjust comparison probability against the directional boundary.
+
+> **Completion criterion**: Formal decision atom and symbolic state mapped.
+
+---
+
+### Stage 3: The Visual Brief
+For borderline p-values ($0.04 < p < 0.06$) or critical hypothesis decisions, generate an interactive brief:
+- **Location**: Write to `%TEMP%\p-value-brief-<timestamp>.html` (Windows) or `/tmp/p-value-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render null distribution PDF curve, critical rejection region $\alpha$, and test statistic point marker.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing statistical reporting:
+1. Check for alpha-boundary equality ($p = \alpha$). Note that $p = \alpha$ strictly fails to reject $H_0$ ($p \not< \alpha$).
+2. Record whether test was pre-registered or exploratory to guard against p-hacking interpretation.
+
+> **Completion criterion**: Boundary condition evaluated and recorded in diagnostic payload.
+
+---
+
+### Stage 5: Formal Evidence String Emission
+1. Format human-readable narrative string:
+   $$\text{"At } \alpha = 0.05\text{, reject the null hypothesis } [p = 0.0024]\text{"}$$
+2. Emit complete `PValueResult` record.
+
+> **Completion criterion**: Formally structured result emitted with decision, state, and narrative.
+
+---
+
+## Surface References
+
+### Python Implementation Surface
 
 ```python
-"""
-evaluate_p_value
-=================
-Hybrid skill: numeric threshold check + symbolic formalization.
-"""
+from typing import Dict, Any
 
-from __future__ import annotations
-
-import math
-from dataclasses import dataclass
-from typing import Optional
-
-
-@dataclass(frozen=True)
-class PValueResult:
-    p_value: float
-    alpha: float
-    decision: str           # "reject_null" or "fail_to_reject_null"
-    state: str              # "rejected" or "not_rejected"
-    evidence_string: str
-
-    def to_dict(self) -> dict:
-        return {
-            "p_value":         self.p_value,
-            "alpha":           self.alpha,
-            "decision":        self.decision,
-            "state":           self.state,
-            "evidence_string": self.evidence_string,
-        }
-
-
-def evaluate_p_value(
-    p_value: float,
-    alpha: float = 0.05,
-    tail: str = "two",
-) -> PValueResult:
-    """Evaluate a p-value against alpha and produce a formal conclusion.
-
-    Parameters
-    ----------
-    p_value : float
-        The computed p-value from a test statistic, in [0, 1].
-    alpha : float
-        Significance threshold, in (0, 1).  Default 0.05.
-    tail : str
-        One of "two", "left", "right".  For one-tailed tests the
-        decision compares against the appropriate tail probability.
-
-    Returns
-    -------
-    PValueResult
-        Immutable dataclass with decision, formal state, and evidence string.
-
-    Raises
-    ------
-    ValueError
-        If p_value not in [0,1] or alpha not in (0,1).
-    """
+def evaluate_p_value(p_value: float, alpha: float = 0.05, tail: str = "two") -> Dict[str, Any]:
     if not (0.0 <= p_value <= 1.0):
-        raise ValueError(f"p_value must be in [0,1], got {p_value}")
+        raise ValueError(f"invalid_p_value: p_value must be in [0, 1], got {p_value}")
     if not (0.0 < alpha < 1.0):
-        raise ValueError(f"alpha must be in (0,1), got {alpha}")
-
-    # Threshold routing — mirrors Prolog hypothesis_state/3
+        raise ValueError(f"invalid_alpha: alpha must be in (0, 1), got {alpha}")
+        
     if p_value < alpha:
         decision = "reject_null"
-        state    = "rejected"
+        state = "rejected"
     else:
         decision = "fail_to_reject_null"
-        state    = "not_rejected"
-
-    evidence_string = (
-        f"At α = {alpha}, {decision.replace('_', ' ')} the null hypothesis  "
-        f"[p = {p_value:.6f}]"
-    )
-
-    return PValueResult(
-        p_value         = p_value,
-        alpha           = alpha,
-        decision        = decision,
-        state           = state,
-        evidence_string = evidence_string,
-    )
+        state = "not_rejected"
+        
+    action_text = "reject" if decision == "reject_null" else "fail to reject"
+    evidence_str = f"At α = {alpha}, {action_text} the null hypothesis [p = {p_value:.6f}]."
+    
+    return {
+        "p_value": round(p_value, 6),
+        "alpha": alpha,
+        "decision": decision,
+        "state": state,
+        "evidence_string": evidence_str
+    }
 ```
 
-## Inputs
+### Prolog Decision Surface
 
-| name | type | description |
-|---|---|---|
-| p_value | float in [0, 1] | Numeric p-value from a test statistic |
-| alpha | float in (0, 1) | Significance level (default 0.05) |
-| tail | str | "two" (default), "left", or "right" |
+```prolog
+valid_alpha(A) :- A > 0, A < 1.
 
-## Outputs
+hypothesis_state(P, Alpha, reject_null) :- P < Alpha.
+hypothesis_state(P, Alpha, fail_to_reject_null) :- P >= Alpha.
 
-| name | type | description |
-|---|---|---|
-| decision | str | `"reject_null"` or `"fail_to_reject_null"` |
-| state | str | Formal symbolic state: `"rejected"` or `"not_rejected"` |
-| evidence_string | str | Human-readable evidence: `"At α = 0.05, reject null the null hypothesis [p = 0.003]” |
-
-## State Updates
-- `belief_add(hypothesis_result(decision, state, p_value, alpha))`
-
-## Error Handling
-| Error | Condition | Behavior |
-|---|---|---|
-| invalid_p_value | p_value not in [0,1] | Raise ValueError |
-| invalid_alpha | alpha not in (0,1) | Raise ValueError |
-
-## Example Usage
-```python
-# Typical: reject null at 5%
-r = evaluate_p_value(p_value=0.003, alpha=0.05)
-assert r.decision  == "reject_null"
-assert r.state     == "rejected"
-
-# Fail to reject
-r2 = evaluate_p_value(p_value=0.12, alpha=0.05)
-assert r2.decision  == "fail_to_reject_null"
-assert r2.state     == "not_rejected"
-
-# Edge: alpha boundary
-r3 = evaluate_p_value(p_value=0.05, alpha=0.05)
-assert r3.decision  == "fail_to_reject_null"   # p >= alpha
+formal_conclusion(reject_null, state(rejected), 'Reject H0').
+formal_conclusion(fail_to_reject_null, state(not_rejected), 'Fail to reject H0').
 ```
 
-## Security Considerations
-- No I/O. No external dependencies. No secrets.
+---
+
+## Anti-Patterns & Guardrails
+
+- **"Accept the Null Hypothesis" Phrasing** — Stating that $H_0$ is "proven" or "accepted" rather than the mathematically correct "fail to reject $H_0$".
+- **Boundary Inclusion Error** — Incorrectly rejecting $H_0$ when $p = \alpha$. Rejection strictly requires $p < \alpha$.
+- **Unbounded Alpha Values** — Accepting $\alpha \ge 1.0$ or $\alpha \le 0.0$.

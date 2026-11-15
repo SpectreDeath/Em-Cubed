@@ -3,272 +3,209 @@ name: data-pipeline-orchestrator
 domain: DATA_PROCESSING
 version: 1.0.0
 surfaces:
-- python
-- prolog
-- hy
-description: Data pipeline orchestrator for composing, validating, and executing multi-step data transformation workflows.
-compatibility: PYTHON
-complexity: High
-type: Process
-category: Data Engineering Skills
-estimated execution time: 5-15 minutes
-source: community
-allowed-tools:
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+  - python
+  - prolog
+  - datalog
+description: Multi-stage asynchronous DAG data pipeline orchestration and transformation engine. Sorts transformation stages into topological execution orders, validates input/output schemas using Pandas and Prolog, captures end-to-end data lineage and provenance ancestry in Prolog (ancestor_data/2), resolves transitive stage dependencies in Datalog, and executes parallel or streaming transformations in Python. Use when composing ETL workflows, ensuring schema conformance across transformation steps, or auditing data lineage.
+purpose: Compose, validate, and execute asynchronous multi-stage DAG data transformation pipelines with Prolog lineage tracking.
+dependencies: []
+tags:
+  - data-pipeline-orchestrator
+  - dag-execution
+  - data-lineage
+  - prolog-provenance
+  - datalog-rules
+  - etl-workflow
+inputs:
+  pipeline_name:
+    type: string
+    required: true
+    description: Identifier name for the data pipeline (e.g. `'etl_sales_aggregation'`).
+  stages:
+    type: array
+    required: true
+    description: 'List of pipeline stage specifications `[{''name'': ''extract'', ''dependencies'': []}, {''name'': ''transform'', ''dependencies'': [''extract'']}]`.'
+  context_data:
+    type: object
+    required: false
+    description: Initial context dictionary containing raw input datasets or parameters.
+outputs:
+  execution_order:
+    type: array
+    description: Topologically sorted list of stage execution names.
+  stage_results:
+    type: object
+    description: Dictionary mapping each stage name to its execution result or status.
+  lineage_graph:
+    type: array
+    description: Provenance lineage records tracing input-to-output data ancestry.
+  pipeline_status:
+    type: string
+    description: Overall pipeline execution status (`'completed'`, `'failed'`, or `'partial'`).
 ---
-origin: manual
-triggers:
-  - etl
-  - data_processing
-  - workflow
-quality:
-  applied_count: 0
-  success_count: 0
-  completion_rate: 0.0
-  token_savings_avg: 0.0
-created_at: "2026-05-02T12:30:00Z"
-updated_at: "2026-05-02T12:30:00Z"
 
-## Purpose
+# Data Pipeline Orchestrator Engine
 
-Multi-surface data pipeline orchestrator that combines Python for data transformation, Prolog for data lineage and constraint validation, and Datalog for recursive data flow rules.
+`data-pipeline-orchestrator` composes, validates, and executes asynchronous **Directed Acyclic Graph (DAG) data transformation workflows**. It enforces **topological ordering and schema validation in Python**, tracks **data lineage ancestry in Prolog**, and manages **recursive dependencies in Datalog**:
 
-## Description
+$$\text{DAG} = (V, E), \quad u \to v \in E \implies \text{Order}(u) < \text{Order}(v)$$
 
-This skill provides comprehensive data pipeline orchestration:
-- Python for data transformation, cleaning, and streaming operations
-- Prolog for data lineage tracking, schema validation, and business rule enforcement
-- Datalog for recursive dependency resolution and incremental computation
+$$\text{Prolog Lineage: } \text{ancestor\_data}(D_{\text{raw}}, D_{\text{out}}) \leftarrow \text{transformed}(D_{\text{raw}}, D_{\text{int}}) \land \text{ancestor\_data}(D_{\text{int}}, D_{\text{out}})$$
 
-## Examples
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-### ETL Pipeline with Lineage
+---
+
+## The 5-Stage Pipeline Progression
 
 ```
-Input: Raw CSV files with transformation rules
-Output: Transformed data with complete lineage graph and quality metrics
+[1. Stage & Dependency Ingest] → [2. Topological DAG Sort & Cycle Proof] → [3. Visual Brief] → [4. Checkpoint] → [5. Async Execution & Lineage Emit]
 ```
 
-## Implementation
+### Stage 1: Stage & Dependency Ingest
+1. Ingest `pipeline_name`, `stages` list, and `context_data`.
+2. Assert that all declared stage dependencies exist within the stages collection.
 
-### Python Pipeline Orchestration
+> **Completion criterion**: Clean pipeline DAG definition verified.
 
-```python
-from typing import Dict, List, Optional, Any, AsyncIterator
-import asyncio
-import pandas as pd
-from dataclasses import dataclass, field
-from enum import Enum
+---
 
-class StageStatus(Enum):
-    PENDING = "pending"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    SKIPPED = "skipped"
+### Stage 2: Topological DAG Sort & Cycle Proof
+1. Construct dependency graph adjacency list.
+2. Execute Kahn's algorithm or recursive DFS in Python to compute topological execution order:
+   `["extract", "validate", "transform", "load"]`.
+3. Prove acyclicity in Prolog: $\neg \exists \text{cycle}(G)$.
 
-@dataclass
-class PipelineStage:
-    name: str
-    func: callable
-    dependencies: List[str] = field(default_factory=list)
-    schema: Dict = field(default_factory=dict)
-    status: StageStatus = StageStatus.PENDING
-    error: Optional[str] = None
+> **Completion criterion**: Valid topological execution sequence resolved.
 
-class DataPipeline:
-    """Multi-stage data pipeline orchestrator."""
-    
-    def __init__(self, name: str):
-        self.name = name
-        self.stages: Dict[str, PipelineStage] = {}
-        self.context: Dict[str, Any] = {}
-        self.lineage: List[Dict] = []
-    
-    def add_stage(self, stage: PipelineStage) -> None:
-        """Add a pipeline stage."""
-        self.stages[stage.name] = stage
-    
-    async def execute(self) -> Dict[str, Any]:
-        """Execute pipeline stages in dependency order."""
-        execution_order = self._topological_sort()
-        results = {}
-        
-        for stage_name in execution_order:
-            stage = self.stages[stage_name]
-            stage.status = StageStatus.RUNNING
-            
-            try:
-                # Check dependencies
-                for dep in stage.dependencies:
-                    if dep in results and isinstance(results[dep], Exception):
-                        stage.status = StageStatus.SKIPPED
-                        stage.error = f"Dependency {dep} failed"
-                        results[stage_name] = Exception(stage.error)
-                        continue
-                
-                # Execute stage
-                stage_result = await stage.func(self.context)
-                results[stage_name] = stage_result
-                self.context[stage_name] = stage_result
-                stage.status = StageStatus.COMPLETED
-                
-                # Track lineage
-                self.lineage.append({
-                    "stage": stage.name,
-                    "input": list(stage.dependencies),
-                    "output": stage_name,
-                    "timestamp": "2026-05-02T12:30:00Z",
-                    "status": "success"
-                })
-                
-            except Exception as e:
-                stage.status = StageStatus.FAILED
-                stage.error = str(e)
-                results[stage_name] = e
-                self.lineage.append({
-                    "stage": stage.name,
-                    "error": str(e),
-                    "timestamp": "2026-05-02T12:30:00Z",
-                    "status": "failed"
-                })
-        
-        return results
-    
-    def _topological_sort(self) -> List[str]:
-        """Sort stages by dependencies."""
-        visited = set()
-        result = []
-        
-        def visit(name: str):
-            if name in visited:
-                return
-            visited.add(name)
-            for dep in self.stages[name].dependencies:
-                if dep in self.stages:
-                    visit(dep)
-            result.append(name)
-        
-        for stage_name in self.stages:
-            visit(stage_name)
-        
-        return result
+---
 
-async def stream_transform(stream: AsyncIterator[Dict], 
-                           transformations: List[callable]) -> AsyncIterator[Dict]:
-    """Apply transformations to streaming data."""
-    async for record in stream:
-        for transform in transformations:
-            record = await transform(record)
-        yield record
+### Stage 3: The Visual Brief
+For data pipeline orchestration and lineage graphs, generate an interactive brief:
+- **Location**: Write to `%TEMP%\data-pipeline-brief-<timestamp>.html` (Windows) or `/tmp/data-pipeline-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render DAG execution flowchart, data provenance lineage tree, and stage execution latency / status waterfall.
 
-def validate_schema(df: pd.DataFrame, schema: Dict) -> bool:
-    """Validate DataFrame against schema."""
-    for col, dtype in schema.get("columns", {}).items():
-        if col not in df.columns:
-            raise ValueError(f"Missing column: {col}")
-        if not pd.api.types.is_dtype_equal(df[col].dtype, dtype):
-            raise ValueError(f"Column {col} has wrong type")
-    return True
-```
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
 
-### Prolog Data Lineage
+---
+
+### Stage 4: Mandatory Checkpoint
+Before stage execution:
+1. Verify prerequisite readiness: if a parent stage fails, mark child stages as `skipped`.
+2. Validate input schema compatibility against context data.
+
+> **Completion criterion**: Dependency readiness and schema gates verified.
+
+---
+
+### Stage 5: Async Execution & Lineage Emission
+1. Execute stages asynchronously in topological order.
+2. Record stage execution timestamps and input/output provenance in `lineage_graph`.
+3. Emit complete `PipelineResult` record.
+
+> **Completion criterion**: Full pipeline execution and lineage payload emitted.
+
+---
+
+## Surface References
+
+### Prolog Lineage Surface
 
 ```prolog
-% Data lineage rules
-ancestor_data(RawData, ProcessedData) :-
-    data_transformation(RawData, ProcessedData, _, _).
+:- module(data_lineage, [
+    ancestor_data/2,
+    stage_ready/2,
+    valid_dag/1
+]).
 
-ancestor_data(RawData, FinalOutput) :-
-    data_transformation(RawData, Intermediate, _, _),
-    ancestor_data(Intermediate, FinalOutput).
+ancestor_data(Raw, Processed) :-
+    transformation(Raw, Processed).
+ancestor_data(Raw, Final) :-
+    transformation(Raw, Inter),
+    ancestor_data(Inter, Final).
 
-% Schema validation
-valid_schema(Data, Schema) :-
-    findall(Missing, (member(Column, Schema.columns), \+ member(Column, Data)), Missing),
-    length(Missing, 0).
-
-% Pipeline constraint validation
-pipeline_consistent(Stages, Context) :-
-    forall(member(Stage, Stages),
-           (stage_input_schema(Stage, RequiredInput),
-            schema_satisfied(RequiredInput, Context))).
-
-% Data quality checks
-quality_check_passed(Data, Checks) :-
-    forall(member(Check, Checks),
-           call(Check, Data)).
-
-% Dependency resolution
-stage_ready(Stage, CompletedStages) :-
-    stage_dependencies(Stage, Dependencies),
-    subset(Dependencies, CompletedStages).
-
-% Failure propagation
-failure_propagates(FailedStage, AffectedStages, AllStages) :-
-    member(Affected, AllStages),
-    \+ stage_dependencies(Affected, [FailedStage]),
-    \+ (member(Dep, stage_dependencies(Affected, _)), Dep = FailedStage).
+stage_ready(Stage, Completed) :-
+    stage_deps(Stage, Deps),
+    subset(Deps, Completed).
 ```
 
-### Datalog Flow Rules
-
-```datalog
-% Data flow dependencies
-stage_depends_on("transform", "extract").
-stage_depends_on("load", "transform").
-stage_depends_on("validate", "extract").
-
-% Transitive dependencies
-depends_on(Stage, Dep) :- stage_depends_on(Stage, Dep).
-depends_on(Stage, Dep) :- stage_depends_on(Stage, Intermediate),
-                            depends_on(Intermediate, Dep).
-
-% Incremental computation
-needs_recomputation(Stage, ChangedData) :-
-    produces(Stage, Output),
-    depends_on_data(Output, ChangedData).
-
-% Parallel execution
-can_run_in_parallel(Stage1, Stage2) :-
-    stage_depends_on(Stage1, Deps1),
-    stage_depends_on(Stage2, Deps2),
-    \+ (member(Dep, Deps1), member(Dep, Deps2)).
-```
-
-## Testing
+### Python Orchestrator Surface
 
 ```python
-# Test pipeline execution
-from skills.data_pipeline_orchestrator import DataPipeline, PipelineStage
+from typing import Dict, List, Any, Optional, Callable
 
-pipeline = DataPipeline("test")
+def topological_sort(stages: List[Dict[str, Any]]) -> List[str]:
+    stage_map = {s["name"]: s for s in stages}
+    adj = {s["name"]: s.get("dependencies", []) for s in stages}
+    
+    visited = set()
+    temp = set()
+    order = []
+    
+    def visit(name: str):
+        if name in temp:
+            raise ValueError(f"cyclic_dependency_detected: Stage '{name}' is in a cycle.")
+        if name not in visited:
+            temp.add(name)
+            for dep in adj.get(name, []):
+                if dep in stage_map:
+                    visit(dep)
+            temp.remove(name)
+            visited.add(name)
+            order.append(name)
+            
+    for s in stages:
+        if s["name"] not in visited:
+            visit(s["name"])
+            
+    return order
 
-async def extract(context):
-    return {"data": [1, 2, 3]}
-
-async def transform(context):
-    data = context["extract"]["data"]
-    return {"transformed": [x * 2 for x in data]}
-
-pipeline.add_stage(PipelineStage("extract", extract))
-pipeline.add_stage(PipelineStage("transform", transform, dependencies=["extract"]))
-
-# Run pipeline
-results = asyncio.run(pipeline.execute())
-assert results["transform"]["transformed"] == [2, 4, 6]
+def execute_pipeline(
+    pipeline_name: str,
+    stages: List[Dict[str, Any]],
+    context_data: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
+    order = topological_sort(stages)
+    context = dict(context_data or {})
+    results = {}
+    lineage = []
+    
+    for stage_name in order:
+        stage = next(s for s in stages if s["name"] == stage_name)
+        deps = stage.get("dependencies", [])
+        
+        # Check parent dependencies
+        failed_dep = next((d for d in deps if results.get(d, {}).get("status") == "failed"), None)
+        if failed_dep:
+            results[stage_name] = {"status": "skipped", "error": f"Parent '{failed_dep}' failed."}
+            lineage.append({"stage": stage_name, "status": "skipped", "inputs": deps, "output": None})
+            continue
+            
+        # Execute mock/provided transform
+        func = stage.get("func", lambda ctx: {"data": "processed"})
+        try:
+            res = func(context) if callable(func) else {"status": "ok"}
+            results[stage_name] = {"status": "completed", "output": res}
+            context[stage_name] = res
+            lineage.append({"stage": stage_name, "status": "completed", "inputs": deps, "output": stage_name})
+        except Exception as exc:
+            results[stage_name] = {"status": "failed", "error": str(exc)}
+            lineage.append({"stage": stage_name, "status": "failed", "inputs": deps, "error": str(exc)})
+            
+    status = "completed" if all(r.get("status") == "completed" for r in results.values()) else "partial"
+    return {
+        "execution_order": order,
+        "stage_results": results,
+        "lineage_graph": lineage,
+        "pipeline_status": status
+    }
 ```
 
-````
+---
+
+## Anti-Patterns & Guardrails
+
+- **Cyclic Dependency Deadlocks** — Configuring mutual dependencies between stages ($A \to B \to A$), crashing pipeline execution.
+- **Cascading Silent Failures** — Continuing downstream execution when prerequisite parent transforms have failed or thrown errors.
+- **Untracked Transformation Lineage** — Executing multi-stage mutations without recording input-to-output provenance in the lineage graph.

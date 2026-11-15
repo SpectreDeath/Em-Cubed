@@ -25,18 +25,34 @@ class HybridCoprocessor:
     Hybrid Neuro-Symbolic Co-Processor orchestrating logic and code surface co-execution.
     """
 
-    def __init__(self, timeout: float = 30.0) -> None:
+    def __init__(self, timeout: float = 30.0, plugin_manager: Any | None = None) -> None:
         self.timeout = timeout
-        self.python_surface = PythonSurface(timeout=timeout)
+        self.plugin_manager = plugin_manager
+
+        # Default fallback surfaces
+        self.python_surface = (
+            self.plugin_manager.get("python") if self.plugin_manager else None
+        ) or PythonSurface(timeout=timeout)
 
         # Logic surfaces
-        self.prolog_surface = PrologSurface(timeout=timeout)
-        self.clingo_surface = ClingoSurface(timeout=timeout)
-        self.datalog_surface = DatalogSurface(timeout=timeout)
+        self.prolog_surface = (
+            self.plugin_manager.get("prolog") if self.plugin_manager else None
+        ) or PrologSurface(timeout=timeout)
+        self.clingo_surface = (
+            self.plugin_manager.get("clingo") if self.plugin_manager else None
+        ) or ClingoSurface(timeout=timeout)
+        self.datalog_surface = (
+            self.plugin_manager.get("datalog") if self.plugin_manager else None
+        ) or DatalogSurface(timeout=timeout)
 
     def _get_logic_surface(self, surface_type: str) -> Any:
-        """Get logic surface by identifier."""
+        """Get logic surface by identifier, querying PluginManager if present."""
         st = surface_type.lower()
+        if self.plugin_manager is not None:
+            surface = self.plugin_manager.get(st)
+            if surface is not None:
+                return surface
+
         if st in ("prolog", "pl"):
             return self.prolog_surface
         elif st in ("clingo", "asp"):
@@ -45,6 +61,7 @@ class HybridCoprocessor:
             return self.datalog_surface
         else:
             raise ValueError(f"Unsupported logic surface type: '{surface_type}'")
+
 
     async def execute_hybrid_pipeline(
         self,

@@ -37,8 +37,9 @@ def main():
 
         # Initialize plugin manager and registry
         plugin_manager = PluginManager()
-        registry = SkillRegistry()
-        skills_dir = Path("/app/skills")
+        skills_dir = Path(context.get("skills_dir", "/app/skills"))
+        registry_file = Path(context.get("registry_file", "registry.json"))
+        registry = SkillRegistry(skills_dir=skills_dir, registry_file=registry_file)
 
         # Initialize executor
         executor = SkillExecutor(plugin_manager, registry, skills_dir)

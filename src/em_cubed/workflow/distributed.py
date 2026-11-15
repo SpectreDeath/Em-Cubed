@@ -392,7 +392,8 @@ def _get_surface_by_name(name: str):
         cls = getattr(mod, class_name)
         instance = cls()
         return instance if getattr(instance, "available", True) else None
-    except Exception:
+    except Exception as exc:
+        logger.debug("Failed to load distributed surface", surface=name, error=str(exc))
         return None
 
 
@@ -604,7 +605,8 @@ class AdaptiveWorkerPool:
                 return max(self.min_workers, self.max_workers // 2)
             else:
                 return self.max_workers
-        except Exception:
+        except Exception as exc:
+            logger.debug("psutil unavailable for worker scaling, using max_workers", error=str(exc))
             return self.max_workers
 
 

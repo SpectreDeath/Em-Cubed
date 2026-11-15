@@ -93,7 +93,14 @@ class CompositionEdge:
 class SkillRegistry:
     """Enhanced skill registry with quality tracking, telemetry, and remote federation."""
 
-    def __init__(self, skills_dir: Path, registry_file: Path, storage: Optional["RegistryStorage"] = None):
+    def __init__(
+        self,
+        skills_dir: Path | None = None,
+        registry_file: Path | None = None,
+        storage: Optional["RegistryStorage"] = None,
+    ):
+        skills_dir = skills_dir or Path("skills")
+        registry_file = registry_file or Path("registry.json")
         self.skills_dir = skills_dir
         self.registry_file = registry_file
         self.logger = logger.bind(component="skill_registry")
@@ -519,7 +526,8 @@ class JSONFileRegistryStorage(RegistryStorage):
         try:
             with open(self.registry_file, encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
+        except Exception as e:
+            logger.warning("Failed to load registry JSON file", path=str(self.registry_file), error=str(e))
             return []
 
     def save_skills(self, skills: list[dict[str, Any]]) -> None:
@@ -686,7 +694,12 @@ class SQLiteRegistryStorage(RegistryStorage):
                         metrics["execution_history"] = hist
 
                         updated_data = json.dumps(skill_data)
-                    except Exception:
+                    except Exception as e:
+                        logger.warning(
+                            "Failed to update serialized SQLite skill metrics payload",
+                            skill_id=skill_id,
+                            error=str(e),
+                        )
                         updated_data = row["data"]
 
                     conn.execute(

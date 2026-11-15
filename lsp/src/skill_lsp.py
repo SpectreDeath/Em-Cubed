@@ -92,8 +92,8 @@ def load_valid_domains() -> List[str]:
             cats = data.get("skill_categories", [])
             if cats:
                 return sorted(list(set(cats + VALID_DOMAINS_FALLBACK)))
-    except Exception:
-        pass
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Failed to load manifest.yaml domains, using fallback: %s", exc)
     return VALID_DOMAINS_FALLBACK
 
 

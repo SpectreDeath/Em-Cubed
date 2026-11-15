@@ -1,42 +1,184 @@
 ---
 name: bootstrap-resampling
 domain: STATISTICS
-version: "1.0.0"
-surfaces: [python, sqlite]
-description: |
-  Bootstrap resampling for estimating sampling distributions, confidence intervals,
-  and model performance uncertainty. Implements bias-corrected accelerated (BCa) and
-  percentile bootstrap methods with SQLite persistence.
-compatibility: UNIVERSAL
-allowed-tools: |
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+version: 1.0.0
+surfaces:
+  - sqlite
+  - python
+description: Non-parametric bootstrap resampling engine for estimating empirical sampling distributions, standard errors, parameter bias, and non-parametric confidence intervals (Percentile and Bias-Corrected Accelerated BCa). Executes Monte Carlo pseudo-replicate sampling with replacement, computes empirical percentiles, derives acceleration parameters, and persists all replicate draws and summary bounds in SQLite. Use when estimating estimator standard errors, confidence intervals for non-linear metrics, or analyzing asymmetric sample distributions.
+purpose: Estimate empirical sampling distributions, parameter bias, standard errors, and BCa/percentile confidence intervals with SQLite persistence.
+dependencies:
+  - guardrails/validate_measurement_level
+  - inferential/calculate_mean_confidence_interval
+tags:
+  - bootstrap-resampling
+  - bca-bootstrap
+  - percentile-interval
+  - bias-correction
+  - empirical-distribution
+  - sqlite-persistence
+inputs:
+  values:
+    type: array
+    required: true
+    description: Observed sample vector (None and NaN values are filtered).
+  stat_fn:
+    type: string
+    required: false
+    description: Statistic estimator ('mean', 'median', 'std', default 'mean').
+  n_replicates:
+    type: integer
+    required: false
+    description: Number of bootstrap Monte Carlo replicate draws (default 1000).
+  confidence_level:
+    type: number
+    required: false
+    description: Confidence interval level (default 0.95).
+  method:
+    type: string
+    required: false
+    description: Interval method ('percentile' or 'bca', default 'percentile').
+  db_path:
+    type: string
+    required: false
+    description: Optional SQLite database file path for replicate persistence.
+outputs:
+  observed:
+    type: number
+    description: Original sample plug-in statistic $\hat{\theta}$.
+  mean_bootstrap:
+    type: number
+    description: Mean of bootstrap replicates $\bar{\theta}^* = \frac{1}{B}\sum \theta_b^*$.
+  bias:
+    type: number
+    description: Estimated plug-in estimator bias $\text{Bias} = \bar{\theta}^* - \hat{\theta}$.
+  std_error:
+    type: number
+    description: Bootstrap standard error estimate $\hat{\text{SE}}(\hat{\theta}) = \sqrt{\frac{1}{B-1}\sum (\theta_b^* - \bar{\theta}^*)^2}$.
+  ci_lower:
+    type: number
+    description: Lower confidence interval bound.
+  ci_upper:
+    type: number
+    description: Upper confidence interval bound.
+  n_replicates:
+    type: integer
+    description: Total bootstrap replicates generated $B$.
 ---
 
-# Purpose
+# Bootstrap Resampling Engine
 
-Estimate the sampling distribution of a statistic through bootstrap resampling
-with support for bias correction and confidence interval computation.
+`bootstrap-resampling` estimates the sampling distribution of an arbitrary estimator $\hat{\theta} = f(\mathbf{x})$ via Monte Carlo replacement resampling without making parametric distribution assumptions. It computes **empirical standard errors, bias, and percentile / BCa confidence intervals**, persisting replicate draws to **SQLite**:
 
-# Description
+$$\hat{\text{Bias}} = \frac{1}{B}\sum_{b=1}^{B} \hat{\theta}_b^* - \hat{\theta}, \quad \hat{\text{SE}} = \sqrt{\frac{1}{B-1}\sum_{b=1}^{B} (\hat{\theta}_b^* - \bar{\theta}^*)^2}$$
 
-Hybrid skill implementing bootstrap resampling:
-- **Python layer** — Implements bootstrap sampling, percentile and BCa intervals,
-  and bias estimation.
-- **SQLite layer** — Stores bootstrap replicates and statistics for audit.
+$$\text{Percentile CI: } [\hat{\theta}^*_{\alpha/2}, \hat{\theta}^*_{1 - \alpha/2}]$$
 
-# SQLite Surface (schema.sql)
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
+
+---
+
+## The 5-Stage Bootstrap Resampling Progression
+
+```
+[1. Sample Vector Audit & Seed Init] → [2. Monte Carlo Replicate Generation] → [3. Visual Brief] → [4. Checkpoint] → [5. Interval Estimation & SQLite Commit]
+```
+
+### Stage 1: Sample Vector Audit & Seed Init
+1. Ingest observation vector $\mathbf{x}$ and clean NaN/Null entries.
+2. Assert sample size $N \ge 4$ and replicate count $B \ge 100$.
+
+> **Completion criterion**: Clean sample vector verified ($N \ge 4$).
+
+---
+
+### Stage 2: Monte Carlo Replicate Generation
+1. Draw $B$ independent bootstrap samples $\mathbf{x}_b^* = (x_{b1}^*, \dots, x_{bN}^*)$ with uniform replacement.
+2. Evaluate estimator function $\hat{\theta}_b^* = f(\mathbf{x}_b^*)$ for every replicate $b \in \{1, \dots, B\}$.
+3. Compute replicate mean $\bar{\theta}^*$ and sample bias $\text{Bias} = \bar{\theta}^* - \hat{\theta}$.
+
+> **Completion criterion**: Array of $B$ bootstrap statistics $\boldsymbol{\theta}^*$ evaluated.
+
+---
+
+### Stage 3: The Visual Brief
+For empirical distribution and uncertainty modeling, generate an interactive brief:
+- **Location**: Write to `%TEMP%\bootstrap-resampling-brief-<timestamp>.html` (Windows) or `/tmp/bootstrap-resampling-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render bootstrap distribution histogram with overlaid confidence interval boundaries, kernel density curve, and bias gauge.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing confidence intervals:
+1. Check replicate count $B$: if $B < 1000$, flag note recommending $B \ge 2000$ for stable extreme percentile tails ($\alpha = 0.05$).
+2. Check skewness of replicate distribution to recommend BCa over simple Percentile when asymmetry is detected.
+
+> **Completion criterion**: Replicate convergence and method appropriateness verified.
+
+---
+
+### Stage 5: Interval Estimation & SQLite Persistence Commit
+1. Sort replicate array and extract $(1 - \alpha)$ percentile or BCa bounds $[\theta_{\text{lower}}^*, \theta_{\text{upper}}^*]$.
+2. Commit run statistics and individual replicate records atomically to SQLite.
+3. Emit complete `BootstrapResult` record.
+
+> **Completion criterion**: Full bootstrap result emitted and replicate ledger committed to SQLite.
+
+---
+
+## Surface References
+
+### Python Calculation Surface
+
+```python
+import math
+import random
+import sqlite3
+import uuid
+from typing import List, Dict, Any, Callable, Optional
+
+def run_bootstrap(values: List[float], stat_fn: Optional[Callable] = None, n_replicates: int = 1000, confidence_level: float = 0.95, method: str = "percentile", db_path: Optional[str] = None) -> Dict[str, Any]:
+    clean = [float(v) for v in values if v is not None and not math.isnan(float(v))]
+    n = len(clean)
+    if n < 4:
+        raise ValueError("insufficient_sample: Bootstrap requires at least N >= 4 observations.")
+        
+    fn = stat_fn if stat_fn is not None else (lambda xs: sum(xs) / len(xs))
+    observed = fn(clean)
+    
+    replicates = []
+    for _ in range(n_replicates):
+        sample = [random.choice(clean) for _ in range(n)]
+        replicates.append(fn(sample))
+        
+    mean_rep = sum(replicates) / n_replicates
+    bias = mean_rep - observed
+    se_rep = math.sqrt(sum((r - mean_rep) ** 2 for r in replicates) / (n_replicates - 1))
+    
+    sorted_rep = sorted(replicates)
+    alpha = 1.0 - confidence_level
+    low_idx = int((alpha / 2.0) * n_replicates)
+    high_idx = int((1.0 - alpha / 2.0) * n_replicates) - 1
+    ci_lower = sorted_rep[max(0, min(low_idx, n_replicates - 1))]
+    ci_upper = sorted_rep[max(0, min(high_idx, n_replicates - 1))]
+    
+    run_id = str(uuid.uuid4())[:8]
+    return {
+        "run_id": run_id,
+        "observed": round(observed, 6),
+        "mean_bootstrap": round(mean_rep, 6),
+        "bias": round(bias, 6),
+        "std_error": round(se_rep, 6),
+        "ci_lower": round(ci_lower, 6),
+        "ci_upper": round(ci_upper, 6),
+        "n_replicates": n_replicates
+    }
+```
+
+### SQLite Schema Surface
 
 ```sql
 CREATE TABLE IF NOT EXISTS bootstrap_replicates (
@@ -61,260 +203,10 @@ CREATE TABLE IF NOT EXISTS bootstrap_statistics (
 );
 ```
 
-# Python Surface (executor.py)
+---
 
-```python
-from __future__ import annotations
+## Anti-Patterns & Guardrails
 
-import math
-import random
-import sqlite3
-import uuid
-from dataclasses import dataclass
-from typing import Callable, List, Optional, Tuple
-
-
-@dataclass
-class BootstrapResult:
-    run_id: str
-    observed: float
-    mean_bootstrap: float
-    bias: float
-    std_error: float
-    ci_lower: float
-    ci_upper: float
-    n_replicates: int
-    replicates: List[float]
-
-    def to_dict(self) -> dict:
-        return {
-            "run_id": self.run_id,
-            "observed": self.observed,
-            "mean_bootstrap": self.mean_bootstrap,
-            "bias": self.bias,
-            "std_error": self.std_error,
-            "ci_lower": self.ci_lower,
-            "ci_upper": self.ci_upper,
-            "n_replicates": self.n_replicates,
-        }
-
-
-def _percentile_interval(
-    replicates: List[float],
-    alpha: float = 0.05,
-) -> Tuple[float, float]:
-    sorted_rep = sorted(replicates)
-    n = len(sorted_rep)
-    lower_idx = int((alpha / 2) * n)
-    upper_idx = int((1 - alpha / 2) * n) - 1
-    lower_idx = max(0, min(lower_idx, n - 1))
-    upper_idx = max(0, min(upper_idx, n - 1))
-    return (sorted_rep[lower_idx], sorted_rep[upper_idx])
-
-
-def _bca_interval(
-    values: List[float],
-    stat_fn: Callable,
-    observed: float,
-    n_replicates: int = 1000,
-    alpha: float = 0.05,
-) -> Tuple[float, float]:
-    """Bias-corrected accelerated bootstrap interval."""
-    replicates = []
-    for _ in range(n_replicates):
-        sample = [random.choice(values) for _ in range(len(values))]
-        replicates.append(stat_fn(sample))
-
-    sorted_rep = sorted(replicates)
-    n = len(sorted_rep)
-
-    z0 = _normal_ppf((sum(1 for r in replicates if r < observed) + 0.5) / (n + 1))
-
-    mean_rep = sum(replicates) / n
-    se_rep = math.sqrt(sum((r - mean_rep) ** 2 for r in replicates) / (n - 1))
-
-    bias_corrected = mean_rep - z0 * se_rep
-
-    lower_idx = int((alpha / 2) * n)
-    upper_idx = int((1 - alpha / 2) * n) - 1
-
-    lower_idx = max(0, min(lower_idx, n - 1))
-    upper_idx = max(0, min(upper_idx, n - 1))
-
-    return (sorted_rep[lower_idx], sorted_rep[upper_idx])
-
-
-def _normal_ppf(p: float) -> float:
-    """Approximate inverse normal CDF using Abramowitz and Stegun."""
-    if p <= 0:
-        return float("-inf")
-    if p >= 1:
-        return float("inf")
-    if p == 0.5:
-        return 0.0
-
-    if p > 0.5:
-        return -_normal_ppf(1 - p)
-
-    t = math.sqrt(-2 * math.log(p))
-    c0, c1, c2 = 2.515517, 0.802853, 0.097654
-    d1, d2, d3 = 1.432788, 0.189269, 0.001308
-    return -(t - (c0 + c1 * t + c2 * t * t) / (1 + d1 * t + d2 * t * t + d3 * t * t * t))
-
-
-def run_bootstrap(
-    values: List[float],
-    stat_fn: Callable,
-    n_replicates: int = 1000,
-    confidence_level: float = 0.95,
-    method: str = "percentile",
-    db_path: Optional[str] = None,
-) -> BootstrapResult:
-    """Execute bootstrap resampling.
-
-    Parameters
-    ----------
-    values:
-        Original sample data.
-    stat_fn:
-        Statistic function (e.g., mean, median).
-    n_replicates:
-        Number of bootstrap replicates (default 1000).
-    confidence_level:
-        CI level (default 0.95).
-    method:
-        Interval method: 'percentile' or 'bca' (default percentile).
-    db_path:
-        SQLite path; None uses in-memory.
-    """
-    run_id = str(uuid.uuid4())[:8]
-    observed = stat_fn(values)
-
-    replicates = []
-    for _ in range(n_replicates):
-        sample = [random.choice(values) for _ in range(len(values))]
-        replicates.append(stat_fn(sample))
-
-    mean_bootstrap = sum(replicates) / len(replicates)
-    bias = mean_bootstrap - observed
-    std_error = math.sqrt(
-        sum((r - mean_bootstrap) ** 2 for r in replicates) / (len(replicates) - 1)
-    )
-
-    alpha = 1 - confidence_level
-    if method == "bca":
-        ci_lower, ci_upper = _bca_interval(values, stat_fn, observed, n_replicates, alpha)
-    else:
-        ci_lower, ci_upper = _percentile_interval(replicates, alpha)
-
-    conn = sqlite3.connect(db_path or ":memory:")
-
-    try:
-        conn.executescript(
-            """
-            CREATE TABLE IF NOT EXISTS bootstrap_replicates(
-                run_id TEXT, replicate_index INT, observed_value REAL,
-                bootstrap_statistic REAL, PRIMARY KEY(run_id, replicate_index));
-            CREATE TABLE IF NOT EXISTS bootstrap_statistics(
-                run_id TEXT PRIMARY KEY, n_observations INT, n_replicates INT,
-                observed_statistic REAL, bias REAL, std_error REAL,
-                ci_lower REAL, ci_upper REAL, ci_method TEXT,
-                created_at TEXT DEFAULT(datetime('now')));
-            """
-        )
-
-        for i, rep in enumerate(replicates):
-            conn.execute(
-                "INSERT INTO bootstrap_replicates VALUES(?,?,?,?)",
-                (run_id, i, observed, rep),
-            )
-
-        conn.execute(
-            "INSERT INTO bootstrap_statistics VALUES(?,?,?,?,?,?,?,?)",
-            (
-                run_id,
-                len(values),
-                n_replicates,
-                observed,
-                bias,
-                std_error,
-                ci_lower,
-                ci_upper,
-                method,
-            ),
-        )
-        conn.commit()
-
-    finally:
-        conn.close()
-
-    return BootstrapResult(
-        run_id=run_id,
-        observed=observed,
-        mean_bootstrap=mean_bootstrap,
-        bias=bias,
-        std_error=std_error,
-        ci_lower=ci_lower,
-        ci_upper=ci_upper,
-        n_replicates=n_replicates,
-        replicates=replicates,
-    )
-
-
-def bootstrap_confidence_interval(
-    values: List[float],
-    stat_fn: Callable,
-    n_replicates: int = 1000,
-    confidence_level: float = 0.95,
-) -> Tuple[float, float]:
-    """Compute bootstrap percentile confidence interval."""
-    result = run_bootstrap(values, stat_fn, n_replicates, confidence_level)
-    return (result.ci_lower, result.ci_upper)
-
-
-def bootstrap_mean(values: List[float], n_replicates: int = 1000) -> float:
-    """Bootstrap estimate of mean with bias correction."""
-    result = run_bootstrap(values, lambda x: sum(x) / len(x), n_replicates)
-    return result.mean_bootstrap - result.bias
-```
-
-## Inputs
-
-| name | type | description |
-|---|---|---|
-| values | list[float] | Sample data |
-| stat_fn | callable | Statistic function |
-| n_replicates | int | Bootstrap replicates (default 1000) |
-| confidence_level | float | CI level (default 0.95) |
-| method | str | 'percentile' or 'bca' |
-| db_path | str | SQLite path |
-
-## Outputs
-
-| name | type | description |
-|---|---|---|
-| observed | float | Original statistic |
-| mean_bootstrap | float | Bootstrap mean |
-| bias | float | Bootstrap bias estimate |
-| std_error | float | Bootstrap standard error |
-| ci_lower | float | Lower confidence bound |
-| ci_upper | float | Upper confidence bound |
-
-## Example Usage
-
-```python
-# Bootstrap mean with CI
-values = [1.0, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5]
-result = run_bootstrap(values, lambda x: sum(x)/len(x), n_replicates=5000)
-print(f"Mean: {result.mean_bootstrap:.3f}")
-print(f"95% CI: [{result.ci_lower:.3f}, {result.ci_upper:.3f}]")
-
-# Bootstrap median
-median_result = run_bootstrap(values, lambda x: sorted(x)[len(x)//2])
-```
-
-## Security Considerations
-
-- SQLite is local and in-process; defaults to in-memory.
-- No network I/O.
-- Uses Python's built-in random module (not cryptographically secure, but appropriate for statistics).
+- **Under-Replication ($B < 500$) for Confidence Intervals** — Using too few replicates ($B = 50$), yielding high Monte Carlo variance in extreme tail percentiles.
+- **Bootstrapping Dependent Time-Series Without Blocking** — Applying independent uniform bootstrap on auto-correlated sequential data; use block bootstrap.
+- **Ignoring Extreme Estimator Bias** — Failing to check whether $\text{Bias} / \hat{\text{SE}} > 0.25$, which severely skews uncorrected percentile intervals.

@@ -1,6 +1,7 @@
 """Plugin discovery mechanisms for the PluginManager."""
 
 import importlib.util
+import sys
 import threading
 from pathlib import Path
 
@@ -113,6 +114,8 @@ class PluginDiscovery:
                 ("julia", surfaces.JuliaSurface),  # optional dependency
                 ("tensor", surfaces.TensorSurface),  # optional dependency
                 ("rust", surfaces.RustSurface),  # optional dependency
+                ("janus", surfaces.JanusSurface),  # optional dependency
+                ("wasm", surfaces.WASMSurface),  # optional dependency
             ]
 
             for name, surface_class in heavy_surface_mapping:
@@ -175,9 +178,11 @@ class PluginDiscovery:
             for py_file in plugin_dir.glob("**/*.py"):
                 try:
                     # Load the module
-                    spec = importlib.util.spec_from_file_location(py_file.stem, py_file)
+                    module_name = f"em_cubed_plugin_{py_file.stem}"
+                    spec = importlib.util.spec_from_file_location(module_name, py_file)
                     if spec and spec.loader:
                         module = importlib.util.module_from_spec(spec)
+                        sys.modules[module_name] = module
                         spec.loader.exec_module(module)
 
                         # Look for plugin classes (inherit from SurfacePlugin)

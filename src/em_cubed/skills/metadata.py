@@ -289,16 +289,15 @@ class SkillMetadata:
                 min_documentation_ratio=self.quality_thresholds.get("min_documentation_ratio", 0.3),
             )
         if isinstance(self.metrics, dict):
-            self.metrics = RuntimeMetrics()
             quality_data = self.metrics
-            if isinstance(quality_data, dict):
-                self.metrics.applied_count = quality_data.get("applied_count", 0)
-                self.metrics.success_count = quality_data.get("success_count", 0)
-                self.metrics.total_token_usage = (
-                    quality_data.get("token_savings_avg", 0.0) * self.metrics.applied_count
-                    if self.metrics.applied_count > 0
-                    else 0
-                )
+            self.metrics = RuntimeMetrics()
+            self.metrics.applied_count = quality_data.get("applied_count", 0)
+            self.metrics.success_count = quality_data.get("success_count", 0)
+            self.metrics.total_token_usage = (
+                quality_data.get("token_savings_avg", 0.0) * self.metrics.applied_count
+                if self.metrics.applied_count > 0
+                else 0
+            )
 
         if self.skill_id is None:
             # Use slugified components for internal ID

@@ -321,7 +321,7 @@ traffic_rule_violation(Path, Violation) :-
 
 ## Testing
 
-> **Note:** These tests use direct imports for standalone illustration. In production, use the `SkillExecutor` which injects surface plugins via `context["surfaces"]`. See [Multi-Surface Guide](../../docs/MULTI_SURFACE_GUIDE.md) for the recommended pattern.
+> **Note:** These tests use direct imports for standalone illustration. In production, use the `SkillExecutor` which injects surface plugins via `context["surfaces"]`. See [Multi-Surface Guide](../../../docs/MULTI_SURFACE_GUIDE.md) for the recommended pattern.
 
 ### Python Surface Test
 

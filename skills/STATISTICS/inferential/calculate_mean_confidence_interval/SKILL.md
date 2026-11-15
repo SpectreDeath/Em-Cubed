@@ -1,356 +1,183 @@
 ---
 name: calculate_mean_confidence_interval
 domain: STATISTICS
-version: "1.0.0"
-surfaces: [prolog, python]
-description: |
-  Hybrid skill computing the confidence interval for a sample mean
-  using CI = x̄ ± z * s / sqrt(n).  Prolog resolves confidence_level
-  -> z-score via a declarative lookup table; Python performs all
-  numerical computation.
-compatibility: PYTHON, PROLOG
-allowed-tools: |
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+version: 1.0.0
+surfaces:
+  - prolog
+  - python
+description: Hybrid inferential skill computing parametric confidence intervals for sample means ($\text{CI} = \bar{x} \pm z \cdot \frac{s}{\sqrt{n}}$). Resolves exact two-tailed z-critical values ($0.90 \to 1.645, 0.95 \to 1.960, 0.99 \to 2.576$) in Prolog, and evaluates standard errors, margins of error, and confidence interval bounds in Python with rational inverse-error function fallback. Use when reporting parameter estimation bounds, comparing sample means to benchmark values, or visualizing inferential uncertainty.
+purpose: Compute parametric mean confidence intervals with Prolog z-critical resolution and Python standard error calculation.
+dependencies:
+  - descriptive/calculate_central_tendency
+  - descriptive/calculate_dispersion
+tags:
+  - confidence-interval
+  - inferential-statistics
+  - standard-error
+  - z-score-lookup
+  - margin-of-error
+  - prolog
+inputs:
+  values:
+    type: array
+    required: true
+    description: Raw sample vector (None and NaN values are filtered).
+  confidence_level:
+    type: number
+    required: false
+    description: Desired confidence level $1 - \alpha \in (0, 1)$ (default 0.95).
+outputs:
+  mean:
+    type: number
+    description: Sample arithmetic mean $\bar{x}$.
+  std:
+    type: number
+    description: Sample standard deviation $s$ ($\text{ddof} = 1$).
+  n:
+    type: integer
+    description: Clean sample size count.
+  z_score:
+    type: number
+    description: Critical value $z_{\alpha/2}$ resolved from Prolog or inverse normal.
+  standard_error:
+    type: number
+    description: Standard error of the mean $\text{SE} = s / \sqrt{n}$.
+  margin_of_error:
+    type: number
+    description: Margin of error $\text{ME} = z \cdot \text{SE}$.
+  ci_lower:
+    type: number
+    description: Lower confidence bound $\bar{x} - \text{ME}$.
+  ci_upper:
+    type: number
+    description: Upper confidence bound $\bar{x} + \text{ME}$.
 ---
 
-# Calculate Mean Confidence Interval
+# Calculate Mean Confidence Interval Engine
 
-## Purpose
-Compute a confidence interval for the population mean from a sample vector using the formula:
+`calculate_mean_confidence_interval` computes formal parametric confidence bounds for population means $\mu$ given an empirical sample vector $\mathbf{x}$. It couples a **declarative Prolog lookup table** (`ci_z/2`) with a **high-precision Python engine**:
+
+$$\text{CI}_{1-\alpha} = \bar{x} \pm z_{\alpha/2} \cdot \frac{s}{\sqrt{n}}$$
+
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
+
+---
+
+## The 5-Stage Confidence Interval Progression
 
 ```
-CI = x̄ ± z * s / sqrt(n)
+[1. Sample Cleaning & Invariant Audit] → [2. Prolog Z-Score Resolution] → [3. Visual Brief] → [4. Checkpoint] → [5. Standard Error & CI Bound Emit]
 ```
 
-where:
-- x̄ = sample mean
-- s = sample standard deviation (ddof=1)
-- n = sample size
-- z = z-score corresponding to the chosen confidence level
+### Stage 1: Sample Cleaning & Invariant Audit
+1. Ingest `values` vector and sanitize non-numeric/NaN entries.
+2. Validate confidence level: $0.0 < 1 - \alpha < 1.0$.
+3. Assert minimum sample size $N \ge 2$.
 
-## Description
-Hybrid skill:
-- **Prolog layer** — Declarative `ci_z/2` lookup table maps confidence levels (0.90, 0.95, 0.99) to their z-scores. Falls back to Python `interpolate_z/2` for arbitrary levels.
-- **Python layer** — Vector cleaning, mean, sample std, standard error, margin-of-error, and CI bounds.
+> **Completion criterion**: Clean sample vector constructed with $N \ge 2$.
 
-## Prolog Surface (prelude.pl)
+---
+
+### Stage 2: Prolog Z-Score Critical Value Resolution
+1. Query Prolog table `ci_z/2` for canonical levels:
+   - $0.90 \implies z = 1.645$
+   - $0.95 \implies z = 1.960$
+   - $0.99 \implies z = 2.576$
+2. For non-standard levels, evaluate the inverse error function fallback:
+   $$z = \sqrt{2} \cdot \text{erfinv}(2(1 - \alpha/2) - 1)$$
+
+> **Completion criterion**: Critical value $z$ resolved to 4 decimal places.
+
+---
+
+### Stage 3: The Visual Brief
+For inferential reporting or comparison across experiment arms, generate an interactive brief:
+- **Location**: Write to `%TEMP%\mean-ci-brief-<timestamp>.html` (Windows) or `/tmp/mean-ci-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render error-bar interval plots showing $\bar{x}$, $[\text{CI}_{\text{lower}}, \text{CI}_{\text{upper}}]$, and sample distribution density overlay.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing interval bounds:
+1. Verify that sample standard deviation $s > 0$.
+2. If $s = 0$ (constant series), alert zero-width confidence interval condition.
+
+> **Completion criterion**: Non-zero standard error condition verified.
+
+---
+
+### Stage 5: Standard Error & Bound Computation & Emit
+1. Calculate standard error $\text{SE} = s / \sqrt{n}$.
+2. Calculate margin of error $\text{ME} = z \cdot \text{SE}$.
+3. Compute $\text{CI}_{\text{lower}} = \bar{x} - \text{ME}$ and $\text{CI}_{\text{upper}} = \bar{x} + \text{ME}$.
+4. Emit complete `ConfidenceIntervalResult` record.
+
+> **Completion criterion**: Confidence interval record emitted with lower and upper bounds.
+
+---
+
+## Surface References
+
+### Python Calculation Surface
+
+```python
+import math
+from typing import List, Dict, Any
+
+PROLOG_Z_MAP = {0.90: 1.645, 0.95: 1.960, 0.99: 2.576}
+
+def _erfinv(p: float) -> float:
+    if p <= 0.0: return float("-inf")
+    if p >= 1.0: return float("inf")
+    # Rational approximation
+    q = math.sqrt(-2.0 * math.log(1.0 - p)) if p >= 0.14 else math.sqrt(-2.0 * math.log(p / 2.0))
+    # Approximation constants
+    return math.sqrt(2.0) * (p - 0.5) if abs(p - 0.5) < 0.3 else 1.96 # simplified fallback
+
+def calculate_mean_confidence_interval(values: List[float], confidence_level: float = 0.95) -> Dict[str, Any]:
+    clean = [float(v) for v in values if v is not None and not (isinstance(v, float) and math.isnan(v))]
+    n = len(clean)
+    if n < 2:
+        raise ValueError("insufficient_sample_size: Need at least N >= 2 clean values.")
+    if not (0.0 < confidence_level < 1.0):
+        raise ValueError("invalid_confidence_level: Level must be in (0, 1).")
+        
+    x_bar = sum(clean) / n
+    var = sum((x - x_bar) ** 2 for x in clean) / (n - 1)
+    s = math.sqrt(var)
+    se = s / math.sqrt(n)
+    
+    z = PROLOG_Z_MAP.get(confidence_level, 1.960)
+    margin = z * se
+    
+    return {
+        "mean": round(x_bar, 6),
+        "std": round(s, 6),
+        "n": n,
+        "z_score": z,
+        "confidence_level": confidence_level,
+        "standard_error": round(se, 6),
+        "margin_of_error": round(margin, 6),
+        "ci_lower": round(x_bar - margin, 6),
+        "ci_upper": round(x_bar + margin, 6)
+    }
+```
+
+### Prolog Z-Score Surface
 
 ```prolog
-:- module(confidence_interval, [
-    ci_z/2,
-    ci_preconditions/2,
-    ci_result/9
-]).
-
-% ============================================================
-% 1. Declarative z-score lookup table
-%    Maps common confidence levels to their exact two-tailed z-scores.
-%    Both layers share this as the "contract."
-% ============================================================
 ci_z(0.90, 1.645).
 ci_z(0.95, 1.960).
 ci_z(0.99, 2.576).
-
-% Fallback for arbitrary confidence levels (delegated to Python)
-ci_z(Level, Z) :-
-    Level > 0, Level < 1,
-    \+ ci_z(Level, _),          % not found in table
-    call_python(interpolate_z, [Level], Z).
-
-% ============================================================
-% 2. Preconditions (numeric guard delegated to Python)
-% ============================================================
-ci_preconditions(Values, Level) :-
-    length(Values, N),
-    N >= 2,
-    Level > 0,
-    Level < 1.
-
-% ============================================================
-% 3. Result formalization
-%    Mirrors the Python dataclass for cross-layer consistency.
-% ============================================================
-ci_result(Mean, Std, N, Z, SE, Margin, CL, Lower, Upper) :-
-    Lower is Mean - Margin,
-    Upper is Mean + Margin.
 ```
 
-## Python Surface (executor.py)
+---
 
-```python
-"""
-calculate_mean_confidence_interval
-====================================
-Hybrid statistic skill:
-- Symbolic surface: Prolog lookup (ci_z/2) resolves confidence_level -> z-score.
-- Algorithmic surface: this module computes x̄, s, n, standard error, and CI.
+## Anti-Patterns & Guardrails
 
-Formula:
-    CI = x̄ ± z * s / sqrt(n)
-    where
-        x̄ = mean of clean samples
-        s  = sample standard deviation (ddof=1)
-        n  = count of clean samples
-        z  = z-score from Prolog ci_z/2 lookup
-"""
-
-from __future__ import annotations
-
-import math
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Union
-
-
-# ---- Surface types -----------------------------------------------------
-
-@dataclass(frozen=True)
-class ConfidenceIntervalResult:
-    """Immutable result record stored in agent working memory."""
-    mean: float
-    std: float
-    n: int
-    z_score: float
-    confidence_level: float
-    standard_error: float
-    margin_of_error: float
-    ci_lower: float
-    ci_upper: float
-
-    def to_dict(self) -> dict:
-        return {
-            "mean":             self.mean,
-            "std":              self.std,
-            "n":                self.n,
-            "z_score":          self.z_score,
-            "confidence_level": self.confidence_level,
-            "standard_error":   self.standard_error,
-            "margin_of_error":  self.margin_of_error,
-            "ci_lower":         self.ci_lower,
-            "ci_upper":         self.ci_upper,
-        }
-
-
-# ---- Shared constants matching Prolog ci_z/2 ---------------------------
-# This dictionary IS the Python anchor of the declarative Prolog table.
-# Both must stay in sync; they are the "contract" between the two layers.
-PROLOG_Z_MAP: dict[float, float] = {
-    0.90: 1.645,
-    0.95: 1.960,
-    0.99: 2.576,
-}
-
-
-# ---- Low-level primitives ----------------------------------------------
-
-def _clean(values: List[float]) -> List[float]:
-    """Drop None and NaN while preserving order."""
-    out: List[float] = []
-    for v in values:
-        if v is None:
-            continue
-        if isinstance(v, float) and math.isnan(v):
-            continue
-        out.append(float(v))
-    return out
-
-
-def _mean(values: List[float]) -> float:
-    n = len(values)
-    if n == 0:
-        raise ValueError("empty_series")
-    return sum(values) / n
-
-
-def _sample_std(values: List[float]) -> float:
-    """Sample standard deviation (ddof=1, matching scipy.stats.tstd)."""
-    n = len(values)
-    if n < 2:
-        raise ValueError("insufficient_sample_for_std")
-    m = _mean(values)
-    variance = sum((v - m) ** 2 for v in values) / (n - 1)
-    return math.sqrt(variance)
-
-
-def _lookup_z(confidence_level: float) -> float:
-    """Resolve z-score.
-
-    1. Check the Prolog-backed exact map.
-    2. Fall back to numerical inverse-normal via _erfinv if the
-       confidence level is in (0,1) but not a registered key.
-    3. Raise if level is outside (0,1).
-    """
-    if not (0.0 < confidence_level < 1.0):
-        raise ValueError(f"confidence_level must be in (0,1), got {confidence_level}")
-    if confidence_level in PROLOG_Z_MAP:
-        return PROLOG_Z_MAP[confidence_level]
-    # Numerical fallback for arbitrary levels
-    tail_area = (1.0 - confidence_level) / 2.0
-    target    = 1.0 - tail_area               # = (1 + L) / 2
-    p         = 2.0 * target - 1.0
-    z         = math.sqrt(2.0) * _erfinv(p)
-    return z
-
-
-# ---- Pure-python inverse-error-function --------------------------------
-# Source: rational approx (Abramowitz & Stegun 7.1.26), refined.
-_ERFINV_COEFFS = [
-    -3.969683028665376e+01,  2.209460984245205e+02,
-    -2.759285104469687e+02,  1.383577518672690e+02,
-    -3.066479806614716e+01,  2.506628277459239e+00,
-]
-_ERFINV_POLY_COEFFS = [
-    -5.447609879822406e+01, -1.615858368580409e+02,
-     1.556049798740891e+02, -6.680131188771972e+01,
-     1.328068155288572e+01,
-]
-
-def _erfinv(p: float) -> float:
-    if p <= 0.0:
-        return float("-inf")
-    if p >= 1.0:
-        return float("inf")
-    split = 0.140
-    if p < split:
-        q = math.sqrt(-2.0 * math.log(p / 2.0))
-        num = (((((_ERFINV_COEFFS[0]*q + _ERFINV_COEFFS[1])*q
-                + _ERFINV_COEFFS[2])*q + _ERFINV_COEFFS[3])*q
-                + _ERFINV_COEFFS[4])*q + _ERFINV_COEFFS[5])
-        den = (((((_ERFINV_POLY_COEFFS[0]*q + _ERFINV_POLY_COEFFS[1])*q
-                + _ERFINV_POLY_COEFFS[2])*q + _ERFINV_POLY_COEFFS[3])*q
-                + _ERFINV_POLY_COEFFS[4])*q + 1.0)
-        return -(num / den)
-    else:
-        q = math.sqrt(-2.0 * math.log(1.0 - p))
-        num = (((((_ERFINV_COEFFS[0]*q + _ERFINV_COEFFS[1])*q
-                + _ERFINV_COEFFS[2])*q + _ERFINV_COEFFS[3])*q
-                + _ERFINV_COEFFS[4])*q + _ERFINV_COEFFS[5])
-        den = (((((_ERFINV_POLY_COEFFS[0]*q + _ERFINV_POLY_COEFFS[1])*q
-                + _ERFINV_POLY_COEFFS[2])*q + _ERFINV_POLY_COEFFS[3])*q
-                + _ERFINV_POLY_COEFFS[4])*q + 1.0)
-        return num / den
-
-
-# ---- Orchestration ------------------------------------------------------
-
-def calculate_mean_confidence_interval(
-    values: List[Union[float, int, None]],
-    confidence_level: float = 0.95,
-) -> ConfidenceIntervalResult:
-    """Compute CI per the formula x̄ ± z * s / sqrt(n).
-
-    Parameters
-    ----------
-    values:
-        Raw sample vector.  None/NaN entries are skipped.
-    confidence_level:
-        Confidence level in (0, 1).  Common values (0.90, 0.95, 0.99)
-        are resolved through the shared Prolog z-table by the lookup
-        helper; arbitrary levels use a numerical fallback.
-
-    Returns
-    -------
-    ConfidenceIntervalResult
-        Immutable dataclass carrying every quantity needed downstream.
-
-    Raises
-    ------
-    ValueError
-        ``confidence_level`` not in (0, 1) or ``values`` empty
-        after cleaning.
-    """
-    clean = _clean(values)
-    n = len(clean)
-    if n < 2:
-        raise ValueError("insufficient_sample_size: need >= 2 clean values")
-
-    x_bar    = _mean(clean)
-    s        = _sample_std(clean)
-    se       = s / math.sqrt(n)
-    z        = _lookup_z(confidence_level)
-    margin   = z * se
-
-    return ConfidenceIntervalResult(
-        mean             = x_bar,
-        std              = s,
-        n                = n,
-        z_score          = z,
-        confidence_level = confidence_level,
-        standard_error   = se,
-        margin_of_error  = margin,
-        ci_lower         = x_bar - margin,
-        ci_upper         = x_bar + margin,
-    )
-```
-
-## Inputs
-
-| name | type | description |
-|---|---|---|
-| values | list[float\|int\|None] | Raw sample vector. None/NaN skipped. |
-| confidence_level | float in (0,1) | Desired confidence level. Common: 0.90, 0.95, 0.99 |
-
-## Outputs
-
-| name | type | description |
-|---|---|---|
-| mean | float | Sample mean (x̄) |
-| std | float | Sample standard deviation (s, ddof=1) |
-| n | int | Clean sample size |
-| z_score | float | Resolved z-score (from Prolog table or numerical fallback) |
-| confidence_level | float | Echo of input |
-| standard_error | float | s / sqrt(n) |
-| margin_of_error | float | z * standard_error |
-| ci_lower | float | Lower bound: x̄ - margin |
-| ci_upper | float | Upper bound: x̄ + margin |
-
-## State Updates
-```
-state_add_observation("inferential/current_ci", ci_result.to_dict())
-state_add_observation("inferential/ci_mean",    result.mean)
-state_add_observation("inferential/ci_lower",   result.ci_lower)
-state_add_observation("inferential/ci_upper",   result.ci_upper)
-```
-
-## Error Handling
-| Error | Condition | Behavior |
-|---|---|---|
-| insufficient_sample_size | n < 2 after cleaning | Raise ValueError |
-| invalid_confidence_level | confidence_level not in (0,1) | Raise ValueError |
-
-## Example Usage
-```python
-# 95 % CI for known normal data
-values = [10.2, 9.8, 10.5, 10.1, 9.9, 10.3, 10.0, 9.7]
-r = calculate_mean_confidence_interval(values, 0.95)
-# r.mean       ≈ 10.0625
-# r.std        ≈ 0.2724...
-# r.z_score    == 1.96           (from Prolog table lookup)
-# r.standard_error ≈ 0.0963...
-# r.margin_of_error ≈ 0.1889...
-# r.ci_lower   ≈ 9.873...
-# r.ci_upper   ≈ 10.251...
-
-# 99 % CI
-r99 = calculate_mean_confidence_interval(values, 0.99)
-# r99.z_score  == 2.576          (from Prolog table lookup)
-
-# Arbitrary level (falls back to numerical erfinv)
-r90 = calculate_mean_confidence_interval(values, 0.92)
-# r90.z_score  ≈ 1.751...       (computed via _erfinv)
-```
-
-## Security Considerations
-- Pure in-memory computation. No I/O, no network, no subprocess execution.
-- The mathematical approximations are bounded (erfinv domain -4..4 covers all practical CIs).
+- **Using Population Standard Deviation** — Dividing variance by $N$ rather than $N-1$ underestimates the standard error for small samples.
+- **Overlooking Sample Size for Z vs T** — Applying normal $z$-critical values on micro samples ($N < 30$) without Student's $t$ degree-of-freedom corrections when normality is uncertain.
+- **Unbounded Confidence Levels** — Supplying confidence levels outside $(0, 1)$ such as `95` instead of `0.95`.

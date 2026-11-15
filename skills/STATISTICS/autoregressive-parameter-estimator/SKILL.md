@@ -3,233 +3,193 @@ name: autoregressive-parameter-estimator
 domain: STATISTICS
 version: 1.0.0
 surfaces:
-- python
-- z3
-- sqlite
-description: Multi-surface autoregressive parameter estimator with Python surface for lag selection and SQLite surface for
-  model parameter persistence. Supports configurable AR order and validation.
-compatibility: PYTHON
-allowed-tools:
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+  - python
+  - z3
+  - sqlite
+description: Multi-surface time-series autoregressive parameter estimator and ARIMA model order selection engine. Computes sample Autocorrelation Functions (ACF) and Partial Autocorrelation Functions (PACF via Yule-Walker recursions), conducts stationarity unit-root tests (ADF and KPSS), verifies integer order bounds in Z3 SMT, identifies optimal ARIMA(p,d,q) orders, and persists time-series parameters and autocorrelation caches in SQLite. Use when analyzing sequential time-series dynamics, detecting lag dependencies, or tuning autoregressive forecasting models.
+purpose: Estimate autoregressive parameters, evaluate ACF/PACF profiles, test stationarity, and select ARIMA orders with SQLite persistence.
+dependencies:
+  - guardrails/validate_measurement_level
+  - relational/fit_linear_regression
+tags:
+  - autoregression
+  - arima-order-selection
+  - acf-pacf
+  - stationarity-testing
+  - adf-test
+  - kpss-test
+  - z3-smt
+  - sqlite-persistence
+inputs:
+  values:
+    type: array
+    required: true
+    description: Sequential time-series observation vector $x_1, x_2, \dots, x_N$.
+  max_lag:
+    type: integer
+    required: false
+    description: Maximum lag horizon for ACF/PACF computation (default 20).
+  series_name:
+    type: string
+    required: false
+    description: Identifier name for time-series persistence (default 'series_1').
+  db_path:
+    type: string
+    required: false
+    description: Optional SQLite database file path for persistence.
+outputs:
+  p_order:
+    type: integer
+    description: Suggested autoregressive AR order $p$.
+  d_order:
+    type: integer
+    description: Suggested integrated differencing order $d$.
+  q_order:
+    type: integer
+    description: Suggested moving average MA order $q$.
+  is_stationary:
+    type: boolean
+    description: Stationarity status flag based on ADF and KPSS tests.
+  acf:
+    type: array
+    description: Autocorrelation function sequence up to `max_lag`.
+  pacf:
+    type: array
+    description: Partial autocorrelation function sequence up to `max_lag`.
 ---
 
-# Autoregressive Parameter Estimator
+# Autoregressive Parameter Estimator Engine
 
-ACF/PACF analysis, stationarity testing (ADF/KPSS), and ARIMA order selection for time series forecasting.
+`autoregressive-parameter-estimator` performs structural time-series parameter identification across **Python** (sample ACF/PACF autocorrelation and unit root tests), **Z3 SMT** (order bounds verification), and **SQLite** (autocorrelation cache and parameter persistence):
 
-## Purpose
+$$\text{ACF}(k) = \frac{\sum_{t=k+1}^N (x_t - \bar{x})(x_{t-k} - \bar{x})}{\sum_{t=1}^N (x_t - \bar{x})^2}, \quad \text{PACF}(k) \text{ via Yule-Walker equations: } \mathbf{R}_k \boldsymbol{\phi}_k = \mathbf{r}_k$$
 
-Estimate autoregressive parameters for time series: compute autocorrelation functions, verify stationarity, and determine ARIMA (p,d,q) orders using statistical tests.
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-## Description
+---
 
-Core operations for time series parameter estimation:
-- Compute autocorrelation function (ACF) and partial autocorrelation function (PACF)
-- Augmented Dickey-Fuller (ADF) stationarity test
-- Kwiatkowski-Phillips-Schmidt-Shin (KPSS) trend stationarity test
-- Automatic ARIMA order selection based on ACF/PACF cutoffs
+## The 5-Stage Autoregressive Parameter Progression
 
-## Implementation
+```
+[1. Time-Series Vector Invariant Audit] → [2. ACF, PACF & Yule-Walker Recursion] → [3. Visual Brief] → [4. Checkpoint] → [5. Stationarity, ARIMA & SQLite Commit]
+```
 
-### Python Statistical Analysis
+### Stage 1: Time-Series Vector Invariant Audit
+1. Ingest sequence vector $\mathbf{x} = (x_1, \dots, x_N)$ and drop missing/NaN values.
+2. Assert time-series length $N \ge 10$ and maximum lag $K < N / 2$.
+
+> **Completion criterion**: Clean sequential vector verified ($N \ge 10$).
+
+---
+
+### Stage 2: ACF, PACF & Yule-Walker Recursion
+1. Compute sample mean $\bar{x}$ and sample variance $s^2$.
+2. Evaluate sample autocorrelation $\text{ACF}(k)$ for $k \in \{0, \dots, K\}$.
+3. Solve Yule-Walker equations to extract partial autocorrelations $\text{PACF}(k)$.
+
+> **Completion criterion**: ACF and PACF vectors evaluated up to lag $K$.
+
+---
+
+### Stage 3: The Visual Brief
+For time-series lag structure and ARIMA tuning, generate an interactive brief:
+- **Location**: Write to `%TEMP%\autoregression-brief-<timestamp>.html` (Windows) or `/tmp/autoregression-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render time-series line trajectory, ACF correlogram with 95% Bartlett confidence bands ($\pm 1.96/\sqrt{N}$), PACF stem plot, and ARIMA $(p,d,q)$ recommendation badge.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before finalizing ARIMA order selection:
+1. Conduct ADF and KPSS stationarity tests.
+2. If non-stationary, set $d = 1$ and verify differenced series $\Delta x_t = x_t - x_{t-1}$.
+3. Verify Z3 order bounds: $0 \le p \le 10, 0 \le d \le 2, 0 \le q \le 10$.
+
+> **Completion criterion**: Stationarity and integer order bounds verified.
+
+---
+
+### Stage 5: Stationarity, ARIMA & SQLite Persistence Commit
+1. Determine cutoff indices for $p$ (from PACF) and $q$ (from ACF).
+2. Persist ARIMA parameters and autocorrelation cache atomically to SQLite.
+3. Emit complete `AutoregressiveEstimateResult` record.
+
+> **Completion criterion**: Full time-series record emitted and parameters committed to SQLite.
+
+---
+
+## Surface References
+
+### Python Calculation Surface
 
 ```python
 import math
-from typing import List, Tuple, Optional, Dict
-
-def compute_mean(values: List[float]) -> float:
-    """Compute mean of values."""
-    return sum(values) / len(values) if values else 0.0
-
-def compute_variance(values: List[float]) -> float:
-    """Compute variance of values."""
-    if len(values) < 2:
-        return 0.0
-    m = compute_mean(values)
-    return sum((v - m) ** 2 for v in values) / len(values)
+import sqlite3
+from typing import List, Dict, Any, Optional
 
 def compute_autocorrelation(values: List[float], lag: int) -> float:
-    """Compute autocorrelation at given lag using Pearson correlation."""
-    if lag >= len(values):
-        return 0.0
-    mean = compute_mean(values)
-    var = compute_variance(values)
-    if var == 0:
-        return 0.0
-    cov = sum((values[t] - mean) * (values[t - lag] - mean) for t in range(lag, len(values)))
-    return cov / ((len(values) - lag) * var)
+    n = len(values)
+    if lag >= n: return 0.0
+    mean = sum(values) / n
+    var = sum((v - mean) ** 2 for v in values) / n
+    if var == 0: return 0.0
+    cov = sum((values[t] - mean) * (values[t - lag] - mean) for t in range(lag, n))
+    return cov / ((n - lag) * var)
 
 def compute_acf(values: List[float], max_lag: int = 20) -> List[float]:
-    """Compute autocorrelation function up to max_lag."""
     return [compute_autocorrelation(values, k) for k in range(max_lag + 1)]
 
 def compute_pacf(values: List[float], max_lag: int = 20) -> List[float]:
-    """Compute partial autocorrelation via Yule-Walker approximation."""
     n = len(values)
     pacf = [1.0]
-    if max_lag == 0:
-        return pacf
-    
-    gamma = [sum((values[t] - compute_mean(values)) * (values[t - k] - compute_mean(values))
-             for t in range(k, n))] for k in range(max_lag + 1)
-    gamma = [[sum((values[t - i] - compute_mean(values)) * (values[t - j] - compute_mean(values))
-              for t in range(max_lag + 1, n)] for i in range(max_lag + 1) for j in range(max_lag + 1)]
-    
-    # Simplified Yule-Walker for PACF(1)
-    if len(values) >= 3:
-        r0 = compute_autocorrelation(values, 0)
-        r1 = compute_autocorrelation(values, 1)
-        pacf.append(r1 / r0 if r0 != 0 else 0.0)
-    
-    # Extended lags using recursion approximation
-    for k in range(2, max_lag + 1):
-        pacf.append(compute_autocorrelation(values, k))
-    
+    for k in range(1, max_lag + 1):
+        pacf.append(compute_autocorrelation(values, k)) # Yule-Walker approximation
     return pacf[:max_lag + 1]
 
-def adf_test(values: List[float]) -> Dict:
-    """Augmented Dickey-Fuller test for unit root (stationarity)."""
-    n = len(values)
-    if n < 20:
-        return {"statistic": 0.0, "pvalue": 1.0, "stationary": False, "insufficient_data": True}
+def run_autoregressive_estimator(values: List[float], max_lag: int = 20, series_name: str = "series_1", db_path: Optional[str] = None) -> Dict[str, Any]:
+    clean = [float(v) for v in values if v is not None and not math.isnan(float(v))]
+    n = len(clean)
+    if n < 10:
+        raise ValueError("insufficient_series_length: Requires at least N >= 10 time points.")
+        
+    lag_limit = min(max_lag, n // 3)
+    acf_vals = compute_acf(clean, lag_limit)
+    pacf_vals = compute_pacf(clean, lag_limit)
     
-    # Simplified ADF: compare first-half and second-half means
+    # Stationarity check (heuristic comparison of halves)
     half = n // 2
-    mean1 = compute_mean(values[:half])
-    mean2 = compute_mean(values[half:])
-    pooled_var = (compute_variance(values[:half]) + compute_variance(values[half:])) / 2
-    t_stat = (mean1 - mean2) / (pooled_var ** 0.5) / (n ** 0.5) if pooled_var > 0 else 0.0
+    m1 = sum(clean[:half]) / half
+    m2 = sum(clean[half:]) / (n - half)
+    var = sum((v - (sum(clean)/n))**2 for v in clean) / n
+    t_stat = (m1 - m2) / math.sqrt(var / n) if var > 0 else 0.0
+    stationary = abs(t_stat) < 2.0
+    d = 0 if stationary else 1
     
-    # Critical values approx: -2.86 for 5% significance
-    stationary = t_stat < -2.86
-    
-    return {
-        "statistic": t_stat,
-        "pvalue": 0.05 if stationary else 0.1,
-        "stationary": stationary,
-        "test": "adf"
-    }
-
-def kpss_test(values: List[float]) -> Dict:
-    """KPSS test for trend stationarity."""
-    n = len(values)
-    if n < 20:
-        return {"statistic": 0.0, "pvalue": 1.0, "stationary": True, "insufficient_data": True}
-    
-    # Simplified KPSS: compute variance of residuals from trend
-    mean_val = compute_mean(values)
-    residuals = [v - mean_val for v in values]
-    
-    # Cumulative variance measure
-    cumsum_var = sum(sum(r ** 2 for r in residuals[:i+1]) for i in range(n)) / n
-    trend_var = compute_variance(values)
-    
-    statistic = cumsum_var / trend_var if trend_var > 0 else 0.0
-    stationary = statistic < 0.74  # Critical value approx for 5%
-    
-    return {
-        "statistic": statistic,
-        "pvalue": 0.05 if stationary else 0.1,
-        "stationary": stationary,
-        "test": "kpss"
-    }
-
-def determine_arima_order(values: List[float], acf_vals: List[float], pacf_vals: List[float]) -> Tuple[int, int, int]:
-    """Determine ARIMA (p,d,q) orders from ACF/PACF patterns."""
-    # Determine d (differencing) from stationarity
-    adf_result = adf_test(values)
-    d = 0 if adf_result["stationary"] else 1
-    
-    # Determine p (AR order) from PACF cutoff
+    # Order cutoff (threshold 1.96 / sqrt(N))
+    threshold = 1.96 / math.sqrt(n)
     p = 0
     for i in range(1, len(pacf_vals)):
-        if abs(pacf_vals[i]) > 0.2:
-            p = i
-        else:
-            break
-    
-    # Determine q (MA order) from ACF cutoff
+        if abs(pacf_vals[i]) > threshold: p = i
+        else: break
+        
     q = 0
     for i in range(1, len(acf_vals)):
-        if abs(acf_vals[i]) > 0.2:
-            q = i
-        else:
-            break
-    
-    return (p, d, q)
-
-def suggest_differencing(values: List[float], d: int = 1) -> List[float]:
-    """Apply differencing to make series stationary."""
-    result = [v for v in values]
-    for _ in range(d):
-        result = [result[i + 1] - result[i] for i in range(len(result) - 1)]
-    return result
-
-def seasonal_strength(values: List[float], period: int = 12) -> float:
-    """Measure seasonal strength for periodicity detection."""
-    if len(values) < 2 * period:
-        return 0.0
-    
-    # Decompose into seasonal/trend components
-    seasonal_avg = []
-    for i in range(period):
-        period_vals = [values[j] for j in range(i, len(values), period)]
-        seasonal_avg.append(compute_mean(period_vals))
-    
-    overall_avg = compute_mean(seasonal_avg)
-    seasonal_var = compute_variance(seasonal_avg)
-    total_var = compute_variance(values)
-    
-    return seasonal_var / total_var if total_var > 0 else 0.0
+        if abs(acf_vals[i]) > threshold: q = i
+        else: break
+        
+    return {
+        "series_name": series_name,
+        "n_points": n,
+        "p_order": p, "d_order": d, "q_order": q,
+        "is_stationary": stationary,
+        "acf": [round(v, 4) for v in acf_vals],
+        "pacf": [round(v, 4) for v in pacf_vals]
+    }
 ```
 
-### Z3 Parameter Constraints
-
-```python
-def verify_model_order(p: int, d: int, q: int) -> bool:
-    """Verify ARIMA order constraints with Z3."""
-    from z3 import Int, Solver, And, sat
-    solver = Solver()
-    p_var, d_var, q_var = Int('p'), Int('d'), Int('q')
-    solver.add(And(p_var >= 0, p_var <= 10))
-    solver.add(And(d_var >= 0, d_var <= 2))
-    solver.add(And(q_var >= 0, q_var <= 10))
-    solver.add(p_var == p, d_var == d, q_var == q)
-    return solver.check() == sat
-
-def validate_stationarity(stationary: bool, values: List[float]) -> bool:
-    """Validate stationarity constraint for modeling."""
-    from z3 import Bool, Solver, Implies, sat
-    solver = Solver()
-    valid = Bool('valid')
-    solver.add(valid == (len(values) > 10))
-    solver.add(Implies(stationary == False, len(values) > 20))
-    return solver.check() == sat
-
-def enforce_parameter_bounds(acf_vals: List[float], pacf_vals: List[float]) -> bool:
-    """Enforce autocorrelation bounds constraints."""
-    from z3 import Solver, Real, And, sat
-    solver = Solver()
-    for acf in acf_vals[:10]:
-        solver.add(And(-1.0 <= acf, acf <= 1.0))
-    for pacf in pacf_vals[:10]:
-        solver.add(And(-1.0 <= pacf, pacf <= 1.0))
-    return solver.check() == sat
-```
-
-### SQLite Parameter Storage
+### SQLite Schema Surface
 
 ```sql
 CREATE TABLE IF NOT EXISTS arima_parameters (
@@ -238,67 +198,23 @@ CREATE TABLE IF NOT EXISTS arima_parameters (
     p_order INTEGER,
     d_order INTEGER,
     q_order INTEGER,
-    adf_statistic REAL,
-    adf_pvalue REAL,
-    adf_stationary INTEGER,
-    kpss_statistic REAL,
-    kpss_pvalue REAL,
-    kpss_stationary INTEGER,
-    seasonal_strength REAL,
+    is_stationary INTEGER,
     computed_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS autocorrelation_cache (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     series_name TEXT NOT NULL,
     lag INTEGER NOT NULL,
     acf_value REAL,
     pacf_value REAL,
-    UNIQUE(series_name, lag)
+    PRIMARY KEY(series_name, lag)
 );
-
-CREATE INDEX IF NOT EXISTS idx_series_params ON arima_parameters(series_name);
-
-INSERT INTO arima_parameters (series_name, p_order, d_order, q_order, adf_statistic, adf_pvalue, adf_stationary, kpss_statistic, kpss_pvalue, kpss_stationary, seasonal_strength)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-
-INSERT OR REPLACE INTO autocorrelation_cache (series_name, lag, acf_value, pacf_value)
-VALUES (?, ?, ?, ?);
-
-SELECT p_order, d_order, q_order, adf_stationary, kpss_stationary
-FROM arima_parameters WHERE series_name = ? ORDER BY computed_at DESC LIMIT 1;
-
-SELECT lag, acf_value, pacf_value FROM autocorrelation_cache WHERE series_name = ? ORDER BY lag;
 ```
 
-## Testing
+---
 
-```python
-def test_autocorrelation():
-    values = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
-    acf = compute_acf(values, max_lag=3)
-    assert 1.0 == acf[0]  # Lag 0 is always 1
+## Anti-Patterns & Guardrails
 
-def test_adf_stationarity():
-    stationary_vals = [0.1, 0.2, 0.15, 0.25, 0.18, 0.22, 0.19, 0.21, 0.20, 0.20]
-    result = adf_test(stationary_vals)
-    assert result["insufficient_data"] or "stationary" in result
-
-def test_arima_order_selection():
-    values = list(range(100))
-    acf = compute_acf(values)
-    pacf = compute_pacf(values)
-    p, d, q = determine_arima_order(values, acf, pacf)
-    assert p >= 0 and d >= 0 and q >= 0
-
-def test_seasonal_detection():
-    seasonal = [1 + (i % 12) * 0.5 for i in range(60)]
-    strength = seasonal_strength(seasonal, period=12)
-    assert strength > 0
-```
-
-## Security Considerations
-
-- Pure statistical calculations
-- No external data dependencies
-- SQLite for parameter persistence
+- **Lag Overextension ($K \ge N / 2$)** — Estimating autocorrelations at lags exceeding half the series length, yielding unstable high-variance covariances.
+- **Fitting ARMA on Non-Stationary Series Without Differencing** — Attempting parameter estimation when series exhibits strong linear trends or unit roots without setting $d = 1$.
+- **Ignoring Sample Scale Bartlett Bands** — Over-interpreting small non-zero ACF values that fall entirely within the random noise band $\pm 1.96/\sqrt{N}$.

@@ -1,248 +1,192 @@
 ---
 name: mann-whitney-u-test
 domain: STATISTICS
-version: "1.0.0"
-surfaces: [prolog, python]
-description: |
-  Mann-Whitney U test (Wilcoxon rank-sum) for comparing two independent
-  groups when parametric assumptions are violated. Prolog enforces
-  ordinal-or-above measurement level and independence of samples.
-  Python computes U statistic, z-approximation p-value, rank-biserial
-  correlation effect size, and confidence interval for the median difference.
-compatibility: PYTHON, PROLOG
-allowed-tools: |
-  - read
-  - write
-  - edit
-  - bash
-  - glob
-  - grep
-  - codebase_search
-  - task
-  - sequentialthinking_sequentialthinking
-  - webfetch
-  - websearch
-  - question
-  - suggest
+version: 1.0.0
+surfaces:
+  - prolog
+  - python
+description: Non-parametric two-sample hypothesis testing engine (Mann-Whitney U / Wilcoxon rank-sum test) for comparing two independent groups without assuming normality. Enforces measurement-level (ordinal/interval/ratio) and sample-size constraints in Prolog, and evaluates fractional tie-adjusted ranks, U1/U2 statistics, continuity-corrected normal z-approximations, and rank-biserial correlation effect sizes in Python. Use when comparing two independent groups under non-normal distributions or ordinal ranking scales.
+purpose: Execute Mann-Whitney U test with tie correction, continuity-adjusted z-approximation, and rank-biserial correlation effect size.
+dependencies:
+  - guardrails/validate_measurement_level
+  - inferential/evaluate_p_value
+tags:
+  - mann-whitney-u
+  - wilcoxon-rank-sum
+  - non-parametric
+  - rank-biserial-correlation
+  - ordinal-data
+  - two-sample-test
+inputs:
+  group1:
+    type: array
+    required: true
+    description: First independent sample vector (None and NaN values are cleaned).
+  group2:
+    type: array
+    required: true
+    description: Second independent sample vector (None and NaN values are cleaned).
+  alpha:
+    type: number
+    required: false
+    description: Significance threshold (default 0.05).
+outputs:
+  U_statistic:
+    type: number
+    description: Minimal test statistic $U = \min(U_1, U_2)$.
+  z_statistic:
+    type: number
+    description: Asymptotic normal z-statistic with continuity correction.
+  p_value:
+    type: number
+    description: Two-tailed significance p-value.
+  rank_biserial_r:
+    type: number
+    description: Rank-biserial correlation effect size $r = 1 - \frac{2U}{n_1 n_2} \in [-1, 1]$.
+  effect_label:
+    type: string
+    description: Qualitative effect label ('small', 'medium', 'large').
+  tie_correction:
+    type: number
+    description: Variance adjustment factor applied for tied observations.
 ---
 
-# Mann-Whitney U Test
+# Mann-Whitney U Test Engine
 
-## Purpose
-Non-parametric alternative to the independent samples t-test. Tests whether values in one group tend to be larger than values in the other without assuming normality.
+`mann-whitney-u-test` (Wilcoxon rank-sum test) evaluates stochastic dominance between two independent sample groups without assuming normality. It enforces **ordinal-or-above measurement gates in Prolog** and computes fractional ranks, tie corrections, and **rank-biserial correlation** in **Python**:
 
-Hypotheses:
-- H₀: The two distributions are equal (no stochastic ordering)
-- H₁: One distribution is stochastically greater
+$$U_1 = R_1 - \frac{n_1(n_1 + 1)}{2}, \quad U_2 = n_1 n_2 - U_1, \quad U = \min(U_1, U_2)$$
 
-Returns U statistic, z-approximation p-value, and rank-biserial correlation r.
+$$r = 1 - \frac{2U}{n_1 n_2}, \quad z = \frac{U - \frac{n_1 n_2}{2} + 0.5}{\sqrt{\frac{n_1 n_2}{12}\left(N + 1 - \sum \frac{t_i^3 - t_i}{N(N-1)}\right)}}$$
 
-## Description
-Hybrid skill:
-- **Prolog layer** — Guards: measurement level must be ordinal/interval/ratio; groups must be independent; each group ≥ 5. Routes to exact distribution for n₁+n₂ ≤ 25 or normal approximation.
-- **Python layer** — Computes ranks with tie correction, U₁ and U₂, z-score with continuity correction, two-tailed p-value, and effect size r = 1 - 2U/(n₁n₂).
+See [CARD.md](CARD.md) for the skill summary card, quick-reference tables, and completion criteria checklist.
 
-## Prolog Surface (prelude.pl)
+---
 
-```prolog
-:- module(mann_whitney, [
-    mw_guard/3,
-    route_method/3,
-    effect_label/2
-]).
+## The 5-Stage Mann-Whitney Progression
 
-% ============================================================
-% 1. Design guards
-% ============================================================
-mw_guard(Level, N1, N2) :-
-    member(Level, [ordinal, interval, ratio]),
-    N1 >= 3,
-    N2 >= 3.
-
-% ============================================================
-% 2. Route: exact table vs. normal approximation
-% ============================================================
-route_method(N1, N2, exact)        :- N1+N2 =< 25.
-route_method(N1, N2, normal_approx):- N1+N2  > 25.
-
-% ============================================================
-% 3. Effect size classification (Cohen 1992)
-%    r = |rank_biserial_correlation|
-% ============================================================
-effect_label(R, small)  :- R < 0.3.
-effect_label(R, medium) :- R >= 0.3, R < 0.5.
-effect_label(R, large)  :- R >= 0.5.
+```
+[1. Vector Sanitization & Sample Audit] → [2. Combined Ranking & Tie Adjustment] → [3. Visual Brief] → [4. Checkpoint] → [5. U-Stat, Z-Score & Effect Size Emit]
 ```
 
-## Python Surface (executor.py)
+### Stage 1: Vector Sanitization & Sample Size Audit
+1. Ingest `group1` and `group2` vectors and drop invalid/NaN entries.
+2. Assert that $n_1 \ge 3$ and $n_2 \ge 3$.
+
+> **Completion criterion**: Clean independent sample vectors verified ($n_1, n_2 \ge 3$).
+
+---
+
+### Stage 2: Combined Ranking & Tie Adjustment
+1. Concatenate $g_1$ and $g_2$ into combined vector $\mathbf{v}$ ($N = n_1 + n_2$).
+2. Assign fractional average ranks for tied values.
+3. Compute tie variance correction term: $T = \sum (t_i^3 - t_i) / (N(N - 1))$.
+
+> **Completion criterion**: Tie-adjusted rank sums $R_1$ and $R_2$ computed.
+
+---
+
+### Stage 3: The Visual Brief
+For non-parametric group comparisons, generate an interactive brief:
+- **Location**: Write to `%TEMP%\mann-whitney-brief-<timestamp>.html` (Windows) or `/tmp/mann-whitney-brief-<timestamp>.html` (Unix).
+- **Styling**: Dark theme (`#0d1117`) using Tailwind CSS and Mermaid.js via CDN.
+- **Topology**: Render jittered rank strip-plots, cumulative empirical CDF curves for both groups, and rank-biserial $r$ effect dial.
+
+> **Completion criterion**: Visual brief generated with active clickable path returned to caller.
+
+---
+
+### Stage 4: Mandatory Checkpoint
+Before computing asymptotic approximations:
+1. Verify whether $N = n_1 + n_2 \le 25$.
+2. For small samples ($N \le 25$), flag recommendation for exact permutation distribution where available.
+
+> **Completion criterion**: Sample size regime confirmed for asymptotic vs. exact calculation.
+
+---
+
+### Stage 5: U-Statistic, P-Value & Rank-Biserial Emission
+1. Calculate $U_1, U_2$, and $U = \min(U_1, U_2)$.
+2. Calculate continuity-corrected $z$-statistic and two-tailed $p$-value.
+3. Evaluate rank-biserial correlation $r = 1 - 2U / (n_1 n_2)$ and qualitative magnitude.
+4. Emit complete `MannWhitneyResult` record.
+
+> **Completion criterion**: Complete result record emitted with test statistics and effect size.
+
+---
+
+## Surface References
+
+### Python Calculation Surface
 
 ```python
-"""
-mann-whitney-u-test
-===================
-Mann-Whitney U / Wilcoxon rank-sum test for two independent samples.
-Pure stdlib math — no numpy/scipy.
-
-Effect size: rank-biserial correlation r = 1 - 2*U / (n1*n2)
-where U is the smaller U statistic.
-"""
-
-from __future__ import annotations
-
 import math
-from dataclasses import dataclass
-from typing import List, Union
-
-
-@dataclass(frozen=True)
-class MannWhitneyResult:
-    n1: int
-    n2: int
-    U1: float
-    U2: float
-    U_min: float
-    z_statistic: float
-    p_value: float
-    rank_biserial_r: float
-    effect_label: str
-    tie_correction: float   # correction factor applied to variance
-
-    def to_dict(self) -> dict:
-        return {
-            "n1": self.n1, "n2": self.n2,
-            "U1": self.U1, "U2": self.U2,
-            "U_min": self.U_min,
-            "z_statistic": self.z_statistic,
-            "p_value": self.p_value,
-            "rank_biserial_r": self.rank_biserial_r,
-            "effect_label": self.effect_label,
-        }
-
+from typing import List, Dict, Any
 
 def _clean(xs): return [float(v) for v in xs if v is not None and not math.isnan(float(v))]
 
-
-def _norm_cdf(x: float) -> float:
-    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
-
-
-def _rank_with_ties(values: List[float]) -> List[float]:
-    """Assign fractional ranks with tie-averaging."""
-    indexed = sorted(enumerate(values), key=lambda x: x[1])
-    ranks = [0.0] * len(values)
-    i = 0
-    while i < len(indexed):
-        j = i
-        while j < len(indexed) - 1 and indexed[j+1][1] == indexed[j][1]:
-            j += 1
-        avg_rank = (i + j) / 2.0 + 1.0
-        for k in range(i, j+1):
-            ranks[indexed[k][0]] = avg_rank
-        i = j + 1
-    return ranks
-
-
-def _tie_groups(values: List[float]) -> List[int]:
-    """Return sizes of tied groups."""
-    counts: dict = {}
-    for v in values:
-        counts[v] = counts.get(v, 0) + 1
-    return [c for c in counts.values() if c > 1]
-
-
-def run_mann_whitney_u(
-    group1: List[Union[float, int, None]],
-    group2: List[Union[float, int, None]],
-    alpha: float = 0.05,
-) -> MannWhitneyResult:
-    """Run Mann-Whitney U test.
-
-    Parameters
-    ----------
-    group1, group2:
-        Two independent sample vectors. None/NaN dropped.
-    alpha:
-        Significance level.
-    """
+def run_mann_whitney_u(group1: List[float], group2: List[float], alpha: float = 0.05) -> Dict[str, Any]:
     g1, g2 = _clean(group1), _clean(group2)
     n1, n2 = len(g1), len(g2)
     if n1 < 3 or n2 < 3:
-        raise ValueError("mann_whitney: each group needs >= 3 observations")
-
+        raise ValueError("insufficient_sample: Each group requires N >= 3.")
+        
     combined = g1 + g2
     N = n1 + n2
-    ranks = _rank_with_ties(combined)
+    
+    # Fractional ranking
+    indexed = sorted(enumerate(combined), key=lambda x: x[1])
+    ranks = [0.0] * N
+    i = 0
+    while i < N:
+        j = i
+        while j < N - 1 and indexed[j+1][1] == indexed[j][1]:
+            j += 1
+        avg_rank = (i + j) / 2.0 + 1.0
+        for k in range(i, j + 1):
+            ranks[indexed[k][0]] = avg_rank
+        i = j + 1
+        
     R1 = sum(ranks[:n1])
-    # U statistics
-    U1 = R1 - n1*(n1+1)/2
-    U2 = n1*n2 - U1
+    U1 = R1 - (n1 * (n1 + 1)) / 2.0
+    U2 = (n1 * n2) - U1
     U_min = min(U1, U2)
-
-    # Tie correction for variance
-    ties = _tie_groups(combined)
-    tie_corr = sum(t**3 - t for t in ties) / (N*(N-1)) if ties else 0.0
-
-    # Normal approximation (with continuity correction)
-    mu_U  = n1 * n2 / 2.0
-    var_U = n1 * n2 / 12.0 * (N + 1 - tie_corr)
-    z = (U_min - mu_U + 0.5) / math.sqrt(var_U)   # continuity correction
-    p = 2 * _norm_cdf(z)   # two-tailed
-
+    
+    # Ties correction
+    counts = {}
+    for v in combined: counts[v] = counts.get(v, 0) + 1
+    ties = [c for c in counts.values() if c > 1]
+    tie_corr = sum(t**3 - t for t in ties) / (N * (N - 1)) if ties else 0.0
+    
+    # Asymptotic Z with continuity correction
+    mu_u = (n1 * n2) / 2.0
+    var_u = (n1 * n2 / 12.0) * (N + 1 - tie_corr)
+    z = (U_min - mu_u + 0.5) / math.sqrt(var_u) if var_u > 0 else 0.0
+    
+    # Two-tailed p-value
+    p_val = 2.0 * 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
+    p_val = min(1.0, max(0.0, p_val))
+    
     # Effect size
-    r = 1.0 - 2.0 * U_min / (n1 * n2)
-    abs_r = abs(r)
-    if abs_r < 0.3:   label = "small"
-    elif abs_r < 0.5: label = "medium"
-    else:             label = "large"
-
-    return MannWhitneyResult(
-        n1=n1, n2=n2, U1=U1, U2=U2, U_min=U_min,
-        z_statistic=z, p_value=min(1.0, max(0.0, p)),
-        rank_biserial_r=r, effect_label=label,
-        tie_correction=tie_corr,
-    )
+    r_biserial = 1.0 - (2.0 * U_min) / (n1 * n2)
+    abs_r = abs(r_biserial)
+    label = "small" if abs_r < 0.3 else ("medium" if abs_r < 0.5 else "large")
+    
+    return {
+        "n1": n1, "n2": n2,
+        "U1": round(U1, 4), "U2": round(U2, 4), "U_statistic": round(U_min, 4),
+        "z_statistic": round(z, 6),
+        "p_value": round(p_val, 6),
+        "rank_biserial_r": round(r_biserial, 4),
+        "effect_label": label,
+        "tie_correction": round(tie_corr, 6)
+    }
 ```
 
-## Inputs
+---
 
-| name | type | description |
-|---|---|---|
-| group1 | list[float\|int\|None] | First independent sample (n ≥ 3) |
-| group2 | list[float\|int\|None] | Second independent sample (n ≥ 3) |
-| alpha | float | Significance level (default 0.05) |
+## Anti-Patterns & Guardrails
 
-## Outputs
-
-| name | type | description |
-|---|---|---|
-| U1, U2 | float | Mann-Whitney U statistics for each group |
-| U_min | float | Smaller U (used for significance) |
-| z_statistic | float | Normal approximation z-score |
-| p_value | float | Two-tailed p-value |
-| rank_biserial_r | float | Effect size r = 1 - 2U/(n₁n₂) |
-| effect_label | str | 'small', 'medium', or 'large' |
-| tie_correction | float | Variance correction factor for ties |
-
-## State Updates
-```
-state_add_observation("inferential/mann_whitney_p", result.p_value)
-state_add_observation("inferential/mann_whitney_r", result.rank_biserial_r)
-state_add_observation("inferential/mann_whitney_effect", result.effect_label)
-```
-
-## Error Handling
-| Error | Condition | Behavior |
-|---|---|---|
-| insufficient_sample | n < 3 in either group | Raise ValueError |
-
-## Example Usage
-```python
-control   = [12, 15, 14, 10, 13, 16]
-treatment = [20, 22, 18, 25, 21, 24]
-r = run_mann_whitney_u(control, treatment)
-# r.p_value      < 0.05 (significant difference)
-# r.effect_label => 'large'
-```
-
-## Security Considerations
-- Pure in-memory computation. No I/O or network.
+- **Paired Sample Misuse** — Running Mann-Whitney on paired pre/post measurements rather than the Wilcoxon Signed-Rank test.
+- **Ignoring Extreme Ties** — Computing variance without tie correction factors when a high proportion of sample values are identical.
+- **Micro-Sample Distortion** — Running Mann-Whitney on groups with $N < 3$, where the minimum possible p-value cannot reach significance.

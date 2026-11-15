@@ -69,3 +69,18 @@ class TestHybridCoprocessor:
 
         assert isinstance(coprocessor, HybridCoprocessor)
         assert coprocessor.timeout == 15.0
+        assert coprocessor.plugin_manager is pm
+
+    @pytest.mark.asyncio
+    async def test_hybrid_coprocessor_with_injected_plugin_manager(self):
+        pm = PluginManager()
+        coprocessor = HybridCoprocessor(timeout=20.0, plugin_manager=pm)
+
+        res = await coprocessor.execute_hybrid_pipeline(
+            logic_rules="parent(a, b).",
+            logic_surface_type="prolog",
+            python_code="result = {'len': len(str(symbolic_facts))}",
+        )
+        assert res["success"] is True
+        assert res["python_result"]["status"] == "ok"
+
