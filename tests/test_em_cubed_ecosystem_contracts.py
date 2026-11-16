@@ -65,7 +65,12 @@ def test_registry_json_matches_skills_directory() -> None:
     assert isinstance(entries, list)
 
     reg_ids = [item["skill_id"] for item in entries]
-    reg_paths = {(REPO_ROOT / item["path"]).resolve() if not Path(item["path"]).is_absolute() else Path(item["path"]).resolve() for item in entries}
+    for item in entries:
+        raw_path = item["path"]
+        assert "\\" not in raw_path and not Path(raw_path).is_absolute(), (
+            f"Non-portable path in registry.json: {raw_path}"
+        )
+    reg_paths = {(REPO_ROOT / item["path"]).resolve() for item in entries}
     disk_files = sorted((REPO_ROOT / "skills").rglob("SKILL.md"))
     disk_paths = {p.resolve() for p in disk_files}
 

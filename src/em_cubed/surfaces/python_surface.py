@@ -33,6 +33,8 @@ import asyncio
 import logging
 import multiprocessing
 import os
+import threading
+import time
 from typing import Any
 
 import structlog
@@ -80,22 +82,34 @@ def _missing_builtin_func(name: str) -> Any:
     return _blocked
 
 
-def _build_restricted_interpreter(context: dict[str, Any] | None = None) -> Any:
-    """Create an asteval Interpreter with dangerous symbols removed.
-
-    Strategy (validated against asteval 1.0.9 with ``multiprocessing.spawn``):
-      1. Create a standard ``Interpreter()`` with max_loop_iterations limit.
-      2. Pop every blocked symbol from the symtable.
-      3. Set ``__builtins__`` to an empty dict so internal ``name in __builtins__``
-         checks in asteval remain safe (a function value would cause TypeError).
-      4. Install RuntimeError-raising wrappers for callable blocked symbols.
-      5. Inject caller-supplied context variables.
-    """
+def _build_restricted_interpreter(
+    context: dict[str, Any] | None = None,
+    deadline: float | None = None,
+    cancel_event: threading.Event | None = None,
+) -> Any:
+    """Create an asteval Interpreter with dangerous symbols removed and cooperative timeout checks."""
     from asteval import Interpreter
 
-    # Set max_loop_iterations so infinite loops break with MaxLoopError
-    # instead of spinning daemon thread workers indefinitely.
-    aeval = Interpreter(max_loop_iterations=10000)
+    class _BoundedInterpreter(Interpreter):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            super().__init__(*args, **kwargs)
+            self._op_counter = 0
+            self._deadline = deadline
+            self._cancel_event = cancel_event
+
+        def _check_abort(self) -> None:
+            self._op_counter += 1
+            if (self._op_counter & 63) == 0:
+                if self._cancel_event is not None and self._cancel_event.is_set():
+                    raise TimeoutError("Execution timed out")
+                if self._deadline is not None and time.monotonic() >= self._deadline:
+                    raise TimeoutError("Execution timed out")
+
+        def run(self, node: Any, expr: Any = None, lineno: Any = None, with_raise: bool = True) -> Any:
+            self._check_abort()
+            return super().run(node, expr=expr, lineno=lineno, with_raise=with_raise)
+
+    aeval = _BoundedInterpreter()
 
     # Step 1: remove all dangerous symbols.
     for bad in _BLOCKED_SYMBOLS:
@@ -118,14 +132,19 @@ def _build_restricted_interpreter(context: dict[str, Any] | None = None) -> Any:
     return aeval
 
 
-def _run_asteval_in_thread(code: str, context: dict[str, Any] | None) -> dict[str, Any]:
+def _run_asteval_in_thread(
+    code: str,
+    context: dict[str, Any] | None,
+    deadline: float | None = None,
+    cancel_event: threading.Event | None = None,
+) -> dict[str, Any]:
     """Run restricted asteval evaluation in the current thread.
 
     Used by ``_execute_impl`` (async path with ThreadPoolExecutor).
     This is safe because the sandbox blocks all dangerous builtins.
     """
     try:
-        aeval = _build_restricted_interpreter(context)
+        aeval = _build_restricted_interpreter(context, deadline=deadline, cancel_event=cancel_event)
         result = aeval(code)
 
         if result is None and "result" in aeval.symtable and aeval.symtable["result"] is not None:
@@ -151,10 +170,17 @@ def _run_asteval_in_thread(code: str, context: dict[str, Any] | None) -> dict[st
 # a worker thread via run_in_executor causes [WinError 6] handle errors.
 # ---------------------------------------------------------------------------
 
+def _send_child_payload(out_channel: Any, payload: dict[str, Any]) -> None:
+    if hasattr(out_channel, "put"):
+        out_channel.put(payload)
+    else:
+        out_channel.send(payload)
+
+
 def _child_eval_runner(
     code: str,
     context: dict[str, Any] | None,
-    out_q: "multiprocessing.Queue[dict[str, Any]]",
+    out_q: Any,
 ) -> None:
     """Entry point for the isolated child process.
 
@@ -191,13 +217,13 @@ def _child_eval_runner(
                 if hasattr(aeval.error[0], "msg")
                 else str(aeval.error[0])
             )
-            out_q.put({"status": "error", "message": error_msg})
+            _send_child_payload(out_q, {"status": "error", "message": error_msg})
             return
 
-        out_q.put({"status": "ok", "value": result})
+        _send_child_payload(out_q, {"status": "ok", "value": result})
 
     except Exception as exc:
-        out_q.put({"status": "error", "message": str(exc)})
+        _send_child_payload(out_q, {"status": "error", "message": str(exc)})
 
 
 def run_isolated_eval(
@@ -217,27 +243,30 @@ def run_isolated_eval(
         ``[WinError 6] The handle is invalid`` errors during handle inheritance.
     """
     ctx = multiprocessing.get_context("spawn")
-    q: multiprocessing.Queue[dict[str, Any]] = ctx.Queue()
-    p = ctx.Process(target=_child_eval_runner, args=(code, context, q))
+    parent_conn, child_conn = ctx.Pipe(duplex=False)
+    p = ctx.Process(target=_child_eval_runner, args=(code, context, child_conn))
     p.start()
-    p.join(timeout)
-
-    if p.is_alive():
-        p.terminate()
-        p.join(2)  # give OS up to 2 s to reap the process
-        if p.is_alive():
-            p.kill()
-            p.join(1)
-        return {"status": "error", "message": f"Execution timed out after {timeout}s"}
-
+    child_conn.close()
     try:
-        return q.get_nowait()
-    except Exception:
+        p.join(timeout)
+
+        if p.is_alive():
+            p.terminate()
+            p.join(2)  # give OS up to 2 s to reap the process
+            if p.is_alive():
+                p.kill()
+                p.join(1)
+            return {"status": "error", "message": f"Execution timed out after {timeout}s"}
+
+        if parent_conn.poll(0.1):
+            return parent_conn.recv()
         exit_code = p.exitcode
         return {
             "status": "error",
             "message": f"No result from child process (exit code: {exit_code})",
         }
+    finally:
+        parent_conn.close()
 
 
 try:
@@ -313,13 +342,20 @@ class PythonSurface(SurfaceBase):
         """
         if not self.available:
             return {"status": "error", "message": f"{self.name} surface not available"}
+        cancel_event = threading.Event()
+        deadline = time.monotonic() + self.timeout if self.timeout is not None else None
         loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(
-            self._executor,
-            _run_asteval_in_thread,
-            code,
-            context,
-        )
+        try:
+            return await loop.run_in_executor(
+                self._executor,
+                _run_asteval_in_thread,
+                code,
+                context,
+                deadline,
+                cancel_event,
+            )
+        finally:
+            cancel_event.set()
 
     def _run_code(self, code: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Run restricted evaluation synchronously (for non-async callers)."""

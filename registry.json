@@ -50,19 +50,19 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "join_depth",
+      "block",
       "cost_weight",
-      "architectural_component",
-      "db_table",
-      "evaluate_architectural_impact",
       "requires_service",
       "rules",
-      "classify_cost",
-      "calculate_cost",
+      "evaluate_architectural_impact",
+      "architectural_component",
       "facts",
-      "block",
-      "join_depth"
+      "db_table",
+      "calculate_cost",
+      "classify_cost"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\debt-predictor\\SKILL.md",
+    "path": "skills/WORLD_MODELS/debt-predictor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -134,7 +134,7 @@
     "tags": [
       "verify_accessibility"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\invariant-gate\\SKILL.md",
+    "path": "skills/WORLD_MODELS/invariant-gate/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -204,7 +204,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\looped-state-compressor\\SKILL.md",
+    "path": "skills/WORLD_MODELS/looped-state-compressor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -276,16 +276,16 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "solve_ill_posed",
       "light",
-      "coherent",
       "source",
       "problem",
-      "object",
       "axioms",
-      "observation"
+      "observation",
+      "object",
+      "solve_ill_posed",
+      "coherent"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\skill-constraint-resolver\\SKILL.md",
+    "path": "skills/WORLD_MODELS/skill-constraint-resolver/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -356,20 +356,20 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "findall",
-      "noise_within_threshold",
       "extract_connectivity",
-      "topological_invariant",
-      "extract_dependencies",
-      "max_list",
       "equivalent",
-      "connectivity",
-      "noise",
+      "noise_within_threshold",
       "feature_diff",
+      "masking",
       "observation",
-      "masking"
+      "connectivity",
+      "extract_dependencies",
+      "noise",
+      "topological_invariant",
+      "max_list",
+      "findall"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\skill-invariant-filter\\SKILL.md",
+    "path": "skills/WORLD_MODELS/skill-invariant-filter/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -441,14 +441,14 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "step",
-      "action",
-      "skill_loaded",
       "verify_budgets",
-      "invariant",
-      "conflict"
+      "action",
+      "step",
+      "skill_loaded",
+      "conflict",
+      "invariant"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\skill-world-designer\\SKILL.md",
+    "path": "skills/WORLD_MODELS/skill-world-designer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -520,7 +520,7 @@
     "tags": [
       "verify_harness_topology"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\smt-harness-optimizer\\SKILL.md",
+    "path": "skills/WORLD_MODELS/smt-harness-optimizer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -597,7 +597,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\WORLD_MODELS\\world-simulator\\SKILL.md",
+    "path": "skills/WORLD_MODELS/world-simulator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -664,7 +664,7 @@
       "to_dict",
       "arima_forecast"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\TIME_SERIES\\arima-forecaster\\SKILL.md",
+    "path": "skills/TIME_SERIES/arima-forecaster/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -728,24 +728,24 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "holds_at",
-      "cross_validate",
-      "fit",
-      "initially",
-      "no_negative_values",
-      "happens",
-      "forecast_anomaly",
-      "abs",
-      "consistent_trend",
-      "forecast",
-      "exponential_smoothing",
-      "autocorrelation",
-      "initiates",
       "seasonal_decompose",
       "seasonal_pattern",
-      "valid_forecast"
+      "cross_validate",
+      "autocorrelation",
+      "no_negative_values",
+      "exponential_smoothing",
+      "forecast",
+      "abs",
+      "forecast_anomaly",
+      "initiates",
+      "initially",
+      "consistent_trend",
+      "valid_forecast",
+      "happens",
+      "holds_at",
+      "fit"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\TIME_SERIES\\time-series-forecaster\\SKILL.md",
+    "path": "skills/TIME_SERIES/time-series-forecaster/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -810,7 +810,7 @@
     "tags": [
       "define_constraints"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\Testing\\z3-test-skill\\SKILL.md",
+    "path": "skills/Testing/z3-test-skill/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -875,7 +875,7 @@
     "tags": [
       "calculate_gph"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\TECHNICAL_ANALYSIS\\arfima-gph-estimator\\SKILL.md",
+    "path": "skills/TECHNICAL_ANALYSIS/arfima-gph-estimator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -939,16 +939,16 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "encode_candle",
-      "valid_pattern_sequence",
-      "match_candlestick_signal",
+      "length",
       "pattern_permutation",
+      "encode_candle",
       "bullish_pattern",
-      "encode_sequence",
+      "match_candlestick_signal",
       "bearish_pattern",
-      "length"
+      "valid_pattern_sequence",
+      "encode_sequence"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\TECHNICAL_ANALYSIS\\candlestick-pattern-analyzer\\SKILL.md",
+    "path": "skills/TECHNICAL_ANALYSIS/candlestick-pattern-analyzer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1013,7 +1013,7 @@
     "tags": [
       "compute_pyramid"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\TECHNICAL_ANALYSIS\\falling-risk-pyramid\\SKILL.md",
+    "path": "skills/TECHNICAL_ANALYSIS/falling-risk-pyramid/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1078,7 +1078,7 @@
     "tags": [
       "verify_pyramid_risk_bounds"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\TECHNICAL_ANALYSIS\\pyramid-risk-verifier\\SKILL.md",
+    "path": "skills/TECHNICAL_ANALYSIS/pyramid-risk-verifier/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1148,23 +1148,23 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "assert_valid_transition",
+      "dead_end",
+      "blocked",
+      "transition_cost",
+      "resource_context",
+      "safe_target",
+      "module",
       "transition",
+      "resource_sufficient",
       "recent_transition",
+      "evaluate_context_gate",
       "recently_visited",
       "member",
-      "dead_end",
-      "transition_cost",
-      "safe_target",
-      "assert_valid_transition",
-      "blocked",
-      "resource_context",
       "capability_permits",
-      "module",
-      "findall",
-      "evaluate_context_gate",
-      "resource_sufficient"
+      "findall"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STOCHASTIC_PROCESSES\\assert_context_gate\\SKILL.md",
+    "path": "skills/STOCHASTIC_PROCESSES/assert_context_gate/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1242,7 +1242,7 @@
     "tags": [
       "calculate_pagerank_vector"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STOCHASTIC_PROCESSES\\calculate_pagerank_vector\\SKILL.md",
+    "path": "skills/STOCHASTIC_PROCESSES/calculate_pagerank_vector/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1318,14 +1318,14 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "histogram_valid",
-      "member",
-      "compile_simulation_histogram",
       "forall",
       "same_length",
-      "integer"
+      "integer",
+      "member",
+      "compile_simulation_histogram",
+      "histogram_valid"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STOCHASTIC_PROCESSES\\compile_simulation_histogram\\SKILL.md",
+    "path": "skills/STOCHASTIC_PROCESSES/compile_simulation_histogram/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1395,15 +1395,15 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "is_aperiodic",
-      "is_reducible",
-      "is_ergodic",
-      "has_absorbing_state",
+      "nth0",
       "module",
+      "is_reducible",
       "evaluate_stationarity",
-      "nth0"
+      "is_aperiodic",
+      "has_absorbing_state",
+      "is_ergodic"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STOCHASTIC_PROCESSES\\evaluate_stationarity\\SKILL.md",
+    "path": "skills/STOCHASTIC_PROCESSES/evaluate_stationarity/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1480,7 +1480,7 @@
     "tags": [
       "execute_monte_carlo_walk"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STOCHASTIC_PROCESSES\\execute_monte_carlo_walk\\SKILL.md",
+    "path": "skills/STOCHASTIC_PROCESSES/execute_monte_carlo_walk/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1550,18 +1550,18 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "generate_transition_matrix",
       "absorbing_state",
-      "member",
-      "forall",
-      "row_stochastic",
-      "sum_list",
-      "abs",
-      "module",
       "valid_matrix",
-      "nth0"
+      "nth0",
+      "forall",
+      "module",
+      "abs",
+      "row_stochastic",
+      "member",
+      "sum_list",
+      "generate_transition_matrix"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STOCHASTIC_PROCESSES\\generate_transition_matrix\\SKILL.md",
+    "path": "skills/STOCHASTIC_PROCESSES/generate_transition_matrix/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1631,13 +1631,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "min_frequency_met",
       "build_ngram_model",
-      "valid_n",
       "module",
+      "min_frequency_met",
+      "valid_n",
       "predict_next_token"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STOCHASTIC_PROCESSES\\n_gram_token_predictor\\SKILL.md",
+    "path": "skills/STOCHASTIC_PROCESSES/n_gram_token_predictor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1715,11 +1715,11 @@
     },
     "tags": [
       "compute_autocorrelation",
-      "compute_acf",
+      "compute_pacf",
       "run_autoregressive_estimator",
-      "compute_pacf"
+      "compute_acf"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\autoregressive-parameter-estimator\\SKILL.md",
+    "path": "skills/STATISTICS/autoregressive-parameter-estimator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1797,7 +1797,7 @@
     "tags": [
       "verify_occam_axioms"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\builtin-occams-razor-evaluator\\SKILL.md",
+    "path": "skills/STATISTICS/builtin-occams-razor-evaluator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1883,7 +1883,7 @@
       "run_naive_bayes_classifier",
       "naive_bayes_train"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\naive-bayes-classifier\\SKILL.md",
+    "path": "skills/STATISTICS/naive-bayes-classifier/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -1961,7 +1961,7 @@
     "tags": [
       "verify_probability_conservation"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\nuisance-parameter-integrator\\SKILL.md",
+    "path": "skills/STATISTICS/nuisance-parameter-integrator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2039,7 +2039,7 @@
     "tags": [
       "run_unconscious_inference"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\skill-unconscious-inference\\SKILL.md",
+    "path": "skills/STATISTICS/skill-unconscious-inference/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2119,7 +2119,7 @@
       "valid_bootstrap",
       "run_statistical_bootstrap"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\statistical-bootstrap-analyzer\\SKILL.md",
+    "path": "skills/STATISTICS/statistical-bootstrap-analyzer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2198,7 +2198,7 @@
     "tags": [
       "run_uncertainty_analysis"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\uncertainty-quantifier\\SKILL.md",
+    "path": "skills/STATISTICS/uncertainty-quantifier/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2276,7 +2276,7 @@
     "tags": [
       "run_bootstrap"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\resampling\\bootstrap-resampling\\SKILL.md",
+    "path": "skills/STATISTICS/resampling/bootstrap-resampling/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2353,10 +2353,10 @@
     },
     "tags": [
       "method_allowed",
-      "dominates",
-      "calculate_correlation_profile"
+      "calculate_correlation_profile",
+      "dominates"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\relational\\calculate_correlation_profile\\SKILL.md",
+    "path": "skills/STATISTICS/relational/calculate_correlation_profile/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2432,13 +2432,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "ols_min_samples",
-      "same_length",
-      "fit_linear_regression",
       "independent_groups",
-      "ols_preconditions"
+      "same_length",
+      "ols_preconditions",
+      "fit_linear_regression",
+      "ols_min_samples"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\relational\\fit_linear_regression\\SKILL.md",
+    "path": "skills/STATISTICS/relational/fit_linear_regression/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2516,7 +2516,7 @@
     "tags": [
       "run_multiple_regression"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\relational\\multiple-regression-analyzer\\SKILL.md",
+    "path": "skills/STATISTICS/relational/multiple-regression-analyzer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2592,10 +2592,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "calculate_mean_confidence_interval",
-      "ci_z"
+      "ci_z",
+      "calculate_mean_confidence_interval"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\calculate_mean_confidence_interval\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/calculate_mean_confidence_interval/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2658,10 +2658,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "hypothesis_state",
-      "evaluate_p_value"
+      "evaluate_p_value",
+      "hypothesis_state"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\evaluate_p_value\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/evaluate_p_value/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2739,7 +2739,7 @@
     "tags": [
       "execute_chi_square_independence"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\execute_chi_square_independence\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/execute_chi_square_independence/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2817,7 +2817,7 @@
     "tags": [
       "run_friedman_test"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\friedman-test\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/friedman-test/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2895,7 +2895,7 @@
     "tags": [
       "verify_kw_design"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\kruskal-wallis-test\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/kruskal-wallis-test/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -2973,7 +2973,7 @@
     "tags": [
       "run_mann_whitney_u"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\mann-whitney-u-test\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/mann-whitney-u-test/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3049,10 +3049,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "make_effect",
-      "run_mixed_anova"
+      "run_mixed_anova",
+      "make_effect"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\mixed-model-anova\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/mixed-model-anova/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3131,7 +3131,7 @@
       "route_primary_test",
       "test_normality"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\normality-tester\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/normality-tester/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3209,7 +3209,7 @@
     "tags": [
       "verify_anova_design"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\one-way-anova\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/one-way-anova/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3287,7 +3287,7 @@
     "tags": [
       "run_repeated_measures_anova"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\repeated-measures-anova\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/repeated-measures-anova/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3363,10 +3363,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "select_t_test",
-      "run_t_test"
+      "run_t_test",
+      "select_t_test"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\t-test-selector\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/t-test-selector/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3442,11 +3442,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "anova2_guard",
       "run_two_way_anova",
-      "make_effect"
+      "make_effect",
+      "anova2_guard"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\two-way-anova\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/two-way-anova/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3522,10 +3522,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "route_variance_test",
-      "test_variance_equality"
+      "test_variance_equality",
+      "route_variance_test"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\variance-equality-tester\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/variance-equality-tester/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3603,7 +3603,7 @@
     "tags": [
       "run_wilcoxon_signed_rank"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\inferential\\wilcoxon-signed-rank-test\\SKILL.md",
+    "path": "skills/STATISTICS/inferential/wilcoxon-signed-rank-test/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3673,15 +3673,15 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "check_normality_shapiro",
-      "min_n",
       "blocked",
       "permitted_test",
+      "check_normality_shapiro",
       "assert_test_constraints",
-      "requires_homoscedasticity",
-      "requires_normality"
+      "min_n",
+      "requires_normality",
+      "requires_homoscedasticity"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\guardrails\\assert_test_constraints\\SKILL.md",
+    "path": "skills/STATISTICS/guardrails/assert_test_constraints/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3744,10 +3744,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "dominates",
-      "validate_measurement_level"
+      "validate_measurement_level",
+      "dominates"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\guardrails\\validate_measurement_level\\SKILL.md",
+    "path": "skills/STATISTICS/guardrails/validate_measurement_level/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3811,7 +3811,7 @@
     "tags": [
       "calculate_central_tendency"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\descriptive\\calculate_central_tendency\\SKILL.md",
+    "path": "skills/STATISTICS/descriptive/calculate_central_tendency/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3875,7 +3875,7 @@
     "tags": [
       "calculate_dispersion"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\STATISTICS\\descriptive\\calculate_dispersion\\SKILL.md",
+    "path": "skills/STATISTICS/descriptive/calculate_dispersion/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -3939,37 +3939,37 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "path",
-      "add_link",
-      "forall",
+      "length",
       "causal_link",
-      "link",
-      "equilibrium_reached",
       "compute_influence",
-      "simulate",
-      "lotka_volterra_predator",
-      "findall",
-      "member",
-      "valid_stock_flow",
-      "unstable_system",
-      "add_stock",
-      "cause",
-      "find_feedback_loops",
-      "stable_system",
+      "forall",
+      "add_link",
+      "abs",
       "find_equilibrium",
+      "path",
+      "set_variable",
+      "member",
       "sum_list",
+      "find_feedback_loops",
+      "loop_polarity",
+      "influences",
+      "equilibrium_equations",
+      "lotka_volterra_predator",
+      "simulate",
+      "valid_stock_flow",
+      "cause",
+      "equilibrium_reached",
+      "unstable_system",
+      "delayed_effect",
+      "findall",
+      "stable_system",
+      "lotka_volterra_prey",
+      "add_stock",
       "add_flow",
       "feedback_loop",
-      "equilibrium_equations",
-      "loop_polarity",
-      "lotka_volterra_prey",
-      "abs",
-      "influences",
-      "delayed_effect",
-      "set_variable",
-      "length"
+      "link"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\SIMULATION\\system-dynamics-modeler\\SKILL.md",
+    "path": "skills/SIMULATION/system-dynamics-modeler/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4033,16 +4033,16 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "under_provisioned",
-      "resource_constraint",
-      "capacity-utilization-score",
-      "generate-future-scenarios",
-      "calculate_required_capacity",
       "detect_bottleneck",
       "over_provisioned",
-      "forecast_demand"
+      "capacity-utilization-score",
+      "resource_constraint",
+      "calculate_required_capacity",
+      "under_provisioned",
+      "forecast_demand",
+      "generate-future-scenarios"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\RESOURCE_MANAGEMENT\\predictive-capacity-planner\\SKILL.md",
+    "path": "skills/RESOURCE_MANAGEMENT/predictive-capacity-planner/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4106,33 +4106,33 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "allocation_conflict",
-      "fitness",
-      "valid_resource_type",
-      "allocate_by_priority",
-      "crossover",
       "forall",
-      "sum_allocation",
-      "genetic_algorithm",
-      "lookup_dict",
-      "min_priority",
-      "member",
-      "vailable",
-      "max_priority",
-      "allocation_satisfies_demand",
       "efficiency-score",
-      "calculate_fair_share",
-      "exponential-weighting",
-      "valid_allocation",
-      "mutate",
-      "get_allocation",
-      "penalty-score",
       "fairness-index",
+      "genetic_algorithm",
+      "allocation_conflict",
+      "lookup_dict",
+      "fitness",
       "adaptive-rebalance",
+      "allocation_satisfies_demand",
+      "vailable",
+      "member",
+      "calculate_fair_share",
+      "valid_allocation",
+      "penalty-score",
+      "crossover",
+      "max_priority",
+      "min_priority",
+      "exponential-weighting",
       "create_random_individual",
-      "number"
+      "mutate",
+      "allocate_by_priority",
+      "sum_allocation",
+      "get_allocation",
+      "number",
+      "valid_resource_type"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\RESOURCE_MANAGEMENT\\resource-allocation-planner\\SKILL.md",
+    "path": "skills/RESOURCE_MANAGEMENT/resource-allocation-planner/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4196,11 +4196,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "fit_linear_regression",
       "to_dict",
-      "fit_logistic_regression"
+      "fit_logistic_regression",
+      "fit_linear_regression"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\REGRESSION\\regression-toolkit\\SKILL.md",
+    "path": "skills/REGRESSION/regression-toolkit/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4264,29 +4264,29 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "fit",
-      "findall",
-      "item_similarity",
-      "novelty-score",
-      "pref",
       "contradictory_preferences",
-      "recommendations_diverse",
-      "member",
+      "preference-weighting",
+      "pref",
       "serendipity-measure",
+      "no_conflict_with_preferences",
+      "recommend",
+      "valid_recommendation",
+      "average",
+      "member",
+      "hybrid_scoring",
+      "item_similarity",
+      "fit",
+      "content_based_similarity",
       "similar_items",
       "different_sentiments",
-      "average",
-      "recommend",
-      "no_conflict_with_preferences",
-      "valid_recommendation",
-      "preference-weighting",
+      "recommendations_diverse",
+      "consistent_preferences",
       "compatible_with_history",
+      "findall",
       "meets_constraints",
-      "content_based_similarity",
-      "hybrid_scoring",
-      "consistent_preferences"
+      "novelty-score"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\RECOMMENDER_SYSTEMS\\recommendation-engine\\SKILL.md",
+    "path": "skills/RECOMMENDER_SYSTEMS/recommendation-engine/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4351,25 +4351,25 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "compute-indices",
-      "max_list",
-      "converged_aso",
-      "atoms",
-      "select_policy",
-      "min_list",
-      "calculate-fi",
-      "optimize",
-      "abs",
-      "safe-div",
-      "calculate-ei",
-      "valid_aso_params",
-      "calculate-ii",
-      "adapt-parameters",
       "length",
+      "calculate-ei",
+      "converged_aso",
+      "calculate-ii",
       "append",
-      "check"
+      "min_list",
+      "abs",
+      "calculate-fi",
+      "check",
+      "compute-indices",
+      "valid_aso_params",
+      "select_policy",
+      "optimize",
+      "adapt-parameters",
+      "max_list",
+      "safe-div",
+      "atoms"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\anarchic-society-optimization\\SKILL.md",
+    "path": "skills/OPTIMIZATION/anarchic-society-optimization/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4433,14 +4433,14 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "better_solution",
-      "optimize",
-      "valid_cfo_params",
       "update-position",
       "calculate-distance-squared",
-      "gravitational-force"
+      "gravitational-force",
+      "better_solution",
+      "optimize",
+      "valid_cfo_params"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\central-force-optimization\\SKILL.md",
+    "path": "skills/OPTIMIZATION/central-force-optimization/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4504,20 +4504,20 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "max_list",
+      "length",
+      "sinusoidal-map",
+      "compute-power-distribution",
       "select-map",
       "min_list",
-      "optimize",
-      "sinusoidal-map",
+      "converged",
       "abs",
-      "logistic-map",
+      "optimize",
       "tent-map",
       "valid_coa_params",
-      "converged",
-      "compute-power-distribution",
-      "length"
+      "logistic-map",
+      "max_list"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\chaos-optimization\\SKILL.md",
+    "path": "skills/OPTIMIZATION/chaos-optimization/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4583,22 +4583,22 @@
     },
     "tags": [
       "hsig?",
+      "length",
       "valid_cmaes_params",
-      "max_list",
-      "min_list",
       "compute-damps",
-      "optimize",
-      "abs",
-      "adaptive-sigma",
-      "compute-chi-n",
-      "compute-cs",
-      "converged",
-      "sigma_too_small",
       "append",
+      "min_list",
+      "compute-cs",
+      "sigma_too_small",
+      "converged",
+      "abs",
+      "compute-chi-n",
+      "adaptive-sigma",
+      "optimize",
       "compute-cc",
-      "length"
+      "max_list"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\cma-es-optimizer\\SKILL.md",
+    "path": "skills/OPTIMIZATION/cma-es-optimizer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4662,31 +4662,31 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "all_distinct",
-      "nqueens",
-      "adjacent",
-      "blocks",
       "sudoku",
-      "forward_check",
-      "count-constraints",
-      "member",
-      "least-constraining-value",
-      "coloring_constraint",
+      "length",
       "is_consistent",
-      "transpose",
-      "map_color",
-      "all_different",
-      "memberchk",
-      "solve_sudoku",
-      "ac-3-enforce",
-      "most-constrained-variable",
-      "dif",
       "same_length",
+      "nqueens",
+      "memberchk",
+      "dif",
+      "forward_check",
       "backtrack_search",
+      "map_color",
+      "solve_sudoku",
+      "member",
+      "coloring_constraint",
+      "count-constraints",
+      "transpose",
+      "least-constraining-value",
+      "all_different",
       "maplist",
-      "length"
+      "most-constrained-variable",
+      "ac-3-enforce",
+      "all_distinct",
+      "adjacent",
+      "blocks"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\constraint-satisfaction-solver\\SKILL.md",
+    "path": "skills/OPTIMIZATION/constraint-satisfaction-solver/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4750,23 +4750,23 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "max_list",
-      "min_list",
-      "clip-value",
-      "apply-synthesis",
-      "optimize",
+      "length",
       "adapt-alpha",
-      "select_practical_antithesis",
-      "thinkers",
-      "abs",
+      "append",
+      "min_list",
       "generate-mu",
       "converged",
-      "valid_da_params",
-      "append",
+      "abs",
+      "apply-synthesis",
+      "select_practical_antithesis",
+      "max_list",
+      "clip-value",
+      "optimize",
+      "thinkers",
       "select_speculative_antithesis",
-      "length"
+      "valid_da_params"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\dialectic-search\\SKILL.md",
+    "path": "skills/OPTIMIZATION/dialectic-search/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4831,22 +4831,22 @@
     },
     "tags": [
       "converged_best",
-      "score",
-      "de_adaptive",
-      "max_list",
-      "member",
-      "adaptive-f",
-      "min_list",
       "valid_mutation",
       "forall",
-      "optimize",
+      "min_list",
       "valid_parameters",
       "abs",
       "between",
+      "de_adaptive",
       "jade-strategy",
+      "member",
+      "score",
+      "adaptive-f",
+      "optimize",
+      "max_list",
       "findall"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\differential-evolution-solver\\SKILL.md",
+    "path": "skills/OPTIMIZATION/differential-evolution-solver/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4910,19 +4910,19 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "valid_fba_params",
-      "create-subspace",
-      "point-in-subspace",
-      "max_list",
-      "min_list",
-      "optimize",
-      "abs",
-      "power-distribution",
       "fractal-rank",
+      "length",
+      "power-distribution",
+      "min_list",
+      "create-subspace",
       "converged",
-      "length"
+      "abs",
+      "point-in-subspace",
+      "optimize",
+      "max_list",
+      "valid_fba_params"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\fractal-based-algorithm\\SKILL.md",
+    "path": "skills/OPTIMIZATION/fractal-based-algorithm/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -4985,11 +4985,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "run_monte_carlo",
       "merge_monte_carlo_results",
-      "run_monte_carlo_batched"
+      "run_monte_carlo_batched",
+      "run_monte_carlo"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\monte-carlo-simulator\\SKILL.md",
+    "path": "skills/OPTIMIZATION/monte-carlo-simulator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5052,35 +5052,35 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "optimality_certified",
-      "second_order_condition",
-      "group_nearby_optima",
-      "intersection",
-      "findall",
-      "sample_landscape",
-      "local_optimum",
       "boundary_equation",
-      "nearby_points_satisfy",
-      "build_surrogate",
-      "feature_importance",
-      "constraint",
-      "compute_neutrality",
-      "satisfies_constraints",
-      "shared_variables",
       "constraint_boundary",
-      "hessian_positive_definite",
-      "critical_region",
+      "length",
+      "group_nearby_optima",
+      "optimality_certified",
+      "build_surrogate",
+      "shared_variables",
       "constraint_interaction",
-      "gradient_zero",
-      "first_order_condition",
-      "multimodal_landscape",
-      "find_local_optima",
-      "compute_ruggedness",
-      "compute_modality",
+      "sample_landscape",
+      "second_order_condition",
       "multi_objective_landscape",
-      "length"
+      "compute_modality",
+      "feature_importance",
+      "compute_ruggedness",
+      "first_order_condition",
+      "find_local_optima",
+      "local_optimum",
+      "critical_region",
+      "satisfies_constraints",
+      "multimodal_landscape",
+      "findall",
+      "nearby_points_satisfy",
+      "constraint",
+      "intersection",
+      "compute_neutrality",
+      "hessian_positive_definite",
+      "gradient_zero"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\optimization-landscape-analyzer\\SKILL.md",
+    "path": "skills/OPTIMIZATION/optimization-landscape-analyzer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5144,36 +5144,36 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "pareto-front",
       "edge_time_constraint",
-      "fuzzy-time-estimate",
-      "vehicle_allowed",
       "forall",
-      "astar",
-      "findall",
-      "detect_negative_cycles",
-      "multi-objective-normalize",
-      "member",
-      "avoid_highways",
-      "multi_objective_search",
       "current_hour",
-      "dynamic-weight-adjustment",
       "vehicle_compatible",
+      "valid_path",
+      "vehicle_type",
+      "fuzzy-time-estimate",
       "avoid_tolls",
+      "path-score",
+      "vehicle_allowed",
+      "member",
+      "multi-objective-normalize",
+      "multi_objective_search",
       "dijkstra",
-      "traffic_rule_violation",
+      "astar",
       "edge_type",
+      "detect_negative_cycles",
+      "time_allowed",
+      "avoid_highways",
       "dominates",
       "satisfies_constraints",
-      "vehicle_type",
-      "pareto-front",
+      "findall",
+      "dynamic-weight-adjustment",
       "valid_edge",
-      "valid_path",
-      "edge_constraint",
-      "path-score",
-      "time_allowed",
-      "edge"
+      "traffic_rule_violation",
+      "edge",
+      "edge_constraint"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\pathfinding-with-constraints\\SKILL.md",
+    "path": "skills/OPTIMIZATION/pathfinding-with-constraints/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5238,13 +5238,13 @@
     },
     "tags": [
       "damped-oscillation",
-      "update-amplitude",
+      "is_better",
       "spiral-update",
-      "optimize",
       "valid_sdo_params",
-      "is_better"
+      "update-amplitude",
+      "optimize"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\spiral-dynamics-optimization\\SKILL.md",
+    "path": "skills/OPTIMIZATION/spiral-dynamics-optimization/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5308,17 +5308,17 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "max_list",
+      "length",
+      "append",
       "min_list",
       "valid_sds_params",
-      "optimize",
+      "converged",
       "abs",
       "check",
-      "converged",
-      "append",
-      "length"
+      "optimize",
+      "max_list"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\stochastic-diffusion-search\\SKILL.md",
+    "path": "skills/OPTIMIZATION/stochastic-diffusion-search/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5383,7 +5383,7 @@
     "tags": [
       "main"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\OPTIMIZATION\\z3-schedule-solver\\SKILL.md",
+    "path": "skills/OPTIMIZATION/z3-schedule-solver/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5450,7 +5450,7 @@
     "tags": [
       "execute_dual_engine_swarm"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\autonomous-dual-engine-swarm\\SKILL.md",
+    "path": "skills/ONTOLOGY/autonomous-dual-engine-swarm/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5515,7 +5515,7 @@
     "tags": [
       "run_ontology_benchmark"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\dual-engine-benchmark-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/dual-engine-benchmark-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5580,11 +5580,11 @@
     },
     "tags": [
       "process_ontology_stream",
-      "alert",
       "restricted_zone",
+      "alert",
       "entered_zone"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\event-driven-ontology-stream\\SKILL.md",
+    "path": "skills/ONTOLOGY/event-driven-ontology-stream/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5651,7 +5651,7 @@
     "tags": [
       "compute_federated_consensus"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\federated-topos-consensus-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/federated-topos-consensus-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5717,7 +5717,7 @@
     "tags": [
       "verify_financial_payout"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\high-stakes-financial-auditor\\SKILL.md",
+    "path": "skills/ONTOLOGY/high-stakes-financial-auditor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5783,7 +5783,7 @@
     "tags": [
       "run_elicitation_pipeline"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\knowledge-elicitation-framework\\SKILL.md",
+    "path": "skills/ONTOLOGY/knowledge-elicitation-framework/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5846,11 +5846,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "valid_signature",
       "run_loopy_refactor",
+      "valid_signature",
       "declared_interface"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\loopy-refactor-linter\\SKILL.md",
+    "path": "skills/ONTOLOGY/loopy-refactor-linter/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5914,7 +5914,7 @@
     "tags": [
       "dispatch_mcp_tool"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\mcp-interagent-gateway\\SKILL.md",
+    "path": "skills/ONTOLOGY/mcp-interagent-gateway/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -5983,7 +5983,7 @@
       "bind",
       "functor_python_to_prolog"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\monadic-surface-functor\\SKILL.md",
+    "path": "skills/ONTOLOGY/monadic-surface-functor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6048,7 +6048,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\ontological-os-cli-suite\\SKILL.md",
+    "path": "skills/ONTOLOGY/ontological-os-cli-suite/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6114,7 +6114,7 @@
     "tags": [
       "render_tui_dashboard"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\ontological-os-tui-dashboard\\SKILL.md",
+    "path": "skills/ONTOLOGY/ontological-os-tui-dashboard/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6181,7 +6181,7 @@
     "tags": [
       "materialize_palantir_object"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\palantir-advanced-ontology-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/palantir-advanced-ontology-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6248,7 +6248,7 @@
     "tags": [
       "handle_governance_request"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\production-rest-governance-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/production-rest-governance-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6315,7 +6315,7 @@
     "tags": [
       "migrate_ontology_schema"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\schema-evolution-migrator\\SKILL.md",
+    "path": "skills/ONTOLOGY/schema-evolution-migrator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6381,7 +6381,7 @@
     "tags": [
       "evolve_compliance_skill"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\self-evolving-compliance-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/self-evolving-compliance-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6448,7 +6448,7 @@
     "tags": [
       "audit_and_heal_ontology"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\self-healing-ontological-monitor\\SKILL.md",
+    "path": "skills/ONTOLOGY/self-healing-ontological-monitor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6515,7 +6515,7 @@
     "tags": [
       "query_temporal_spatial"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\temporal-spatial-timeline-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/temporal-spatial-timeline-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6579,13 +6579,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "accessible",
-      "holds",
-      "evaluate_topos_omega",
       "necessary",
-      "ox"
+      "evaluate_topos_omega",
+      "ox",
+      "accessible",
+      "holds"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\topos-modal-verifier\\SKILL.md",
+    "path": "skills/ONTOLOGY/topos-modal-verifier/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6651,7 +6651,7 @@
     "tags": [
       "map_and_transfer"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\tri-engine-cross-domain-transfer\\SKILL.md",
+    "path": "skills/ONTOLOGY/tri-engine-cross-domain-transfer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6717,7 +6717,7 @@
     "tags": [
       "compile_directive"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\tri-engine-policy-steering\\SKILL.md",
+    "path": "skills/ONTOLOGY/tri-engine-policy-steering/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6780,11 +6780,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "verify_integrity",
       "replay_step",
-      "record_frame",
-      "verify_integrity"
+      "record_frame"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\tri-engine-replay-engine\\SKILL.md",
+    "path": "skills/ONTOLOGY/tri-engine-replay-engine/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6851,7 +6851,7 @@
     "tags": [
       "run_tri_engine_simulation"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\tri-engine-sim-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/tri-engine-sim-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6916,7 +6916,7 @@
     "tags": [
       "calculate_swarm_allocation"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\tri-engine-swarm-scaler\\SKILL.md",
+    "path": "skills/ONTOLOGY/tri-engine-swarm-scaler/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -6981,13 +6981,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "triple",
-      "truthmaker",
       "extract_exact_truthmaker",
+      "truthmaker",
+      "relevant_triple",
       "query_term",
-      "relevant_triple"
+      "triple"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\truthmaker-hyperintensional-verifier\\SKILL.md",
+    "path": "skills/ONTOLOGY/truthmaker-hyperintensional-verifier/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7053,7 +7053,7 @@
     "tags": [
       "serialize_to_turtle"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\w3c-rdf-shacl-interoperability-agent\\SKILL.md",
+    "path": "skills/ONTOLOGY/w3c-rdf-shacl-interoperability-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7119,7 +7119,7 @@
     "tags": [
       "generate_zkp_attestation"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ONTOLOGY\\zk-ontological-attestation\\SKILL.md",
+    "path": "skills/ONTOLOGY/zk-ontological-attestation/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7182,10 +7182,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "main",
-      "get_js_for_transform"
+      "get_js_for_transform",
+      "main"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\NLP\\js-text-transformer\\SKILL.md",
+    "path": "skills/NLP/js-text-transformer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7249,19 +7249,19 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "contains_casual_words",
-      "template_fill",
-      "constrained_generate",
       "valid_sentence_structure",
-      "apply-style",
-      "contains_no_contractions",
+      "length",
+      "constrained_generate",
       "matches_style",
-      "style-features",
+      "template_fill",
+      "contains_no_contractions",
+      "contains_casual_words",
+      "apply-style",
       "sub_string",
-      "generate_multiple_variants",
-      "length"
+      "style-features",
+      "generate_multiple_variants"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\NLP\\natural-language-generator\\SKILL.md",
+    "path": "skills/NLP/natural-language-generator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7325,42 +7325,42 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "length",
+      "confidence-interval",
+      "sentiment_in_context",
       "aspect_target",
-      "sentiment-trend",
-      "emotional-variance",
-      "temporal_aggregation",
+      "abs",
+      "comparative_sentiment",
       "intensifier",
       "domain_sentiment_adjusted",
-      "next_token",
-      "precedes",
-      "sentiment_words",
-      "domain_modifier",
-      "negated_sentiment",
       "aspect_sentiment",
-      "extract_opinion",
+      "fuzzy-sentiment-composition",
+      "preprocess_text",
       "member",
-      "sentiment_intensity",
+      "aspect-sentiment-fusion",
+      "batch_analyze",
       "lexicon_score",
-      "extract_comparison",
+      "sentiment-trend",
+      "domain_modifier",
       "contradictory_sentiments",
+      "sentiment_word",
+      "extract_aspect",
+      "extract_opinion",
+      "negated_sentiment",
+      "temporal_aggregation",
       "get_embeddings",
       "similar_context",
-      "sentiment_in_context",
-      "fuzzy-sentiment-composition",
-      "sentiment-forecast",
-      "aspect-sentiment-fusion",
-      "extract_aspect",
-      "batch_analyze",
-      "sentiment_word",
-      "confidence-interval",
-      "comparative_sentiment",
-      "preprocess_text",
+      "sentiment_intensity",
+      "precedes",
+      "next_token",
       "sentiment",
-      "abs",
-      "analyze",
-      "length"
+      "extract_comparison",
+      "emotional-variance",
+      "sentiment-forecast",
+      "sentiment_words",
+      "analyze"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\NLP\\sentiment-intelligence-engine\\SKILL.md",
+    "path": "skills/NLP/sentiment-intelligence-engine/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7424,7 +7424,7 @@
     "tags": [
       "main"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\NLP\\simple-text-generator\\SKILL.md",
+    "path": "skills/NLP/simple-text-generator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7489,7 +7489,7 @@
       "retrieve_context",
       "generate_response"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\NLP\\test-rag-pipeline\\SKILL.md",
+    "path": "skills/NLP/test-rag-pipeline/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7554,7 +7554,7 @@
     "tags": [
       "run_cross_validation"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MODEL_VALIDATION\\cross-validation\\SKILL.md",
+    "path": "skills/MODEL_VALIDATION/cross-validation/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7619,7 +7619,7 @@
     "tags": [
       "verify_limit_boundary"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MODEL_VALIDATION\\finite-limit-sequence-boundary\\SKILL.md",
+    "path": "skills/MODEL_VALIDATION/finite-limit-sequence-boundary/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7683,16 +7683,16 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "std_dev",
-      "overfitting_check",
-      "sum_list",
       "validation-confidence",
       "validate_model_performance",
+      "length",
       "module",
+      "overfitting_check",
       "consistent_cv_scores",
-      "length"
+      "sum_list",
+      "std_dev"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MODEL_VALIDATION\\model-validation-suite\\SKILL.md",
+    "path": "skills/MODEL_VALIDATION/model-validation-suite/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7757,7 +7757,7 @@
     "tags": [
       "diagnose_constraint_anomalies"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MODEL_VALIDATION\\skill-anomaly-diagnostic\\SKILL.md",
+    "path": "skills/MODEL_VALIDATION/skill-anomaly-diagnostic/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7835,7 +7835,7 @@
     "tags": [
       "log_elimination_event"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MODEL_VALIDATION\\skill-elimination-trace-logger\\SKILL.md",
+    "path": "skills/MODEL_VALIDATION/skill-elimination-trace-logger/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7899,36 +7899,36 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "correlated_anomalies",
-      "transaction",
-      "fit",
-      "violates_rule",
-      "business_anomaly",
-      "feature_correlation",
-      "statistical_zscore",
       "temporal-anomaly-confidence",
-      "severity-composition",
-      "classify_anomaly",
-      "anomaly-clustering",
-      "expected_pattern",
       "anomaly",
-      "outside_normal_range",
+      "abs",
       "batch_statistics",
-      "fuzzy-anomaly-score",
-      "pattern_anomaly",
-      "contextual_anomaly",
-      "temporal_anomaly_detection",
       "aggregation_anomaly",
+      "violates_rule",
+      "pattern_anomaly",
       "normal_for_context",
+      "deviation_from_expected",
+      "fit",
+      "statistical_iqr",
+      "feature_correlation",
+      "anomaly-clustering",
+      "classify_anomaly",
+      "business_anomaly",
+      "transaction",
+      "correlated_anomalies",
       "reconstruction_error_anomaly",
       "deviation",
-      "abs",
-      "deviation_from_expected",
-      "adaptive-threshold",
+      "expected_pattern",
       "detect",
-      "statistical_iqr"
+      "contextual_anomaly",
+      "statistical_zscore",
+      "adaptive-threshold",
+      "temporal_anomaly_detection",
+      "severity-composition",
+      "fuzzy-anomaly-score",
+      "outside_normal_range"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ML_OPERATIONS\\anomaly-detection-system\\SKILL.md",
+    "path": "skills/ML_OPERATIONS/anomaly-detection-system/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -7991,7 +7991,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\META_SKILLS\\prompt-quality-evaluator\\SKILL.md",
+    "path": "skills/META_SKILLS/prompt-quality-evaluator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8061,10 +8061,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "infer_professions_from_keywords",
-      "evaluate_skill_proposal"
+      "evaluate_skill_proposal",
+      "infer_professions_from_keywords"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\META_ENGINEERING\\evaluate_skill_proposal\\SKILL.md",
+    "path": "skills/META_ENGINEERING/evaluate_skill_proposal/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8126,13 +8126,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "has_subskill",
       "profession_domain",
       "module",
-      "domain_reference",
-      "requires_meta_wrapper"
+      "requires_meta_wrapper",
+      "has_subskill",
+      "domain_reference"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\META_ENGINEERING\\skill-taxonomy\\SKILL.md",
+    "path": "skills/META_ENGINEERING/skill-taxonomy/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8197,7 +8197,7 @@
     "tags": [
       "log_telemetry_event"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\META_ENGINEERING\\skill-telemetry\\SKILL.md",
+    "path": "skills/META_ENGINEERING/skill-telemetry/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8260,40 +8260,40 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "classify_with_tree",
-      "valid_split",
-      "min_list",
-      "leaf_node",
+      "length",
       "classify_all",
-      "mixed_leaf",
-      "findall",
-      "internal_node",
-      "decision_tree_classifier",
-      "within_max_depth",
-      "compute_importances",
-      "feature_greater",
-      "member",
-      "compute_gain",
-      "nth0",
-      "decision_path",
+      "all_feature_importances",
       "max",
       "feature_importance",
-      "max_list",
-      "entropy_consistent",
       "my_log2",
-      "tree_route",
-      "build_tree",
+      "min_list",
+      "compute_importances",
+      "member",
+      "internal_node",
+      "valid_split",
       "feature_less_equal",
-      "tree_depth",
-      "find_best_split",
+      "within_max_depth",
+      "mixed_leaf",
+      "entropy_consistent",
+      "compute_gain",
+      "leaf_node",
       "predict_tree",
-      "compute_entropy",
-      "get_dict",
-      "all_feature_importances",
+      "findall",
+      "classify_with_tree",
+      "tree_route",
+      "nth0",
+      "tree_depth",
+      "decision_path",
+      "decision_tree_classifier",
       "pure_leaf",
-      "length"
+      "compute_entropy",
+      "build_tree",
+      "get_dict",
+      "find_best_split",
+      "feature_greater",
+      "max_list"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MACHINE_LEARNING\\decision-tree-splits\\SKILL.md",
+    "path": "skills/MACHINE_LEARNING/decision-tree-splits/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8355,11 +8355,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "my_exp",
       "logistic_regression",
-      "sigmoid",
-      "my_exp"
+      "sigmoid"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MACHINE_LEARNING\\logistic-regression-classifier\\SKILL.md",
+    "path": "skills/MACHINE_LEARNING/logistic-regression-classifier/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8423,16 +8423,16 @@
     },
     "tags": [
       "my_log2",
-      "find_best_split",
-      "predict_tree",
       "random_forest_classifier",
       "compute_entropy",
-      "compute_gain",
-      "build_tree",
       "forest_predict",
-      "bootstrap_sample"
+      "build_tree",
+      "bootstrap_sample",
+      "find_best_split",
+      "compute_gain",
+      "predict_tree"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MACHINE_LEARNING\\random-forest-ensemble\\SKILL.md",
+    "path": "skills/MACHINE_LEARNING/random-forest-ensemble/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8496,37 +8496,37 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "variance",
-      "agent_action",
-      "safety_constraint",
-      "gamma",
-      "findall",
-      "potential",
-      "policy",
-      "shaped_reward",
-      "member",
-      "valid_action",
-      "multi_agent_rl",
-      "converged",
-      "satisfies_conditions",
       "learn",
-      "adaptive-exploration",
+      "agent_action",
+      "valid_action",
       "coordinated_actions",
-      "visited",
-      "policy_rule",
-      "multi-armed-bandit",
-      "visit_count",
-      "learning-rate-schedule",
-      "exploration_allowed",
+      "safety_constraint",
       "safe_action",
-      "act",
-      "valid_joint_action",
-      "experience_replay",
+      "adaptive-exploration",
+      "shaped_reward",
+      "potential",
+      "exploration_allowed",
+      "variance",
       "check_constraints",
+      "member",
+      "multi-armed-bandit",
+      "multi_agent_rl",
+      "satisfies_conditions",
+      "act",
+      "visited",
+      "gamma",
+      "learning-rate-schedule",
+      "policy-entropy",
+      "findall",
       "curiosity-driven-action",
-      "policy-entropy"
+      "converged",
+      "policy_rule",
+      "valid_joint_action",
+      "policy",
+      "visit_count",
+      "experience_replay"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MACHINE_LEARNING\\reinforcement-learning-agent\\SKILL.md",
+    "path": "skills/MACHINE_LEARNING/reinforcement-learning-agent/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8589,17 +8589,17 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "compute_margin",
-      "rbf_kernel",
       "svm_classifier",
-      "gram_matrix",
-      "my_exp_approx",
-      "svm_predict",
+      "svm_transform",
       "svm_train_approx",
+      "my_exp_approx",
       "compute_dot",
-      "svm_transform"
+      "rbf_kernel",
+      "compute_margin",
+      "gram_matrix",
+      "svm_predict"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\MACHINE_LEARNING\\svm-classifier\\SKILL.md",
+    "path": "skills/MACHINE_LEARNING/svm-classifier/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8670,13 +8670,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "verify_lattice_distributivity",
       "meet",
       "implies_transitive",
       "bound",
-      "join",
-      "verify_lattice_distributivity"
+      "join"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\LOGIC\\distributive-lattice-validator\\SKILL.md",
+    "path": "skills/LOGIC/distributive-lattice-validator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8748,7 +8748,7 @@
     "tags": [
       "generalize_zeta"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\LOGIC\\inverse-zeta-generalizer\\SKILL.md",
+    "path": "skills/LOGIC/inverse-zeta-generalizer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8812,11 +8812,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "verify_poset_axioms",
       "implies_transitive",
-      "implies",
-      "verify_poset_axioms"
+      "implies"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\LOGIC\\poset-implication-builder\\SKILL.md",
+    "path": "skills/LOGIC/poset-implication-builder/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8878,10 +8878,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "process_with_features",
-      "get_tool_by_name"
+      "get_tool_by_name",
+      "process_with_features"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\LLM_PROCESSING\\advanced-llm-processor\\SKILL.md",
+    "path": "skills/LLM_PROCESSING/advanced-llm-processor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -8946,28 +8946,28 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "type_constraints",
-      "cluster_entities",
-      "subtype",
-      "type_hierarchy",
-      "extract_relationships",
-      "findall",
-      "compute_embeddings",
-      "graph_metrics",
-      "triple",
-      "member",
-      "common_neighbors",
       "extract_entities",
-      "contradiction_exists",
-      "valid_entity",
-      "satisfies_constraints",
-      "atomic_list_concat",
-      "conflicting_predicates",
-      "related",
+      "extract_relationships",
+      "triple",
+      "subtype",
       "transitive_relationship",
-      "inferred_triple"
+      "valid_entity",
+      "member",
+      "atomic_list_concat",
+      "common_neighbors",
+      "related",
+      "conflicting_predicates",
+      "cluster_entities",
+      "inferred_triple",
+      "type_constraints",
+      "compute_embeddings",
+      "satisfies_constraints",
+      "type_hierarchy",
+      "graph_metrics",
+      "findall",
+      "contradiction_exists"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\KNOWLEDGE_GRAPH\\knowledge-graph-builder\\SKILL.md",
+    "path": "skills/KNOWLEDGE_GRAPH/knowledge-graph-builder/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9037,7 +9037,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\Harness\\skill-harness-builder\\SKILL.md",
+    "path": "skills/Harness/skill-harness-builder/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9100,31 +9100,31 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "find_mapping",
-      "path",
-      "forall",
-      "node_label",
       "preserves_edges",
-      "update_rule",
-      "forward",
-      "member",
-      "connected_components",
-      "message_passing",
-      "aggregate_messages",
-      "consistent_update",
-      "connected",
-      "homogeneous_neighborhood",
-      "subgraph_isomorphic",
+      "forall",
       "reset_parameters",
+      "connected",
+      "path",
+      "neighbors",
+      "find_mapping",
+      "message_consistent",
+      "update_rule",
+      "subgraph_isomorphic",
+      "graph_attention",
+      "aggregate_messages",
+      "member",
+      "consistent_update",
+      "message_passing",
+      "connected_components",
+      "node_label",
       "symmetric_edges",
       "no_self_loops",
-      "valid_graph",
       "edge",
-      "message_consistent",
-      "neighbors",
-      "graph_attention"
+      "homogeneous_neighborhood",
+      "forward",
+      "valid_graph"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\GRAPH_ML\\graph-neural-network\\SKILL.md",
+    "path": "skills/GRAPH_ML/graph-neural-network/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9187,17 +9187,17 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "test_fuzzy_operations",
-      "hy_surface",
-      "fuzzy-cooling",
-      "test_fuzzy_membership",
-      "test_symbolic_computation",
-      "test_error_handling",
       "test_function_definitions",
       "fuzzy-temperature-controller",
-      "test_list_comprehensions"
+      "hy_surface",
+      "fuzzy-cooling",
+      "test_error_handling",
+      "test_list_comprehensions",
+      "test_fuzzy_operations",
+      "test_symbolic_computation",
+      "test_fuzzy_membership"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\hy-fuzzy-logic\\SKILL.md",
+    "path": "skills/General/hy-fuzzy-logic/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9262,7 +9262,7 @@
     "tags": [
       "process_family_data"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\integrated-logic-solver\\SKILL.md",
+    "path": "skills/General/integrated-logic-solver/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9326,26 +9326,26 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "developer",
       "findall",
+      "skill-match-score",
+      "forall",
       "meets_requirements",
-      "developer_capacity",
-      "composite-fitness",
-      "valid_assignment",
-      "workload-balance-score",
+      "fuzzy-membership",
+      "project",
+      "optimize-assignment",
+      "priority-satisfaction",
+      "has_skill",
       "member",
       "project_priority",
+      "composite-fitness",
+      "workload-balance-score",
       "select_optimal",
-      "forall",
-      "optimize-assignment",
-      "developer",
-      "has_skill",
       "optimal_allocation",
-      "priority-satisfaction",
-      "project",
-      "fuzzy-membership",
-      "skill-match-score"
+      "developer_capacity",
+      "valid_assignment"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\intelligent-task-planner\\SKILL.md",
+    "path": "skills/General/intelligent-task-planner/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9408,26 +9408,26 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "test_constraint_solving",
-      "female",
-      "male",
-      "sister",
-      "prolog_surface",
-      "parent",
-      "test_mathematical_functions",
-      "test_list_operations",
       "test_family_relationships",
       "test_error_handling",
-      "sibling",
-      "father",
-      "mother",
+      "sister",
       "grandfather",
+      "test_mathematical_functions",
+      "mother",
+      "ancestor",
+      "parent",
+      "male",
+      "female",
+      "sibling",
       "grandmother",
       "brother",
-      "grandparent",
-      "ancestor"
+      "prolog_surface",
+      "father",
+      "test_constraint_solving",
+      "test_list_operations",
+      "grandparent"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\prolog-logic-solver\\SKILL.md",
+    "path": "skills/General/prolog-logic-solver/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9489,7 +9489,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\General\\python-calculator\\SKILL.md",
+    "path": "skills/General/python-calculator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9555,7 +9555,7 @@
       "solve_linear_system",
       "linear_regression"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\FORENSIC_ECONOMICS\\linear-regression\\SKILL.md",
+    "path": "skills/FORENSIC_ECONOMICS/linear-regression/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9619,27 +9619,27 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "add_transformer",
-      "no_missing_values",
+      "datetime_features",
+      "missing_percentage",
       "unique_ratio",
+      "polynomial_features",
+      "data_quality",
+      "feature-pipeline-optimization",
       "feature_interaction",
+      "mutual_information",
+      "add_transformer",
       "fit_transform",
       "interaction_features",
-      "normalization-method",
       "correlated",
-      "valid_feature",
-      "missing_percentage",
-      "feature-pipeline-optimization",
-      "polynomial_features",
-      "datetime_features",
       "encode_categorical",
-      "data_quality",
-      "reasonable_range",
-      "feature-complexity",
+      "valid_feature",
+      "normalization-method",
       "informative_feature",
-      "mutual_information"
+      "no_missing_values",
+      "reasonable_range",
+      "feature-complexity"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\FEATURE_ENGINEERING\\feature-engineering-pipeline\\SKILL.md",
+    "path": "skills/FEATURE_ENGINEERING/feature-engineering-pipeline/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9703,11 +9703,11 @@
     },
     "tags": [
       "input",
-      "path",
       "edge",
-      "rolog"
+      "rolog",
+      "path"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\EXAMPLES\\python-prolog-pipeline\\SKILL.md",
+    "path": "skills/EXAMPLES/python-prolog-pipeline/SKILL.md",
     "schema_version": 1,
     "created_at": "2026-05-07T21:00:00+00:00",
     "updated_at": "2026-05-07T21:00:00+00:00",
@@ -9772,7 +9772,7 @@
     "tags": [
       "main"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\EXAMPLES\\sqlite-pipeline\\SKILL.md",
+    "path": "skills/EXAMPLES/sqlite-pipeline/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9835,7 +9835,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\EPIDEMIOLOGY\\gradient-descent-optimizer\\SKILL.md",
+    "path": "skills/EPIDEMIOLOGY/gradient-descent-optimizer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9899,16 +9899,16 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "compute_r0",
       "transmission_chain",
       "infected",
       "exposed",
       "contact",
-      "findall",
       "valid_quarantine",
-      "simulate_transmission"
+      "simulate_transmission",
+      "compute_r0",
+      "findall"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\EPIDEMIOLOGY\\stochastic-transmission-network\\SKILL.md",
+    "path": "skills/EPIDEMIOLOGY/stochastic-transmission-network/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -9972,24 +9972,24 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "optimize_weights",
-      "diversity-score",
-      "diverse_models",
-      "member",
-      "fit",
-      "voting_strategy",
-      "ensemble_compatible",
-      "add_model",
-      "model_type",
-      "compatible_models",
-      "no_circular_dependencies",
       "valid_ensemble",
-      "fuzzy-weight",
+      "diversity-score",
+      "voting_strategy",
+      "loss",
+      "fit",
       "stacking_predict",
+      "optimize_weights",
+      "model_type",
       "predict",
-      "loss"
+      "member",
+      "no_circular_dependencies",
+      "diverse_models",
+      "fuzzy-weight",
+      "compatible_models",
+      "ensemble_compatible",
+      "add_model"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ENSEMBLE\\ensemble-method-manager\\SKILL.md",
+    "path": "skills/ENSEMBLE/ensemble-method-manager/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10053,11 +10053,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "topological_sort",
       "critical_path",
-      "get_ready_tasks",
-      "topological_sort"
+      "get_ready_tasks"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\dag-task-scheduler\\SKILL.md",
+    "path": "skills/DISTRIBUTED_SYSTEMS/dag-task-scheduler/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10122,17 +10122,17 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "detect_byzantine",
-      "byzantine-score",
-      "byzantine_node",
-      "check_quorum",
+      "consensus-confidence",
+      "length",
       "valid_quorum",
+      "detect_byzantine",
       "raft_transition",
       "count_divergent",
-      "consensus-confidence",
-      "length"
+      "check_quorum",
+      "byzantine-score",
+      "byzantine_node"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\distributed-consensus-analyzer\\SKILL.md",
+    "path": "skills/DISTRIBUTED_SYSTEMS/distributed-consensus-analyzer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10196,13 +10196,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "create_checkpoint",
       "save_checkpoint",
       "serialize",
-      "create_checkpoint",
-      "load_checkpoint",
-      "recover_workflow"
+      "recover_workflow",
+      "load_checkpoint"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\durable-execution-engine\\SKILL.md",
+    "path": "skills/DISTRIBUTED_SYSTEMS/durable-execution-engine/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10266,17 +10266,17 @@
     },
     "tags": [
       "should_retrain",
-      "aggregate_forecast_performance",
-      "trigger_retraining",
-      "detect_concept_drift",
-      "model_version_check",
-      "compute_rmse",
-      "compute_mape",
-      "compute_forecast_accuracy",
       "compute_mae",
-      "rolling_accuracy_metrics"
+      "compute_forecast_accuracy",
+      "rolling_accuracy_metrics",
+      "compute_rmse",
+      "trigger_retraining",
+      "model_version_check",
+      "detect_concept_drift",
+      "compute_mape",
+      "aggregate_forecast_performance"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\forecasting-monitor\\SKILL.md",
+    "path": "skills/DISTRIBUTED_SYSTEMS/forecasting-monitor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10340,32 +10340,32 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "coordination-efficiency",
-      "select_top",
-      "register_agent",
-      "findall",
+      "length",
       "task_requirements",
-      "coordinate_agents",
-      "member",
+      "consensus_reached",
       "valid_receiver",
-      "emergence-metric",
-      "process_message",
-      "potential_deadlock",
-      "valid_sender",
-      "overlap",
       "format_message",
+      "coordinate_agents",
+      "process_message",
+      "member",
       "sum_list",
-      "adaptive-coordination",
-      "task_allocation",
       "flocking_behavior",
+      "adaptive-coordination",
+      "agent_capability",
+      "coordination-efficiency",
+      "emergence-metric",
       "message_exchange",
+      "findall",
+      "register_agent",
+      "valid_sender",
+      "select_top",
+      "overlap",
       "sort",
       "waiting_cycle",
-      "agent_capability",
-      "consensus_reached",
-      "length"
+      "task_allocation",
+      "potential_deadlock"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\multi-agent-coordinator\\SKILL.md",
+    "path": "skills/DISTRIBUTED_SYSTEMS/multi-agent-coordinator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10428,15 +10428,15 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "increment_counter",
-      "record_metric",
-      "get_metric",
       "calculate_average",
       "aggregate_metrics",
       "detect_anomaly",
-      "get_counter"
+      "get_metric",
+      "increment_counter",
+      "get_counter",
+      "record_metric"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\observability-dashboard\\SKILL.md",
+    "path": "skills/DISTRIBUTED_SYSTEMS/observability-dashboard/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10499,14 +10499,14 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "extract_params",
       "create_sandbox_config",
-      "parse_wat_module",
       "extract_results",
+      "extract_params",
       "extract_string_arg",
+      "parse_wat_module",
       "validate_module_bounds"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DISTRIBUTED_SYSTEMS\\wasm-execution-sandbox\\SKILL.md",
+    "path": "skills/DISTRIBUTED_SYSTEMS/wasm-execution-sandbox/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10577,18 +10577,18 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "quivalency",
-      "generic_forbidden",
-      "tier",
-      "code_component",
-      "tier_required_but_unmapped",
-      "name_alias",
-      "requires_approved_component",
       "must_use_component",
+      "generic_forbidden",
+      "guard",
       "design_component",
-      "guard"
+      "quivalency",
+      "tier",
+      "requires_approved_component",
+      "name_alias",
+      "code_component",
+      "tier_required_but_unmapped"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DESIGN_SYSTEMS\\design-sync\\SKILL.md",
+    "path": "skills/DESIGN_SYSTEMS/design-sync/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10664,11 +10664,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "implies",
       "chain_valid",
-      "chain_conditional_product"
+      "chain_conditional_product",
+      "implies"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\associative-chaining-product\\SKILL.md",
+    "path": "skills/DECISION_MAKING/associative-chaining-product/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10739,11 +10739,11 @@
     },
     "tags": [
       "epistemologically_independent",
+      "knowledge_constrains",
       "knowledge_covers",
-      "filter_epistemological_independence",
-      "knowledge_constrains"
+      "filter_epistemological_independence"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\epistemological-independence-filter\\SKILL.md",
+    "path": "skills/DECISION_MAKING/epistemological-independence-filter/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10822,7 +10822,7 @@
     "tags": [
       "check_strict_dominance_z3"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\iterated-dominance-solver\\SKILL.md",
+    "path": "skills/DECISION_MAKING/iterated-dominance-solver/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10895,7 +10895,7 @@
       "meet",
       "compute_lattice_sum"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\lattice-inclusion-exclusion-sum\\SKILL.md",
+    "path": "skills/DECISION_MAKING/lattice-inclusion-exclusion-sum/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -10966,13 +10966,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "calculate_mcda_weights",
-      "consistency_ratio",
+      "matrix_consistent",
       "module",
-      "random_index",
-      "matrix_consistent"
+      "consistency_ratio",
+      "calculate_mcda_weights",
+      "random_index"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\multi-criteria-weight-calculator\\SKILL.md",
+    "path": "skills/DECISION_MAKING/multi-criteria-weight-calculator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11047,7 +11047,7 @@
       "constraint_violation",
       "option_risk"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\multi-surface-decision-tree\\SKILL.md",
+    "path": "skills/DECISION_MAKING/multi-surface-decision-tree/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11126,7 +11126,7 @@
       "redistribute-mass",
       "update_belief_state"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\skill-belief-state-updater\\SKILL.md",
+    "path": "skills/DECISION_MAKING/skill-belief-state-updater/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11197,7 +11197,7 @@
     "tags": [
       "check_bounded_rationality"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\skill-bounded-rationality-constraint\\SKILL.md",
+    "path": "skills/DECISION_MAKING/skill-bounded-rationality-constraint/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11279,7 +11279,7 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\skill-expected-utility-maximizer\\SKILL.md",
+    "path": "skills/DECISION_MAKING/skill-expected-utility-maximizer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11351,7 +11351,7 @@
     "tags": [
       "verify_strategic_feasibility_z3"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\strategic-planner\\SKILL.md",
+    "path": "skills/DECISION_MAKING/strategic-planner/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11422,7 +11422,7 @@
     "tags": [
       "make_decision"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DECISION_MAKING\\test-decision-maker\\SKILL.md",
+    "path": "skills/DECISION_MAKING/test-decision-maker/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11486,17 +11486,17 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "stage_deps",
-      "stage_ready",
-      "ancestor_data",
       "topological_sort",
-      "visit",
+      "stage_ready",
+      "stage_deps",
       "module",
-      "execute_pipeline",
+      "ancestor_data",
+      "visit",
       "transformation",
+      "execute_pipeline",
       "subset"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DATA_PROCESSING\\data-pipeline-orchestrator\\SKILL.md",
+    "path": "skills/DATA_PROCESSING/data-pipeline-orchestrator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11561,7 +11561,7 @@
     "tags": [
       "transduce_sensor_stream"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DATA_PROCESSING\\skill-sensor-transducer\\SKILL.md",
+    "path": "skills/DATA_PROCESSING/skill-sensor-transducer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11626,7 +11626,7 @@
     "tags": [
       "aggregate_sql_data"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DATA_PROCESSING\\sql-aggregator\\SKILL.md",
+    "path": "skills/DATA_PROCESSING/sql-aggregator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11691,7 +11691,7 @@
     "tags": [
       "preprocess_time_series"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\DATA_PROCESSING\\time-series-preprocessor\\SKILL.md",
+    "path": "skills/DATA_PROCESSING/time-series-preprocessor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11754,22 +11754,22 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "contradictory",
-      "evaluate_ae",
-      "rule",
-      "member",
-      "evaluate_ae_tree",
-      "main",
-      "severity_grade",
-      "setof",
-      "grade_rule",
-      "findall",
-      "grade_ae_severity",
       "last",
+      "findall",
+      "evaluate_ae_tree",
+      "evaluate_ae",
+      "grade_ae_severity",
+      "rule",
       "ae_record",
-      "conflict"
+      "main",
+      "contradictory",
+      "member",
+      "severity_grade",
+      "conflict",
+      "grade_rule",
+      "setof"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\CLINICAL_TRIALS\\ae-severity-tree-evaluator\\SKILL.md",
+    "path": "skills/CLINICAL_TRIALS/ae-severity-tree-evaluator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11833,21 +11833,21 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "analyze_dmc",
       "stop_for_efficacy",
+      "continue_trial",
+      "arm",
+      "build_interim_facts",
+      "fact",
+      "futility_check",
       "continue_look",
       "continuity",
-      "build_interim_facts",
-      "p_value_check",
-      "main",
-      "stop_for_futility",
-      "continue_trial",
-      "futility_check",
-      "fact",
-      "arm",
       "ook",
-      "analyze_dmc"
+      "main",
+      "p_value_check",
+      "stop_for_futility"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\CLINICAL_TRIALS\\dmc-counting-rule-analyzer\\SKILL.md",
+    "path": "skills/CLINICAL_TRIALS/dmc-counting-rule-analyzer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11910,11 +11910,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "main",
+      "parse_icf_sections",
       "validate_icf_z3",
-      "parse_icf_sections"
+      "main"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\CLINICAL_TRIALS\\icf-clause-validator\\SKILL.md",
+    "path": "skills/CLINICAL_TRIALS/icf-clause-validator/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -11976,12 +11976,12 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "my_sqrt",
       "kmeans",
       "euclidean_distance",
-      "initialize_centroids"
+      "initialize_centroids",
+      "my_sqrt"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\CLINICAL_TRIALS\\k-means-clustering\\SKILL.md",
+    "path": "skills/CLINICAL_TRIALS/k-means-clustering/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12044,10 +12044,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "check_non_inferiority",
-      "main"
+      "main",
+      "check_non_inferiority"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\CLINICAL_TRIALS\\non-inferiority-margin-checker\\SKILL.md",
+    "path": "skills/CLINICAL_TRIALS/non-inferiority-margin-checker/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12110,10 +12110,10 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "main",
-      "compute_sae_reporting"
+      "compute_sae_reporting",
+      "main"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\CLINICAL_TRIALS\\sae-reporting-threshold-tester\\SKILL.md",
+    "path": "skills/CLINICAL_TRIALS/sae-reporting-threshold-tester/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12176,18 +12176,18 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "sap_endpoint",
+      "registry_endpoint",
+      "protocol_endpoint",
+      "endpoint",
       "main",
       "build_endpoint_maps",
-      "missing_from_registry",
-      "protocol_endpoint",
-      "check_endpoint_consistency",
-      "registry_endpoint",
-      "aligned_endpoint",
-      "endpoint",
       "missing_from_protocol",
-      "sap_endpoint"
+      "check_endpoint_consistency",
+      "missing_from_registry",
+      "aligned_endpoint"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\CLINICAL_TRIALS\\sap-endpoint-consistency-checker\\SKILL.md",
+    "path": "skills/CLINICAL_TRIALS/sap-endpoint-consistency-checker/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12251,20 +12251,20 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "get_pull_requests",
-      "repo_exists",
       "stubs",
-      "pr_ready",
-      "potential_conflict",
-      "create_pull_request",
-      "pr_exists",
       "branch_exists",
+      "potential_conflict",
       "overlapping_changes",
       "generate-pr-body",
+      "pr_ready",
       "score-pr-title",
-      "modified_in"
+      "create_pull_request",
+      "pr_exists",
+      "get_pull_requests",
+      "modified_in",
+      "repo_exists"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\AUTOMATION\\github-pr-manager\\SKILL.md",
+    "path": "skills/AUTOMATION/github-pr-manager/SKILL.md",
     "schema_version": 1,
     "created_at": "2026-05-03T15:40:00+00:00",
     "updated_at": "2026-05-03T15:40:00+00:00",
@@ -12328,42 +12328,42 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "workflow_similarity",
-      "workflow_tasks",
-      "forall",
-      "parallel_execution_plan",
-      "valid_workflow",
-      "depends_on",
-      "optimize_order",
-      "findall",
-      "task_satisfies_constraints",
-      "requires_completion",
-      "no_unresolved_dependencies",
-      "task_dependencies",
-      "create_workflow",
-      "member",
+      "select",
       "task_retry_count",
+      "forall",
+      "adapt-workflow",
+      "parallel_execution_plan",
+      "workflow_tasks",
+      "generate_conditional_tasks",
+      "requires_completion",
       "no_orphan_tasks",
-      "total_resources",
+      "workflow_similarity",
+      "task_satisfies_constraints",
+      "member",
+      "valid_workflow",
+      "task_can_retry",
+      "apply-style",
       "add_task",
       "requires",
-      "critical_path",
+      "topological_sort",
+      "depends_on",
+      "workflow-score",
+      "optimize_order",
+      "create_workflow",
+      "no_unresolved_dependencies",
+      "task_dependencies",
+      "findall",
+      "total_resources",
+      "consistent_workflow",
       "sufficient_resources",
       "task_max_retries",
-      "potential_deadlock",
-      "adapt-workflow",
-      "generate_conditional_tasks",
-      "apply-style",
-      "topological_sort",
-      "workflow-score",
+      "critical_path",
       "task_resource_requirement",
-      "task_can_retry",
       "failure_propagation",
-      "consistent_workflow",
       "acyclic",
-      "select"
+      "potential_deadlock"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\AUTOMATION\\workflow-synthesiser\\SKILL.md",
+    "path": "skills/AUTOMATION/workflow-synthesiser/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12427,14 +12427,14 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
+      "calculate_posterior_update",
       "verify_exhaustive",
+      "valid_category",
       "member",
       "verify_exclusive",
-      "valid_category",
-      "calculate_posterior_update",
       "audit_hypothesis_space"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ANALYTICS\\bayesian-evidence-updater\\SKILL.md",
+    "path": "skills/ANALYTICS/bayesian-evidence-updater/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12497,15 +12497,15 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "error",
-      "step_markov_chain",
+      "sub_stochastic_row",
       "throw",
-      "sum_list",
       "abs",
+      "step_markov_chain",
+      "error",
       "validate_state_weights",
-      "sub_stochastic_row"
+      "sum_list"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ANALYTICS\\markov-chain-sequence\\SKILL.md",
+    "path": "skills/ANALYTICS/markov-chain-sequence/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12568,13 +12568,13 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "assertz",
-      "compute_pagerank",
-      "detect_dead_ends",
+      "dead_end",
       "edge",
-      "dead_end"
+      "detect_dead_ends",
+      "assertz",
+      "compute_pagerank"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ANALYTICS\\pagerank-centrality\\SKILL.md",
+    "path": "skills/ANALYTICS/pagerank-centrality/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12638,11 +12638,11 @@
       "min_documentation_ratio": 0.3
     },
     "tags": [
-      "analyze_solver_profile",
+      "assertz",
       "solver_profile",
-      "assertz"
+      "analyze_solver_profile"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ANALYTICS\\skill-decision-profile-analyzer\\SKILL.md",
+    "path": "skills/ANALYTICS/skill-decision-profile-analyzer/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,
@@ -12709,7 +12709,7 @@
       "advise_statistical_test",
       "get_optimal_test"
     ],
-    "path": "D:\\GitHub\\projects\\em-cubed\\skills\\ANALYTICS\\statistical-test-advisor\\SKILL.md",
+    "path": "skills/ANALYTICS/statistical-test-advisor/SKILL.md",
     "schema_version": 1,
     "created_at": null,
     "updated_at": null,

@@ -64,7 +64,7 @@ class LoopySkillRunner:
                     future = executor.submit(skill.run, *args, **kwargs)
                     try:
                         result = future.result(timeout=timeout)
-                    except TimeoutError:
+                    except (TimeoutError, concurrent.futures.TimeoutError):
                         logger.warning("Loopy skill '%s' exceeded timeout of %.2fs", skill_name, timeout)
                         result = LoopySkillResult(
                             success=False,

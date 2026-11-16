@@ -107,7 +107,10 @@ def get_skill_metadata(file_path: Path, skills_dir: Path) -> dict[str, Any] | No
         result["logic_tags"] = logic_tags
         result["heuristic_tags"] = heuristic_tags
         result["last_modified"] = os.path.getmtime(file_path)
-        result["path"] = str(file_path.resolve())
+        try:
+            result["path"] = file_path.resolve().relative_to(skills_dir.resolve().parent).as_posix()
+        except ValueError:
+            result["path"] = file_path.resolve().as_posix()
 
         # Default surfaces to python if none detected
         if not result["surfaces"]:
@@ -147,7 +150,10 @@ def reindex_incremental(skills_dir: Path, registry_output: Path) -> None:
 
     # Check all skill files
     for skill_file in _discover_skill_files(skills_dir):
-        rel_path = str(skill_file.relative_to(skills_dir.parent))
+        try:
+            rel_path = skill_file.resolve().relative_to(skills_dir.resolve().parent).as_posix()
+        except ValueError:
+            rel_path = skill_file.resolve().as_posix()
         processed_paths.add(rel_path)
 
         # Check if file has changed

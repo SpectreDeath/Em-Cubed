@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import multiprocessing
 import re
 import threading
 import time
@@ -404,7 +405,10 @@ class ProcessDistributedExecutor(DistributedExecutor):
         super().__init__()
         self.skills_dir = skills_dir
         self._max_workers = max_workers
-        self._process_executor = ProcessPoolExecutor(max_workers=max_workers)
+        self._process_executor = ProcessPoolExecutor(
+            max_workers=max_workers,
+            mp_context=multiprocessing.get_context("spawn"),
+        )
         self._futures: dict[str, Any] = {}
         self._scheduler_tasks: dict[str, asyncio.Task] = {}
         self._callback_lock = threading.Lock()  # Guards _tasks mutations in done-callbacks
@@ -568,18 +572,24 @@ class ProcessDistributedExecutor(DistributedExecutor):
 
     def shutdown(self) -> None:
         """Clean up worker process execution pools."""
+        for task in list(self._scheduler_tasks.values()):
+            try:
+                if not task.done():
+                    task.cancel()
+            except Exception:
+                pass  # nosec B110 - intentional cleanup fallback
         try:
+            # Shutdown manager cleanly first so ProcessPoolExecutor does not respawn killed workers
+            self._process_executor.shutdown(wait=True, cancel_futures=True)
+        except Exception:
             processes = getattr(self._process_executor, "_processes", None)
-            if processes:
-                for p in list(processes):
+            if isinstance(processes, dict):
+                for p in list(processes.values()):
                     try:
                         p.terminate()
                         p.kill()
                     except Exception:
                         pass  # nosec B110 - intentional fallback; caller handles None/False return
-        except Exception:
-            pass  # nosec B110 - intentional fallback; caller handles None/False return
-        self._process_executor.shutdown(wait=False)
 
 
 class AdaptiveWorkerPool:
